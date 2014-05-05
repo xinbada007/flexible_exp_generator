@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3C7B6A26-72D0-41B9-AFDF-EE9048FA191C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Go</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(OSG_3RDPARTY_DIR)\include;$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OSG_ROOT)\lib;$(OSG_3RDPARTY_DIR)\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL.lib;osg.lib;osgAnimation.lib;osgDB.lib;osgFX.lib;osgGA.lib;osgManipulator.lib;osgParticle.lib;osgShadow.lib;osgSim.lib;osgTerrain.lib;osgText.lib;osgUtil.lib;osgViewer.lib;osgVolume.lib;osgWidget.lib;osgPresentation.lib;OpenThreads.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cameraEvent.h" />
+    <ClInclude Include="car.h" />
+    <ClInclude Include="carEvent.h" />
+    <ClInclude Include="collision.h" />
+    <ClInclude Include="collVisitor.h" />
+    <ClInclude Include="debugNode.h" />
+    <ClInclude Include="edge.h" />
+    <ClInclude Include="eulerPoly.h" />
+    <ClInclude Include="halfedge.h" />
+    <ClInclude Include="loop.h" />
+    <ClInclude Include="math.h" />
+    <ClInclude Include="mulitViewer.h" />
+    <ClInclude Include="Nurbs.h" />
+    <ClInclude Include="logicRoad.h" />
+    <ClInclude Include="obstacles.h" />
+    <ClInclude Include="plane.h" />
+    <ClInclude Include="points.h" />
+    <ClInclude Include="readConfig.h" />
+    <ClInclude Include="recorder.h" />
+    <ClInclude Include="renderVistor.h" />
+    <ClInclude Include="road.h" />
+    <ClInclude Include="solid.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="switchVisitor.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="textureVisitor.h" />
+    <ClInclude Include="wall.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cameraEvent.cpp" />
+    <ClCompile Include="car.cpp" />
+    <ClCompile Include="carEvent.cpp" />
+    <ClCompile Include="collision.cpp" />
+    <ClCompile Include="collVisitor.cpp" />
+    <ClCompile Include="debugNode.cpp" />
+    <ClCompile Include="edge.cpp" />
+    <ClCompile Include="eulerPoly.cpp" />
+    <ClCompile Include="halfedge.cpp" />
+    <ClCompile Include="Go!.cpp" />
+    <ClCompile Include="loop.cpp" />
+    <ClCompile Include="math.cpp" />
+    <ClCompile Include="mulitViewer.cpp" />
+    <ClCompile Include="NurbsCurve.cpp" />
+    <ClCompile Include="logicRoad.cpp" />
+    <ClCompile Include="obstacles.cpp" />
+    <ClCompile Include="plane.cpp" />
+    <ClCompile Include="points.cpp" />
+    <ClCompile Include="readConfig.cpp" />
+    <ClCompile Include="recorder.cpp" />
+    <ClCompile Include="renderVistor.cpp" />
+    <ClCompile Include="road.cpp" />
+    <ClCompile Include="solid.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="switchVisitor.cpp" />
+    <ClCompile Include="textureVisitor.cpp" />
+    <ClCompile Include="wall.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

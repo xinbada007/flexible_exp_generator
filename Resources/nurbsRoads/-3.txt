@@ -1,0 +1,12 @@
+Endless Nurbs
+ctrlpoints -2.0 -4.0 0.0
+ctrlpoints -2.0 -2.0 0.0
+ctrlpoints -2.0 -1.0 0.0
+ctrlpoints -2.0 0.0 0.0
+ctrlpoints -2.0 2.0 0.0
+ctrlpoints -2.0 4.0 0.0
+knots 0.0 4
+knots 1.0
+knots 2.0
+knots 3.0 4
+orders -1

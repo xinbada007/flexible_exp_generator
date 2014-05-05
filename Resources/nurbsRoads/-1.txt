@@ -1,0 +1,66 @@
+Endless Nurbs
+ctrlpoints 2 0 0
+ctrlpoints 1.96157 0.390181 0
+ctrlpoints 1.84776 0.765367 0
+ctrlpoints 1.66294 1.11114 0
+ctrlpoints 1.41421 1.41421 0
+ctrlpoints 1.11114 1.66294 0
+ctrlpoints 0.765367 1.84776 0
+ctrlpoints 0.390181 1.96157 0
+ctrlpoints -8.74228e-008 2 0
+ctrlpoints -0.390181 1.96157 0
+ctrlpoints -0.765367 1.84776 0
+ctrlpoints -1.11114 1.66294 0
+ctrlpoints -1.41421 1.41421 0
+ctrlpoints -1.66294 1.11114 0
+ctrlpoints -1.84776 0.765367 0
+ctrlpoints -1.96157 0.39018 0
+ctrlpoints -2 -1.74846e-007 0
+ctrlpoints -1.96157 -0.390181 0
+ctrlpoints -1.84776 -0.765367 0
+ctrlpoints -1.66294 -1.11114 0
+ctrlpoints -1.41421 -1.41421 0
+ctrlpoints -1.11114 -1.66294 0
+ctrlpoints -0.765367 -1.84776 0
+ctrlpoints -0.39018 -1.96157 0
+ctrlpoints 2.62268e-007 -2 0
+ctrlpoints 0.390181 -1.96157 0
+ctrlpoints 0.765367 -1.84776 0
+ctrlpoints 1.11114 -1.66294 0
+ctrlpoints 1.41421 -1.41421 0
+ctrlpoints 1.66294 -1.11114 0
+ctrlpoints 1.84776 -0.765367 0
+ctrlpoints 1.96157 -0.39018 0
+ctrlpoints 2 3.49691e-007 0
+knots 0.0 4
+knots 1.0
+knots 2.0
+knots 3.0
+knots 4.0
+knots 5.0
+knots 6.0
+knots 7.0
+knots 8.0
+knots 9.0
+knots 10.0
+knots 11.0
+knots 12.0
+knots 13.0
+knots 14.0
+knots 15.0
+knots 16.0
+knots 17.0
+knots 18.0
+knots 19.0
+knots 20.0
+knots 21.0
+knots 22.0
+knots 23.0
+knots 24.0
+knots 25.0
+knots 26.0
+knots 27.0
+knots 28.0
+knots 29.0
+knots 30.0 4
+orders -1
