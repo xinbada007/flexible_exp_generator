@@ -1,7 +1,7 @@
 Trial Config
 [ScreenSettings]
 screens: 0
-cameras: 1
+cameras: 3 : 0, 0, 0
 aspect: 0
 background: ../Resources/texture/background.jpg
 [CarSettings]

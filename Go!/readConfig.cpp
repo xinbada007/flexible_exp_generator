@@ -120,14 +120,47 @@ void ReadConfig::readTrial()
 		}
 		else if (config == "cameras:")
 		{
-			in >> config;
-			unsigned c = config.front() - '0';
+			getline(in, config);
+			std::string::const_iterator iter = config.cbegin();
+			while (iter != config.cend() && (*iter < '9' && *iter > '0'));
+			{
+				iter++;
+			}
+			unsigned c = (iter != config.cend()) ? (*iter) - '0' : 0;
 			_screens->_cameras = c;
+			while (iter != config.cend() && (*iter) != ':')
+			{
+				iter++;
+			}
+			while (iter != config.cend() && ((*iter) <'9' && (*iter) >'0'))
+			{
+				iter++;
+			}
+			while (iter != config.cend())
+			{
+				std::string txtCamera;
+				while (iter != config.cend() && (*iter) != ',')
+				{
+					if (((*iter)>= '0' && (*iter) <= '9') || (*iter) == '.')
+					{
+						txtCamera.push_back(*iter);
+					}
+					iter++;
+				}
+				(iter != config.cend()) ? iter++ : iter;
+				_screens->_cam->push_back(stod(txtCamera, NULL));
+			}
+			if (_screens->_cameras != _screens->_cam->size())
+			{
+				osg::notify(osg::WARN) << "Number of Camera not Match!" << std::endl;
+				return;
+			}
 			continue;
 		}
 		else if (config == "aspect:")
 		{
-			getline(in, config);
+			in >> config;
+			_screens->_aspect = stod(config, NULL);
 			continue;
 		}
 		else if (config == "background:")

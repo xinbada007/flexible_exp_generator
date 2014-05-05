@@ -33,16 +33,13 @@ void MulitViewer::genMainViewer(osg::ref_ptr<ReadConfig> refRC)
 		return;
 	}
 
-	if ((numElements == 1 && _screens->_cameras == 1) || (numElements > 1))
+	if (numElements > 1 && _screens->_cameras > 1)
 	{
-		this->addView(createPowerWall());
+		osg::notify(osg::FATAL) << "Cannot support multiple screens along with multiple cameras!" << std::endl;
 		return;
 	}
 
-	else if (numElements == 1 && _screens->_cameras > 1)
-	{
-		
-	}
+	this->addView(createPowerWall());
 
 	return;
 }
@@ -51,34 +48,60 @@ osgViewer::View * MulitViewer::createPowerWall()
 {
 	osg::GraphicsContext::WindowingSystemInterface *wsi;
 	wsi = osg::GraphicsContext::getWindowingSystemInterface();
-
 	osg::GraphicsContext::ScreenSettings ss;
+
 	int min_height = INT_MAX;
 	int sum_width = 0;
-	for (unsigned i = 0; i < _screens->_scrs->getNumElements();i++)
+	for (unsigned i = 0; i < _screens->_scrs->getNumElements(); i++)
 	{
 		unsigned si = *(_screens->_scrs->begin() + i);
 		wsi->getScreenSettings(si, ss);
 		min_height = ss.height < min_height ? ss.height : min_height;
 		sum_width += ss.width;
 	}
-	const double aspect = double(sum_width) / double(min_height);
-
+	const double aspect = (_screens->_aspect == 0) ? (double)(sum_width) / (double)(min_height) : _screens->_aspect;
 	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;
 	view->getCamera()->setProjectionMatrixAsPerspective(30, aspect, 0.1f, 0.5f);
-	view->getCamera()->setClearColor(osg::Vec4(0.2f,0.2f,0.2f,1.0f));
+	view->getCamera()->setClearColor(osg::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
 
-	const unsigned numColumns = _screens->_scrs->getNumElements(), numRows(1);
-	for (unsigned i = 0; i < numColumns; i++)
+	if (_screens->_scrs->getNumElements() > 1)
 	{
-		unsigned si = *(_screens->_scrs->begin() + i);
-		wsi->getScreenSettings(si, ss);
-		osg::ref_ptr<osg::Camera> camera = createSlaveCamera(si, ss);
+		//multiple screens with one camera
+		const unsigned numColumns = _screens->_scrs->getNumElements(), numRows(1);
+		for (unsigned i = 0; i < numColumns; i++)
+		{
+			unsigned si = *(_screens->_scrs->begin() + i);
+			wsi->getScreenSettings(si, ss);
+			osg::ref_ptr<osg::Camera> camera = createSlaveCamera(si, ss);
 
-		osg::Matrix proOffset = osg::Matrix::scale(numColumns, numRows, 1.0f)
-								* osg::Matrix::translate(int(numColumns - 2 * i - 1), 0.0f,0.0f);
+			osg::Matrix proOffset = osg::Matrix::scale(numColumns, numRows, 1.0f)
+				* osg::Matrix::translate(int(numColumns - 2 * i - 1), 0.0f, 0.0f);
+			
+			view->addSlave(camera, proOffset, osg::Matrix(), true);
+		}
+	}
 
-		view->addSlave(camera, proOffset, osg::Matrix(), true);
+	osg::Vec3 center, eye, updir;
+	view->getCamera()->getViewMatrixAsLookAt(eye, center, updir);
+	if (_screens->_cameras > 1)
+	{
+		//multiple cameras with one screen
+		const unsigned numColumns = _screens->_cameras, numRows(1);
+		unsigned si = _screens->_scrs->front();
+		for (unsigned i = 0; i < numColumns; i++)
+		{
+			wsi->getScreenSettings(si, ss);
+			osg::ref_ptr<osg::Camera> camera = createSlaveCamera(si, ss);
+
+			osg::Matrix proOffset = osg::Matrix::scale(numColumns, numRows, 1.0f)
+				* osg::Matrix::translate(int(numColumns - 2 * i - 1), 0.0f, 0.0f);
+
+			osg::Matrix viewOffset = osg::Matrix::translate(-eye) *
+				osg::Matrix::rotate(_screens->_cam->at(i), UP_DIR) *
+				osg::Matrix::translate(eye);
+
+			view->addSlave(camera, proOffset, viewOffset, true);
+		}
 	}
 
 	return view.release();

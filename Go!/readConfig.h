@@ -84,11 +84,15 @@ typedef struct Screens:public osg::Referenced
 		_cameras = 0;
 		_background = "";
 		_scrs = new osg::UIntArray;
+		_cam = new osg::DoubleArray;
+		_aspect = 0.0f;
 	}
 
 	unsigned _cameras;
 	std::string _background;
+	double _aspect;
 	osg::ref_ptr<osg::UIntArray> _scrs;
+	osg::ref_ptr<osg::DoubleArray> _cam;
 }Screens;
 
 class ReadConfig:public osg::Referenced

@@ -26,7 +26,7 @@ using namespace std;
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//Build Road
-	string filename = "config.txt";
+	string filename = "../Resources/config.txt";
 	osg::ref_ptr<Road> road = new Road;
 	road->genRoad(new ReadConfig(filename));
 
