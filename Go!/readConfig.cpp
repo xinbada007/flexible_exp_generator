@@ -122,7 +122,7 @@ void ReadConfig::readTrial()
 		{
 			getline(in, config);
 			std::string::const_iterator iter = config.cbegin();
-			while (iter != config.cend() && (*iter < '9' && *iter > '0'));
+			while (iter != config.cend() && (*iter <= '9' && *iter > '0'));
 			{
 				iter++;
 			}
@@ -132,7 +132,8 @@ void ReadConfig::readTrial()
 			{
 				iter++;
 			}
-			while (iter != config.cend() && ((*iter) <'9' && (*iter) >'0'))
+			(iter != config.cend()) ? iter++ : iter;
+			while (iter != config.cend() && (*iter) == ' ')
 			{
 				iter++;
 			}
@@ -141,10 +142,12 @@ void ReadConfig::readTrial()
 				std::string txtCamera;
 				while (iter != config.cend() && (*iter) != ',')
 				{
-					if (((*iter)>= '0' && (*iter) <= '9') || (*iter) == '.')
+					if ((*iter) == ' ')
 					{
-						txtCamera.push_back(*iter);
+						iter++;
+						continue;
 					}
+					txtCamera.push_back(*iter);
 					iter++;
 				}
 				(iter != config.cend()) ? iter++ : iter;

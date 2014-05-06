@@ -8,6 +8,8 @@ const double PI = 3.14159265358979323846;
 const double PI_2 = 1.57079632679489661923;
 const double PI_4 = 0.78539816339744830962;
 
+const double TO_RADDIAN = 0.01745329251994329577;
+
 const osg::Vec3 X_AXIS(1.0f, 0.0f, 0.0f);
 const osg::Vec3 Y_AXIS(0.0f, 1.0f, 0.0f);
 const osg::Vec3 Z_AXIS(0.0f, 0.0f, 1.0f);

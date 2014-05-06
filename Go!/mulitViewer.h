@@ -13,7 +13,7 @@ public:
 	void genMainViewer(osg::ref_ptr<ReadConfig> refRC);
 
 private:
-	osg::Camera * createSlaveCamera(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss);
+	osg::Camera * createSlaveCamera(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX = 0, const int startY = 0);
 
 	osgViewer::View * createPowerWall();
 

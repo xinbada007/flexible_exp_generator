@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "mulitViewer.h"
+#include "math.h"
+
 #include <osg/Notify>
 
 MulitViewer::MulitViewer()
@@ -59,7 +61,7 @@ osgViewer::View * MulitViewer::createPowerWall()
 		min_height = ss.height < min_height ? ss.height : min_height;
 		sum_width += ss.width;
 	}
-	const double aspect = (_screens->_aspect == 0) ? (double)(sum_width) / (double)(min_height) : _screens->_aspect;
+	double aspect = (_screens->_aspect == 0) ? (double)(sum_width) / (double)(min_height) : _screens->_aspect;
 	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;
 	view->getCamera()->setProjectionMatrixAsPerspective(30, aspect, 0.1f, 0.5f);
 	view->getCamera()->setClearColor(osg::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -81,50 +83,54 @@ osgViewer::View * MulitViewer::createPowerWall()
 		}
 	}
 
-	osg::Vec3 center, eye, updir;
-	view->getCamera()->getViewMatrixAsLookAt(eye, center, updir);
 	if (_screens->_cameras > 1)
 	{
 		//multiple cameras with one screen
+		osg::Vec3 center, eye, updir;
+		view->getCamera()->getViewMatrixAsLookAt(eye, center, updir);
 		const unsigned numColumns = _screens->_cameras, numRows(1);
+		int tileWidth = sum_width / numColumns;
+		int tileHeight = min_height / numRows;
 		unsigned si = _screens->_scrs->front();
 		for (unsigned i = 0; i < numColumns; i++)
 		{
 			wsi->getScreenSettings(si, ss);
-			osg::ref_ptr<osg::Camera> camera = createSlaveCamera(si, ss);
+			ss.height = tileHeight;
+			ss.width = tileWidth;
+			osg::ref_ptr<osg::Camera> camera = createSlaveCamera(si, ss, tileWidth*i);
 
 			osg::Matrix proOffset = osg::Matrix::scale(numColumns, numRows, 1.0f)
 				* osg::Matrix::translate(int(numColumns - 2 * i - 1), 0.0f, 0.0f);
 
 			osg::Matrix viewOffset = osg::Matrix::translate(-eye) *
-				osg::Matrix::rotate(_screens->_cam->at(i), UP_DIR) *
+				osg::Matrix::rotate(_screens->_cam->at(i) * TO_RADDIAN, UP_DIR) *
 				osg::Matrix::translate(eye);
 
-			view->addSlave(camera, proOffset, viewOffset, true);
+			view->addSlave(camera.release(), proOffset, viewOffset, true);
 		}
 	}
 
 	return view.release();
 }
 
-osg::Camera * MulitViewer::createSlaveCamera(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss)
+osg::Camera * MulitViewer::createSlaveCamera(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX /* = 0 */, const int startY /* = 0 */)
 {
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
 	traits->screenNum = screenNum;
-	traits->x = 0;
-	traits->y = 0;
+	traits->x = startX;
+	traits->y = startY;
 	traits->width = ss.width;
 	traits->height = ss.height;
 	traits->windowDecoration = false;
 	traits->doubleBuffer = true;
-	traits->sharedContext = false;
+	traits->sharedContext = 0;
 	traits->vsync = true;
 
 	osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
 
 	osg::ref_ptr<osg::Camera> camera = new osg::Camera;
 	camera->setGraphicsContext(gc.get());
-	camera->setViewport(new osg::Viewport(traits->x,traits->y,traits->width,traits->height));
+	camera->setViewport(new osg::Viewport(0,0,ss.width,ss.height));
 
 	GLenum buffer = traits->doubleBuffer ? GL_BACK : GL_FRONT;
 	camera->setDrawBuffer(buffer);
