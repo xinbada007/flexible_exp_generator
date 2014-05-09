@@ -63,6 +63,7 @@ void ReadConfig::assignConfig()
 		_roads = new RoadSet;
 		//read trial config
 		readTrial();
+		initializeVehicle();
 		//read nurbs config according to trial config
 		stringList::const_iterator i = _roads->_roadTxt.cbegin();
 		while (i != _roads->_roadTxt.cend())
@@ -73,13 +74,23 @@ void ReadConfig::assignConfig()
 			
 			Nurbs *prve = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());			
 			alignCtrlPoints(prve);
-			
 			updateNurbs(new NurbsCurve);
-
 			_roads->_nurbs.push_back(_nurbs.release());
 		}
 		return;
 	}
+}
+
+void ReadConfig::initializeVehicle()
+{
+	_vehicle->_width = _roads->_width / _vehicle->_rwratio;
+	_vehicle->_length = _roads->_width * _vehicle->_lwratio;
+	osg::Vec3 right_bottom(_vehicle->_width / 2, -_vehicle->_length / 2, _vehicle->_height);
+	osg::Vec3 right_top(_vehicle->_width / 2, _vehicle->_length / 2, _vehicle->_height);
+	osg::Vec3 left_top(-_vehicle->_width / 2, _vehicle->_length / 2, _vehicle->_height);
+	osg::Vec3 left_bottom(-_vehicle->_width / 2, -_vehicle->_length / 2, _vehicle->_height);
+	_vehicle->_V->clear();
+	_vehicle->_V->push_back(right_bottom); _vehicle->_V->push_back(right_top); _vehicle->_V->push_back(left_top); _vehicle->_V->push_back(left_bottom);
 }
 
 bool ReadConfig::byPassSpace(ifstream &in, std::string &content)
@@ -149,7 +160,6 @@ void ReadConfig::readTrial()
 	{
 		byPassSpace(in, flag);
 		string config;
-		std::size_t found;
 		//Set Screen
 		const string SCR = "screens";
 		const string ASPECT = "aspect";
@@ -158,7 +168,7 @@ void ReadConfig::readTrial()
 		while (flag == SCREEN)
 		{
 			byPassSpace(in, config);
-			if (config.find(SCR) != config.npos)
+			if (config.find(SCR) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + SCR.size());
 				while (!config.empty())
@@ -169,13 +179,13 @@ void ReadConfig::readTrial()
 				}
 				continue;
 			}
-			else if (config.find(ASPECT) != config.npos)
+			else if (config.find(ASPECT) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + ASPECT.size());
 				_screens->_aspect = stod(config);
 				continue;
 			}
-			else if (config.find(REALWORD) != config.npos)
+			else if (config.find(REALWORD) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + REALWORD.size());				
 				std::string::size_type sz;
@@ -188,7 +198,7 @@ void ReadConfig::readTrial()
 				}
 				continue;
 			}
-			else if (config.find(BGPIC) != config.npos)
+			else if (config.find(BGPIC) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + BGPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
@@ -207,27 +217,27 @@ void ReadConfig::readTrial()
 		while (flag == CAR)
 		{
 			byPassSpace(in, config);
-			if (config.find(ACCEL) != config.npos)
+			if (config.find(ACCEL) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + ACCEL.size());
 				_vehicle->_acceleration = (stoi(config) == 1) ? true : false;
 				continue;
 			}
-			else if (config.find(CARSPEED) != config.npos)
+			else if (config.find(CARSPEED) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + CARSPEED.size());
 				_vehicle->_speed = stod(config);
 				_vehicle->_speed /= frameRate;
 				continue;
 			}
-			else if (config.find(CARWHEEL) != config.npos)
+			else if (config.find(CARWHEEL) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + CARWHEEL.size());
 				_vehicle->_rotate = stod(config);
 				_vehicle->_rotate *= TO_RADDIAN;
 				continue;
 			}
-			else if (config.find(CARPIC) != config.npos)
+			else if (config.find(CARPIC) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + CARPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
@@ -246,20 +256,20 @@ void ReadConfig::readTrial()
 		while (flag == ROAD)
 		{
 			byPassSpace(in, config);
-			if (config.find(ROADWD) != config.npos)
+			if (config.find(ROADWD) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + ROADWD.size());
 				_roads->_width = stod(config);
 				continue;
 			}
-			else if (config.find(ROADPIC) != config.npos)
+			else if (config.find(ROADPIC) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + ROADPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
 				_roads->_texture = config;
 				continue;
 			}
-			else if (config.find(ROADTXT) != config.npos)
+			else if (config.find(ROADTXT) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + ROADTXT.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
@@ -275,7 +285,6 @@ void ReadConfig::readTrial()
 					{
 						txtRoad = config;
 						config.clear();
-						continue;
 					}
 					_roads->_roadTxt.push_back(txtRoad);
 					config.erase(config.begin(), config.begin() + found_to);
@@ -283,7 +292,7 @@ void ReadConfig::readTrial()
 				}
 				continue;
 			}
-			else if (config.find(ROADDT) != config.npos)
+			else if (config.find(ROADDT) != config.npos && !in.eof())
 			{
 				config.erase(config.begin(), config.begin() + ROADDT.size());
 				_roads->_density = stoi(config);
@@ -306,8 +315,9 @@ Nurbs * ReadConfig::readNurbs()
 		cout << "File Open Failed" << endl;
 		return NULL;
 	}
+
 	string config;
-	getline(filein, config);
+	byPassSpace(filein, config);
 	if (config != "Endless Nurbs")
 	{
 		cout << "File Doesn't Match" << endl;
@@ -315,56 +325,53 @@ Nurbs * ReadConfig::readNurbs()
 		return NULL;
 	}
 
-	unsigned _cpcounts(0);
-	unsigned _knotcounts(0);
-	filein >> config;
-	while (config == "ctrlpoints" && !filein.eof())
+	const string CTRLPOINT = "ctrlpoints";
+	const string KNOTS = "knots";
+	const string ORDERS = "orders";
+	string flag;
+	while (!filein.eof())
 	{
-		double _x, _y, _z;
-		filein >> _x;
-		filein >> _y;
-		filein >> _z;
-		_nurbs->_ctrlPoints->push_back(osg::Vec3d(_x, _y, _z));
-		++_cpcounts;
-
-		filein >> config;
-	}
-	while (config == "knots" && !filein.eof())
-	{
-		double _k;
-		filein >> _k;
-		unsigned counts(1);
-		getline(filein, config);
-		if (config != "") counts = atoi(config.c_str());
-		_knotcounts += counts;
-		for (unsigned int i = 0; i < counts; i++)
+		byPassSpace(filein, flag);
+		while (flag == CTRLPOINT && !filein.eof())
 		{
-			_nurbs->_knotVector->push_back(_k);
+			byPassSpace(filein, config);
+			if (config.front() >= 'a' && config.front() <= 'z')
+			{
+				flag = config;
+				continue;;
+			}
+			double x, y, z(0.0f);
+			std::string::size_type sz;
+			x = stod(config, &sz);
+			y = stod(config.substr(sz));
+			_nurbs->_ctrlPoints->push_back(osg::Vec3(x,y,z));
 		}
 
-		filein >> config;
-	}
-	while (config == "orders" && !filein.eof())
-	{
-		int order;
-		filein >> order;
-		if (order == -1)
+		while (flag == KNOTS && !filein.eof())
 		{
-			_nurbs->_order = _knotcounts - _cpcounts;
+			byPassSpace(filein, config);
+			if (config.front() >= 'a' && config.front() <= 'z')
+			{
+				flag = config;
+				continue;;
+			}
+			std::vector<double> knot;
+			while (!config.empty())
+			{
+				std::string::size_type sz;
+				knot.push_back(stod(config, &sz));
+				config.erase(config.begin(), config.begin() + sz);
+			}
+			if (knot.empty()) continue;
+			if (knot.size() == 1) knot.push_back(1);
+			for (int i = 0; i < knot.back();i++)
+			{
+				_nurbs->_knotVector->push_back(knot.front());
+			}
 		}
-		else if(order != _knotcounts - _cpcounts)
-		{
-			osg::notify(osg::FATAL) << "Order != Knots - CtrlPoints!!!" << std::endl;
-			filein.close();
-			return NULL;
-		}
-		else
-		{
-			_nurbs->_order = order;
-		}
-		filein >> config;
 	}
 
+	_nurbs->_order = _nurbs->_knotVector->size() - _nurbs->_ctrlPoints->size();
 	filein.close();
 	return _nurbs.get();
 }

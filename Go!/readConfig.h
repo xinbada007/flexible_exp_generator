@@ -62,14 +62,19 @@ typedef struct Vehicle:public osg::Referenced
 	{
 		_V = new osg::Vec3Array;
 		this->_O.set(O_POINT);
+		_lwratio = 2.6f;
+		_rwratio = 6.0f;
+		_height = getZDeepth();
 	}
 	osg::ref_ptr<osg::Vec3Array> _V;
 	osg::Vec3 _O;
 
 	double _width;
+	double _rwratio;
 	double _length;
-	double _height;
 	double _lwratio;
+	double _height;
+	
 	double _speed;
 	double _rotate;
 	bool _acceleration;
@@ -106,11 +111,9 @@ private:
 	ReadConfig();
 	~ReadConfig();
 	void assignConfig();
-
-	void readTrial();
-	
 	bool byPassSpace(std::ifstream &in, std::string &content);
-
+	void readTrial();
+	void initializeVehicle();
 	Nurbs * readNurbs();
 	void alignCtrlPoints(Nurbs *refNurbs);
 	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB);
