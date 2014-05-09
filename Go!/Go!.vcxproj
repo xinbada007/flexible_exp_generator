@@ -46,8 +46,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OSG_LIBRARY_PATH);$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\s4284756\Documents\Dev\OpenSceneGraph\3.2.0-vs2012\include;$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\s4284756\Documents\Dev\OpenSceneGraph\3.2.0-vs2012\lib;$(OSG_LIBRARY_PATH);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

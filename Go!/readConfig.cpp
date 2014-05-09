@@ -1,8 +1,12 @@
 #include "stdafx.h"
 #include "readConfig.h"
-#include <fstream>
+#include "math.h"
+
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <algorithm>
+
 #include <osg/Notify>
 
 using namespace std;
@@ -38,8 +42,9 @@ void ReadConfig::assignConfig()
 	}
 
 	string config;
-	getline(filein, config);
-	if (config == "Endless Nurbs")
+	const string ENDLESSNURBS = "Endless Nurbs";
+	byPassSpace(filein, config);
+	if (config == ENDLESSNURBS)
 	{
 		filein.close();
 		_nurbs = new Nurbs;
@@ -49,7 +54,8 @@ void ReadConfig::assignConfig()
 		return;
 	}
 
-	if (config == "Trial Config")
+	const string TRAIL = "Trial Config";
+	if (config == TRAIL)
 	{
 		filein.close();
 		_screens = new Screens;
@@ -76,6 +82,47 @@ void ReadConfig::assignConfig()
 	}
 }
 
+bool ReadConfig::byPassSpace(ifstream &in, std::string &content)
+{
+	const string COLON = ":";
+	const string COMMA = ",";
+	const string SPACE = " ";
+	const string SEMICOLON = ";";
+
+	const string TAB = "\t";
+	const string ENTER = "\n";
+	const string COMMENT = "#";
+
+	while (!in.eof())
+	{
+		getline(in, content);
+		std::size_t found = content.find_first_not_of(*SPACE.c_str());
+		if (found != std::string::npos) content.erase(content.begin(), content.begin() + found);
+		found = content.find_first_not_of(*TAB.c_str());
+		if (found != std::string::npos) content.erase(content.begin(), content.begin() + found);
+		found = content.find_first_not_of(*ENTER.c_str());
+		if (found != std::string::npos) content.erase(content.begin(), content.begin() + found);
+		found = content.find_first_of(*COMMENT.c_str());
+		if (found != std::string::npos) content.erase(content.begin() + found, content.end());
+		if (content.empty()) continue;
+		else break;
+	}
+
+	if (!content.empty())
+	{
+		std::replace(content.begin(),content.end(),*TAB.c_str(), *SPACE.c_str());
+		std::replace(content.begin(), content.end(), *SEMICOLON.c_str(), *SPACE.c_str());
+		std::replace(content.begin(), content.end(), *COMMA.c_str(), *SPACE.c_str());
+		std::replace(content.begin(), content.end(), *COLON.c_str(), *SPACE.c_str());
+		std::string::iterator i = std::unique(content.begin(), content.end(), uniqueTest<const char>(*SPACE.c_str()));
+		content.erase(i, content.end());
+		if (content.back() == *SPACE.c_str()) content.erase(content.end() - 1);
+		return true;
+	}
+
+	return false;
+}
+
 void ReadConfig::readTrial()
 {
 	ifstream in(_filename.c_str());
@@ -85,12 +132,8 @@ void ReadConfig::readTrial()
 		return;
 	}
 
-	const string ScreenFlag = "[ScreenSettings]";
-	const string CarFlag = "[CarSettings]";
-	const string RoadFlag = "[RoadSettings]";
-
 	string flag;
-	getline(in, flag);
+	byPassSpace(in, flag);
 	if (flag != "Trial Config")
 	{
 		in.close();
@@ -98,192 +141,157 @@ void ReadConfig::readTrial()
 		return;
 	}
 
-	string config;
-	in >> flag;
-	while (flag == ScreenFlag && !in.eof())
+	const string SCREEN = "[ScreenSettings]";
+	const string CAR = "[CarSettings]";
+	const string ROAD = "[RoadSettings]";
+
+	while (!in.eof())
 	{
-		in >> config;
-		if (config == "screens:")
+		byPassSpace(in, flag);
+		string config;
+		std::size_t found;
+		//Set Screen
+		const string SCR = "screens";
+		const string ASPECT = "aspect";
+		const string REALWORD = "RealWorld";
+		const string BGPIC = "background";
+		while (flag == SCREEN)
 		{
-			getline(in, config);
-			std::string::iterator iter = config.begin();
-			for (; iter != config.end(); iter++)
+			byPassSpace(in, config);
+			if (config.find(SCR) != config.npos)
 			{
-				if (*iter >= '0' && *iter <= '9')
+				config.erase(config.begin(), config.begin() + SCR.size());
+				while (!config.empty())
 				{
-					int s = *iter;
-					s -= '0';
-					_screens->_scrs->push_back(s);
+					std::string::size_type sz;
+					_screens->_scrs->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
 				}
+				continue;
 			}
-			continue;
-		}
-		else if (config == "cameras:")
-		{
-			getline(in, config);
-			std::string::const_iterator iter = config.cbegin();
-			while (iter != config.cend() && (*iter <= '9' && *iter > '0'));
+			else if (config.find(ASPECT) != config.npos)
 			{
-				iter++;
+				config.erase(config.begin(), config.begin() + ASPECT.size());
+				_screens->_aspect = stod(config);
+				continue;
 			}
-			unsigned c = (iter != config.cend()) ? (*iter) - '0' : 0;
-			_screens->_cameras = c;
-			while (iter != config.cend() && (*iter) != ':')
+			else if (config.find(REALWORD) != config.npos)
 			{
-				iter++;
-			}
-			(iter != config.cend()) ? iter++ : iter;
-			while (iter != config.cend() && (*iter) == ' ')
-			{
-				iter++;
-			}
-			while (iter != config.cend())
-			{
-				std::string txtCamera;
-				while (iter != config.cend() && (*iter) != ',')
+				config.erase(config.begin(), config.begin() + REALWORD.size());				
+				std::string::size_type sz;
+				if(!stoi(config, &sz)) continue;
+				config.erase(config.begin(), config.begin() + sz);
+				while (!config.empty())
 				{
-					if ((*iter) == ' ')
+					_screens->_realworld->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (config.find(BGPIC) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + BGPIC.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				_screens->_background = config;
+				continue;
+			}
+
+			flag = config;
+		}
+
+		//Set Vehicle
+		const string ACCEL = "acceleration";
+		const string CARSPEED = "CarSpeed";
+		const string CARWHEEL = "CarWheel";
+		const string CARPIC = "CarPic";
+		while (flag == CAR)
+		{
+			byPassSpace(in, config);
+			if (config.find(ACCEL) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + ACCEL.size());
+				_vehicle->_acceleration = (stoi(config) == 1) ? true : false;
+				continue;
+			}
+			else if (config.find(CARSPEED) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + CARSPEED.size());
+				_vehicle->_speed = stod(config);
+				_vehicle->_speed /= frameRate;
+				continue;
+			}
+			else if (config.find(CARWHEEL) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + CARWHEEL.size());
+				_vehicle->_rotate = stod(config);
+				_vehicle->_rotate *= TO_RADDIAN;
+				continue;
+			}
+			else if (config.find(CARPIC) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + CARPIC.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				_vehicle->_texture = config;
+				continue;
+			}
+
+			flag = config;
+		}
+
+		//Setting Road
+		const string ROADWD = "RoadWidth";
+		const string ROADPIC = "RoadPic";
+		const string ROADTXT = "RoadTxt";
+		const string ROADDT = "Density";
+		while (flag == ROAD)
+		{
+			byPassSpace(in, config);
+			if (config.find(ROADWD) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + ROADWD.size());
+				_roads->_width = stod(config);
+				continue;
+			}
+			else if (config.find(ROADPIC) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + ROADPIC.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				_roads->_texture = config;
+				continue;
+			}
+			else if (config.find(ROADTXT) != config.npos)
+			{
+				config.erase(config.begin(), config.begin() + ROADTXT.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				while (!config.empty())
+				{
+					std::string txtRoad;
+					std::size_t found_to = config.find_first_of(" ");
+					if (found_to != config.npos)
 					{
-						iter++;
+						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtRoad));
+					}
+					else
+					{
+						txtRoad = config;
+						config.clear();
 						continue;
 					}
-					txtCamera.push_back(*iter);
-					iter++;
+					_roads->_roadTxt.push_back(txtRoad);
+					config.erase(config.begin(), config.begin() + found_to);
+					config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
 				}
-				(iter != config.cend()) ? iter++ : iter;
-				_screens->_cam->push_back(stod(txtCamera, NULL));
+				continue;
 			}
-			if (_screens->_cameras != _screens->_cam->size())
+			else if (config.find(ROADDT) != config.npos)
 			{
-				osg::notify(osg::WARN) << "Number of Camera not Match!" << std::endl;
-				return;
+				config.erase(config.begin(), config.begin() + ROADDT.size());
+				_roads->_density = stoi(config);
+				continue;
 			}
-			continue;
-		}
-		else if (config == "aspect:")
-		{
-			in >> config;
-			_screens->_aspect = stod(config, NULL);
-			continue;
-		}
-		else if (config == "background:")
-		{
-			in >> config;
-			_screens->_background = config;
-			continue;
-		}
-		flag = config;
-	}
 
-	//Setting Vehicle
-	const double roadwidth = 0.5f;
-	const double ratio = 6.0f;
-	while (flag == CarFlag && !in.eof())
-	{
-		in >> config;
-		if (config == "acceleration:")
-		{
-			in >> _vehicle->_acceleration;
-			continue;
+			flag = config;
 		}
-		else if (config == "CarSpeed:")
-		{
-			in >> _vehicle->_speed;
-			_vehicle->_speed /= frameRate;
-			_vehicle->_speed *= roadwidth;
-			continue;
-		}
-		else if (config == "CarWheel:")
-		{
-			in >> _vehicle->_rotate;
-			_vehicle->_rotate *= 2 * PI / 360.0f;
-			continue;
-		}
-		else if (config == "CarPic:")
-		{
-			in >> config;
-			_vehicle->_texture = config;
-			continue;
-		}
-
-		flag = config;
-	}
-	_vehicle->_lwratio = 2.6f;
-	_vehicle->_height = getZDeepth();
-	_vehicle->_width = roadwidth / ratio;
-	_vehicle->_length = _vehicle->_width*_vehicle->_lwratio;
-	osg::Vec3 a(_vehicle->_width / 2, -_vehicle->_length / 2, _vehicle->_height);
-	osg::Vec3 b(_vehicle->_width / 2, _vehicle->_length / 2, _vehicle->_height);
-	osg::Vec3 c(-_vehicle->_width / 2, _vehicle->_length / 2, _vehicle->_height);
-	osg::Vec3 d(-_vehicle->_width / 2, -_vehicle->_length / 2, _vehicle->_height);
-	_vehicle->_V->push_back(a); _vehicle->_V->push_back(b); _vehicle->_V->push_back(c); _vehicle->_V->push_back(d);
-
-	while (flag == RoadFlag && !in.eof())
-	{
-		in >> config;
-		if (config == "RoadWidth:")
-		{
-			in >> _roads->_width;
-			continue;
-		}
-		else if (config == "RoadPic:")
-		{
-			in >> config;
-			_roads->_texture = config;
-			continue;
-		}
-		else if (config == "RoadTxt:")
-		{
-			getline(in, config);
-			std::string::const_iterator iter = config.cbegin();
-			while (iter != config.cend())
-			{
-				std::string txtRoad;
-				while (iter != config.cend() && *iter != ';')
-				{
-					(*iter != ' ') ? txtRoad.push_back(*iter) : iter;
-					iter++;
-				}
-				_roads->_roadTxt.push_back(txtRoad);
-				(iter != config.cend()) ? iter++ : iter;
-			}
-			continue;
-// 			while (iter != config.end())
-// 			{
-// 				if ((*iter >= 'A' && *iter <= 'Z') || (*iter >= 'a' && *iter <= 'z'))
-// 					break;
-// 				iter++;
-// 			}
-// 			if (iter == config.end())
-// 			{
-// 				_roads->_roadTxt.push_back("");
-// 				break;
-// 			}
-// 
-// 			std::string txt;
-// 			while (iter != config.end())
-// 			{
-// 				if (*iter != ';')
-// 				{
-// 					txt.push_back(*iter);
-// 				}
-// 				else if (*iter == ';')
-// 				{
-// 					_roads->_roadTxt.push_back(txt);
-// 					txt.clear();
-// 				}
-// 				iter++;
-// 			}
-// 			_roads->_roadTxt.push_back(txt);
-// 			continue;
-		}
-		else if (config == "Density:")
-		{
-			in >> _roads->_density;
-			continue;
-		}
-
-		flag = config;
 	}
 
 	in.close();

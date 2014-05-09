@@ -1,16 +1,22 @@
+#only comma, colon, space, and semicolon are allowed to use
+#folder path MUST not contain SPACE
+
 Trial Config
-[ScreenSettings]
-screens: 2
-cameras: 3 : 0,0,0
-aspect: 0
-background: ../Resources/texture/background.jpg
+[ScreenSettings]   
+#Num of Screent starts from 0
+screens:	0
+RealWorld:	1:	39.583 , 65.217 , 42.391
+aspect:	1.7777777777777777777777777777778
+background:	../Resources/texture/background.jpg
+
 [CarSettings]
-acceleration: 1
-CarSpeed: 120
-CarWheel: 42.5
-CarPic: ../Resources/texture/car.png
+acceleration:	1
+CarSpeed:	120     
+CarWheel:	42.5     
+CarPic:	../Resources/texture/car.png
+
 [RoadSettings]
-RoadWidth: 0.15
-RoadPic: ../Resources/texture/tio.jpg
-RoadTxt: ../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt
-Density: 1000
+RoadWidth:	0.15    
+RoadPic:	../Resources/texture/tio.jpg
+RoadTxt:	../Resources/nurbsRoads/2.txt  
+Density:	1000

@@ -59,3 +59,15 @@ struct searchIndex
 private:
 	unsigned _index;
 };
+
+template <typename T>
+struct uniqueTest
+{
+	uniqueTest(const T uni) :_uni(uni){};
+	bool operator()(const T A, const T B)
+	{
+		return (A == _uni && B == _uni);
+	}
+private:
+	const T _uni;
+};
