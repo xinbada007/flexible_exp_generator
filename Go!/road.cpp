@@ -3,12 +3,12 @@
 #include "edge.h"
 
 Road::Road() :
-_LEFTWALL(1), _RIGHTWALL(-1), _roadSet(NULL), _WALLHEIGHT(0.25f)
+_LEFTWALL(1), _RIGHTWALL(-1), _roadSet(NULL)
 {
 }
 
 Road::Road(const Road &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
-osg::Switch(copy, copyop), _LEFTWALL(copy._LEFTWALL), _RIGHTWALL(copy._RIGHTWALL), _WALLHEIGHT(copy._WALLHEIGHT), _roadSet(copy._roadSet),
+osg::Switch(copy, copyop), _LEFTWALL(copy._LEFTWALL), _RIGHTWALL(copy._RIGHTWALL), _roadSet(copy._roadSet),
 _roadList(copy._roadList), _lWallList(copy._lWallList), _rWallList(copy._rWallList), _ctrlList(copy._ctrlList), _midList(copy._midList)
 {
 
@@ -20,14 +20,14 @@ Road::~Road()
 
 osg::ref_ptr<osg::Vec2Array> Road::universalTexture(const int i,const double size)
 {
-	const osg::ref_ptr<osg::Vec3Array> midline = _roadSet->_nurbs.at(i)->_path;
-	osg::Vec3Array::const_iterator j = midline->begin();
+	const osg::ref_ptr<osg::Vec3dArray> midline = _roadSet->_nurbs.at(i)->_path;
+	osg::Vec3dArray::const_iterator j = midline->begin();
 	osg::ref_ptr<osg::Vec2Array> texcoord = new osg::Vec2Array;
 	const double &std_distance = size;
 	double tot_distance(0.0f);
 	while (j != midline->end())
 	{
-		const osg::Vec3 mid = *(j + 1) - *(j);
+		const osg::Vec3d mid = *(j + 1) - *(j);
 		const double cur_distance = mid.length();
 		const double ratio = tot_distance / std_distance;
 
@@ -51,9 +51,9 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 	osg::ref_ptr<LogicRoad> newLogic = NULL;
 	osg::ref_ptr<Nurbs> refNurbs = _roadSet->_nurbs.at(i);
 
-	osg::ref_ptr<osg::Vec3Array> path = NULL;
-	osg::ref_ptr<osg::Vec3Array> pathOffset = NULL;
-	double wh = _roadSet->_width;
+	osg::ref_ptr<osg::Vec3dArray> path = NULL;
+	osg::ref_ptr<osg::Vec3dArray> pathOffset = NULL;
+	double wh(0.0);
 
 	edgeFlag *pathFlag = NULL;
 	FlagEdgeArrayList eFlagArray;
@@ -70,16 +70,16 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 			eFlagArray.push_back(path);
 		}
 
-		pathOffset = new osg::Vec3Array(path->begin(), path->end());
-		wh *= _WALLHEIGHT;
-		osg::Matrix m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, wh));
+		pathOffset = new osg::Vec3dArray(path->begin(), path->end());
+		wh = _roadSet->_wallHeight;
+		osg::Matrix m = osg::Matrix::translate(osg::Vec3d(0.0f, 0.0f, wh));
 		arrayByMatrix(pathOffset, m);
 	}
 	else if (refTag == ROAD)
 	{
 		path = refNurbs->_path_left;
 		pathOffset = refNurbs->_path_right;
-		wh *= (1 + _WALLHEIGHT);
+		wh = _roadSet->_width;
 		
 		//Flag the Edge for navigating vehicle
 		{
@@ -94,13 +94,13 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 	{
 		path = refNurbs->_ctrl_left;
 		pathOffset = refNurbs->_ctrl_right;
-		wh *= 0.0f;
 	}
 	else if (refTag == MIDQUAD)
 	{
-		path = arrayLinearTransform(refNurbs->_path_right, refNurbs->_path_left, 0.5f + 0.05f*wh);
-		pathOffset = arrayLinearTransform(refNurbs->_path_right, refNurbs->_path_left, 0.5f - 0.05f*wh);
-		wh *= 0.10f;
+		wh = _roadSet->_width * 0.0025;
+		path = arrayLinearTransform(refNurbs->_path_right, refNurbs->_path_left, 0.5f + wh);
+		pathOffset = arrayLinearTransform(refNurbs->_path_right, refNurbs->_path_left, 0.5f - wh);
+		wh = _roadSet->_width;
 	}
 
 	if (path && pathOffset)

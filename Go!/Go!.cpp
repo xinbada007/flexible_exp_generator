@@ -25,10 +25,13 @@ using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//Build Road
+	//first read config from txt file
 	string filename = "../Resources/config.txt";
+	osg::ref_ptr<ReadConfig> readConfig = new ReadConfig(filename);
+
+	//Build Road
 	osg::ref_ptr<Road> road = new Road;
-	road->genRoad(new ReadConfig(filename));
+	road->genRoad(readConfig);
 
 	//This has to be first to be executed
 	//set RenderVistor
@@ -45,45 +48,49 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//Build Car & Render Car
 	osg::ref_ptr<Car> car = new Car;
-	car->genCar(new ReadConfig(filename));
+	car->genCar(readConfig);
 	car->accept(*rv);
 
 	//Car event callback
 	osg::ref_ptr<osg::MatrixTransform> carMatrix = new osg::MatrixTransform;
-	carMatrix->setEventCallback(new CarEvent);
+	carMatrix->addEventCallback(new CarEvent);
 	carMatrix->setUserData(car.get());
 	carMatrix->addChild(car->asGroup());
 
 	//Root Node
 	osg::ref_ptr<osg::Group> root = new osg::Group();
-	root->addChild(road.get());
-	root->addChild(carMatrix.get());  
+	root->addChild(road);
+	root->addChild(carMatrix);
+	//root->addChild(readConfig->measuer());
 
 	//Collision detect && Trace Car
 	osg::ref_ptr<CollVisitor> cv = new CollVisitor;
 	root->accept(*cv);
 	osg::ref_ptr<Collision> colldetect = new Collision;
 	colldetect->setUserData(cv.get());
-	car->setUpdateCallback(colldetect.get());
+	car->addUpdateCallback(colldetect.get());
 
 	//Record Car
 	osg::ref_ptr<Recorder> recorder = new Recorder;
 	car->addUpdateCallback(recorder.get());
 
-	//Debug Node
+// 	//Debug Node
 	osg::ref_ptr<DebugNode> debugger = new DebugNode;
 	debugger->setUserData(cv.get());
-	root->setEventCallback(debugger.get());
-
-	//Camera event callback
+	root->addEventCallback(debugger.get());
+// 
+// 	//Camera event callback
 	osg::ref_ptr<CameraEvent> camMatrix = new CameraEvent;
+	camMatrix->genCamera(readConfig);
 	camMatrix->setUserData(car.get());
 
 	//Viewer Setup
 	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer;
-	mViewer->genMainViewer(new ReadConfig(filename));
+	mViewer->genMainViewer(readConfig);
 	mViewer->getView(0)->setCameraManipulator(camMatrix.get());
 	mViewer->getView(0)->setSceneData(root->asGroup());
 
 	mViewer->run();
+
+	recorder->output(readConfig);
 }

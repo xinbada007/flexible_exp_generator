@@ -18,7 +18,7 @@
 #ifndef OSGMODELING_NURBS
 #define OSGMODELING_NURBS 1
 
-#include <osg/Vec3>
+#include <osg/Vec3d>
 #include <osg/Array>
 #include <osg/Referenced>
 
@@ -34,13 +34,13 @@ public:
 	NurbsCurve();
 
 	/** Specifies parameters in constructor & no need to call update(). Provided for convenience. */
-	NurbsCurve( osg::Vec3Array* pts, osg::DoubleArray* weights, osg::DoubleArray* knots,
+	NurbsCurve( osg::Vec3dArray* pts, osg::DoubleArray* weights, osg::DoubleArray* knots,
 		unsigned int degree=3, unsigned int numPath=20 );
 
 	/** Specifies parameters like gluNurbsCurve & no need to call update(). Provided for convenience.
 	 * The size of control points is determined by 'kcount-order'.
 	 * \param kcount Size of the knot vector.
-	 * \param stride Can be 2, 3 & 4, Vec3 data will be created for control points, and the 4th is considered as weight.
+	 * \param stride Can be 2, 3 & 4, Vec3d data will be created for control points, and the 4th is considered as weight.
 	 * \param order Order equals degree + 1.
 	 */
 	NurbsCurve( unsigned int kcount, double* knotPtr, unsigned int stride, double* ctrlPtr,
@@ -55,13 +55,13 @@ public:
 	inline int getMethod() { return _method; }
 
 	/** Specifies a vertex list as the defining polygon vertices. */
-	inline void setCtrlPoints( osg::Vec3Array* pts )
+	inline void setCtrlPoints( osg::Vec3dArray* pts )
 	{
 		_ctrlPts = pts;
 		if (_updated) _updated=false;
 	}
-	inline osg::Vec3Array* getCtrlPoints() { return _ctrlPts.get(); }
-	inline const osg::Vec3Array* getCtrlPoints() const { return _ctrlPts.get(); }
+	inline osg::Vec3dArray* getCtrlPoints() { return _ctrlPts.get(); }
+	inline const osg::Vec3dArray* getCtrlPoints() const { return _ctrlPts.get(); }
 
 	/** Specifies a value list as the knots vector.
 	 * The knots vector is used to control the distribution of B-spline.
@@ -101,29 +101,29 @@ public:
 	
 	inline void update() {updateImplementation();_updated=true;}
 
-	inline osg::Vec3Array *getPath() const { return _PathArray.get(); };
+	inline osg::Vec3dArray *getPath() const { return _PathArray.get(); };
 protected:
 	virtual ~NurbsCurve();
 
-	void useCoxDeBoor( osg::Vec3Array* result );
-	void useDeBoor( osg::Vec3Array* result );
+	void useCoxDeBoor( osg::Vec3dArray* result );
+	void useDeBoor( osg::Vec3dArray* result );
 
 	osg::Vec4 lerpRecursion( unsigned int k, unsigned int r, unsigned int i, double u );
 	void coxDeBoor( osg::DoubleArray* basis, int m, int num, double u );
 	
-	inline void setPath(osg::Vec3Array *pathArray) {_PathArray = pathArray;}
+	inline void setPath(osg::Vec3dArray *pathArray) {_PathArray = pathArray;}
 	template<typename T>
 	inline T lerp( const T& a, const T& b, double u ) { return a*(1.0f-u)+b*u; }
 
 	int _method;
 
-	osg::ref_ptr<osg::Vec3Array> _ctrlPts;
+	osg::ref_ptr<osg::Vec3dArray> _ctrlPts;
 	osg::ref_ptr<osg::DoubleArray> _knots;
 	osg::ref_ptr<osg::DoubleArray> _weights;
 	unsigned int _degree;
 	unsigned int _numPath;
 	
-	osg::ref_ptr<osg::Vec3Array> _PathArray;
+	osg::ref_ptr<osg::Vec3dArray> _PathArray;
 	bool _updated;
 };
 

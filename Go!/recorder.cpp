@@ -4,8 +4,10 @@
 #include "edge.h"
 #include "halfedge.h"
 #include "points.h"
+#include "readConfig.h"
 
 #include <stdlib.h>
+#include <fstream>
 
 #include <osg/Notify>
 
@@ -38,10 +40,22 @@ Recorder::Recorder()
 	copy();
 }
 
-
-
 Recorder::~Recorder()
 {
+}
+
+bool Recorder::output(ReadConfig *rc)
+{
+	const std::string filename = rc->getSubjects()->getRecPath() + "\\rec.txt";
+	ofstream wout(filename);
+	if (!wout)
+	{
+		osg::notify(osg::FATAL) << "cannot create recorder file" << std::endl;
+		return false;
+	}
+
+	wout << _txtRecorder << std::endl;
+	return true;
 }
 
 void Recorder::rectoTxt(const CarState *carState)
@@ -51,7 +65,7 @@ void Recorder::rectoTxt(const CarState *carState)
 
 	unsigned crash = carState->_collide;
 	_itoa_s(crash, temp,size_temp);
-	_recS._crash = temp;
+	_recS._crash = temp + _recS._TAB;
 	
 	if (carState->_lastQuad.size() < carState->_carArray->size())
 	{
@@ -64,68 +78,68 @@ void Recorder::rectoTxt(const CarState *carState)
 	int lu = (*i) ? (*i)->getIndex() : -1; i++;
 	int lb = (*i) ? (*i)->getIndex() : -1;
 	_itoa_s(rb, temp, size_temp);
-	_recS._rb = temp;
+	_recS._rb = temp + _recS._TAB;
 	_itoa_s(ru, temp, size_temp);
-	_recS._ru = temp;
+	_recS._ru = temp + _recS._TAB;
 	_itoa_s(lu, temp, size_temp);
-	_recS._lu = temp;
+	_recS._lu = temp + _recS._TAB;
 	_itoa_s(lb, temp, size_temp);
-	_recS._lb = temp;
+	_recS._lb = temp + _recS._TAB;
 	
 	const unsigned nDigit(6);
 	char tempd[20];
 	const int size_tempd = sizeof(tempd);
 	double swAngle = carState->_swangle;
 	_gcvt_s(tempd, size_tempd, swAngle, nDigit);
-	_recS._swAngle = tempd;
+	_recS._swAngle = tempd + _recS._TAB;
 
 	double OX = carState->_O.x();
 	double OY = carState->_O.y();
 	double OZ = carState->_O.z();
 	_gcvt_s(tempd, size_tempd, OX, nDigit);
-	_recS._OX = tempd;
+	_recS._OX = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, OY, nDigit);
-	_recS._OY = tempd;
+	_recS._OY = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, OZ, nDigit);
-	_recS._OZ = tempd;
+	_recS._OZ = tempd + _recS._TAB;
 
 	double HX = carState->_direction.x();
 	double HY = carState->_direction.y();
 	double HZ = carState->_direction.z();
 	_gcvt_s(tempd, size_tempd, HX, nDigit);
-	_recS._HX = tempd;
+	_recS._HX = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, HY, nDigit);
-	_recS._HY = tempd;
+	_recS._HY = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, HZ, nDigit);
-	_recS._HZ = tempd;
+	_recS._HZ = tempd + _recS._TAB;
 
 	double speed = carState->_speed;
 	_gcvt_s(tempd, size_tempd, speed, nDigit);
-	_recS._speed = tempd;
+	_recS._speed = tempd + _recS._TAB;
 
-	osg::Vec3 carD = carState->_direction;
+	osg::Vec3d carD = carState->_direction;
 	carD.normalize();
 	if (!carState->_lastQuad.empty())
 	{
-		osg::ref_ptr<osg::Vec3Array> navigationEdge = carState->_lastQuad.back()->getLoop()->getNavigationEdge();
-		osg::Vec3 naviEdge = navigationEdge->front() - navigationEdge->back();
+		osg::ref_ptr<osg::Vec3dArray> navigationEdge = carState->_lastQuad.back()->getLoop()->getNavigationEdge();
+		osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
 		naviEdge.normalize();
 		const double dA = acos(carD*naviEdge);
 		_gcvt_s(tempd, size_tempd, dA, nDigit);
-		_recS._dAngle = tempd;
+		_recS._dAngle = tempd + _recS._TAB;
 	}
 
-	osg::Vec3 carD_LastFrame = carState->_directionLastFrame;
+	osg::Vec3d carD_LastFrame = carState->_directionLastFrame;
 	carD_LastFrame.normalize();
 	const double HA = asin((carD ^ carD_LastFrame).z());
 	_gcvt_s(tempd, size_tempd, HA, nDigit);
-	_recS._HA = tempd;
+	_recS._HA = tempd + _recS._TAB;
 
-	const osg::Vec3 O = carState->_O;
-	const osg::Vec3 N = carState->_O_Project;
+	const osg::Vec3d O = carState->_O;
+	const osg::Vec3d N = carState->_O_Project;
 	const double dis = (N - O).length();
 	_gcvt_s(tempd, size_tempd, dis, nDigit);
-	_recS._dither = tempd;
+	_recS._dither = tempd + _recS._TAB;
 }
 
 void Recorder::copy()

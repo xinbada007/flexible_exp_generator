@@ -42,26 +42,16 @@ void MulitViewer::genMainViewer(osg::ref_ptr<ReadConfig> refRC)
 
 osgViewer::View * MulitViewer::createPowerWall()
 {
+	const double aspect = _screens->_aspect;
+	double fovy = (_screens->_realworld->empty()) ? _screens->_fovy : _screens->_realworld->front();
+
+	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;	
+	view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, _screens->_horDistance, 1000.0f);
+	view->getCamera()->setClearColor(osg::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
+
 	osg::GraphicsContext::WindowingSystemInterface *wsi;
 	wsi = osg::GraphicsContext::getWindowingSystemInterface();
 	osg::GraphicsContext::ScreenSettings ss;
-
-	int min_height = INT_MAX;
-	int sum_width = 0;
-	for (unsigned i = 0; i < _screens->_scrs->getNumElements(); i++)
-	{
-		unsigned si = *(_screens->_scrs->begin() + i);
-		wsi->getScreenSettings(si, ss);
-		min_height = ss.height < min_height ? ss.height : min_height;
-		sum_width += ss.width;
-	}
-	const double aspect = (_screens->_aspect == 0) ? (double)(sum_width) / (double)(min_height) : _screens->_aspect;
-	double fovy = (_screens->_realworld->empty()) ? 30.0f : _screens->_realworld->front();
-
-	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;	
-	view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, 0.1f, 0.5f);
-	view->getCamera()->setClearColor(osg::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
-
 	if (_screens->_realworld->empty())
 	{
 		//multiple screens with one camera
@@ -77,18 +67,19 @@ osgViewer::View * MulitViewer::createPowerWall()
 			
 			view->addSlave(camera, proOffset, osg::Matrix(), true);
 		}
-		
-		return view.release();
 	}
 	else
 	{
 		//multiple cameras with one screen
-		osg::Vec3 center, eye, updir;
-		view->getCamera()->getViewMatrixAsLookAt(eye, center, updir);
 		int numColumns(3), numRows(1);
-		int tileWidth = sum_width / numColumns;
-		int tileHeight = min_height / numRows;
 		unsigned si = _screens->_scrs->front();
+		wsi->getScreenSettings(si, ss);
+		int tileWidth = ss.width / numColumns;
+		int tileHeight = ss.height / numRows;
+
+		osg::Vec3d center, eye, updir;
+		view->getCamera()->getViewMatrixAsLookAt(eye, center, updir);
+
 		for (int i = 0; i < numColumns; i++)
 		{
 			wsi->getScreenSettings(si, ss);
@@ -104,9 +95,9 @@ osgViewer::View * MulitViewer::createPowerWall()
 
 			view->addSlave(camera.release(), osg::Matrix(), viewOffset, true);
 		}
-
-		return view.release();
 	}
+
+	return view.release();
 }
 
 osg::Camera * MulitViewer::createSlaveCamera(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX /* = 0 */, const int startY /* = 0 */)

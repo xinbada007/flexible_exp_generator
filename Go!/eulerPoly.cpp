@@ -20,7 +20,7 @@ EulerPoly::~EulerPoly()
 {
 }
 
-void EulerPoly::mvfs(osg::Vec3 ref)
+void EulerPoly::mvfs(osg::Vec3d ref)
 {
 	Points *newP = new Points(ref);
 
@@ -34,7 +34,7 @@ void EulerPoly::mvfs(osg::Vec3 ref)
 	newS->addPlanetoList(newPl);
 }
 
-void EulerPoly::mev(Points *oldP, osg::Vec3 newP)
+void EulerPoly::mev(Points *oldP, osg::Vec3d newP)
 {
 	Solid *refS = dynamic_cast<Solid*> (this); 
 	Loop *refL = refS->getAbstract()->getLoop();
@@ -80,7 +80,7 @@ void EulerPoly::calcPlaneEQU(Loop *refL)
 		return;
 	}
 
-	osg::Vec3 p1, p2, p3, p;
+	osg::Vec3d p1, p2, p3, p;
 	HalfEdge *he1 = refL->getHE();
 	p1 = he1->getPoint()->getPoint();
 	p = p1;
@@ -102,7 +102,7 @@ void EulerPoly::calcPlaneEQU(Loop *refL)
 	refL->setPlaneEQU(equ);
 }
 
-void EulerPoly::link(osg::Vec3 P1, osg::Vec3 P2)
+void EulerPoly::link(osg::Vec3d P1, osg::Vec3d P2)
 {
 	Solid *refS = dynamic_cast<Solid*> (this);
 	if (!refS->getNumPoints())
@@ -132,7 +132,7 @@ void EulerPoly::link(osg::Vec3 P1, osg::Vec3 P2)
 
 	{
 		Points *oldP = (refP1) ? refP1 : refP2;
-		osg::Vec3 newP = (refP1) ? P2 : P1;
+		osg::Vec3d newP = (refP1) ? P2 : P1;
 		return mev(oldP, newP);
 	}
 }

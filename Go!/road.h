@@ -27,7 +27,7 @@ private:
 
 	const int _LEFTWALL;
 	const int _RIGHTWALL;
-	const double _WALLHEIGHT;
+
 	osg::ref_ptr<RoadSet> _roadSet;
 
 	logicRoadList _roadList;

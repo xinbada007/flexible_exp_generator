@@ -36,7 +36,7 @@ DebugNode::~DebugNode()
 {
 }
 
-osg::ref_ptr<osg::Geometry> DebugNode::addCarDebuggerDrawables(osg::Vec3Array *refArray)
+osg::ref_ptr<osg::Geometry> DebugNode::addCarDebuggerDrawables(osg::Vec3dArray *refArray)
 {
 	if (_i_color == _colorIndex->end() - 1)
 	{
@@ -97,7 +97,7 @@ void DebugNode::addCarDebugger()
 		_carDebugGde->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 		_carDebugGde->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
-		std::vector<osg::ref_ptr<osg::Vec3Array>>::const_iterator i = _carDebugArray.cbegin();
+		std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator i = _carDebugArray.cbegin();
 		while (i != _carDebugArray.cend())
 		{
 			_carDebugGde->addDrawable(addCarDebuggerDrawables(*i));
@@ -118,12 +118,12 @@ void DebugNode::addCarDebugger()
 	_carDebugGde->dirtyBound();
 }
 
-void DebugNode::setDeepth(std::vector<osg::ref_ptr<osg::Vec3Array>> &refVector)
+void DebugNode::setDeepth(std::vector<osg::ref_ptr<osg::Vec3dArray>> &refVector)
 {
-	std::vector<osg::ref_ptr<osg::Vec3Array>>::iterator i = refVector.begin();
+	std::vector<osg::ref_ptr<osg::Vec3dArray>>::iterator i = refVector.begin();
 	while (i != refVector.end())
 	{
-		osg::Vec3Array::iterator j = (*i)->begin();
+		osg::Vec3dArray::iterator j = (*i)->begin();
 		while (j != (*i)->end())
 		{
 			(*j).z() = _z_deepth;
@@ -145,31 +145,31 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		CarState *carState = refCV->getCar()->getCarState();
 		if (carState->_updated)
 		{
-			std::vector<osg::ref_ptr<osg::Vec3Array>>::iterator i = _carDebugArray.begin();
+			std::vector<osg::ref_ptr<osg::Vec3dArray>>::iterator i = _carDebugArray.begin();
 
-// 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3Array), i = _carDebugArray.end() - 1) : (*i)->clear();
+// 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
 // 			(*i)->push_back(carState->_O);
 // 			i++;
 
-			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3Array), i = _carDebugArray.end() - 1) : (*i)->clear();
+			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
 			(*i)->push_back(carState->_O); (*i)->push_back(carState->_O_Project);
 			i++;
 
-			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3Array), i = _carDebugArray.end() - 1) : (*i)->clear();			(*i)->clear();
-			osg::Vec3 midFront = carState->_frontWheel->front()*0.5f + carState->_frontWheel->back()*0.5f;
+			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();			(*i)->clear();
+			osg::Vec3d midFront = carState->_frontWheel->front()*0.5f + carState->_frontWheel->back()*0.5f;
 			midFront -= carState->_O;
-			osg::Vec3 navi = carState->_midLine->front() - carState->_midLine->back();
+			osg::Vec3d navi = carState->_midLine->front() - carState->_midLine->back();
 			navi *= (midFront.length() / navi.length());
 			navi += carState->_O;
 			(*i)->push_back(carState->_O); (*i)->push_back(navi);
 			i++;
 
-// 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3Array), i = _carDebugArray.end() - 1) : (*i)->clear();
+// 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
 // 			(*i)->push_back(carState->_midLine->front()); (*i)->push_back(carState->_midLine->back());
 // 			i++;
 
-			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3Array), i = _carDebugArray.end() - 1) : (*i)->clear();
-			osg::Vec3 carD = carState->_direction;
+			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
+			osg::Vec3d carD = carState->_direction;
 			carD *= (midFront.length()) / (carD.length());
 			carD += carState->_O;
 			(*i)->push_back(carState->_O); (*i)->push_back(carD);

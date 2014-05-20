@@ -53,7 +53,7 @@ public:
 
 	void traverse();
 	bool isValid();
-	Points * findPoint(osg::Vec3 ref);
+	Points * findPoint(osg::Vec3d ref);
 
 	inline void setTexCoord(osg::ref_ptr<osg::Vec2Array> refT) { _texCoord = refT; };
 	inline const osg::ref_ptr<osg::Vec2Array> getTexCoord() const { return _texCoord; };

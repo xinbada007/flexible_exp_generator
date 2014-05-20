@@ -20,8 +20,8 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 {
 	_vehicle = refRC->getVehicle();
 
-	osg::ref_ptr<osg::Vec3Array> refV = _vehicle->_V;
-	osg::Vec3Array::const_iterator i = refV->begin();
+	osg::ref_ptr<osg::Vec3dArray> refV = _vehicle->_V;
+	osg::Vec3dArray::const_iterator i = refV->begin();
 	while (++i != refV->end())
 	{
 		link(*(i - 1), *i);

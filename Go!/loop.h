@@ -29,7 +29,7 @@ public:
 	inline void setSwitch(bool ref) { _switch = ref; };
 
 	const edgelist getFlagEdge() const;
-	const osg::ref_ptr<osg::Vec3Array> getNavigationEdge() const;
+	const osg::ref_ptr<osg::Vec3dArray> getNavigationEdge() const;
 
 	bool isValid() const;
 
@@ -40,7 +40,7 @@ public:
 	void setPlaneEQU(planeEQU ref) { _planeEQU = ref; };
 	planeEQU getPlaneEQU() const { return _planeEQU; };
 
-	const osg::ref_ptr<osg::Vec3Array> getPoints();
+	const osg::ref_ptr<osg::Vec3dArray> getPoints();
 private:
 	void forwardInsertHE(HalfEdge *he1, HalfEdge *he2);
 	HalfEdge *_startHE;

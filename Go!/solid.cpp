@@ -176,7 +176,7 @@ bool Solid::isValid()
 	return valid;
 }
 
-Points * Solid::findPoint(osg::Vec3 refP)
+Points * Solid::findPoint(osg::Vec3d refP)
 {
 	Points * objP = _startP;
 	do 

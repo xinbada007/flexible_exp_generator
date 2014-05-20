@@ -24,7 +24,7 @@ NurbsCurve::NurbsCurve():
 {
 }
 
-NurbsCurve::NurbsCurve( osg::Vec3Array* pts, osg::DoubleArray* weights, osg::DoubleArray* knots,
+NurbsCurve::NurbsCurve( osg::Vec3dArray* pts, osg::DoubleArray* weights, osg::DoubleArray* knots,
                        unsigned int degree, unsigned int numPath ):
     _method(1), _ctrlPts(pts), _knots(knots), _weights(weights), _degree(degree), _numPath(numPath),_updated(false)
 {
@@ -36,7 +36,7 @@ NurbsCurve::NurbsCurve( unsigned int kcount, double* knotPtr, unsigned int strid
     _method(1), _degree(order-1), _numPath(numPath),_updated(false)
 {
     if ( kcount<=order || stride<2 || !knotPtr || !ctrlPtr ) return;
-    if ( !_ctrlPts ) _ctrlPts = new osg::Vec3Array;
+    if ( !_ctrlPts ) _ctrlPts = new osg::Vec3dArray;
     if ( !_knots ) _knots = new osg::DoubleArray;
     if ( !_weights ) _weights = new osg::DoubleArray;
 
@@ -48,12 +48,12 @@ NurbsCurve::NurbsCurve( unsigned int kcount, double* knotPtr, unsigned int strid
     {
         if ( stride==2 )
         {
-            _ctrlPts->push_back( osg::Vec3(
+            _ctrlPts->push_back( osg::Vec3d(
                 *(ctrlPtr+i), *(ctrlPtr+i+1), 0.0f) );
         }
         else
         {
-            _ctrlPts->push_back( osg::Vec3(
+            _ctrlPts->push_back( osg::Vec3d(
                 *(ctrlPtr+i), *(ctrlPtr+i+1), *(ctrlPtr+i+2)) );
         }
 
@@ -119,13 +119,13 @@ void NurbsCurve::updateImplementation()
         return;
     }
 
-    osg::ref_ptr<osg::Vec3Array> pathArray = new osg::Vec3Array;
+    osg::ref_ptr<osg::Vec3dArray> pathArray = new osg::Vec3dArray;
     if ( _method==0 ) useCoxDeBoor( pathArray.get() );
     else if ( _method==1 ) useDeBoor( pathArray.get() );
     setPath( pathArray.get() );
 }
 
-void NurbsCurve::useCoxDeBoor( osg::Vec3Array* result )
+void NurbsCurve::useCoxDeBoor( osg::Vec3dArray* result )
 {
     osg::ref_ptr<osg::DoubleArray> basisArray = new osg::DoubleArray;
     unsigned int i, j;
@@ -137,14 +137,14 @@ void NurbsCurve::useCoxDeBoor( osg::Vec3Array* result )
         u = min + i*interval;
         coxDeBoor( basisArray.get(), _degree+1, numCtrl, u );
 
-        osg::Vec3 pathPoint;
+        osg::Vec3d pathPoint;
         for ( j=0; j<numCtrl; ++j )
             pathPoint += (*_ctrlPts)[j] * (*basisArray)[j];
         result->push_back( pathPoint );
     }
 }
 
-void NurbsCurve::useDeBoor( osg::Vec3Array* result )
+void NurbsCurve::useDeBoor( osg::Vec3dArray* result )
 {
     unsigned int i, s=_degree;
     unsigned int numCtrl = _ctrlPts->size();
@@ -159,13 +159,13 @@ void NurbsCurve::useDeBoor( osg::Vec3Array* result )
         ptAndWeight = lerpRecursion( _degree, _degree, s, u );
         if ( ptAndWeight.w() )
         {
-            result->push_back( osg::Vec3(
+            result->push_back( osg::Vec3d(
                 ptAndWeight.x()/ptAndWeight.w(),
                 ptAndWeight.y()/ptAndWeight.w(),
                 ptAndWeight.z()/ptAndWeight.w()) );
         }
         else
-            result->push_back( osg::Vec3(0.0f, 0.0f, 0.0f) );
+            result->push_back( osg::Vec3d(0.0f, 0.0f, 0.0f) );
     }
 }
 

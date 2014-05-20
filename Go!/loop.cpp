@@ -28,14 +28,14 @@ Loop::~Loop()
 void Loop::draw()
 {
 	HalfEdge *refHE = _startHE;
-	osg::ref_ptr<osg::Vec3Array> varray = new osg::Vec3Array;
+	osg::ref_ptr<osg::Vec3dArray> varray = new osg::Vec3dArray;
 	do
 	{
 		varray->push_back(refHE->getPoint()->getPoint());
 		refHE = refHE->getNext();
 	} while (refHE != _startHE);
 
-	this->setVertexArray(varray);
+	this->setVertexArray(varray.release());
 }
 
 bool Loop::isValid() const
@@ -182,9 +182,9 @@ void Loop::splitLoop(Edge *refE, Loop *newL)
 	} while (tempHE2 != _startHE);
 }
 
-const osg::ref_ptr<osg::Vec3Array> Loop::getPoints()
+const osg::ref_ptr<osg::Vec3dArray> Loop::getPoints()
 {
-	osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array;
+	osg::ref_ptr<osg::Vec3dArray> points = new osg::Vec3dArray;
 
 	HalfEdge * he = _startHE;
 	do
@@ -212,12 +212,12 @@ const edgelist Loop::getFlagEdge() const
 	return list;
 }
 
-const osg::ref_ptr<osg::Vec3Array> Loop::getNavigationEdge() const
+const osg::ref_ptr<osg::Vec3dArray> Loop::getNavigationEdge() const
 {
 	const HalfEdge *he = _startHE;
-	osg::ref_ptr<osg::Vec3Array> navigation = new osg::Vec3Array;
-	osg::ref_ptr<osg::Vec3Array> edgeA = new osg::Vec3Array;
-	osg::ref_ptr<osg::Vec3Array> edgeB = new osg::Vec3Array;
+	osg::ref_ptr<osg::Vec3dArray> navigation = new osg::Vec3dArray;
+	osg::ref_ptr<osg::Vec3dArray> edgeA = new osg::Vec3dArray;
+	osg::ref_ptr<osg::Vec3dArray> edgeB = new osg::Vec3dArray;
 
 	do 
 	{
@@ -225,7 +225,7 @@ const osg::ref_ptr<osg::Vec3Array> Loop::getNavigationEdge() const
 		{
 			if (he->getEdge()->getEdgeFlag()->_navigateEdge)
 			{
-				osg::ref_ptr<osg::Vec3Array> tempArray = (edgeA->empty()) ? edgeA : edgeB;
+				osg::ref_ptr<osg::Vec3dArray> tempArray = (edgeA->empty()) ? edgeA : edgeB;
 				*tempArray = *(he->getEdge()->getEdgeFlag()->_navigationArray);
 			}
 		}

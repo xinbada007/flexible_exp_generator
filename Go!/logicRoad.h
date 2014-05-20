@@ -18,7 +18,7 @@ typedef enum FLAGTYPE
 	NAFLAG,EDGEFLAG
 }FLAGTYPE;
 
-typedef std::vector<osg::ref_ptr<osg::Vec3Array>> FlagEdgeArrayList;
+typedef std::vector<osg::ref_ptr<osg::Vec3dArray>> FlagEdgeArrayList;
 
 class LogicRoad :
 	public EulerPoly
@@ -28,9 +28,9 @@ public:
 	LogicRoad(const LogicRoad &copy, osg::CopyOp copyop = osg::CopyOp::SHALLOW_COPY);
 	META_Node(LogicRoad, LogicRoad);
 
-	void line1D(const osg::Vec3Array *V1, const osg::Vec3Array *V2);
-	void line1D(const osg::Vec3Array *refV);
-	void sweep1D(const osg::Vec3Array *refV);
+	void line1D(const osg::Vec3dArray *V1, const osg::Vec3dArray *V2);
+	void line1D(const osg::Vec3dArray *refV);
+	void sweep1D(const osg::Vec3dArray *refV);
 
 	void traverse();
 
@@ -69,10 +69,10 @@ public:
 		_texFile = refRS->_texture;
 		_width = refRS->_width;
 		_density = refRS->_density;
-		_nurbs = new osg::Vec3Array(refRS->_nurbs.at(i)->_path->begin(), refRS->_nurbs.at(i)->_path->end());
+		_nurbs = new osg::Vec3dArray(refRS->_nurbs.at(i)->_path->begin(), refRS->_nurbs.at(i)->_path->end());
 	}
 
-	inline osg::ref_ptr<osg::Vec3Array> getRawPoints() const
+	inline osg::ref_ptr<osg::Vec3dArray> getRawPoints() const
 	{
 		return _nurbs;
 	}
@@ -87,7 +87,7 @@ private:
 	edgeFlag *_eFlag;
 	FlagEdgeArrayList _eFlagArray;
 
-	osg::ref_ptr<osg::Vec3Array> _project_LineV;
+	osg::ref_ptr<osg::Vec3dArray> _project_LineV;
 	osg::ref_ptr<LogicRoad> _next;
 	osg::ref_ptr<LogicRoad> _prev;
 	ROADTAG _tag;
@@ -96,6 +96,6 @@ private:
 	std::string _roadTxt;
 	double _width;
 	unsigned _density;
-	osg::ref_ptr<osg::Vec3Array> _nurbs;
+	osg::ref_ptr<osg::Vec3dArray> _nurbs;
 };
 

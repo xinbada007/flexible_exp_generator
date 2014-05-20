@@ -1,5 +1,5 @@
 #pragma once
-#include <osg/Vec3>
+#include <osg/Vec3d>
 #include <osg/Referenced>
 #include "edge.h"
 

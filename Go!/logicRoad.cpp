@@ -11,7 +11,7 @@ LogicRoad::LogicRoad():
 _next(NULL), _prev(NULL), _tag(ROAD),
 _roadTxt(""), _width(-1), _density(-1), _nurbs(NULL), _eFlag(NULL)
 {
-	_project_LineV = new osg::Vec3Array;
+	_project_LineV = new osg::Vec3dArray;
 }
 
 LogicRoad::LogicRoad(const LogicRoad &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
@@ -26,7 +26,7 @@ LogicRoad::~LogicRoad()
 {
 }
 
-void LogicRoad::line1D(const osg::Vec3Array *V1, const osg::Vec3Array *V2)
+void LogicRoad::line1D(const osg::Vec3dArray *V1, const osg::Vec3dArray *V2)
 {
 	if (V1->size() != V2->size())
 	{
@@ -34,15 +34,15 @@ void LogicRoad::line1D(const osg::Vec3Array *V1, const osg::Vec3Array *V2)
 		return;
 	}
 
-	osg::Vec3Array::const_iterator i = V1->begin();
-	osg::Vec3Array::const_iterator j = V2->begin();
+	osg::Vec3dArray::const_iterator i = V1->begin();
+	osg::Vec3dArray::const_iterator j = V2->begin();
 	while (i != V1->end() && j != V2->end())
 	{
 		link(*i++, *j++);
 	}
 }
 
-void LogicRoad::line1D(const osg::Vec3Array *refV)
+void LogicRoad::line1D(const osg::Vec3dArray *refV)
 {
 	bool flag = false;
 
@@ -60,7 +60,7 @@ void LogicRoad::line1D(const osg::Vec3Array *refV)
 		}
 	}
 
-	osg::Vec3Array::const_iterator i = refV->begin();
+	osg::Vec3dArray::const_iterator i = refV->begin();
 	while (++i != refV->end())
 	{
 		link(*(i - 1),*i);
@@ -72,7 +72,7 @@ void LogicRoad::line1D(const osg::Vec3Array *refV)
 	}
 }
 
-void LogicRoad::sweep1D(const osg::Vec3Array *refV)
+void LogicRoad::sweep1D(const osg::Vec3dArray *refV)
 {
 	Solid *refS = dynamic_cast<Solid*> (this);
 	if (!refS)
@@ -86,9 +86,9 @@ void LogicRoad::sweep1D(const osg::Vec3Array *refV)
 		return;
 	}
 
-	osg::Vec3Array::const_iterator i = refV->begin();
+	osg::Vec3dArray::const_iterator i = refV->begin();
 	Points *P = refS->getPoint();
-	osg::Vec3 refP = P->getPoint();
+	osg::Vec3d refP = P->getPoint();
 	link(refP, *i);
 	while (++i != refV->end())
 	{
@@ -109,7 +109,7 @@ void LogicRoad::setUpFlag()
 		if (newEFlag->_navigateEdge)
 		{
 			//HE1 always points to a later point
-			newEFlag->_navigationArray = new osg::Vec3Array;
+			newEFlag->_navigationArray = new osg::Vec3dArray;
 			newEFlag->_navigationArray->push_back(this->getEdge()->getHE1()->getPoint()->getPoint());
 			newEFlag->_navigationArray->push_back(this->getEdge()->getHE2()->getPoint()->getPoint());
 		}

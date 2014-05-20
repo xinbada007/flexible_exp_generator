@@ -1,9 +1,12 @@
 #pragma once
 #include <osg/NodeCallback>
-#include <vector>
 
-#include "string"
+#include <vector>
+#include <string>
+
 #include "car.h"
+
+class ReadConfig;
 
 typedef struct recState
 {
@@ -51,6 +54,8 @@ public:
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
 	void rectoTxt(const CarState *carState);
 	virtual ~Recorder();
+
+	bool output(ReadConfig *rc);
 
 private:
 	void copy();

@@ -5,34 +5,34 @@
 
 extern double z_deepest = eps_1000;
 
-osg::Vec3Array * project_Line(const osg::Vec3Array *refV, const double width)
+osg::Vec3dArray * project_Line(const osg::Vec3dArray *refV, const double width)
 {
-	osg::ref_ptr <osg::Vec3Array> results = new osg::Vec3Array;
+	osg::ref_ptr <osg::Vec3dArray> results = new osg::Vec3dArray;
 
-	const osg::Vec3Array::const_iterator refV_begin = refV->begin();
-	const osg::Vec3Array::const_iterator refV_end = refV->end();
+	const osg::Vec3dArray::const_iterator refV_begin = refV->begin();
+	const osg::Vec3dArray::const_iterator refV_end = refV->end();
 
 	//初始化第一条线段的平移
-	const osg::Vec3 *p0 = refV_begin._Ptr;
-	const osg::Vec3 *p1 = p0 + 1;
-	osg::Vec3 project_0 = find_Prependicular(*p0, *p1, width);
+	const osg::Vec3d *p0 = refV_begin._Ptr;
+	const osg::Vec3d *p1 = p0 + 1;
+	osg::Vec3d project_0 = find_Prependicular(*p0, *p1, width);
 
-	osg::Vec3 a = project_0 + *p0;
-	osg::Vec3 b = project_0 + *p1;
+	osg::Vec3d a = project_0 + *p0;
+	osg::Vec3d b = project_0 + *p1;
 	results->push_back(a);
 	results->push_back(b);
 
-	for (osg::Vec3Array::const_iterator i = refV_begin + 1; (i + 1) != refV_end; i++)
+	for (osg::Vec3dArray::const_iterator i = refV_begin + 1; (i + 1) != refV_end; i++)
 	{
-		const osg::Vec3 *p2 = (i + 1)._Ptr;
+		const osg::Vec3d *p2 = (i + 1)._Ptr;
 		p1 = p2 - 1;
 		p0 = p1 - 1;
 
-		const osg::Vec3 v2_p2p1 = *p2 - *p1;
-		const osg::Vec3 v1_p1p0 = *p1 - *p0;
+		const osg::Vec3d v2_p2p1 = *p2 - *p1;
+		const osg::Vec3d v1_p1p0 = *p1 - *p0;
 		const double dot_v2v1 = v2_p2p1*v1_p1p0;
 
-		const osg::Vec3 cross_v2v1 = v2_p2p1^v1_p1p0;
+		const osg::Vec3d cross_v2v1 = v2_p2p1^v1_p1p0;
 		if (cross_v2v1.length() <= eps)
 		{
 			//此时两线段共线，投影致相同的点上
@@ -41,11 +41,11 @@ osg::Vec3Array * project_Line(const osg::Vec3Array *refV, const double width)
 			continue;
 		}
 
-		const osg::Vec3 project_1 = find_Prependicular(*p1, *p2, width);
-		const osg::Vec3 project_2 = -project_1;
+		const osg::Vec3d project_1 = find_Prependicular(*p1, *p2, width);
+		const osg::Vec3d project_2 = -project_1;
 		const double dot_pro2pro1 = project_2*project_0;
 		const double dot_pro1pro0 = project_1*project_0;
-		osg::Vec3 project(0.0f, 0.0f, 0.0f);
+		osg::Vec3d project(0.0f, 0.0f, 0.0f);
 
 		if (abs(dot_v2v1) <= eps)
 		{
@@ -63,7 +63,7 @@ osg::Vec3Array * project_Line(const osg::Vec3Array *refV, const double width)
 		b = project + *p2;
 
 		//此时取得了正确的平移向量，开始寻找交点
-		const osg::Vec3Array::iterator i_pro_now = results->end() - 1;
+		const osg::Vec3dArray::iterator i_pro_now = results->end() - 1;
 		const double &x_a = i_pro_now._Ptr->x();
 		const double &y_a = i_pro_now._Ptr->y();
 		const double &x_b = a.x();
@@ -71,7 +71,7 @@ osg::Vec3Array * project_Line(const osg::Vec3Array *refV, const double width)
 		const double &x_c = p1->x();
 		const double &y_c = p1->y();
 
-		const osg::Vec3 a_b = (a - *i_pro_now._Ptr);
+		const osg::Vec3d a_b = (a - *i_pro_now._Ptr);
 		if (a_b.length() <= eps)
 		{
 			//此时两线段共线，投影致相同的点上
@@ -97,9 +97,9 @@ osg::Vec3Array * project_Line(const osg::Vec3Array *refV, const double width)
 		}
 
 		//如果交点落在反向延长线上，则该投影无几何意义
-		const osg::Vec3 *p0_1 = (i_pro_now - 1)._Ptr;
-		const osg::Vec3 p1_reset(x, y, 0.0f);
-		const osg::Vec3 v_p1reset_p0 = p1_reset - *p0_1;
+		const osg::Vec3d *p0_1 = (i_pro_now - 1)._Ptr;
+		const osg::Vec3d p1_reset(x, y, 0.0f);
+		const osg::Vec3d v_p1reset_p0 = p1_reset - *p0_1;
 		const double direction_p0p1 = v_p1reset_p0*v1_p1p0;
 		if (direction_p0p1 < 0)
 		{
@@ -119,7 +119,7 @@ osg::Vec3Array * project_Line(const osg::Vec3Array *refV, const double width)
 	return results.release();
 }
 
-osg::Vec3 find_Prependicular(const osg::Vec3 p0, const osg::Vec3 p1, const double width)
+osg::Vec3d find_Prependicular(const osg::Vec3d p0, const osg::Vec3d p1, const double width)
 {
 	//Watch Out!!!
 	//Only for 2D(Z MUST = 0) Projection
@@ -148,8 +148,8 @@ osg::Vec3 find_Prependicular(const osg::Vec3 p0, const osg::Vec3 p1, const doubl
 		Y = -sqrt(Y);
 	}
 
-	osg::Vec3 P(X, Y, 0.0f);
-	const osg::Vec3 p1_p0 = p1 - p0;
+	osg::Vec3d P(X, Y, 0.0f);
+	const osg::Vec3d p1_p0 = p1 - p0;
 
 	if (abs(P*p1_p0) > eps)
 	{
@@ -165,28 +165,28 @@ osg::Vec3 find_Prependicular(const osg::Vec3 p0, const osg::Vec3 p1, const doubl
 	return P;
 }
 
-osg::Matrix rotate(const osg::Vec3Array *source, const osg::Vec3Array *des)
+osg::Matrix rotate(const osg::Vec3dArray *source, const osg::Vec3dArray *des)
 {
-	osg::Vec3Array::const_iterator i_source_end = source->end();
-	osg::Vec3 srcp1 = *(--i_source_end);
-	osg::Vec3 srcp2 = *(--i_source_end);
-	osg::Vec3 srcv = srcp1 - srcp2;
+	osg::Vec3dArray::const_iterator i_source_end = source->end();
+	osg::Vec3d srcp1 = *(--i_source_end);
+	osg::Vec3d srcp2 = *(--i_source_end);
+	osg::Vec3d srcv = srcp1 - srcp2;
 
-	osg::Vec3Array::const_iterator i_des_end = des->begin();
-	osg::Vec3 desp1 = *(i_des_end++);
-	osg::Vec3 desp2 = *(i_des_end);
-	osg::Vec3 desv = desp2 = desp1;
+	osg::Vec3dArray::const_iterator i_des_end = des->begin();
+	osg::Vec3d desp1 = *(i_des_end++);
+	osg::Vec3d desp2 = *(i_des_end);
+	osg::Vec3d desv = desp2 = desp1;
 
 	osg::Matrixd resluts(osg::Matrix::identity());
 	resluts.makeRotate(desv, srcv);
 
-	osg::Vec3 distance;
+	osg::Vec3d distance;
 	desp1 = desp1 * resluts;
 	distance = srcp1 - desp1;
 	resluts.makeTranslate(distance);
 
 	desp1 = desp1*resluts;
-	osg::Vec3 srcv_desv_v = desp1 - srcp1;
+	osg::Vec3d srcv_desv_v = desp1 - srcp1;
 	if (srcv * srcv_desv_v < 0)
 	{
 		resluts.makeTranslate((-srcv_desv_v)*1.1f*eps);
@@ -195,9 +195,9 @@ osg::Matrix rotate(const osg::Vec3Array *source, const osg::Vec3Array *des)
 	return resluts;
 }
 
-void arrayByMatrix(osg::Vec3Array *source, const osg::Matrix refM)
+void arrayByMatrix(osg::Vec3dArray *source, const osg::Matrix refM)
 {
-	osg::Vec3Array::iterator i = source->begin();
+	osg::Vec3dArray::iterator i = source->begin();
 	for (; i != source->end(); i++)
 	{
 		(*i) = (*i) * (refM);
@@ -206,17 +206,17 @@ void arrayByMatrix(osg::Vec3Array *source, const osg::Matrix refM)
 
 osg::BoundingBox BoundingboxByMatrix(const osg::BoundingBox &refBB, const osg::Matrix &refM) /*WILL SET Z to Zero*/
 {
-	osg::Vec3 xminymin(refBB.xMin(), refBB.yMin(), 0.0f);
-	osg::Vec3 xmaxymin(refBB.xMax(), refBB.yMin(), 0.0f);
-	osg::Vec3 xmaxymax(refBB.xMax(), refBB.yMax(), 0.0f);
-	osg::Vec3 xminymax(refBB.xMin(), refBB.yMax(), 0.0f);
+	osg::Vec3d xminymin(refBB.xMin(), refBB.yMin(), 0.0f);
+	osg::Vec3d xmaxymin(refBB.xMax(), refBB.yMin(), 0.0f);
+	osg::Vec3d xmaxymax(refBB.xMax(), refBB.yMax(), 0.0f);
+	osg::Vec3d xminymax(refBB.xMin(), refBB.yMax(), 0.0f);
 
-	osg::ref_ptr<osg::Vec3Array> xy = new osg::Vec3Array;
+	osg::ref_ptr<osg::Vec3dArray> xy = new osg::Vec3dArray;
 	xy->push_back(xminymin); xy->push_back(xmaxymin); xy->push_back(xmaxymax); xy->push_back(xminymax);
 	arrayByMatrix(xy, refM);
 
 	osg::BoundingBox bb;
-	osg::Vec3Array::const_iterator i = xy->begin();
+	osg::Vec3dArray::const_iterator i = xy->begin();
 	do
 	{
 		bb.expandBy(*i++);
@@ -225,7 +225,7 @@ osg::BoundingBox BoundingboxByMatrix(const osg::BoundingBox &refBB, const osg::M
 	return bb;
 }
 
-double ifPoints_ON_Plane(const osg::Vec3 refP, const planeEQU refEQU)
+double ifPoints_ON_Plane(const osg::Vec3d refP, const planeEQU refEQU)
 {
 	if (refEQU.size() < 4)
 	{
@@ -270,7 +270,7 @@ bool isEqual(double a, double p,const double e /* = eps */)
 	return false;
 }
 
-osg::ref_ptr<osg::Vec3Array> linetoRectangle(osg::ref_ptr<osg::Vec3Array> line)
+osg::ref_ptr<osg::Vec3dArray> linetoRectangle(osg::ref_ptr<osg::Vec3dArray> line)
 {
 	//Return a Rectangle under Counterclockwise starting from left-bottom
 	//Only applies to 2D
@@ -284,16 +284,16 @@ osg::ref_ptr<osg::Vec3Array> linetoRectangle(osg::ref_ptr<osg::Vec3Array> line)
 	const double ymin = y1 < y2 ? y1 : y2;
 	const double ymax = y1 < y2 ? y2 : y1;
 
-	osg::ref_ptr<osg::Vec3Array> rect = new osg::Vec3Array;
-	rect->push_back(osg::Vec3(xmin, ymin, 0.0f));
-	rect->push_back(osg::Vec3(xmax, ymin, 0.0f));
-	rect->push_back(osg::Vec3(xmax, ymax, 0.0f));
-	rect->push_back(osg::Vec3(xmin, ymax, 0.0f));
+	osg::ref_ptr<osg::Vec3dArray> rect = new osg::Vec3dArray;
+	rect->push_back(osg::Vec3d(xmin, ymin, 0.0f));
+	rect->push_back(osg::Vec3d(xmax, ymin, 0.0f));
+	rect->push_back(osg::Vec3d(xmax, ymax, 0.0f));
+	rect->push_back(osg::Vec3d(xmin, ymax, 0.0f));
 
 	return rect.release();
 }
 
-bool ifRectangleOverlap(osg::ref_ptr<osg::Vec3Array> rectA, osg::ref_ptr<osg::Vec3Array> rectB)
+bool ifRectangleOverlap(osg::ref_ptr<osg::Vec3dArray> rectA, osg::ref_ptr<osg::Vec3dArray> rectB)
 {
 	//All Vertex in Rectangle must be given under Counterclockwise starting from left-bottom
 	//Only applies to 2D
@@ -304,15 +304,15 @@ bool ifRectangleOverlap(osg::ref_ptr<osg::Vec3Array> rectA, osg::ref_ptr<osg::Ve
 		return false;
 	}
 
-	osg::Vec3 A_left_bottom = *rectA->begin();
-	osg::Vec3 A_right_bottom = *(rectA->begin() + 1);
-	osg::Vec3 A_right_up = *(rectA->begin() + 2);
-	osg::Vec3 A_left_up = *(rectA->begin() + 3);
+	osg::Vec3d A_left_bottom = *rectA->begin();
+	osg::Vec3d A_right_bottom = *(rectA->begin() + 1);
+	osg::Vec3d A_right_up = *(rectA->begin() + 2);
+	osg::Vec3d A_left_up = *(rectA->begin() + 3);
 
-	osg::Vec3 B_left_bottom = *rectB->begin();
-	osg::Vec3 B_right_bottom = *(rectB->begin() + 1);
-	osg::Vec3 B_right_up = *(rectB->begin() + 2);
-	osg::Vec3 B_left_up = *(rectB->begin() + 3);
+	osg::Vec3d B_left_bottom = *rectB->begin();
+	osg::Vec3d B_right_bottom = *(rectB->begin() + 1);
+	osg::Vec3d B_right_up = *(rectB->begin() + 2);
+	osg::Vec3d B_left_up = *(rectB->begin() + 3);
 
 	if (A_right_bottom.x()<B_left_bottom.x() ||
 		A_left_bottom.y()>B_left_up.y() ||
@@ -325,27 +325,27 @@ bool ifRectangleOverlap(osg::ref_ptr<osg::Vec3Array> rectA, osg::ref_ptr<osg::Ve
 	return true;
 }
 
-bool ifLineIntersects(osg::ref_ptr<osg::Vec3Array> lineA, osg::ref_ptr<osg::Vec3Array> lineB)
+bool ifLineIntersects(osg::ref_ptr<osg::Vec3dArray> lineA, osg::ref_ptr<osg::Vec3dArray> lineB)
 {
 	//Only applies to 2D
-	osg::Vec3 p1 = lineA->front();
-	osg::Vec3 p2 = lineA->back();
+	osg::Vec3d p1 = lineA->front();
+	osg::Vec3d p2 = lineA->back();
 
-	osg::Vec3 q1 = lineB->front();
-	osg::Vec3 q2 = lineB->back();
+	osg::Vec3d q1 = lineB->front();
+	osg::Vec3d q2 = lineB->back();
 
-	osg::Vec3 p1_q1 = p1 - q1;
-	osg::Vec3 p2_q1 = p2 - q1;
-	osg::Vec3 q2_q1 = q2 - q1;
-	osg::Vec3 temp1 = p1_q1^q2_q1;
-	osg::Vec3 temp2 = p2_q1^q2_q1;
+	osg::Vec3d p1_q1 = p1 - q1;
+	osg::Vec3d p2_q1 = p2 - q1;
+	osg::Vec3d q2_q1 = q2 - q1;
+	osg::Vec3d temp1 = p1_q1^q2_q1;
+	osg::Vec3d temp2 = p2_q1^q2_q1;
 	//double temp3 = temp1.z() * temp2.z();
 
-	osg::Vec3 q1_p1 = q1 - p1;
-	osg::Vec3 q2_p1 = q2 - p1;
-	osg::Vec3 p2_p1 = p2 - p1;
-	osg::Vec3 temp4 = q1_p1^p2_p1;
-	osg::Vec3 temp5 = q2_p1^p2_p1;
+	osg::Vec3d q1_p1 = q1 - p1;
+	osg::Vec3d q2_p1 = q2 - p1;
+	osg::Vec3d p2_p1 = p2 - p1;
+	osg::Vec3d temp4 = q1_p1^p2_p1;
+	osg::Vec3d temp5 = q2_p1^p2_p1;
 	//double temp6 = temp4.z() * temp5.z();
 
 	if (temp1*temp2 > 0.0f || temp4*temp5 > 0.0f)
@@ -356,7 +356,7 @@ bool ifLineIntersects(osg::ref_ptr<osg::Vec3Array> lineA, osg::ref_ptr<osg::Vec3
 	return true;
 }
 
-bool ifPoint_IN_Polygon(const Point refP, const osg::ref_ptr<osg::Vec3Array> refPoly, const planeEQU refEQU)
+bool ifPoint_IN_Polygon(const Point refP, const osg::ref_ptr<osg::Vec3dArray> refPoly, const planeEQU refEQU)
 {
 	//Only Applies to a 2D Point in a 2D Convex Polygon and this dimension must be Z=0
 	//Not for General Polygon
@@ -369,12 +369,12 @@ bool ifPoint_IN_Polygon(const Point refP, const osg::ref_ptr<osg::Vec3Array> ref
 	}
 
 	planeEQU::const_iterator j = refEQU.cbegin();
-	osg::Vec3 normal(*(j), *(j+1), *(j+2));
+	osg::Vec3d normal(*(j), *(j+1), *(j+2));
 	normal.normalize();
 
-	osg::Vec3Array::const_iterator i = refPoly->begin();
-	osg::Vec3 line_ab, line_ap;
-	osg::Vec3 ab_ap;
+	osg::Vec3dArray::const_iterator i = refPoly->begin();
+	osg::Vec3d line_ab, line_ap;
+	osg::Vec3d ab_ap;
 	while ((i+1) != refPoly->end())
 	{
 		line_ab = *(i + 1) - *i;
@@ -412,7 +412,7 @@ double getZDeepth()
 	return depth;
 }
 
-osg::ref_ptr<osg::Vec3Array> arrayLinearTransform(const osg::Vec3Array *A, const osg::Vec3Array *B, const double lamida)
+osg::ref_ptr<osg::Vec3dArray> arrayLinearTransform(const osg::Vec3dArray *A, const osg::Vec3dArray *B, const double lamida)
 {
 	if (A->size() != B->size())
 	{
@@ -420,9 +420,9 @@ osg::ref_ptr<osg::Vec3Array> arrayLinearTransform(const osg::Vec3Array *A, const
 	}
 
 	const double one_lamida = 1 - lamida;
-	osg::ref_ptr<osg::Vec3Array> dest = new osg::Vec3Array;
-	osg::Vec3Array::const_iterator i = A->begin();
-	osg::Vec3Array::const_iterator j = B->begin();
+	osg::ref_ptr<osg::Vec3dArray> dest = new osg::Vec3dArray;
+	osg::Vec3dArray::const_iterator i = A->begin();
+	osg::Vec3dArray::const_iterator j = B->begin();
 
 	while (i != A->end() && j != B->end())
 	{
@@ -431,4 +431,19 @@ osg::ref_ptr<osg::Vec3Array> arrayLinearTransform(const osg::Vec3Array *A, const
 	}
 	
 	return dest.release();
+}
+
+bool isletter(const char c)
+{
+	if (c >= 'a' && c <= 'z')
+	{
+		return true;
+	}
+
+	if (c >= 'A' && c <= 'Z')
+	{
+		return true;
+	}
+
+	return false;
 }

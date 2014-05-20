@@ -15,9 +15,13 @@ private:
 	void caclCarMovement();
 
 	osg::ref_ptr<CarState> _carState;
+	const Vehicle *_vehicle;
 	osg::ref_ptr<osg::MatrixTransform> _mTransform;
 
 	bool _leftTurn;
-	void turn();
+	bool _acceleration;
+	bool _updated;
+
+	void move();
 };
 

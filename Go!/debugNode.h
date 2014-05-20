@@ -26,18 +26,18 @@ private:
 
 	osg::ref_ptr<osg::Switch> _carDebugSwitch;
 	osg::ref_ptr<osg::Geode> _carDebugGde;
-	std::vector<osg::ref_ptr<osg::Vec3Array>> _carDebugArray;
+	std::vector<osg::ref_ptr<osg::Vec3dArray>> _carDebugArray;
 
 	osg::Switch *_road;
 
 	void addCarDebugger();
-	osg::ref_ptr<osg::Geometry> addCarDebuggerDrawables(osg::Vec3Array *refArray);
+	osg::ref_ptr<osg::Geometry> addCarDebuggerDrawables(osg::Vec3dArray *refArray);
 
 	osg::ref_ptr<osg::Vec4Array> _colorIndex;
 	osg::Vec4Array::const_iterator _i_color;
 
 	double _z_deepth;
-	void setDeepth(std::vector<osg::ref_ptr<osg::Vec3Array>> &refVector);
+	void setDeepth(std::vector<osg::ref_ptr<osg::Vec3dArray>> &refVector);
 };
 
 class deTexture :

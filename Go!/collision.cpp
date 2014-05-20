@@ -28,14 +28,14 @@ Collision::~Collision()
 }
 
 
-bool Collision::detectFirst(const osg::ref_ptr<osg::Vec3Array> planeMove, const Plane *planeObS)
+bool Collision::detectFirst(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Plane *planeObS)
 {
 	if (!planeMove || !planeObS)
 	{
 		return false;
 	}
 
-	osg::Vec3Array::const_iterator i = planeMove->begin();
+	osg::Vec3dArray::const_iterator i = planeMove->begin();
 	const planeEQU &equOBS = planeObS->getLoop()->getPlaneEQU();
 	
 	double sign_cur(0), sign_prv(0);
@@ -52,10 +52,10 @@ bool Collision::detectFirst(const osg::ref_ptr<osg::Vec3Array> planeMove, const 
 	return false;
 }
 
-bool Collision::detectSecond(const osg::ref_ptr<osg::Vec3Array> planeMove, const Plane *planeObs)
+bool Collision::detectSecond(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Plane *planeObs)
 {
 	osg::BoundingBox bbMove;
-	osg::Vec3Array::const_iterator i = planeMove->begin();
+	osg::Vec3dArray::const_iterator i = planeMove->begin();
 	while (i != planeMove->end())
 	{
 		bbMove.expandBy(*i++);
@@ -64,7 +64,7 @@ bool Collision::detectSecond(const osg::ref_ptr<osg::Vec3Array> planeMove, const
 	return bbMove.intersects(planeObs->getBoundingBox());
 }
 
-bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3Array> planeMove, Plane *planeObs)
+bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane *planeObs)
 {
 	const edgelist &list = planeObs->getLoop()->getFlagEdge();
 	
@@ -81,19 +81,19 @@ bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3Array> planeMove, Plane 
 		{
 			if ((*i)->getEdgeFlag()->_collsionEdge)
 			{
-				osg::Vec3 a = (*i)->getHE1()->getPoint()->getPoint();
-				osg::Vec3 b = (*i)->getHE2()->getPoint()->getPoint();
-				osg::ref_ptr<osg::Vec3Array> edge = new osg::Vec3Array;
+				osg::Vec3d a = (*i)->getHE1()->getPoint()->getPoint();
+				osg::Vec3d b = (*i)->getHE2()->getPoint()->getPoint();
+				osg::ref_ptr<osg::Vec3dArray> edge = new osg::Vec3dArray;
 				edge->push_back(a); edge->push_back(b);
-				osg::ref_ptr<osg::Vec3Array> rectObs = linetoRectangle(edge);
+				osg::ref_ptr<osg::Vec3dArray> rectObs = linetoRectangle(edge);
 
-				osg::Vec3Array::const_iterator j = planeMove->begin();
-				osg::Vec3Array::const_iterator END = planeMove->end();
-				osg::ref_ptr<osg::Vec3Array> lineMove = new osg::Vec3Array;
+				osg::Vec3dArray::const_iterator j = planeMove->begin();
+				osg::Vec3dArray::const_iterator END = planeMove->end();
+				osg::ref_ptr<osg::Vec3dArray> lineMove = new osg::Vec3dArray;
 				lineMove->push_back(planeMove->front()); lineMove->push_back(planeMove->back());
 				do
 				{
-					osg::ref_ptr<osg::Vec3Array> rectMove = linetoRectangle(lineMove);
+					osg::ref_ptr<osg::Vec3dArray> rectMove = linetoRectangle(lineMove);
 					if (ifRectangleOverlap(rectMove, rectObs))
 					{
 						if (ifLineIntersects(lineMove, edge))
@@ -113,7 +113,7 @@ bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3Array> planeMove, Plane 
 	return false;
 }
 
-Plane * Collision::ifCollide(const osg::ref_ptr<osg::Vec3Array> planeMove, const quadList refObs)
+Plane * Collision::ifCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove, const quadList refObs)
 {
 	if (!planeMove)
 	{
@@ -147,7 +147,7 @@ quadList Collision::listCollsion(const Car *refC, const quadList obs)
 	if (refC && !obs.empty())
 	{
 		const CarState *refCS = refC->getCarState();
-		const osg::ref_ptr<osg::Vec3Array> carArray = refCS->_carArray;
+		const osg::ref_ptr<osg::Vec3dArray> carArray = refCS->_carArray;
 
 		Plane *pl = ifCollide(carArray, obs);
 		if (pl) list.push_back(pl);
@@ -163,7 +163,7 @@ bool Collision::detectLocation(const Point pMove, const Plane *planeRoad)
 		return false;
 	}
 
-	osg::ref_ptr<osg::Vec3Array> pRoad = planeRoad->getLoop()->getPoints();
+	osg::ref_ptr<osg::Vec3dArray> pRoad = planeRoad->getLoop()->getPoints();
 	planeEQU pEQU = planeRoad->getLoop()->getPlaneEQU();
 	
 	return (ifPoint_IN_Polygon(pMove, pRoad, pEQU));
@@ -192,11 +192,11 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 	if (refC && !road.empty())
 	{
 		const CarState *refCS = refC->getCarState();
-		const osg::ref_ptr<osg::Vec3Array> carArray = refCS->_carArray;
+		const osg::ref_ptr<osg::Vec3dArray> carArray = refCS->_carArray;
 		quadList lasQuad = refCS->_lastQuad;
 
 		//find which polygon the car is in
-		osg::Vec3Array::const_iterator iCar = carArray->begin();
+		osg::Vec3dArray::const_iterator iCar = carArray->begin();
 		unsigned int step(0);
 		if (lasQuad.empty())
 		{

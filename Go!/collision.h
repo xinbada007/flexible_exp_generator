@@ -12,10 +12,10 @@ public:
 	virtual ~Collision();
 private:
 	quadList listCollsion(const Car *refC, const quadList obs);
-	Plane * ifCollide(const osg::ref_ptr<osg::Vec3Array> planeMove , const quadList refObs);
-	bool detectFirst(const osg::ref_ptr<osg::Vec3Array> planeMove, const Plane *planeObS);
-	bool detectSecond(const osg::ref_ptr<osg::Vec3Array> planeMove, const Plane *planeObs);
-	bool detectFinal(const osg::ref_ptr<osg::Vec3Array> planeMove, Plane *planeObs);
+	Plane * ifCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove , const quadList refObs);
+	bool detectFirst(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Plane *planeObS);
+	bool detectSecond(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Plane *planeObs);
+	bool detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane *planeObs);
 
 	quadList listRoadQuad(const Car *refC, const solidList road);
 	Plane * locateCar(Plane::reverse_across_iterator begin, Plane::reverse_across_iterator end, const Point pMove);

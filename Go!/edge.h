@@ -13,7 +13,7 @@ typedef struct edgeFlag
 	};
 	~edgeFlag(){};
 
-	osg::ref_ptr<osg::Vec3Array> _navigationArray;
+	osg::ref_ptr<osg::Vec3dArray> _navigationArray;
 	bool _collsionEdge;
 	bool _navigateEdge;
 }edgeFlag;
