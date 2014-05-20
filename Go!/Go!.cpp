@@ -1,6 +1,5 @@
 // Go!.cpp : Defines the entry point for the console application.
 //
-
 #include "stdafx.h"
 #include "renderVistor.h"
 #include "road.h"
@@ -10,11 +9,11 @@
 #include "mulitViewer.h"
 #include "collVisitor.h"
 #include "collision.h"
-#include "wall.h"
 #include "switchVisitor.h"
 #include "textureVisitor.h"
 #include "recorder.h"
 #include "debugNode.h"
+#include "pickHandler.h"
 
 #include <iostream>
 
@@ -61,7 +60,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	osg::ref_ptr<osg::Group> root = new osg::Group();
 	root->addChild(road);
 	root->addChild(carMatrix);
-	//root->addChild(readConfig->measuer());
+	root->addChild(readConfig->measuer());
 
 	//Collision detect && Trace Car
 	osg::ref_ptr<CollVisitor> cv = new CollVisitor;

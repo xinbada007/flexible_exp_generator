@@ -19,6 +19,7 @@ protected:
 	virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
 
 private:
+	void updateLookAt(osg::View *viewer);
 	osg::Quat _camRotationOrigin;
 	osg::Quat _camRotation;
 	osg::Vec3d _offsetOrigin;
@@ -26,13 +27,18 @@ private:
 	osg::Vec3d _eyePoint;
 
 	osg::Quat _eyeRotation;
-	osg::Vec3 _eyeOffset;
+	osg::Vec3d _eyeOffset;
 	const double _offsetInterval;
 	const double _rotationInterval;
 
-	osg::Vec3 _eye_X_Axis;
-	osg::Vec3 _eye_Z_Axis;
+	osg::Vec3d _eye_X_Axis;
+	osg::Vec3d _eye_Z_Axis;
 
 	bool _reset;
+
+	osg::Vec2d _windowsPick;
+	osg::Vec3d _zNear;
+	osg::Vec3 _zFar;
+	osg::Matrix _matrixLookAt;
 };
 

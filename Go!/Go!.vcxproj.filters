@@ -78,12 +78,6 @@
     <ClInclude Include="collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="obstacles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wall.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="switchVisitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -97,6 +91,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="debugNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pickHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -161,12 +158,6 @@
     <ClCompile Include="collision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="obstacles.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="wall.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="switchVisitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -180,6 +171,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="debugNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pickHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -99,7 +99,7 @@
     <ClInclude Include="mulitViewer.h" />
     <ClInclude Include="Nurbs.h" />
     <ClInclude Include="logicRoad.h" />
-    <ClInclude Include="obstacles.h" />
+    <ClInclude Include="pickHandler.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="points.h" />
     <ClInclude Include="readConfig.h" />
@@ -111,7 +111,6 @@
     <ClInclude Include="switchVisitor.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="textureVisitor.h" />
-    <ClInclude Include="wall.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cameraEvent.cpp" />
@@ -129,7 +128,7 @@
     <ClCompile Include="mulitViewer.cpp" />
     <ClCompile Include="NurbsCurve.cpp" />
     <ClCompile Include="logicRoad.cpp" />
-    <ClCompile Include="obstacles.cpp" />
+    <ClCompile Include="pickHandler.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="points.cpp" />
     <ClCompile Include="readConfig.cpp" />
@@ -143,7 +142,6 @@
     </ClCompile>
     <ClCompile Include="switchVisitor.cpp" />
     <ClCompile Include="textureVisitor.cpp" />
-    <ClCompile Include="wall.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
