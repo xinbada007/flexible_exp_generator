@@ -13,7 +13,7 @@
 
 using namespace std;
 
-Recorder::Recorder()
+Recorder::Recorder() :_statusText(new osgText::Text)
 {
 	_outMoment.push_back(&_recS._time);
 	_outMoment.push_back(&_recS._fps);
@@ -145,11 +145,15 @@ void Recorder::rectoTxt(const CarState *carState)
 void Recorder::copy()
 {
 	std::vector<const std::string*>::const_iterator i = _outMoment.cbegin();
+	std::string content;
 	while (i != _outMoment.cend())
 	{
 		_txtRecorder += **i;
+		content += **i;
 		i++;
 	}
+
+	_statusText->setText(content);
 }
 
 void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)

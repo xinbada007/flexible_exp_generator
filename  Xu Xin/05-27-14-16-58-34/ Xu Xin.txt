@@ -1,0 +1,43 @@
+#only comma, colon, space, and semicolon are allowed to use
+#folder path MUST not contain SPACE
+
+TrialConfig
+
+[ScreenSettings]
+#Num of Screent starts from 0
+Hdistance:	0.6	#2.72	#5.44	#0.6
+Vdistance:	1.25	#1.25
+screen:		1
+aspect:	 	1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		28	#Disable when RealWorld is enabled
+RealWorld:	0:	42.175 , 65.217 , 42.391
+background:	../Resources/texture/background.jpg
+
+[CarSettings]
+acceleration:	1
+CarSpeed:	60
+CarWheel:	42.5
+CarWidth:	1.7
+CarHeight:	0.15
+CarLength:	4.7
+CarPic:		../Resources/texture/car.png
+
+[RoadSettings]
+RoadLanes:	2
+RoadPic:	../Resources/texture/tio.jpg
+RoadTxt:	../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/2.txt;
+Density:	1000
+WallHeight:	1.0
+ScaleVector:	30,30,1		#DO NOT mess around with this
+
+[CameraSettings]
+#this is the camera's position realtively to the original point of vehicle
+#shouldn't mess around with this, set as 0 to let program to define
+Offset:		0
+EyeTracker:	0
+
+[Subjects]
+Name:	Xu Xin
+Age:	29
+Gender:	Male
+Driving:	3	#how many years since driving

@@ -13,6 +13,9 @@ public:
 private:
 	~CarEvent();
 	void caclCarMovement();
+	void move();
+	void carDynamic();
+	bool Joystick();
 
 	osg::ref_ptr<CarState> _carState;
 	const Vehicle *_vehicle;
@@ -22,6 +25,6 @@ private:
 	bool _acceleration;
 	bool _updated;
 
-	void move();
+	int _test_dynamic;
 };
 

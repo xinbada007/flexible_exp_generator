@@ -133,9 +133,11 @@ typedef struct CameraSet :public osg::Referenced
 	CameraSet()
 	{
 		_offset = new osg::DoubleArray;
+		_eyeTracker = false;
 	}
 
 	osg::ref_ptr<osg::DoubleArray> _offset;
+	bool _eyeTracker;
 }CameraSet;
 
 typedef struct Subjects:public osg::Referenced
@@ -185,6 +187,10 @@ public:
 	osg::Matrix getDistortionMatrix() const{  return osg::Matrix::scale(osg::Vec3d(1.0f,1.0f,1.0f / _screens->_distortion)); };
 	osg::Geode* measuer();
 
+	//test
+	osg::ref_ptr<osg::Vec3dArray> _measuerment;
+	//test
+
 private:
 	//ReadConfig();
 	~ReadConfig();
@@ -205,4 +211,6 @@ private:
 	osg::ref_ptr<CameraSet> _camset;
 	osg::ref_ptr<Subjects> _subjects;
 	std::string _filename;
+
+	osg::Vec3d _alignPoint;
 };

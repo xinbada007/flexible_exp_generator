@@ -1,20 +1,22 @@
 #include "stdafx.h"
 #include "mulitViewer.h"
-#include "math.h"
 
 #include <osg/Notify>
+#include <osgViewer/Viewer>
+#include <osg/Depth>
+#include <osgText/Text>
+#include <osgDB/ReadFile>
 
-MulitViewer::MulitViewer()
+MulitViewer::MulitViewer():
+_screens(NULL), _mainView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL)
 {
-	_screens = NULL;
 }
-
 
 MulitViewer::~MulitViewer()
 {
 }
 
-void MulitViewer::genMainViewer(osg::ref_ptr<ReadConfig> refRC)
+void MulitViewer::genMainView(osg::ref_ptr<ReadConfig> refRC)
 {
 	_screens = refRC->getScreens();
 	if (!_screens)
@@ -27,6 +29,9 @@ void MulitViewer::genMainViewer(osg::ref_ptr<ReadConfig> refRC)
 	wsi = osg::GraphicsContext::getWindowingSystemInterface();
 
 	unsigned numScreensTxt = _screens->_scrs->getNumElements();
+	osg::ref_ptr<osg::UIntArray> screenNumber = new osg::UIntArray(_screens->_scrs->begin(), _screens->_scrs->end());
+	osg::UIntArray::iterator uni = std::unique(screenNumber->begin(), screenNumber->end());
+	numScreensTxt -= (screenNumber->end() - uni);
 	unsigned numScreensSys = wsi->getNumScreens();
 
 	if (!numScreensTxt || numScreensTxt > numScreensSys)
@@ -35,7 +40,12 @@ void MulitViewer::genMainViewer(osg::ref_ptr<ReadConfig> refRC)
 		return;
 	}
 
-	this->addView(createPowerWall());
+	if (!_mainView)
+	{
+		_mainView = createPowerWall();
+	}
+
+	this->addView(_mainView);
 
 	return;
 }
@@ -45,7 +55,7 @@ osgViewer::View * MulitViewer::createPowerWall()
 	const double aspect = _screens->_aspect;
 	double fovy = (_screens->_realworld->empty()) ? _screens->_fovy : _screens->_realworld->front();
 
-	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;	
+	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;
 	view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, _screens->_horDistance, 1000.0f);
 	view->getCamera()->setClearColor(osg::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
 
@@ -54,13 +64,23 @@ osgViewer::View * MulitViewer::createPowerWall()
 	osg::GraphicsContext::ScreenSettings ss;
 	if (_screens->_realworld->empty())
 	{
-		//multiple screens with one camera
+		//multiple screens with one camera for each
+		osg::ref_ptr<osg::UIntArray> screenNumber = new osg::UIntArray(_screens->_scrs->begin(), _screens->_scrs->end());
 		const unsigned numColumns = _screens->_scrs->getNumElements(), numRows(1);
 		for (unsigned i = 0; i < numColumns; i++)
 		{
 			unsigned si = *(_screens->_scrs->begin() + i);
+			unsigned si_count = std::count(_screens->_scrs->begin(), _screens->_scrs->end(), si);
+			osg::UIntArray::iterator ffo = std::find(screenNumber->begin(), screenNumber->end(),si);
+			if (ffo != screenNumber->end())	screenNumber->erase(ffo);
+			unsigned sn_count = std::count(screenNumber->begin(), screenNumber->end(), si);
 			wsi->getScreenSettings(si, ss);
-			osg::ref_ptr<osg::Camera> camera = createSlaveCamera(si, ss);
+			ss.height = ss.height / numRows;
+			ss.width = ss.width / si_count;
+
+			unsigned index = si_count - sn_count;
+
+			osg::ref_ptr<osg::Camera> camera = createSlaveCamerainMainView(si, ss, ss.width * (--index));
 
 			osg::Matrix proOffset = osg::Matrix::scale(numColumns, numRows, 1.0f)
 				* osg::Matrix::translate(int(numColumns - 2 * i - 1), 0.0f, 0.0f);
@@ -85,14 +105,13 @@ osgViewer::View * MulitViewer::createPowerWall()
 			wsi->getScreenSettings(si, ss);
 			ss.height = tileHeight;
 			ss.width = tileWidth;
-			osg::ref_ptr<osg::Camera> camera = createSlaveCamera(si, ss, tileWidth*i);
+			osg::ref_ptr<osg::Camera> camera = createSlaveCamerainMainView(si, ss, tileWidth*i);
 
 			const double rotation = _screens->_realworld->back() * (i - 1);
 
-			osg::Matrix viewOffset = osg::Matrix::translate(-eye) *
-				osg::Matrix::rotate(rotation * TO_RADDIAN, UP_DIR) *
-				osg::Matrix::translate(eye);
+			osg::Matrix viewOffset = osg::Matrix::rotate(rotation * TO_RADDIAN, UP_DIR);
 
+			_slaveCamerasinMainView.push_back(camera.get());
 			view->addSlave(camera.release(), osg::Matrix(), viewOffset, true);
 		}
 	}
@@ -100,7 +119,7 @@ osgViewer::View * MulitViewer::createPowerWall()
 	return view.release();
 }
 
-osg::Camera * MulitViewer::createSlaveCamera(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX /* = 0 */, const int startY /* = 0 */)
+osg::Camera * MulitViewer::createSlaveCamerainMainView(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX /* = 0 */, const int startY /* = 0 */)
 {
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
 	traits->screenNum = screenNum;
@@ -124,4 +143,130 @@ osg::Camera * MulitViewer::createSlaveCamera(const unsigned screenNum, const osg
 	camera->setReadBuffer(buffer);
 
 	return camera.release();
+}
+
+osg::Camera * MulitViewer::createHUDCamerainWindow(osg::GraphicsContext *windows)
+{
+	// create a camera to set up the projection and model view matrices, and the subgraph to draw in the HUD
+	osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+
+	camera->setGraphicsContext(windows);
+
+	// set the view matrix    
+	camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+	camera->setViewMatrix(osg::Matrix::identity());
+	camera->setProjectionMatrix(osg::Matrix::ortho2D(0, windows->getTraits()->width, 0, windows->getTraits()->height));
+	camera->setViewport(0, 0, windows->getTraits()->width, windows->getTraits()->height);
+
+	//have to be set like this
+	camera->setClearMask(0);
+
+	// draw subgraph after main camera view.
+	camera->setRenderOrder(osg::Camera::POST_RENDER);
+
+	// we don't want the camera to grab event focus from the viewers main camera(s).
+	camera->setAllowEventFocus(false);
+
+	camera->setCullingActive(false);
+
+	// turn lighting off for the text and disable depth test to ensure it's always ontop.
+	osg::StateSet* stateset = camera->getOrCreateStateSet();
+	stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+	stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+	return camera.release();
+}
+
+void MulitViewer::createHUDView()
+{
+	if (!_mainView && _HUDView)
+	{
+		return;
+	}
+	
+	_HUDView = new osgViewer::View;
+
+	osgViewer::Viewer::Windows windows;
+	this->getWindows(windows);
+	osg::Camera *camera = createHUDCamerainWindow(windows[0]);
+	// add special depth attribute
+	camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
+	camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::HUDDISPLAY);
+
+	_HUDView->setCamera(camera);
+	this->addView(_HUDView);
+}
+
+void MulitViewer::setHUDContent(osgText::Text *ref)
+{
+	if (!_HUDView && _HUDText)
+	{
+		return;
+	}
+	_HUDText = ref;
+
+	// set text content and attached to the camera
+	double X = _HUDView->getCamera()->getViewport()->width();
+	double Y = _HUDView->getCamera()->getViewport()->height();
+
+	osg::Vec3d position(0.05*X, 0.9*Y, 0.0f);
+	std::string font("fonts/arial.ttf");
+	_HUDText->setFont(font);
+	//_HUDText->setCharacterSize(18.0f, 1.778);
+	_HUDText->setPosition(position);
+	_HUDText->setDataVariance(osg::Object::DYNAMIC);	
+	
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	geode->addDrawable(_HUDText);
+	_HUDView->getCamera()->addChild(geode);
+}
+
+void MulitViewer::createBackgroundView()
+{
+	if (!_mainView && _BGView)
+	{
+		return;
+	}
+	if (!_screens)
+	{
+		return;
+	}
+	osg::ref_ptr<osg::Image> image = osgDB::readImageFile(_screens->_background);
+	if (!image->valid())
+	{
+		osg::notify(osg::FATAL) << "Unable to load BG pic" << std::endl;
+		return;
+	}
+
+	osg::ref_ptr<osg::Texture2D> background = new osg::Texture2D;
+	background->setImage(image);
+	osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(osg::Vec3d(0.0f, 0.0f, 0.0f),
+		osg::Vec3d(1.0f, 0.0f, 0.0f), osg::Vec3d(0.0f, 1.0f, 0.0f));
+	quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, background);
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(quad.release());
+
+	_BGView = new osgViewer::View;
+	osgViewer::Viewer::Windows windows;
+	this->getWindows(windows);
+	double x_start(0.0f);
+	double x_step = 1.0f / double(windows.size());
+	double x_end = x_start + x_step;
+	for (unsigned i = 0; i < windows.size(); i++)
+	{
+		osg::Camera *camera = createHUDCamerainWindow(windows[i]);
+
+		//set the projection matrix
+		camera->setProjectionMatrixAsOrtho2D(x_start, x_end, 0.0f, 1.0f);
+		x_start = x_end;
+		x_end += x_step;
+
+		camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 1.0f, 1.0f));
+		camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::BACKGROUND);
+
+		camera->addChild(geode.get());
+		_BGView->addSlave(camera, false);
+	}
+
+	this->addView(_BGView);
 }

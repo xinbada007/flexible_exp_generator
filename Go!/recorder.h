@@ -1,5 +1,6 @@
 #pragma once
 #include <osg/NodeCallback>
+#include <osgText/Text>
 
 #include <vector>
 #include <string>
@@ -51,16 +52,18 @@ class Recorder :
 {
 public:
 	Recorder();
-	void operator()(osg::Node *node, osg::NodeVisitor *nv);
-	void rectoTxt(const CarState *carState);
 	virtual ~Recorder();
 
+	void operator()(osg::Node *node, osg::NodeVisitor *nv);
 	bool output(ReadConfig *rc);
+	osgText::Text * getStatus() const { return _statusText.get(); };
 
 private:
+	void rectoTxt(const CarState *carState);
 	void copy();
+
 	std::string _txtRecorder;
 	std::vector<const std::string*> _outMoment;
-
+	osg::ref_ptr<osgText::Text> _statusText;
 	recState _recS;
 };

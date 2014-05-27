@@ -71,6 +71,11 @@ osg::ref_ptr<osg::Geometry> DebugNode::addCarDebuggerDrawables(osg::Vec3dArray *
 		carDebugGmt->addPrimitiveSet(new osg::DrawArrays(GL_QUADS,0,refArray->size()));
 	}
 
+	else
+	{
+		carDebugGmt->addPrimitiveSet(new osg::DrawArrays(GL_LINES, 0, refArray->size()));
+	}
+
 	return carDebugGmt.release();
 }
 
@@ -147,15 +152,11 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		{
 			std::vector<osg::ref_ptr<osg::Vec3dArray>>::iterator i = _carDebugArray.begin();
 
-// 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
-// 			(*i)->push_back(carState->_O);
-// 			i++;
-
 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
 			(*i)->push_back(carState->_O); (*i)->push_back(carState->_O_Project);
 			i++;
 
-			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();			(*i)->clear();
+			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
 			osg::Vec3d midFront = carState->_frontWheel->front()*0.5f + carState->_frontWheel->back()*0.5f;
 			midFront -= carState->_O;
 			osg::Vec3d navi = carState->_midLine->front() - carState->_midLine->back();
@@ -164,15 +165,12 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			(*i)->push_back(carState->_O); (*i)->push_back(navi);
 			i++;
 
-// 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
-// 			(*i)->push_back(carState->_midLine->front()); (*i)->push_back(carState->_midLine->back());
-// 			i++;
-
 			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
 			osg::Vec3d carD = carState->_direction;
 			carD *= (midFront.length()) / (carD.length());
 			carD += carState->_O;
 			(*i)->push_back(carState->_O); (*i)->push_back(carD);
+			i++;
 
 			setDeepth(_carDebugArray);
 			addCarDebugger();

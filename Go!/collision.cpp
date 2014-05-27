@@ -70,7 +70,7 @@ bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane
 	
 	if (list.empty())
 	{
-		//try another method here
+		return false;
 	}
 
 	//simpler method if has list
@@ -115,23 +115,30 @@ bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane
 
 Plane * Collision::ifCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove, const quadList refObs)
 {
-	if (!planeMove)
+	if (!planeMove || refObs.empty())
 	{
 		return NULL;
 	}
 
 	quadList::const_iterator i = refObs.cbegin();
+	const unsigned NUMOFPLANES = (*i)->getHomeS()->getNumPlanes() * 0.005;
 	while (i != refObs.cend())
 	{
-		//detectFirst is fast and should accurate enough
+		//detectFirst is very fast but also very inaccurate
 		if (detectFirst(planeMove, *i))
 		{
 			//detectSecond is provided by OSG and it's inaccurate
 //			if (detectSecond(planeMove,*i))
 			{
 				//dectectFinal is the most accurate one and may the slowest one as well
-				if (detectFinal(planeMove,*i))
-					return *i;
+				Plane::reverse_across_iterator collision_i = *i;
+				unsigned collision_test_num(0);
+				while (collision_test_num < NUMOFPLANES && (*collision_i))
+				{
+					if (detectFinal(planeMove, *collision_i)) return *i;
+					collision_i++;
+					collision_test_num++;
+				}
 			}
 		}
 		++i;
@@ -149,7 +156,12 @@ quadList Collision::listCollsion(const Car *refC, const quadList obs)
 		const CarState *refCS = refC->getCarState();
 		const osg::ref_ptr<osg::Vec3dArray> carArray = refCS->_carArray;
 
-		Plane *pl = ifCollide(carArray, obs);
+		//attention! last element of carArray is the original point of car
+		//which should be removed when doing collision detection
+		const unsigned wheelsofCar(4);
+		osg::ref_ptr<osg::Vec3dArray> carRealArray = new osg::Vec3dArray(carArray->begin(), carArray->begin()+wheelsofCar);
+
+		Plane *pl = ifCollide(carRealArray, obs);
 		if (pl) list.push_back(pl);
 	}
 
@@ -206,10 +218,9 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 				iCar++;
 			}
 			solidList::const_iterator iRoad = road.cbegin();
-			while (iRoad != road.cend())
 			{
-				step += (*iRoad)->getNumPlanes();
-				iRoad++;
+				//will cause performance issue so be careful
+				step += (*iRoad)->getNumPlanes()*.05f;
 			}
 		}
 
@@ -217,7 +228,7 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 		iCar = carArray->begin();
 		while (iCar != carArray->end())
 		{
-			step = (!step) ? .1f * (*iQuad)->getHomeS()->getNumPlanes() : step;
+			step = (!step) ? .05f * (*iQuad)->getHomeS()->getNumPlanes() : step;
 			Plane::reverse_across_iterator location = *iQuad;
 			Plane::reverse_across_iterator begin = location - step;
 			Plane::reverse_across_iterator end = location + step;

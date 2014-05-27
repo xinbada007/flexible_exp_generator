@@ -35,6 +35,7 @@ private:
 	osg::Vec3d _eye_Z_Axis;
 
 	bool _reset;
+	bool _eyeTracker;
 
 	osg::Vec2d _windowsPick;
 	osg::Vec3d _zNear;

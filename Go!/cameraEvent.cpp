@@ -6,7 +6,7 @@
 #include <osgViewer/Viewer>
 
 CameraEvent::CameraEvent():
-_reset(false), _rotationInterval(5.0f * TO_RADDIAN), _offsetInterval(0.5f)
+_reset(false), _eyeTracker(false), _rotationInterval(5.0f * TO_RADDIAN), _offsetInterval(0.5f)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);
@@ -128,11 +128,19 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			}
 			break;
 		case osgGA::GUIEventAdapter::KEYUP:
-			_eyeRotation = osg::Matrix::identity().getRotate();
-			_eyeOffset.set(0.0f, 0.0f, 0.0f);
+			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up || ea.getKey() == osgGA::GUIEventAdapter::KEY_Down
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
+			{
+				_eyeRotation = osg::Matrix::identity().getRotate();
+			}
+			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Up || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Down
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Right)
+			{
+				_eyeOffset.set(0.0f, 0.0f, 0.0f);
+			}
 			break;
 		case osgGA::GUIEventAdapter::MOVE:
-			if (viewer)
+			if (viewer && _eyeTracker)
 			{
 				_windowsPick.set(ea.getX(), ea.getY());
 				updateLookAt(viewer);
@@ -178,5 +186,7 @@ void CameraEvent::genCamera(osg::ref_ptr<ReadConfig> refRC)
 			_offset.z() = refRC->getCameraSet()->_offset->at(2);
 		}
 		_offsetOrigin = _offset;
+
+		_eyeTracker = refRC->getCameraSet()->_eyeTracker;
 	}
 }

@@ -98,6 +98,9 @@ void ReadConfig::initializeAfterReadTrial()
 	_vehicle->_V->clear();
 	_vehicle->_V->push_back(right_bottom); _vehicle->_V->push_back(right_top);
 	_vehicle->_V->push_back(left_top); _vehicle->_V->push_back(left_bottom);
+	_alignPoint = (right_bottom + left_bottom) * 0.5f;
+	_alignPoint += (_alignPoint - _vehicle->_O) * eps_100;
+	_alignPoint.z() = 0.0f;
 
 	//convert speed from KM/H to M/S
 	_vehicle->_speed /= 3.6f;
@@ -577,6 +580,7 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//Setting Camera
 		const string CAM_OFFSET("OFFSET");
+		const string CAM_EYE_TRACKER("EYETRACKER");
 		while (flag == CAMERA && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -598,7 +602,16 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-			
+			else if (title == CAM_EYE_TRACKER)
+			{
+				config.erase(config.begin(), config.begin() + CAM_EYE_TRACKER.size());
+				if (!config.empty())
+				{
+					_camset->_eyeTracker = (stoi(config) == 1);
+				}
+				continue;
+			}
+
 			flag = config;
 			flag = getTillFirstSpaceandToUpper(flag);
 			continue;
@@ -706,7 +719,7 @@ void ReadConfig::alignCtrlPoints(Nurbs *refNurbs)
 {
 	if (_nurbs)
 	{
-		osg::Vec3d p = O_POINT;
+		osg::Vec3d p = _alignPoint;
 		osg::Vec3d direction = UP_DIR;
 		if (refNurbs)
 		{
@@ -773,20 +786,20 @@ void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB)
 osg::Geode* ReadConfig::measuer()
 {
 	osg::Vec3d vector;
-	vector.z() = _camset->_offset->at(2);
+	vector.z() = _camset->_offset->at(2)*1.2;
 	vector.x() = 0.0f;
 	vector.y() = 0.0f;
 	//vector.y() += 2.65f;
 
 	osg::Vec3d A = vector;
-	A.x() += -0.5f;
+	A.x() += -1.5f;
 	osg::Vec3d B = vector;
-	B.x() += 0.5f;
+	B.x() += 1.5f;
 	
 	osg::Vec3d AA = vector;
-	AA.z() += -0.5;
+	AA.z() += -1.5;
 	osg::Vec3d BB = vector;
-	BB.z() += 0.5f;
+	BB.z() += 1.5f;
 
 	osg::Vec3 offset;
 	offset.set(_camset->_offset->at(0), _camset->_offset->at(1), _camset->_offset->at(2));
@@ -796,7 +809,7 @@ osg::Geode* ReadConfig::measuer()
 	  
 	osg::Vec3 test = offset - (A + B) / 2;
 	test.set(0.0f, -offset.y(), 0.0f);
-	osg::Matrix mm = osg::Matrix::translate(test) * osg::Matrix::rotate(60 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
+	osg::Matrix mm = osg::Matrix::translate(test) * osg::Matrix::rotate(45 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
 	A = A * mm;
 	B = B * mm;
 	AA = AA * mm;
@@ -805,7 +818,7 @@ osg::Geode* ReadConfig::measuer()
 	x = ((AA + BB) / 2 - offset).length();
 
 	osg::Vec3 RA(OA), RB(OB), RAA(OAA), RBB(OBB);
-	mm = osg::Matrix::translate(test) *  osg::Matrix::rotate(-60 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
+	mm = osg::Matrix::translate(test) *  osg::Matrix::rotate(-45 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
 	RA = RA*mm;
 	RB = RB*mm;
 	RAA = RAA*mm;
@@ -813,29 +826,29 @@ osg::Geode* ReadConfig::measuer()
 	x = ((RA + RB) / 2 - offset).length();
 	x = ((RAA + RBB) / 2 - offset).length();
 
-	osg::Vec3dArray *measuerment = new osg::Vec3dArray;
-	measuerment->push_back(A);
-	measuerment->push_back(B);
-	measuerment->push_back(AA);
-	measuerment->push_back(BB);
+	_measuerment = new osg::Vec3dArray;
+	_measuerment->push_back(A);
+	_measuerment->push_back(B);
+	_measuerment->push_back(AA);
+	_measuerment->push_back(BB);
 
-	measuerment->push_back(OA);
-	measuerment->push_back(OB);
-	measuerment->push_back(OAA);
-	measuerment->push_back(OBB);
+	_measuerment->push_back(OA);
+	_measuerment->push_back(OB);
+	_measuerment->push_back(OAA);
+	_measuerment->push_back(OBB);
 
-	measuerment->push_back(RA);
-	measuerment->push_back(RB);
-	measuerment->push_back(RAA);
-	measuerment->push_back(RBB);
+	_measuerment->push_back(RA);
+	_measuerment->push_back(RB);
+	_measuerment->push_back(RAA);
+	_measuerment->push_back(RBB);
 
 	osg::Geometry *gm = new osg::Geometry;
-	gm->setVertexArray(measuerment);
+	gm->setVertexArray(_measuerment);
 	osg::Vec4Array *color = new osg::Vec4Array;
 	color->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
 	gm->setColorArray(color);
 	gm->setColorBinding(osg::Geometry::BIND_OVERALL);
-	gm->addPrimitiveSet(new osg::DrawArrays(GL_LINES,0,measuerment->size()));
+	gm->addPrimitiveSet(new osg::DrawArrays(GL_LINES, 0, _measuerment->size()));
 	gm->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	osg::Geode *gd = new osg::Geode;
 	gd->addDrawable(gm);

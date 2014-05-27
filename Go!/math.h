@@ -4,6 +4,8 @@
 #include <osg/BoundingBox>
 #include <vector>
 
+#include <math.h>
+
 const double PI = 3.14159265358979323846;
 const double PI_2 = 1.57079632679489661923;
 const double PI_4 = 0.78539816339744830962;

@@ -10,6 +10,7 @@ public:
 	Collision();
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
 	virtual ~Collision();
+
 private:
 	quadList listCollsion(const Car *refC, const quadList obs);
 	Plane * ifCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove , const quadList refObs);

@@ -1,4 +1,4 @@
-Endless Nurbs
+EndlessNurbs
 ctrlpoints
 0.0 -2.0 0.0
 -0.15 -1.95 0.0

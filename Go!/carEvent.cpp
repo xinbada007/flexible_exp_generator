@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "carEvent.h"
+#include "math.h"
 
 #include <osg/Notify>
 #include <osgGA/EventVisitor>
@@ -9,6 +10,7 @@
 CarEvent::CarEvent():
 _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _acceleration(true), _updated(false)
 {
+	_test_dynamic = 0;
 }
 
 CarEvent::~CarEvent()
@@ -17,6 +19,9 @@ CarEvent::~CarEvent()
 
 void CarEvent::move()
 {
+	_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? _vehicle->_speed*(_carState->_speed > 0 ? 1 : -1) : _carState->_speed;
+	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate*(_carState->_angle > 0 ? 1 : -1) : _carState->_angle;
+
 	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
 
 	osg::Matrix rotation = osg::Matrix::translate(-origin);
@@ -29,6 +34,93 @@ void CarEvent::move()
 	_carState->_direction.normalize();
 
 	_carState->_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed);
+}
+
+void CarEvent::carDynamic()
+{
+	if (_acceleration || !(*_carState->_OQuad))
+	{
+		return;
+	}
+
+	Plane::reverse_across_iterator i = *(_carState->_OQuad);
+	osg::Vec3d carHeading = _carState->_direction;
+	carHeading.normalize();
+	osg::Vec3 curRoad = (*i)->getLoop()->getNavigationEdge()->front();
+	curRoad -= (*i)->getLoop()->getNavigationEdge()->back();
+	curRoad.normalize();
+	double headingError = asin((carHeading^curRoad).z());
+	headingError *= _carState->_speed*frameRate;
+
+	double roadDistance(0.0f);
+	double angle(0.0f);
+	double angle_1d(0.0f);
+	double angle_1s(0.0f);
+	double angle_2s(0.0f);
+	while (*i)
+	{
+		osg::Vec3d nextRoad = (*i)->getLoop()->getNavigationEdge()->front();
+		nextRoad -= (*i)->getLoop()->getNavigationEdge()->back();
+		roadDistance += nextRoad.length();
+		nextRoad.normalize();
+		angle = asin((carHeading^nextRoad).z());
+		if (abs(angle) / TO_RADDIAN >= 1.0f)
+		{
+			angle_1d = angle;
+			angle_1d /= (roadDistance / (_carState->_speed*frameRate));
+		}
+		if (roadDistance >= _carState->_speed*frameRate)
+		{
+			angle_1s = angle;
+		}
+		if (roadDistance >= 2*_carState->_speed*frameRate)
+		{
+			angle_2s = angle;
+			angle_2s /= 2;
+			break;
+		}
+		i++;
+	}
+	if (angle_1d || angle_1s)	angle = (angle_1d > angle_1s) ? angle_1d : angle_1s;
+	angle = (angle > angle_2s) ? angle : angle_2s;
+	angle += headingError;
+	_leftTurn = (angle > 0);
+
+	_carState->_angle = angle;
+
+	return;
+}
+
+bool CarEvent::Joystick()
+{
+	extern bool poll_joystick(int &x, int &y, int &b);
+	int x(0), y(0), b(0);
+	if (!poll_joystick(x, y, b))
+	{
+		return false;
+	}
+
+	const double MAX(32767.0f);
+	const double MAX_ANGLE = 120.0f;
+	const double DEAD = 0.10f;
+	const int DeadZone(MAX*DEAD);
+	_carState->_swangle = (x / MAX)*MAX_ANGLE;
+
+	if ((abs(x)) > DeadZone)
+	{
+		_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX) * (x > 0 ? -1 : 1);
+	}
+	else if ((abs(x)) <= DeadZone)
+	{
+		_carState->_angle = 0.0f;
+		_carState->_swangle = 0.0f;
+	}
+
+	if (abs(y) > DeadZone)
+	{
+		_carState->_speed += _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
+	}
+	return true;
 }
 
 void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
@@ -53,6 +145,8 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		}
 		_carState->_moment.makeIdentity();
 
+		Joystick();
+
 		const int &key = ea->getKey();
 		switch (ea->getEventType())
 		{
@@ -62,6 +156,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				int sign = (key == 'a') ? 1 : -1;
 				_leftTurn = (sign == 1) ? true : false;
 				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
+				_test_dynamic = sign;
 				break;
 			}
 			if (key == 'w' || key == 's')
@@ -82,31 +177,13 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				break;
 			}
 		case osgGA::GUIEventAdapter::FRAME:
-			_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? _vehicle->_speed*(_carState->_speed > 0 ? 1 : -1) : _carState->_speed;
-			_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate*(_carState->_angle > 0 ? 1 : -1) : _carState->_angle;
+
+			carDynamic();
 
 			if (_carState->_speed > 0 && _carState->_collide)
 			{
-				_carState->_speed = 0;
+				_carState->_speed = _vehicle->_speed * .01f;
 				_carState->_collide = false;
-			}
-
-			if (!_acceleration)
-			{
-				if(*(_carState->_OQuad))
-				{
-					osg::Vec3 carHeading = _carState->_direction;
-
-					Plane::reverse_across_iterator i = *_carState->_OQuad;
-					osg::Vec3 nextRoad = (*i)->getLoop()->getNavigationEdge()->front();
-					nextRoad -= (*i)->getLoop()->getNavigationEdge()->back();
-
-					carHeading.normalize();
-					nextRoad.normalize();
-
-					_leftTurn = ((carHeading^nextRoad).z() > 0);
-					_carState->_angle = acos(carHeading*nextRoad)*(_leftTurn ? 1 : -1);
-				}
 			}
 
 			move();
@@ -149,5 +226,21 @@ void CarEvent::caclCarMovement()
 		copy(navigationEdge->begin(), navigationEdge->end(), std::back_inserter(*_carState->_midLine));
 
 		_carState->_updated = true;
-	}	
+	}
+
+	if (*_carState->_OQuad)
+	{
+		Plane::reverse_across_iterator i = *_carState->_OQuad;
+		Plane::reverse_across_iterator j = i + 1500;
+		Plane::reverse_across_iterator k = i - 1500;
+
+		if (*j)
+		{
+			osg::Switch *sw = dynamic_cast<osg::Switch *>((*j)->getHomeS()->getParent(0));
+			if (sw)
+			{
+				sw->setChildValue((*j)->getHomeS()->asGroup(), false);
+			}
+		}
+	}
 }

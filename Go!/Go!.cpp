@@ -14,6 +14,7 @@
 #include "recorder.h"
 #include "debugNode.h"
 #include "pickHandler.h"
+#include "roadSwitcher.h"
 
 #include <iostream>
 
@@ -24,6 +25,9 @@ using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	extern bool init_joystick();
+	init_joystick();
+
 	//first read config from txt file
 	string filename = "../Resources/config.txt";
 	osg::ref_ptr<ReadConfig> readConfig = new ReadConfig(filename);
@@ -60,7 +64,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	osg::ref_ptr<osg::Group> root = new osg::Group();
 	root->addChild(road);
 	root->addChild(carMatrix);
-	root->addChild(readConfig->measuer());
+//	root->addChild(readConfig->measuer());
 
 	//Collision detect && Trace Car
 	osg::ref_ptr<CollVisitor> cv = new CollVisitor;
@@ -68,6 +72,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	osg::ref_ptr<Collision> colldetect = new Collision;
 	colldetect->setUserData(cv.get());
 	car->addUpdateCallback(colldetect.get());
+	osg::ref_ptr<RoadSwitcher> roadSwitcher = new RoadSwitcher;
+	roadSwitcher->setUserData(cv.get());
+	root->addUpdateCallback(roadSwitcher.get());
 
 	//Record Car
 	osg::ref_ptr<Recorder> recorder = new Recorder;
@@ -85,11 +92,18 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//Viewer Setup
 	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer;
-	mViewer->genMainViewer(readConfig);
-	mViewer->getView(0)->setCameraManipulator(camMatrix.get());
-	mViewer->getView(0)->setSceneData(root->asGroup());
+	mViewer->genMainView(readConfig);
+	mViewer->getMainView()->setCameraManipulator(camMatrix.get());
+	mViewer->getMainView()->setSceneData(root->asGroup());
+
+	mViewer->createHUDView();
+	mViewer->setHUDContent(recorder->getStatus());
+	mViewer->createBackgroundView();
 
 	mViewer->run();
 
 	recorder->output(readConfig);
+
+	extern void close_joystick();
+	close_joystick();
 }

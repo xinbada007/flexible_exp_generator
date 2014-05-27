@@ -1,7 +1,7 @@
 #must add numbers line by line
 #must not let letters and numbers in the same line
+EndlessNurbs
 
-Endless Nurbs
 ctrlpoints
 -2.0 , -2.0
 -1.75 , -1.0
