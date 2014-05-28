@@ -25,6 +25,7 @@ private:
 	bool _acceleration;
 	bool _updated;
 
-	int _test_dynamic;
+	double _lastAngle;
+	bool _lastTurn;
 };
 

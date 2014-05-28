@@ -10,7 +10,8 @@
 CarEvent::CarEvent():
 _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _acceleration(true), _updated(false)
 {
-	_test_dynamic = 0;
+	_lastAngle = 0.0f;
+	_lastTurn = false;
 }
 
 CarEvent::~CarEvent()
@@ -22,8 +23,61 @@ void CarEvent::move()
 	_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? _vehicle->_speed*(_carState->_speed > 0 ? 1 : -1) : _carState->_speed;
 	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate*(_carState->_angle > 0 ? 1 : -1) : _carState->_angle;
 
-	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
+	_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
+	_carState->_angle = (_carState->_speed == 0) ? 0.0f : _carState->_angle;
 
+	//test
+	const double SPEEDR = abs((_carState->_angle - _lastAngle) / TO_RADDIAN) / (1/frameRate);
+	double MAX = (_vehicle->_rotate / TO_RADDIAN);
+	if (SPEEDR > MAX)
+	{
+		osg::notify(osg::NOTICE) << "SPEEDR:\t" << SPEEDR << std::endl;
+		osg::notify(osg::NOTICE) << "MAX:\t" << MAX << std::endl;
+
+		if (_carState->_angle * _lastAngle < 0)
+		{
+			if (_lastAngle >= 0)
+			{
+				_carState->_angle = _lastAngle - MAX*TO_RADDIAN / frameRate;
+				_leftTurn = (_carState->_angle > 0);
+			}
+			if (_lastAngle < 0)
+			{
+				_carState->_angle = _lastAngle + MAX*TO_RADDIAN / frameRate;
+				_leftTurn = (_carState->_angle > 0);
+			}
+		}
+		if (_carState->_angle * _lastAngle > 0)
+		{
+			if (_lastAngle >= 0)
+			{
+				if (_carState->_angle > _lastAngle)
+				{
+					_carState->_angle = _lastAngle + MAX*TO_RADDIAN / frameRate;
+				}
+				else
+				{
+					_carState->_angle = _lastAngle - MAX*TO_RADDIAN / frameRate;
+				}
+			}
+			else
+			{
+				if (_carState->_angle > _lastAngle)
+				{
+					_carState->_angle = _lastAngle + MAX*TO_RADDIAN / frameRate;
+				}
+				if (_carState->_angle < _lastAngle)
+				{
+					_carState->_angle = _lastAngle - MAX*TO_RADDIAN / frameRate;
+				}
+			}
+		}
+	}
+	
+	_lastAngle = _carState->_angle;
+	//test
+
+	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
 	osg::Matrix rotation = osg::Matrix::translate(-origin);
 	rotation *= osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
 	rotation *= osg::Matrix::translate(origin);
@@ -43,50 +97,56 @@ void CarEvent::carDynamic()
 		return;
 	}
 
-	Plane::reverse_across_iterator i = *(_carState->_OQuad);
-	osg::Vec3d carHeading = _carState->_direction;
-	carHeading.normalize();
-	osg::Vec3 curRoad = (*i)->getLoop()->getNavigationEdge()->front();
-	curRoad -= (*i)->getLoop()->getNavigationEdge()->back();
-	curRoad.normalize();
-	double headingError = asin((carHeading^curRoad).z());
-	headingError *= _carState->_speed*frameRate;
+	Plane::reverse_across_iterator i = *_carState->_OQuad;
+	osg::ref_ptr<osg::Vec3dArray> naviEdge = (*i)->getLoop()->getNavigationEdge();
+	osg::Vec3d roadHeading = naviEdge->front() - naviEdge->back(); roadHeading.normalize();
+	osg::Vec3d carHeading = _carState->_direction; carHeading.normalize();
+	if (_carState->_speed < 0)	carHeading = -carHeading;
+	
+	const double COSANGLE = acos(roadHeading*carHeading);
+	const double SINANGLE = asin((roadHeading^carHeading).z());
+	const bool SAMEDIRECTION = (roadHeading*carHeading > 0);
+	const bool LEFT = (((roadHeading^carHeading).z()) > 0);
+	const bool TURN = SAMEDIRECTION ? !LEFT : LEFT;
+	double headingError = abs(SINANGLE) * abs(_carState->_speed*frameRate);
+	headingError = (headingError > 1.0*TO_RADDIAN) ? (headingError - 1.0f*TO_RADDIAN) : 0.0f;
 
 	double roadDistance(0.0f);
-	double angle(0.0f);
 	double angle_1d(0.0f);
-	double angle_1s(0.0f);
-	double angle_2s(0.0f);
-	while (*i)
+	bool turnF(TURN);
+	const int FORWAROD = (SAMEDIRECTION) ? 1 : -1;
+	while (*(i += FORWAROD))
 	{
-		osg::Vec3d nextRoad = (*i)->getLoop()->getNavigationEdge()->front();
-		nextRoad -= (*i)->getLoop()->getNavigationEdge()->back();
-		roadDistance += nextRoad.length();
-		nextRoad.normalize();
-		angle = asin((carHeading^nextRoad).z());
-		if (abs(angle) / TO_RADDIAN >= 1.0f)
+		naviEdge = (*i)->getLoop()->getNavigationEdge();
+		roadHeading = naviEdge->front() - naviEdge->back();
+		roadDistance += roadHeading.length();
+		roadHeading.normalize();
+		const double SINANGLE = asin((roadHeading^carHeading).z());
+		const double COSANGLE = acos(roadHeading*carHeading);
+		const bool SAMEDIRECTION = (roadHeading*carHeading > 0);
+		const bool LEFT = ((roadHeading^carHeading).z() > 0);
+		turnF = SAMEDIRECTION ? !LEFT : LEFT;
+		const double angle = abs(SINANGLE);
+		if (angle / TO_RADDIAN >= 1.0f)
 		{
 			angle_1d = angle;
 			angle_1d /= (roadDistance / (_carState->_speed*frameRate));
-		}
-		if (roadDistance >= _carState->_speed*frameRate)
-		{
-			angle_1s = angle;
-		}
-		if (roadDistance >= 2*_carState->_speed*frameRate)
-		{
-			angle_2s = angle;
-			angle_2s /= 2;
+			angle_1d = abs(angle_1d);
 			break;
 		}
-		i++;
+		if (roadDistance >= abs(_carState->_speed)*frameRate)
+		{
+			break;
+		}
 	}
-	if (angle_1d || angle_1s)	angle = (angle_1d > angle_1s) ? angle_1d : angle_1s;
-	angle = (angle > angle_2s) ? angle : angle_2s;
-	angle += headingError;
-	_leftTurn = (angle > 0);
 
-	_carState->_angle = angle;
+	double angle(angle_1d);
+
+	const double test = (angle >= 2*headingError) ? angle : headingError;
+	const bool testB = (angle >= 2*headingError) ? turnF : TURN;
+
+	_leftTurn = testB;
+	_carState->_angle = test;
 
 	return;
 }
@@ -156,7 +216,6 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				int sign = (key == 'a') ? 1 : -1;
 				_leftTurn = (sign == 1) ? true : false;
 				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
-				_test_dynamic = sign;
 				break;
 			}
 			if (key == 'w' || key == 's')
@@ -226,21 +285,5 @@ void CarEvent::caclCarMovement()
 		copy(navigationEdge->begin(), navigationEdge->end(), std::back_inserter(*_carState->_midLine));
 
 		_carState->_updated = true;
-	}
-
-	if (*_carState->_OQuad)
-	{
-		Plane::reverse_across_iterator i = *_carState->_OQuad;
-		Plane::reverse_across_iterator j = i + 1500;
-		Plane::reverse_across_iterator k = i - 1500;
-
-		if (*j)
-		{
-			osg::Switch *sw = dynamic_cast<osg::Switch *>((*j)->getHomeS()->getParent(0));
-			if (sw)
-			{
-				sw->setChildValue((*j)->getHomeS()->asGroup(), false);
-			}
-		}
 	}
 }

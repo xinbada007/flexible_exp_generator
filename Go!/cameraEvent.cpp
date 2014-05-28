@@ -88,6 +88,7 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 {
 	const Car * refC = dynamic_cast<Car*>(this->getUserData());
 	osg::View *viewer = us.asView();
+
 	if (refC)
 	{
 		const CarState * refCS = refC->getCarState();

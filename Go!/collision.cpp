@@ -121,7 +121,7 @@ Plane * Collision::ifCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove, cons
 	}
 
 	quadList::const_iterator i = refObs.cbegin();
-	const unsigned NUMOFPLANES = (*i)->getHomeS()->getNumPlanes() * 0.005;
+	const unsigned NUMOFPLANES = (*i)->getHomeS()->getNumPlanes() * 0.05;
 	while (i != refObs.cend())
 	{
 		//detectFirst is very fast but also very inaccurate
