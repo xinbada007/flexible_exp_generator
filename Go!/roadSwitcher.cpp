@@ -2,6 +2,7 @@
 #include "roadSwitcher.h"
 #include "collVisitor.h"
 #include "logicRoad.h"
+#include "edge.h"
 
 
 RoadSwitcher::RoadSwitcher()

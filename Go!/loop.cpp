@@ -22,7 +22,7 @@ _switch(copy.getSwitch())
 
 Loop::~Loop()
 {
-	osg::notify(osg::NOTICE) << "deleting Loop..." << std::endl;
+	//osg::notify(osg::NOTICE) << "deleting Loop..." << std::endl;
 }
 
 void Loop::draw()

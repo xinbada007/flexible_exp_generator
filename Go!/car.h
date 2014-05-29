@@ -87,8 +87,8 @@ public:
 	Car(const Car &copy, osg::CopyOp copyop = osg::CopyOp::SHALLOW_COPY);
 	META_Node(Car, Car);
 	void genCar(osg::ref_ptr<ReadConfig> refRC);
-	const Vehicle * getVehicle() const { return _vehicle; };
-	CarState * getCarState() const { return _carState; };
+	const Vehicle * getVehicle() const { return _vehicle.get(); };
+	CarState * getCarState() const { return _carState.get(); };
 private:
 	virtual ~Car();
 	osg::ref_ptr<Vehicle> _vehicle;

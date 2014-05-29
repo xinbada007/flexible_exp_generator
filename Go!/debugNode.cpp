@@ -5,6 +5,7 @@
 #include "math.h"
 #include "Solid.h"
 #include "switchVisitor.h"
+#include "edge.h"
 
 #include <osgGA/EventVisitor>
 #include <osg/Geometry>
@@ -34,6 +35,7 @@ _z_deepth(getZDeepth())
 
 DebugNode::~DebugNode()
 {
+	std::cout << "Deconstruct DebugNode" << std::endl;
 }
 
 osg::ref_ptr<osg::Geometry> DebugNode::addCarDebuggerDrawables(osg::Vec3dArray *refArray)

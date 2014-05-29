@@ -14,6 +14,7 @@ _screens(NULL), _mainView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL)
 
 MulitViewer::~MulitViewer()
 {
+	std::cout << "Deconstruct MulitViewer" << std::endl;
 }
 
 void MulitViewer::genMainView(osg::ref_ptr<ReadConfig> refRC)

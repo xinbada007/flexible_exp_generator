@@ -2,6 +2,7 @@
 #include "renderVistor.h"
 #include "road.h"
 #include "plane.h"
+#include "edge.h"
 
 #include <osg/Notify>
 #include <osg/Geode>

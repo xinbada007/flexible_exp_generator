@@ -3,6 +3,7 @@
 #include "points.h"
 #include "loop.h"
 #include "edge.h"
+
 #include <osg/Notify>
 
 HalfEdge::HalfEdge(Points *newP) :
@@ -16,7 +17,7 @@ _next(this), _prev(this), _homeE(NULL), _startP(newP), _homeL(NULL)
 
 HalfEdge::~HalfEdge()
 {
-	osg::notify(osg::NOTICE) << "deleting HE..." << std::endl;
+	//osg::notify(osg::NOTICE) << "deleting HE..." << std::endl;
 }
 
 bool HalfEdge::isValid() const

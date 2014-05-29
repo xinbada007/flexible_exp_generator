@@ -25,6 +25,7 @@ _reset(false), _eyeTracker(false), _rotationInterval(5.0f * TO_RADDIAN), _offset
 
 CameraEvent::~CameraEvent()
 {
+	std::cout << "Deconstruct CameraEvent" << std::endl;
 }
 
 void CameraEvent::setByMatrix(const osg::Matrixd& matrix)

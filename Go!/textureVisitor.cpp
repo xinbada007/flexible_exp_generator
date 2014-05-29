@@ -4,6 +4,7 @@
 #include "car.h"
 #include "plane.h"
 #include "loop.h"
+#include "edge.h"
 
 #include <osg/PolygonMode>
 #include <osgdb/ReadFile>

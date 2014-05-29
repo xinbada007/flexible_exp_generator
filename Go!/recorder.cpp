@@ -42,6 +42,7 @@ Recorder::Recorder() :_statusText(new osgText::Text)
 
 Recorder::~Recorder()
 {
+	std::cout << "Deconstruct Recorder" << std::endl;
 }
 
 bool Recorder::output(ReadConfig *rc)
@@ -55,6 +56,7 @@ bool Recorder::output(ReadConfig *rc)
 	}
 
 	wout << _txtRecorder << std::endl;
+
 	return true;
 }
 

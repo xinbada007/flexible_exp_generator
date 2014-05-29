@@ -1,9 +1,13 @@
 #pragma once
 #include <osg/Array>
+#include <osg/Referenced>
+
+#include <iostream>
 
 class HalfEdge;
 
-typedef struct edgeFlag
+typedef struct edgeFlag:
+public osg::Referenced
 {
 	edgeFlag()
 	{
@@ -11,11 +15,13 @@ typedef struct edgeFlag
 		_navigateEdge = false;
 		_navigationArray = NULL;
 	};
-	~edgeFlag(){};
 
 	osg::ref_ptr<osg::Vec3dArray> _navigationArray;
 	bool _collsionEdge;
 	bool _navigateEdge;
+
+protected:
+	~edgeFlag(){ /*std::cout << "Deconstruct EdgeFlag" << std::endl;*/ };
 }edgeFlag;
 
 class Edge
@@ -39,9 +45,9 @@ public:
 
 	inline edgeFlag *  getEdgeFlag()
 	{
-		return _eFlag;
+		return _eFlag.get();
 	};
-	inline void setEdgeFlag(edgeFlag * ref) { _eFlag = ref; };
+	inline void setEdgeFlag(osg::ref_ptr<edgeFlag> ref) { _eFlag = ref; };
 private:
 	HalfEdge *_he1;
 	HalfEdge *_he2;
@@ -49,5 +55,5 @@ private:
 	Edge *_next;
 	Edge *_prev;
 
-	edgeFlag *_eFlag;
+	osg::ref_ptr<edgeFlag> _eFlag;
 };

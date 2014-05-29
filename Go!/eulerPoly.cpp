@@ -18,6 +18,7 @@ Solid(copy,copyop)
 
 EulerPoly::~EulerPoly()
 {
+	std::cout << "Deconstruct EulerPoly" << std::endl;
 }
 
 void EulerPoly::mvfs(osg::Vec3d ref)

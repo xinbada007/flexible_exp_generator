@@ -4,10 +4,10 @@
 #include "car.h"
 #include "road.h"
 #include "plane.h"
-#include "math.h"
-
 #include "halfedge.h"
 #include "points.h"
+#include "math.h"
+#include "edge.h"
 
 #include <osg/Group>
 #include <osg/Notify>
@@ -25,6 +25,7 @@ Collision::Collision()
 
 Collision::~Collision()
 {
+	std::cout << "Deconsturct Collision" << std::endl;
 }
 
 

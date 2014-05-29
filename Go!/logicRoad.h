@@ -32,8 +32,6 @@ public:
 	void line1D(const osg::Vec3dArray *refV);
 	void sweep1D(const osg::Vec3dArray *refV);
 
-	void traverse();
-
 	inline LogicRoad * getNext() const { return _next; };
 	inline void setNext(LogicRoad *ref) 
 	{
@@ -61,7 +59,7 @@ public:
 	};
 	inline ROADTAG getTag() const { return _tag; };
 	inline void setTag(ROADTAG ref) { _tag = ref; };
-	inline void setEFlag(edgeFlag *ref) { _eFlag = ref; };
+	inline void setEFlag(osg::ref_ptr<edgeFlag> ref) { _eFlag = ref; };
 
 	inline void setRawInformation(RoadSet *refRS,int i)
 	{
@@ -69,12 +67,6 @@ public:
 		_texFile = refRS->_texture;
 		_width = refRS->_width;
 		_density = refRS->_density;
-		_nurbs = new osg::Vec3dArray(refRS->_nurbs.at(i)->_path->begin(), refRS->_nurbs.at(i)->_path->end());
-	}
-
-	inline osg::ref_ptr<osg::Vec3dArray> getRawPoints() const
-	{
-		return _nurbs;
 	}
 
 	inline void setEdgeFlagArray(FlagEdgeArrayList &ref) { _eFlagArray = ref; };
@@ -84,7 +76,7 @@ public:
 protected:
 	~LogicRoad();
 private:	
-	edgeFlag *_eFlag;
+	osg::ref_ptr<edgeFlag> _eFlag;
 	FlagEdgeArrayList _eFlagArray;
 
 	osg::ref_ptr<osg::Vec3dArray> _project_LineV;
@@ -96,6 +88,5 @@ private:
 	std::string _roadTxt;
 	double _width;
 	unsigned _density;
-	osg::ref_ptr<osg::Vec3dArray> _nurbs;
 };
 

@@ -2,6 +2,7 @@
 #include "switchVisitor.h"
 #include <osg/Switch>
 #include "logicRoad.h"
+#include "edge.h"
 
 SwitchVisitor::SwitchVisitor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),

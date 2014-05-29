@@ -16,6 +16,7 @@ _roadList(copy._roadList), _lWallList(copy._lWallList), _rWallList(copy._rWallLi
 
 Road::~Road()
 {
+	std::cout << "Deconstruct Road" << std::endl;
 }
 
 osg::ref_ptr<osg::Vec2Array> Road::universalTexture(const int i,const double size)
@@ -55,7 +56,7 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 	osg::ref_ptr<osg::Vec3dArray> pathOffset = NULL;
 	double wh(0.0);
 
-	edgeFlag *pathFlag = NULL;
+	osg::ref_ptr<edgeFlag> pathFlag = NULL;
 	FlagEdgeArrayList eFlagArray;
 
 	if (refTag == LWALL || refTag == RWALL)

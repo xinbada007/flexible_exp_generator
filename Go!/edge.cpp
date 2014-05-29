@@ -2,6 +2,7 @@
 #include "edge.h"
 #include "points.h"
 #include "halfedge.h"
+
 #include <osg/Notify>
 
 Edge::Edge():
@@ -11,7 +12,9 @@ _next(NULL), _prev(NULL), _he1(NULL), _he2(NULL), _eFlag(NULL)
 
 Edge::~Edge()
 {
-	osg::notify(osg::NOTICE) << "deleting Edge..." << std::endl;
+	//osg::notify(osg::NOTICE) << "deleting Edge..." << std::endl;
+// 	delete _eFlag;
+// 	_eFlag = NULL;
 }
 
 void Edge::addHEtoEdge(HalfEdge *refHE1, HalfEdge *refHE2)

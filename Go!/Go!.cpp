@@ -1,27 +1,44 @@
 // Go!.cpp : Defines the entry point for the console application.
 //
 #include "stdafx.h"
-#include "renderVistor.h"
-#include "road.h"
-#include "car.h"
-#include "carEvent.h"
-#include "cameraEvent.h"
-#include "mulitViewer.h"
-#include "collVisitor.h"
-#include "collision.h"
-#include "switchVisitor.h"
-#include "textureVisitor.h"
-#include "recorder.h"
-#include "debugNode.h"
-#include "pickHandler.h"
-#include "roadSwitcher.h"
-
-#include <iostream>
-
-#include <osgViewer/Viewer>
-#include <osg/MatrixTransform>
+#include "headers.h"
 
 using namespace std;
+
+Road * obtainRoad(ReadConfig *rc)
+{
+	osg::ref_ptr<Road> road = new Road;
+	road->genRoad(rc);
+
+	return road.release();
+}
+
+Car * obtainCar(ReadConfig *rc)
+{
+	osg::ref_ptr<Car> car = new Car;
+	car->genCar(rc);
+
+	return car.release();
+}
+
+osg::MatrixTransform *obtainCarMatrix(Car *car)
+{
+	osg::ref_ptr<osg::MatrixTransform> carMatrix = new osg::MatrixTransform;
+	carMatrix->addEventCallback(new CarEvent);
+	carMatrix->setUserData(car);
+	carMatrix->addChild(car);
+
+	return carMatrix.release();
+}
+
+CameraEvent *obtainCamMatrix(ReadConfig *rc, Car *car)
+{
+	osg::ref_ptr<CameraEvent> camMatrix = new CameraEvent;
+	camMatrix->genCamera(rc);
+	camMatrix->setUserData(car);
+
+	return camMatrix.release();
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -32,69 +49,53 @@ int _tmain(int argc, _TCHAR* argv[])
 	string filename = "../Resources/config.txt";
 	osg::ref_ptr<ReadConfig> readConfig = new ReadConfig(filename);
 
-	//Build Road
-	osg::ref_ptr<Road> road = new Road;
-	road->genRoad(readConfig);
-
-	//This has to be first to be executed
-	//set RenderVistor
+	//Always Render first and then texture
 	osg::ref_ptr<RenderVistor> rv = new RenderVistor;
 	rv->setBeginMode(GL_QUADS);
-	
-	//Render Road
-	road->accept(*rv);
-
-	//Always Render first and then texture
-	//Texture Road
 	osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
+
+	//Build Road && Render Road && Texture Road
+	osg::ref_ptr<Road> road = obtainRoad(readConfig);
+	road->accept(*rv);
 	road->accept(*tv);
 
-	//Build Car & Render Car
-	osg::ref_ptr<Car> car = new Car;
-	car->genCar(readConfig);
+	//Build Car & Render Car && Obtain carMatrix
+	osg::ref_ptr<Car> car = obtainCar(readConfig);
 	car->accept(*rv);
+	osg::ref_ptr<osg::MatrixTransform> carMatrix = obtainCarMatrix(car);
 
-	//Car event callback
-	osg::ref_ptr<osg::MatrixTransform> carMatrix = new osg::MatrixTransform;
-	carMatrix->addEventCallback(new CarEvent);
-	carMatrix->setUserData(car.get());
-	carMatrix->addChild(car->asGroup());
-
-	//Root Node
+	//Root Node && collect information for tracing car and collision detection
 	osg::ref_ptr<osg::Group> root = new osg::Group();
-	root->addChild(road);
-	root->addChild(carMatrix);
-//	root->addChild(readConfig->measuer());
-
-	//Collision detect && Trace Car
+	root->addChild(road.get());
+	root->addChild(carMatrix.get()); 
 	osg::ref_ptr<CollVisitor> cv = new CollVisitor;
 	root->accept(*cv);
+
+	//Collision detect && Trace Car
 	osg::ref_ptr<Collision> colldetect = new Collision;
 	colldetect->setUserData(cv.get());
 	car->addUpdateCallback(colldetect.get());
 	osg::ref_ptr<RoadSwitcher> roadSwitcher = new RoadSwitcher;
 	roadSwitcher->setUserData(cv.get());
-	root->addUpdateCallback(roadSwitcher.get());
+	road->addUpdateCallback(roadSwitcher.get());
 
 	//Record Car
 	osg::ref_ptr<Recorder> recorder = new Recorder;
 	car->addUpdateCallback(recorder.get());
 
-// 	//Debug Node
+	//Debug Node
 	osg::ref_ptr<DebugNode> debugger = new DebugNode;
 	debugger->setUserData(cv.get());
 	root->addEventCallback(debugger.get());
-// 
-// 	//Camera event callback
-	osg::ref_ptr<CameraEvent> camMatrix = new CameraEvent;
-	camMatrix->genCamera(readConfig);
-	camMatrix->setUserData(car.get());
+ 
+	//Camera event callback
+	osg::ref_ptr<CameraEvent> camMatrix = obtainCamMatrix(readConfig, car);
 
 	//Viewer Setup
 	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer;
-	mViewer->genMainView(readConfig);
+	mViewer->genMainView(readConfig.get());
 	mViewer->getMainView()->setCameraManipulator(camMatrix.get());
-	mViewer->getMainView()->setSceneData(root->asGroup());
+	mViewer->getMainView()->setSceneData(root.get());
 
 	mViewer->createHUDView();
 	mViewer->setHUDContent(recorder->getStatus());
@@ -102,7 +103,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	mViewer->run();
 
-	recorder->output(readConfig);
+	//final work
+	recorder->output(readConfig.get());
+	root->accept(*new DeConstructerVisitor);
 
 	extern void close_joystick();
 	close_joystick();

@@ -12,9 +12,9 @@ public:
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
 private:
 	~CarEvent();
-	void caclCarMovement();
-	void move();
-	void carDynamic();
+	void applyCarMovement();
+	void calculateCarMovement();
+	void autoNavigation();
 	bool Joystick();
 
 	osg::ref_ptr<CarState> _carState;

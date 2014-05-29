@@ -2,6 +2,7 @@
 #include "collVisitor.h"
 #include "logicRoad.h"
 #include "car.h"
+#include "edge.h"
 
 CollVisitor::CollVisitor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
@@ -12,6 +13,7 @@ _car(NULL)
 
 CollVisitor::~CollVisitor()
 {
+	std::cout << "Deconstruct CollVisitor" << std::endl;
 }
 
 void CollVisitor::reset()

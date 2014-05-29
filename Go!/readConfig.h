@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include <osg/Array>
 #include <osg/Geode>
@@ -34,8 +35,8 @@ typedef struct Nurbs:public osg::Referenced
 	osg::ref_ptr <osg::DoubleArray> _knotVector;
 	unsigned _order;
 
-private:
-	~Nurbs(){};
+protected:
+	virtual ~Nurbs(){ std::cout << "Deconstruct Nurbs" << std::endl; };
 }Nurbs;
 
 typedef std::vector<std::string> stringList;
@@ -67,8 +68,8 @@ typedef struct RoadSet:public osg::Referenced
 	stringList _roadTxt;
 	nurbsList _nurbs;
 
-private:
-	~RoadSet(){};
+protected:
+	virtual ~RoadSet(){ std::cout << "Deconstruct RoadSet" << std::endl; };
 }RoadSet;
 
 typedef struct Vehicle:public osg::Referenced
@@ -81,6 +82,7 @@ typedef struct Vehicle:public osg::Referenced
 
 		_speed = 60 / 3.6 / frameRate;
 		_rotate = 42.5*TO_RADDIAN;
+		_rotationAccl = _rotate;
 		_acceleration = 1;
 
 		_V = new osg::Vec3dArray;
@@ -95,8 +97,12 @@ typedef struct Vehicle:public osg::Referenced
 	
 	double _speed;
 	double _rotate;
+	double _rotationAccl;
 	bool _acceleration;
 	std::string _texture;
+
+protected:
+	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };
 
 }Vehicle;
 
@@ -126,6 +132,9 @@ typedef struct Screens:public osg::Referenced
 	osg::ref_ptr<osg::UIntArray> _scrs;
 	osg::ref_ptr<osg::DoubleArray> _realworld;
 	std::string _background;
+
+protected:
+	virtual ~Screens(){ std::cout << "Deconstruct Screens" << std::endl; };
 }Screens;
 
 typedef struct CameraSet :public osg::Referenced
@@ -138,6 +147,9 @@ typedef struct CameraSet :public osg::Referenced
 
 	osg::ref_ptr<osg::DoubleArray> _offset;
 	bool _eyeTracker;
+
+protected:
+	virtual ~CameraSet(){ std::cout << "Deconstruct CameraSet" << std::endl; };
 }CameraSet;
 
 typedef struct Subjects:public osg::Referenced
@@ -162,6 +174,10 @@ typedef struct Subjects:public osg::Referenced
 	double getDriving() const { return _driving; };
 	std::string getFilePath() const { return _filePath; };
 	std::string getRecPath() const { return _recTxt; };
+
+protected:
+	virtual ~Subjects(){ std::cout << "Deconstruct Subjects" << std::endl; };
+
 private:
 	std::string _name;
 	int _age;
@@ -191,9 +207,11 @@ public:
 	osg::ref_ptr<osg::Vec3dArray> _measuerment;
 	//test
 
+protected:
+	virtual ~ReadConfig();
+
 private:
 	//ReadConfig();
-	~ReadConfig();
 	void assignConfig();
 	bool byPassSpace(std::ifstream &in, std::string &content);
 	std::string getTillFirstSpaceandToUpper(std::string &content);

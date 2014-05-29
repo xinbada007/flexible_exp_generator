@@ -5,8 +5,6 @@
 #include <osg/Notify>
 #include <osgGA/EventVisitor>
 
-#include <iterator>
-
 CarEvent::CarEvent():
 _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _acceleration(true), _updated(false)
 {
@@ -16,67 +14,52 @@ _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _accelerat
 
 CarEvent::~CarEvent()
 {
+	std::cout << "Deconstruct CarEvent" << std::endl;
 }
 
-void CarEvent::move()
+void CarEvent::calculateCarMovement()
 {
+	//Limit the speed under MAX
 	_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? _vehicle->_speed*(_carState->_speed > 0 ? 1 : -1) : _carState->_speed;
 	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate*(_carState->_angle > 0 ? 1 : -1) : _carState->_angle;
 
+	//set rotation direction and limit
 	_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
 	_carState->_angle = (_carState->_speed == 0) ? 0.0f : _carState->_angle;
 
-	//test
-	const double SPEEDR = abs((_carState->_angle - _lastAngle) / TO_RADDIAN) / (1/frameRate);
-	double MAX = (_vehicle->_rotate / TO_RADDIAN);
-	if (SPEEDR > MAX)
+	//set the acceleration of rotation
+	const double ROTATIONACCL = abs(_carState->_angle - _lastAngle)*frameRate;
+	const double MAX_ROTATIONACCL = _vehicle->_rotationAccl;
+	if (ROTATIONACCL > MAX_ROTATIONACCL)
 	{
-		osg::notify(osg::NOTICE) << "SPEEDR:\t" << SPEEDR << std::endl;
-		osg::notify(osg::NOTICE) << "MAX:\t" << MAX << std::endl;
-
-		if (_carState->_angle * _lastAngle < 0)
+		if (_carState->_angle * _lastAngle <= 0)
 		{
 			if (_lastAngle >= 0)
 			{
-				_carState->_angle = _lastAngle - MAX*TO_RADDIAN / frameRate;
+				_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
 				_leftTurn = (_carState->_angle > 0);
 			}
-			if (_lastAngle < 0)
+			if(_lastAngle < 0)
 			{
-				_carState->_angle = _lastAngle + MAX*TO_RADDIAN / frameRate;
+				_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
 				_leftTurn = (_carState->_angle > 0);
 			}
 		}
 		if (_carState->_angle * _lastAngle > 0)
 		{
-			if (_lastAngle >= 0)
+			if (_carState->_angle >= _lastAngle)
 			{
-				if (_carState->_angle > _lastAngle)
-				{
-					_carState->_angle = _lastAngle + MAX*TO_RADDIAN / frameRate;
-				}
-				else
-				{
-					_carState->_angle = _lastAngle - MAX*TO_RADDIAN / frameRate;
-				}
+				_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
 			}
 			else
 			{
-				if (_carState->_angle > _lastAngle)
-				{
-					_carState->_angle = _lastAngle + MAX*TO_RADDIAN / frameRate;
-				}
-				if (_carState->_angle < _lastAngle)
-				{
-					_carState->_angle = _lastAngle - MAX*TO_RADDIAN / frameRate;
-				}
+				_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
 			}
 		}
 	}
-	
 	_lastAngle = _carState->_angle;
-	//test
 
+	//apply the rotation and speed and direction
 	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
 	osg::Matrix rotation = osg::Matrix::translate(-origin);
 	rotation *= osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
@@ -86,11 +69,12 @@ void CarEvent::move()
 	_carState->_direction = _carState->_direction * 
 							osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
 	_carState->_direction.normalize();
+	_carState->_directionLastFrame = _carState->_direction;
 
 	_carState->_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed);
 }
 
-void CarEvent::carDynamic()
+void CarEvent::autoNavigation()
 {
 	if (_acceleration || !(*_carState->_OQuad))
 	{
@@ -103,13 +87,15 @@ void CarEvent::carDynamic()
 	osg::Vec3d carHeading = _carState->_direction; carHeading.normalize();
 	if (_carState->_speed < 0)	carHeading = -carHeading;
 	
-	const double COSANGLE = acos(roadHeading*carHeading);
-	const double SINANGLE = asin((roadHeading^carHeading).z());
-	const bool SAMEDIRECTION = (roadHeading*carHeading > 0);
-	const bool LEFT = (((roadHeading^carHeading).z()) > 0);
+	const double DOTPRODUCT = roadHeading*carHeading;
+	const double CROSSPRODUCT = (roadHeading^carHeading).z();
+	const double COSANGLE = acos(DOTPRODUCT);
+	const double SINANGLE = asin(CROSSPRODUCT);
+	const bool SAMEDIRECTION = (DOTPRODUCT >= 0);
+	const bool LEFT = (CROSSPRODUCT >= 0);
 	const bool TURN = SAMEDIRECTION ? !LEFT : LEFT;
 	double headingError = abs(SINANGLE) * abs(_carState->_speed*frameRate);
-	headingError = (headingError > 1.0*TO_RADDIAN) ? (headingError - 1.0f*TO_RADDIAN) : 0.0f;
+	headingError = (headingError > 1.0f * TO_RADDIAN) ? (headingError - 1.0f * TO_RADDIAN) : 0.0f;
 
 	double roadDistance(0.0f);
 	double angle_1d(0.0f);
@@ -121,32 +107,34 @@ void CarEvent::carDynamic()
 		roadHeading = naviEdge->front() - naviEdge->back();
 		roadDistance += roadHeading.length();
 		roadHeading.normalize();
-		const double SINANGLE = asin((roadHeading^carHeading).z());
-		const double COSANGLE = acos(roadHeading*carHeading);
-		const bool SAMEDIRECTION = (roadHeading*carHeading > 0);
-		const bool LEFT = ((roadHeading^carHeading).z() > 0);
+		const double DOTPRODUCT = roadHeading*carHeading;
+		const double CROSSPRODUCT = (roadHeading^carHeading).z();
+		const double SINANGLE = asin(CROSSPRODUCT);
+		const double COSANGLE = acos(DOTPRODUCT);
+		const bool SAMEDIRECTION = (DOTPRODUCT >= 0);
+		const bool LEFT = (CROSSPRODUCT >= 0);
 		turnF = SAMEDIRECTION ? !LEFT : LEFT;
-		const double angle = abs(SINANGLE);
-		if (angle / TO_RADDIAN >= 1.0f)
+		const double ANGLE = abs(SINANGLE);
+		if (ANGLE / TO_RADDIAN >= 1.0f)
 		{
-			angle_1d = angle;
-			angle_1d /= (roadDistance / (_carState->_speed*frameRate));
+			angle_1d = ANGLE;
+			angle_1d /= (roadDistance / (_carState->_speed * frameRate));
 			angle_1d = abs(angle_1d);
 			break;
 		}
-		if (roadDistance >= abs(_carState->_speed)*frameRate)
+		if (roadDistance >= abs(_carState->_speed) * frameRate)
 		{
 			break;
 		}
 	}
 
-	double angle(angle_1d);
+	const double ANGLE(angle_1d);
 
-	const double test = (angle >= 2*headingError) ? angle : headingError;
-	const bool testB = (angle >= 2*headingError) ? turnF : TURN;
+	const double RatationAngle = (ANGLE > headingError) ? ANGLE : headingError;
+	const bool RatationTurn = (ANGLE > headingError) ? turnF : TURN;
 
-	_leftTurn = testB;
-	_carState->_angle = test;
+	_leftTurn = RatationTurn;
+	_carState->_angle = RatationAngle;
 
 	return;
 }
@@ -237,17 +225,15 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 		case osgGA::GUIEventAdapter::FRAME:
 
-			carDynamic();
-
 			if (_carState->_speed > 0 && _carState->_collide)
 			{
 				_carState->_speed = _vehicle->_speed * .01f;
 				_carState->_collide = false;
 			}
 
-			move();
-			_carState->_directionLastFrame = _carState->_direction;
-			caclCarMovement();
+			autoNavigation();
+			calculateCarMovement();
+			applyCarMovement();
 
 			break;
 
@@ -259,7 +245,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 	traverse(node, nv);
 }
 
-void CarEvent::caclCarMovement()
+void CarEvent::applyCarMovement()
 {
 	_carState->_state *= _carState->_moment;
 

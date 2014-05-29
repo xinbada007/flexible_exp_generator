@@ -1,16 +1,13 @@
 #include "stdafx.h"
 #include "readConfig.h"
-#include "math.h"
 
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <io.h>
 #include <direct.h>
 
 #include <osg/Notify>
-#include <osg/Geode>
 #include <osg/Geometry>
 
 using namespace std;
@@ -35,6 +32,7 @@ _filename(filename)
 
 ReadConfig::~ReadConfig()
 {
+	std::cout << "Deconstruct ReadConfig" << std::endl;
 }
 
 void ReadConfig::assignConfig()
@@ -424,6 +422,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string CARWIDTH = "CARWIDTH";
 		const string CARHEIGHT = "CARHEIGHT";
 		const string CARLENGTH = "CARLENGTH";
+		const string WHEELACCL = "WHEELACCL";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -478,6 +477,16 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_vehicle->_length = stod(config);
+				}
+				continue;
+			}
+			else if (title == WHEELACCL)
+			{
+				config.erase(config.begin(), config.begin() + WHEELACCL.size());
+				if (!config.empty())
+				{
+					_vehicle->_rotationAccl = stod(config);
+					_vehicle->_rotationAccl *= TO_RADDIAN;
 				}
 				continue;
 			}

@@ -9,14 +9,14 @@
 
 LogicRoad::LogicRoad():
 _next(NULL), _prev(NULL), _tag(ROAD),
-_roadTxt(""), _width(-1), _density(-1), _nurbs(NULL), _eFlag(NULL)
+_roadTxt(""), _width(-1), _density(-1), _eFlag(NULL)
 {
 	_project_LineV = new osg::Vec3dArray;
 }
 
 LogicRoad::LogicRoad(const LogicRoad &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
 EulerPoly(copy, copyop), _next(copy._next), _prev(copy._prev), _tag(copy._tag), _project_LineV(copy._project_LineV),
-_roadTxt(copy._roadTxt), _width(copy._width), _density(copy._density), _nurbs(copy._nurbs), _eFlag(copy._eFlag),
+_roadTxt(copy._roadTxt), _width(copy._width), _density(copy._density), _eFlag(copy._eFlag),
 _eFlagArray(copy._eFlagArray)
 {
 
@@ -24,6 +24,7 @@ _eFlagArray(copy._eFlagArray)
 
 LogicRoad::~LogicRoad()
 {
+	std::cout << "Deconstruct logicRoad:\t" <<this->_tag<< std::endl;
 }
 
 void LogicRoad::line1D(const osg::Vec3dArray *V1, const osg::Vec3dArray *V2)
@@ -103,8 +104,7 @@ void LogicRoad::setUpFlag()
 {
 	if (_eFlag)
 	{
-		edgeFlag *newEFlag = new edgeFlag;
-		*newEFlag = *_eFlag;
+		osg::ref_ptr<edgeFlag> newEFlag = new edgeFlag(*_eFlag);
 		this->getEdge()->setEdgeFlag(newEFlag);
 		if (newEFlag->_navigateEdge)
 		{
@@ -114,15 +114,4 @@ void LogicRoad::setUpFlag()
 			newEFlag->_navigationArray->push_back(this->getEdge()->getHE2()->getPoint()->getPoint());
 		}
 	}
-}
-
-void LogicRoad::traverse()
-{
-// 	Solid *thisS = dynamic_cast<Solid*> (this);
-// 	if (!thisS)
-// 	{
-// 		osg::notify(osg::FATAL) << "Cannot find Solid Node!" << std::endl;
-// 		return;
-// 	}	
-// 	thisS->traverse();
 }

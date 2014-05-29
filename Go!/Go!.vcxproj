@@ -91,9 +91,11 @@
     <ClInclude Include="collision.h" />
     <ClInclude Include="collVisitor.h" />
     <ClInclude Include="debugNode.h" />
+    <ClInclude Include="DeConstructerVisitor.h" />
     <ClInclude Include="edge.h" />
     <ClInclude Include="eulerPoly.h" />
     <ClInclude Include="halfedge.h" />
+    <ClInclude Include="headers.h" />
     <ClInclude Include="loop.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mulitViewer.h" />
@@ -120,6 +122,7 @@
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="collVisitor.cpp" />
     <ClCompile Include="debugNode.cpp" />
+    <ClCompile Include="DeConstructerVisitor.cpp" />
     <ClCompile Include="edge.cpp" />
     <ClCompile Include="eulerPoly.cpp" />
     <ClCompile Include="halfedge.cpp" />
