@@ -117,8 +117,7 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 		newLogic->line1D(path);
 		newLogic->line1D(path, pathOffset);
 		newLogic->line1D(pathOffset);
-		newLogic->setTag(refTag);
-		newLogic->setRawInformation(_roadSet, i);
+		newLogic->setRawInformation(_roadSet, i, refTag);
 		
 		if (wh)
 		{

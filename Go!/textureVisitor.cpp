@@ -32,8 +32,11 @@ void TextureVisitor::apply(osg::Group &refNode)
 
 	if (refS)
 	{
-		osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() <<"\t" <<refNode.className() << std::endl;
-		if(texCoord(refS)) {texture(refS);}
+		if (!refS->getTexFile().empty())
+		{
+			osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
+			if (texCoord(refS)) { texture(refS); }
+		}
 	}
 	
 	traverse(refNode);

@@ -58,15 +58,28 @@ public:
 		}
 	};
 	inline ROADTAG getTag() const { return _tag; };
-	inline void setTag(ROADTAG ref) { _tag = ref; };
 	inline void setEFlag(osg::ref_ptr<edgeFlag> ref) { _eFlag = ref; };
 
-	inline void setRawInformation(RoadSet *refRS,int i)
+	inline void setRawInformation(RoadSet *refRS,int i, ROADTAG refTag)
 	{
+		_tag = refTag;
 		_roadTxt = refRS->_roadTxt.at(i);
-		_texFile = refRS->_texture;
-		_width = refRS->_width;
 		_density = refRS->_density;
+		if (refTag ==  ROAD)
+		{
+			_width = refRS->_width;
+			_texFile = refRS->_texture;
+		}
+		else if (refTag == LWALL || refTag == RWALL)
+		{
+			_width = refRS->_wallHeight;
+			_texFile = refRS->_textureWall;
+		}
+		else
+		{
+			_width = 0.0f;
+			_texFile.clear();
+		}
 	}
 
 	inline void setEdgeFlagArray(FlagEdgeArrayList &ref) { _eFlagArray = ref; };

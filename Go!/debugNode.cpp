@@ -299,8 +299,11 @@ void deTexture::apply(osg::Group &refNode)
 
 	if (refS)
 	{
-		osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
-		setTexture(refS);
+		if (!refS->getTexFile().empty())
+		{
+			osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
+			setTexture(refS);
+		}
 	}
 
 	traverse(refNode);
@@ -326,6 +329,11 @@ void deTexture::setTexture(Solid *refS)
 		osg::PolygonMode::Mode polyMode = pm->getMode(osg::PolygonMode::FRONT_AND_BACK);
 		polyMode = (polyMode == osg::PolygonMode::FILL) ? osg::PolygonMode::LINE : osg::PolygonMode::FILL;
 		pm->setMode(osg::PolygonMode::FRONT_AND_BACK, polyMode);
+	}
+	else
+	{
+		pm = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+		ss->setAttribute(pm);
 	}
 
 	osg::StateAttribute::GLModeValue textureMode = ss->getTextureMode(0, GL_TEXTURE_2D);

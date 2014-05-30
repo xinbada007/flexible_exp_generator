@@ -40,7 +40,7 @@ void RenderVistor::reset()
 
 void RenderVistor::apply(osg::Group &refNode)
 {
-	osg::notify(osg::NOTICE) << refNode.libraryName() << "::" << refNode.className() << std::endl;
+	//osg::notify(osg::NOTICE) << refNode.libraryName() << "::" << refNode.className() << std::endl;
 
 	osg::ref_ptr<Solid> refS = dynamic_cast<Solid*> (&refNode);
 	if (refS)
@@ -58,7 +58,7 @@ void RenderVistor::apply(osg::Group &refNode)
 
 void RenderVistor::apply(osg::Geode &refGeode)
 {
-	osg::notify(osg::NOTICE) << refGeode.libraryName() << "::" << refGeode.className() << std::endl;
+	//osg::notify(osg::NOTICE) << refGeode.libraryName() << "::" << refGeode.className() << std::endl;
 
 	//pre-process before traverse
 	osg::ref_ptr<Plane> refP = dynamic_cast<Plane*> (&refGeode);

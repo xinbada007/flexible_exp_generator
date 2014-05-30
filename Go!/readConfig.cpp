@@ -502,6 +502,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string ROADDT = "DENSITY";
 		const string WALLH = "WALLHEIGHT";
 		const string ROADLANE = "ROADLANES";
+		const string WALLPIC = "WALLPIC";
 		const string SCALE = "SCALEVECTOR";
 		while (flag == ROAD && !in.eof())
 		{
@@ -580,6 +581,13 @@ void ReadConfig::readTrial(ifstream &in)
 					_roads->_scale.y() = scale.at(1);
 					_roads->_scale.z() = scale.at(2);
 				}
+			}
+			else if (title == WALLPIC)
+			{
+				config.erase(config.begin(), config.begin() + WALLPIC.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				_roads->_textureWall = config;
+				continue;
 			}
 
 			flag = config;

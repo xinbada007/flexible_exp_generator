@@ -28,32 +28,35 @@ void CarEvent::calculateCarMovement()
 	_carState->_angle = (_carState->_speed == 0) ? 0.0f : _carState->_angle;
 
 	//set the acceleration of rotation
-	const double ROTATIONACCL = abs(_carState->_angle - _lastAngle)*frameRate;
 	const double MAX_ROTATIONACCL = _vehicle->_rotationAccl;
-	if (ROTATIONACCL > MAX_ROTATIONACCL)
+	if (MAX_ROTATIONACCL)
 	{
-		if (_carState->_angle * _lastAngle <= 0)
+		const double ROTATIONACCL = abs(_carState->_angle - _lastAngle)*frameRate;
+		if (ROTATIONACCL > MAX_ROTATIONACCL)
 		{
-			if (_lastAngle >= 0)
+			if (_carState->_angle * _lastAngle <= 0)
 			{
-				_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
-				_leftTurn = (_carState->_angle > 0);
+				if (_lastAngle >= 0)
+				{
+					_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
+					_leftTurn = (_carState->_angle > 0);
+				}
+				if (_lastAngle < 0)
+				{
+					_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
+					_leftTurn = (_carState->_angle > 0);
+				}
 			}
-			if(_lastAngle < 0)
+			if (_carState->_angle * _lastAngle > 0)
 			{
-				_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
-				_leftTurn = (_carState->_angle > 0);
-			}
-		}
-		if (_carState->_angle * _lastAngle > 0)
-		{
-			if (_carState->_angle >= _lastAngle)
-			{
-				_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
-			}
-			else
-			{
-				_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
+				if (_carState->_angle >= _lastAngle)
+				{
+					_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
+				}
+				else
+				{
+					_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
+				}
 			}
 		}
 	}

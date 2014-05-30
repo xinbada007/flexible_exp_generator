@@ -65,6 +65,7 @@ typedef struct RoadSet:public osg::Referenced
 	osg::Vec3d _scale;
 	
 	std::string _texture;
+	std::string _textureWall;
 	stringList _roadTxt;
 	nurbsList _nurbs;
 
