@@ -18,8 +18,10 @@ _reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offse
 
 	_offset.set(0.0f, 0.0f, 0.0f);
 	_offsetOrigin = _offset;
-
 	_eyePoint.set(O_POINT + _offset);
+
+	_eyeRotation = osg::Matrix::identity().getRotate();
+	_eyeOffset.set(0.0f, 0.0f, 0.0f);
 }
 
 
@@ -92,9 +94,8 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 
 	if (refC)
 	{
-		const CarState * refCS = refC->getCarState();
+		CarState * refCS = refC->getCarState();
 		osg::Matrix moment = osg::Matrix::inverse(_stateLast) * refCS->_state;
-		_stateLast = refCS->_state;
 		switch (ea.getEventType())
 		{
 		case osgGA::GUIEventAdapter::KEYDOWN:
@@ -124,6 +125,12 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			case osgGA::GUIEventAdapter::KEY_KP_Right:
 				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_X_Axis * (_offsetInterval / frameRate));
 				break;
+			case osgGA::GUIEventAdapter::KEY_KP_Add:
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(Z_AXIS * (_offsetInterval / frameRate));
+				break;
+			case osgGA::GUIEventAdapter::KEY_KP_Subtract:
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(-Z_AXIS * (_offsetInterval / frameRate));
+				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Enter:
 				_reset = true;
 				break;
@@ -138,7 +145,8 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				_eyeRotation = osg::Matrix::identity().getRotate();
 			}
 			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Up || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Down
-				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Right)
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Right
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Add || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Subtract)
 			{
 				_eyeOffset.set(0.0f, 0.0f, 0.0f);
 			}
@@ -162,25 +170,29 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 // 			_eye_X_Axis = _eye_X_Axis * osg::Matrix::rotate(refCS->_moment.getRotate());
 // 			_eye_Z_Axis = _eye_Z_Axis * osg::Matrix::rotate(refCS->_moment.getRotate());
 
-			_offsetOrigin = _offsetOrigin * osg::Matrix::rotate(moment.getRotate());
 			_offset = _offset * osg::Matrix::rotate(moment.getRotate());
 			_offset = _offset * osg::Matrix::translate(_eyeOffset);
 
-			_camRotationOrigin *= moment.getRotate();
 			_camRotation *= moment.getRotate();
 			_camRotation *= _eyeRotation;
 
-			_eye_X_Axis = _eye_X_Axis * osg::Matrix::rotate(moment.getRotate());
-			_eye_Z_Axis = _eye_Z_Axis * osg::Matrix::rotate(moment.getRotate());
+			_eye_X_Axis = X_AXIS * osg::Matrix::rotate(refCS->_state.getRotate());
+			_eye_Z_Axis = Z_AXIS * osg::Matrix::rotate(refCS->_state.getRotate());
 
 			if (_reset)
 			{
-				_camRotation = _camRotationOrigin;
-				_offset = _offsetOrigin;
+				_camRotation = _camRotationOrigin * refCS->_state.getRotate();
+				_offset = _offsetOrigin * osg::Matrix::rotate(refCS->_state.getRotate());
 				_reset = false;
 			}
 
 			_eyePoint.set(refCS->_O + _offset);
+			_stateLast = refCS->_state;
+			if (viewer)
+			{
+				refCS->_frameStamp = viewer->getFrameStamp()->getFrameNumber();
+				refCS->_timeReference = viewer->getFrameStamp()->getReferenceTime();
+			}
 			break;
 		default:
 			break;
