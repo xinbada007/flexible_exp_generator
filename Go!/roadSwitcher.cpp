@@ -28,9 +28,11 @@ void RoadSwitcher::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		Plane::reverse_across_iterator i = *_carState->_OQuad;
 		if (*i)
 		{
-			const unsigned numPlanes = (*i)->getHomeS()->getNumPlanes();
-			Plane::reverse_across_iterator ON = i + numPlanes * 0.5f;
-			Plane::reverse_across_iterator OFF = i - numPlanes * 1.5f;
+			const int numPlanes = (*i)->getHomeS()->getNumPlanes();
+			Plane::reverse_across_iterator ON(*i); 
+			ON.add(numPlanes*0.5f);
+			Plane::reverse_across_iterator OFF(*i);
+			OFF.add(-numPlanes*1.5f);
 
 			int solidON(-1), solidOFF(-1);
 			if (*ON)	solidON = (*ON)->getHomeS()->getIndex();

@@ -103,6 +103,8 @@ public:
 		reverse_across_iterator operator-(int);
 		reverse_across_iterator operator--(int);
 		reverse_across_iterator operator++(int);
+
+		void add(int);
 		
 		Plane * operator*();
 

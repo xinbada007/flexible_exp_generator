@@ -29,3 +29,4 @@
 
 #include <osgViewer/Viewer>
 #include <osg/MatrixTransform>
+#include <osgUtil/Optimizer>

@@ -6,7 +6,7 @@
 #include <osgViewer/Viewer>
 
 CameraEvent::CameraEvent():
-_reset(false), _eyeTracker(false), _rotationInterval(5.0f * TO_RADDIAN), _offsetInterval(0.5f)
+_reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(1.0f)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);
@@ -93,6 +93,8 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 	if (refC)
 	{
 		const CarState * refCS = refC->getCarState();
+		osg::Matrix moment = osg::Matrix::inverse(_stateLast) * refCS->_state;
+		_stateLast = refCS->_state;
 		switch (ea.getEventType())
 		{
 		case osgGA::GUIEventAdapter::KEYDOWN:
@@ -147,17 +149,29 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				_windowsPick.set(ea.getX(), ea.getY());
 				updateLookAt(viewer);
 			}
+			break;
 		case osgGA::GUIEventAdapter::FRAME:
-			_offsetOrigin = _offsetOrigin * osg::Matrix::rotate(refCS->_moment.getRotate());
-			_offset = _offset * osg::Matrix::rotate(refCS->_moment.getRotate());
+// 			_offsetOrigin = _offsetOrigin * osg::Matrix::rotate(refCS->_moment.getRotate());
+// 			_offset = _offset * osg::Matrix::rotate(refCS->_moment.getRotate());
+// 			_offset = _offset * osg::Matrix::translate(_eyeOffset);
+// 
+// 			_camRotationOrigin *= refCS->_moment.getRotate();
+// 			_camRotation *= refCS->_moment.getRotate();
+// 			_camRotation *= _eyeRotation;
+// 
+// 			_eye_X_Axis = _eye_X_Axis * osg::Matrix::rotate(refCS->_moment.getRotate());
+// 			_eye_Z_Axis = _eye_Z_Axis * osg::Matrix::rotate(refCS->_moment.getRotate());
+
+			_offsetOrigin = _offsetOrigin * osg::Matrix::rotate(moment.getRotate());
+			_offset = _offset * osg::Matrix::rotate(moment.getRotate());
 			_offset = _offset * osg::Matrix::translate(_eyeOffset);
 
-			_camRotationOrigin *= refCS->_moment.getRotate();
-			_camRotation *= refCS->_moment.getRotate();
+			_camRotationOrigin *= moment.getRotate();
+			_camRotation *= moment.getRotate();
 			_camRotation *= _eyeRotation;
 
-			_eye_X_Axis = _eye_X_Axis * osg::Matrix::rotate(refCS->_moment.getRotate());
-			_eye_Z_Axis = _eye_Z_Axis * osg::Matrix::rotate(refCS->_moment.getRotate());
+			_eye_X_Axis = _eye_X_Axis * osg::Matrix::rotate(moment.getRotate());
+			_eye_Z_Axis = _eye_Z_Axis * osg::Matrix::rotate(moment.getRotate());
 
 			if (_reset)
 			{

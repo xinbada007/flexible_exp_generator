@@ -191,6 +191,19 @@ Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator+=(int 
 	return (*this);
 }
 
+void Plane::reverse_across_iterator::add(int ref)
+{
+	for (int i = 0; i < abs(ref);i++)
+	{
+		ref>0 ? ++(*this) : --(*this);
+		if (!this->isValid())
+		{
+			(*this) = NULL;
+			return;
+		}
+	}
+}
+
 Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator-=(int ref)
 {
 	Plane::reverse_across_iterator ret_prv = (*this);

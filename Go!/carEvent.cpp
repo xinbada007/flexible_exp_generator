@@ -7,9 +7,8 @@
 
 CarEvent::CarEvent():
 _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _acceleration(true), _updated(false)
+, _lastAngle(0.0f), _shifted(false)
 {
-	_lastAngle = 0.0f;
-	_lastTurn = false;
 }
 
 CarEvent::~CarEvent()
@@ -21,7 +20,7 @@ void CarEvent::calculateCarMovement()
 {
 	//Limit the speed under MAX
 	_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? _vehicle->_speed*(_carState->_speed > 0 ? 1 : -1) : _carState->_speed;
-	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate*(_carState->_angle > 0 ? 1 : -1) : _carState->_angle;
+	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate: _carState->_angle;
 
 	//set rotation direction and limit
 	_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
@@ -67,14 +66,15 @@ void CarEvent::calculateCarMovement()
 	osg::Matrix rotation = osg::Matrix::translate(-origin);
 	rotation *= osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
 	rotation *= osg::Matrix::translate(origin);
-	_carState->_moment *= rotation;
+	_moment *= rotation;
 
+	_carState->_directionLastFrame = _carState->_direction;
 	_carState->_direction = _carState->_direction * 
 							osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
 	_carState->_direction.normalize();
-	_carState->_directionLastFrame = _carState->_direction;
 
-	_carState->_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed);
+	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed);
+	_moment *= osg::Matrix::translate(_carState->_shiftD);
 }
 
 void CarEvent::autoNavigation()
@@ -159,12 +159,15 @@ bool CarEvent::Joystick()
 
 	if ((abs(x)) > DeadZone)
 	{
-		_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX) * (x > 0 ? -1 : 1);
+		_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX);
+		_leftTurn = (x < 0);
+		_shifted = true;
 	}
 	else if ((abs(x)) <= DeadZone)
 	{
 		_carState->_angle = 0.0f;
 		_carState->_swangle = 0.0f;
+		_shifted = false;
 	}
 
 	if (abs(y) > DeadZone)
@@ -172,6 +175,31 @@ bool CarEvent::Joystick()
 		_carState->_speed += _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
 	}
 	return true;
+}
+
+void CarEvent::dynamicApply()
+{
+	if (_acceleration || !_shifted)
+	{
+		_carState->_shiftD = osg::Vec3d(0.0f, 0.0f, 0.0f);
+		return;
+	}
+
+	_carState->_shiftD.x() = _carState->_direction.y();
+	_carState->_shiftD.y() = -_carState->_direction.x();
+	_carState->_shiftD.z() = _carState->_direction.z();
+	_carState->_shiftD.normalize();
+
+	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
+	osg::Vec3d r = origin - _carState->_O;
+	double R = r.length();
+	R *= abs(_carState->_angle);
+
+	_carState->_shiftD *= R;
+	_carState->_shiftD /= frameRate;
+	_carState->_shiftD = (_leftTurn) ? -_carState->_shiftD : _carState->_shiftD;
+
+	_shifted = false;
 }
 
 void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
@@ -194,7 +222,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			_acceleration = _vehicle->_acceleration;
 			_updated = true;
 		}
-		_carState->_moment.makeIdentity();
+		_moment.makeIdentity();
 
 		Joystick();
 
@@ -204,9 +232,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		case osgGA::GUIEventAdapter::KEYDOWN:
 			if ((key == 'a' || key == 'd'))
 			{
-				int sign = (key == 'a') ? 1 : -1;
-				_leftTurn = (sign == 1) ? true : false;
-				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
+				_leftTurn = (key == 'a');
+				_carState->_angle += _vehicle->_rotate*_carState->_angle_incr;
+				_shifted = true;
 				break;
 			}
 			if (key == 'w' || key == 's')
@@ -224,18 +252,24 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			if (key == 'a' || key == 'd')
 			{
 				_carState->_angle = 0.0f;
+				_shifted = false;
 				break;
 			}
 		case osgGA::GUIEventAdapter::FRAME:
 
-			if (_carState->_speed > 0 && _carState->_collide)
-			{
-				_carState->_speed = _vehicle->_speed * .01f;
-				_carState->_collide = false;
-			}
+// 			if (_carState->_speed > 0 && _carState->_collide)
+// 			{
+// 				_carState->_speed = _vehicle->_speed * .01f;
+// 				_carState->_collide = false;
+// 			}
 
+			//1st
+			dynamicApply();
+			//2nd
 			autoNavigation();
+			//3rd
 			calculateCarMovement();
+			//always final
 			applyCarMovement();
 
 			break;
@@ -250,12 +284,12 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 void CarEvent::applyCarMovement()
 {
-	_carState->_state *= _carState->_moment;
-
-	_carState->_O = _carState->_O * _carState->_moment;
-	arrayByMatrix(_carState->_backWheel, _carState->_moment);
-	arrayByMatrix(_carState->_frontWheel, _carState->_moment);
-	arrayByMatrix(_carState->_carArray, _carState->_moment);
+	_carState->_state *= _moment;
+	_carState->_moment = _moment;
+	_carState->_O = _carState->_O * _moment;
+	arrayByMatrix(_carState->_backWheel, _moment);
+	arrayByMatrix(_carState->_frontWheel, _moment);
+	arrayByMatrix(_carState->_carArray, _moment);
 
 	_mTransform->setMatrix(_carState->_state);
 
@@ -274,5 +308,51 @@ void CarEvent::applyCarMovement()
 		copy(navigationEdge->begin(), navigationEdge->end(), std::back_inserter(*_carState->_midLine));
 
 		_carState->_updated = true;
+	}
+
+	bool NANTEST(true);
+	osg::Vec3dArray *testNAN = _carState->_backWheel;
+	osg::Vec3dArray::const_iterator i = testNAN->begin();
+	while (i != testNAN->end())
+	{
+		NANTEST = NANTEST && (*i).isNaN();
+		i++;
+	}
+	
+	testNAN = _carState->_carArray;
+	i = testNAN->begin();
+	while (i!=testNAN->end())
+	{
+		NANTEST = NANTEST && (*i).isNaN();
+		i++;
+	}
+
+	testNAN = _carState->_frontWheel;
+	i = testNAN->begin();
+	while (i != testNAN->end())
+	{
+		NANTEST = NANTEST && (*i).isNaN();
+		i++;
+	}
+
+	testNAN = _carState->_midLine;
+	i = testNAN->begin();
+	while (i != testNAN->end())
+	{
+		NANTEST = NANTEST && (*i).isNaN();
+		i++;
+	}
+
+	NANTEST = NANTEST && _carState->_direction.isNaN();
+	NANTEST = NANTEST && _carState->_directionLastFrame.isNaN();
+	NANTEST = NANTEST && _carState->_moment.isNaN();
+	NANTEST = NANTEST && _carState->_O.isNaN();
+	NANTEST = NANTEST && _carState->_O_Project.isNaN();
+	NANTEST = NANTEST && _carState->_shiftD.isNaN();
+	NANTEST = NANTEST && _carState->_state.isNaN();
+
+	if (NANTEST)
+	{
+		osg::notify(osg::FATAL) << "NAN FOUND!!!" << std::endl;
 	}
 }

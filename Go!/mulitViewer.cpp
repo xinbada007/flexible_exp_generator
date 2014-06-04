@@ -213,7 +213,7 @@ void MulitViewer::setHUDContent(osgText::Text *ref)
 	osg::Vec3d position(0.05*X, 0.9*Y, 0.0f);
 	std::string font("fonts/arial.ttf");
 	_HUDText->setFont(font);
-	//_HUDText->setCharacterSize(18.0f, 1.778);
+	_HUDText->setFontResolution(512,512);
 	_HUDText->setPosition(position);
 	_HUDText->setDataVariance(osg::Object::DYNAMIC);	
 	

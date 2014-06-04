@@ -18,16 +18,16 @@ typedef struct CarState:public osg::Referenced
 		this->_directionLastFrame.set(_direction);
 		_angle = 0.0f;
 		_angle_incr = 0.2f;
-
 		_swangle = 0.0f;
-
 		_speed = 0.0f;
 		_speed_incr = 0.2f;
-
 		_dither = 0.0f;
 
 		_collide = false;
 		_updated = false;
+
+		_frameStamp = 0;
+		_timeReference = 0.0f;
 
 		//mid-Line of current Road
 		_midLine = new osg::Vec3dArray;
@@ -47,6 +47,7 @@ typedef struct CarState:public osg::Referenced
 	};
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
+	osg::Vec3d _shiftD;
 	osg::Vec3d _direction;
 	osg::Vec3d _directionLastFrame;
 	osg::ref_ptr<osg::Vec3dArray> _midLine;
@@ -62,16 +63,16 @@ typedef struct CarState:public osg::Referenced
 
 	double _angle;
 	double _angle_incr;
-
 	double _swangle;
-
 	double _speed;
 	double _speed_incr;	
-
 	double _dither;
 
 	bool _collide;
 	bool _updated;
+
+	unsigned _frameStamp;
+	double _timeReference;
 
 	osg::Matrix _state;
 	osg::Matrix _moment;

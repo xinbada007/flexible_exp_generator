@@ -1,4 +1,4 @@
-Endless Nurbs
+EndlessNurbs
 
 ctrlpoints
 0	0	0

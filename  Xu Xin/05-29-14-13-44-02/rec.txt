@@ -1,6 +1,0 @@
-Time	FPS	Frame	Crash	RB	RU	LU	LB	Dither	DAngle	swAngle	OX	OY	OZ	HX	HY	HZ	HA	Speed
-Time	FPS	Frame	0	1	4	4	1	0.	1.65597e-005	0.	0.	0.	0.	0.	1.	0.	0.	0.	
-Time	FPS	Frame	0	1	4	4	1	2.04958e-005	1.65597e-005	0.	0.	0.	0.	0.	1.	0.	0.	0.	
-Time	FPS	Frame	0	1	4	4	1	2.04958e-005	1.65597e-005	0.	0.	0.	0.	0.	1.	0.	0.	0.	
-Time	FPS	Frame	0	1	4	4	1	2.04958e-005	1.65597e-005	0.	0.	0.	0.	0.	1.	0.	0.	0.	
-

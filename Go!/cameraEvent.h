@@ -41,5 +41,7 @@ private:
 	osg::Vec3d _zNear;
 	osg::Vec3 _zFar;
 	osg::Matrix _matrixLookAt;
+
+	osg::Matrix _stateLast;
 };
 

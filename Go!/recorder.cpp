@@ -13,7 +13,8 @@
 
 using namespace std;
 
-Recorder::Recorder() :_statusText(new osgText::Text)
+Recorder::Recorder() :_statusText(new osgText::Text),
+_lastFrameStamp(0), _lastTimeReference(0.0f)
 {
 	_outMoment.push_back(&_recS._time);
 	_outMoment.push_back(&_recS._fps);
@@ -23,6 +24,7 @@ Recorder::Recorder() :_statusText(new osgText::Text)
 	_outMoment.push_back(&_recS._ru);
 	_outMoment.push_back(&_recS._lu);
 	_outMoment.push_back(&_recS._lb);
+	_outMoment.push_back(&_recS._oc);
 	_outMoment.push_back(&_recS._dither);
 	_outMoment.push_back(&_recS._dAngle);
 	_outMoment.push_back(&_recS._swAngle);
@@ -65,11 +67,29 @@ void Recorder::rectoTxt(const CarState *carState)
 	char temp[10];
 	const int size_temp = sizeof(temp);
 
+	const unsigned frameStamp = carState->_frameStamp;
+	_itoa_s(frameStamp, temp, size_temp);
+	_recS._frame = temp + _recS._TAB;
+
+	const unsigned nDigit(6);
+	char tempd[20];
+	const int size_tempd = sizeof(tempd);
+
+	const double timeReference = carState->_timeReference;
+	_gcvt_s(tempd, size_tempd, timeReference, nDigit);
+	_recS._time = tempd + _recS._TAB;
+
+	const double fps = (frameStamp - _lastFrameStamp) / (timeReference - _lastTimeReference);
+	_gcvt_s(tempd, size_tempd, fps, nDigit);
+	_recS._fps = tempd + _recS._TAB;
+	_lastFrameStamp = frameStamp;
+	_lastTimeReference = timeReference;
+
 	unsigned crash = carState->_collide;
 	_itoa_s(crash, temp,size_temp);
 	_recS._crash = temp + _recS._TAB;
 	
-	if (carState->_lastQuad.size() < carState->_carArray->size())
+	if (carState->_currentQuad.size() < carState->_carArray->size())
 	{
 		osg::notify(osg::FATAL) << "Cannot record" << std::endl;
 		return;
@@ -78,7 +98,8 @@ void Recorder::rectoTxt(const CarState *carState)
 	int rb = (*i) ? (*i)->getIndex() : -1; i++;
 	int ru = (*i) ? (*i)->getIndex() : -1; i++;
 	int lu = (*i) ? (*i)->getIndex() : -1; i++;
-	int lb = (*i) ? (*i)->getIndex() : -1;
+	int lb = (*i) ? (*i)->getIndex() : -1; i++;
+	int oc = (*i) ? (*i)->getIndex() : -1;
 	_itoa_s(rb, temp, size_temp);
 	_recS._rb = temp + _recS._TAB;
 	_itoa_s(ru, temp, size_temp);
@@ -87,10 +108,9 @@ void Recorder::rectoTxt(const CarState *carState)
 	_recS._lu = temp + _recS._TAB;
 	_itoa_s(lb, temp, size_temp);
 	_recS._lb = temp + _recS._TAB;
+	_itoa_s(oc, temp, size_temp);
+	_recS._oc = temp + _recS._TAB;
 	
-	const unsigned nDigit(6);
-	char tempd[20];
-	const int size_tempd = sizeof(tempd);
 	double swAngle = carState->_swangle;
 	_gcvt_s(tempd, size_tempd, swAngle, nDigit);
 	_recS._swAngle = tempd + _recS._TAB;
@@ -155,7 +175,45 @@ void Recorder::copy()
 		i++;
 	}
 
-	_statusText->setText(content);
+	osgText::String text;
+	std::string::const_iterator iter = content.cbegin();
+	unsigned numTab(0);
+	while (iter != content.cend())
+	{
+		if (*iter != '\t')
+		{
+			text.push_back(*iter);
+		}
+		else
+		{
+			numTab++;
+			switch (numTab)
+			{
+			case 4:
+				text.push_back('\n');
+				break;
+			case 9:
+				text.push_back('\n');
+				break;
+			case 12:
+				text.push_back('\n');
+				break;
+			case 15:
+				text.push_back('\n');
+				break;
+			case 18:
+				text.push_back('\n');
+				break;
+			default:
+				text.push_back(' ');
+				text.push_back(' ');
+				break;
+			}
+		}
+		iter++;
+	}
+	_statusText->setText(text);
+	_statusText->update();
 }
 
 void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)

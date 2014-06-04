@@ -2,6 +2,7 @@
 //
 #include "stdafx.h"
 #include "headers.h"
+#include <fstream>
 
 using namespace std;
 
@@ -101,6 +102,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	mViewer->setHUDContent(recorder->getStatus());
 	mViewer->createBackgroundView();
 
+	mViewer->setRunMaxFrameRate(frameRate);
+	osgUtil::Optimizer optimizer;
+	optimizer.optimize(root.get());
 	mViewer->run();
 
 	//final work
@@ -110,3 +114,23 @@ int _tmain(int argc, _TCHAR* argv[])
 	extern void close_joystick();
 	close_joystick();
 }
+
+/*
+int main()
+{
+	const double R(2.0f);
+	const int gear(96);
+	const double theta(2 * PI / gear);
+	ofstream fileout("circularRoad.txt");
+	for (int i = 0; i <= gear;i++)
+	{
+		double x = R*sin(theta*i);
+		double y = R*cos(theta*i);
+
+		std::cout << x << "\t" << y << std::endl;
+		fileout << x << "\t" << y << std::endl;
+	}
+	fileout.close();
+	getchar();
+}
+*/

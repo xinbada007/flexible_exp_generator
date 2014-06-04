@@ -194,24 +194,24 @@ osg::Group * Road::addLogRoadtoList(LogicRoad *refLR)
 			{
 				refLR->setPrev(_roadList.back());
 				_roadList.back()->setNext(refLR);
+				sw->setAllChildrenOff();
 			}
-			sw->setAllChildrenOff();
 			break;
 		case LWALL:
 			if (!_lWallList.empty())
 			{
 				refLR->setPrev(_lWallList.back());
 				_lWallList.back()->setNext(refLR);
+				sw->setAllChildrenOff();
 			}
-			sw->setAllChildrenOff();
 			break;
 		case RWALL:
 			if (!_rWallList.empty())
 			{
 				refLR->setPrev(_rWallList.back());
 				_rWallList.back()->setNext(refLR);
+				sw->setAllChildrenOff();
 			}
-			sw->setAllChildrenOff();
 			break;
 		case CTRL:
 			if (!_ctrlList.empty())
