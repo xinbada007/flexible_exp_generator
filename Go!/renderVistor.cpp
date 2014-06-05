@@ -15,7 +15,6 @@ RenderVistor::RenderVistor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
 {
 	_beginMode = GL_POINTS;
-	_stateset = NULL;
 }
 
 
@@ -35,7 +34,6 @@ void RenderVistor::reset()
 
 	_drawableList.clear();
 	_beginMode = GL_POINTS;
-	_stateset = NULL;
 }
 
 void RenderVistor::apply(osg::Group &refNode)
@@ -49,7 +47,8 @@ void RenderVistor::apply(osg::Group &refNode)
 		refS->traverse();
 
 		//set stateset
-		refS->setStateSet(bindStateset());
+		osg::ref_ptr<osg::StateSet> stateSet = refS->getOrCreateStateSet();
+		setStateset(stateSet);
 	}
 
 	//continuing traversing sub-scene
@@ -74,17 +73,14 @@ void RenderVistor::apply(osg::Geode &refGeode)
 	traverse(refGeode);
 }
 
-osg::StateSet * RenderVistor::bindStateset()
+void RenderVistor::setStateset(osg::ref_ptr<osg::StateSet> stateSet)
 {
-	osg::ref_ptr<osg::StateSet> ss;
-	ss = (_stateset) ? _stateset : new osg::StateSet;
+	osg::ref_ptr<osg::StateSet> ss = stateSet;
 
 	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 	osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
 	ss->setAttribute(pm);
-	
-	return ss.release();
 }
 
 void RenderVistor::draw() const

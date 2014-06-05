@@ -103,8 +103,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	mViewer->createBackgroundView();
 
 	mViewer->setRunMaxFrameRate(frameRate);
-	osgUtil::Optimizer optimizer;
-	optimizer.optimize(root.get());
 	mViewer->run();
 
 	//final work

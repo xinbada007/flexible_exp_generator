@@ -287,21 +287,15 @@ void deTexture::reset(){};
 
 void deTexture::apply(osg::Group &refNode)
 {
-	std::string libTemp = refNode.libraryName();
-	std::string libClass = refNode.className();
-	if (libTemp == "Car" && libClass == "Car")
-	{
-		traverse(refNode);
-		return;
-	}
-
 	Solid *refS = dynamic_cast<Solid*>(&refNode);
+	LogicRoad *lr = dynamic_cast<LogicRoad*>(&refNode);
 
 	if (refS)
 	{
-		if (!refS->getTexFile().empty())
+		if (refS->getImageTexture().valid())
 		{
 			osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
+			osg::notify(osg::NOTICE) << "Index \t" << refS->getIndex() << std::endl;
 			setTexture(refS);
 		}
 	}
@@ -311,29 +305,18 @@ void deTexture::apply(osg::Group &refNode)
 
 void deTexture::setTexture(Solid *refS)
 {
-	if (!refS)
+	if (!refS ||!refS->getImageTexture().valid())
 	{
 		return;
 	}
 
-	osg::Group *refG = refS->asGroup();
-	if (!refG)
-	{
-		return;
-	}
-
-	osg::StateSet *ss = refG->getOrCreateStateSet();
+	osg::StateSet *ss = refS->getOrCreateStateSet();
 	osg::ref_ptr<osg::PolygonMode> pm = dynamic_cast<osg::PolygonMode*>(ss->getAttribute(osg::StateAttribute::POLYGONMODE));
 	if (pm)
 	{
 		osg::PolygonMode::Mode polyMode = pm->getMode(osg::PolygonMode::FRONT_AND_BACK);
 		polyMode = (polyMode == osg::PolygonMode::FILL) ? osg::PolygonMode::LINE : osg::PolygonMode::FILL;
 		pm->setMode(osg::PolygonMode::FRONT_AND_BACK, polyMode);
-	}
-	else
-	{
-		pm = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
-		ss->setAttribute(pm);
 	}
 
 	osg::StateAttribute::GLModeValue textureMode = ss->getTextureMode(0, GL_TEXTURE_2D);

@@ -5,6 +5,7 @@
 
 #include <osg/Array>
 #include <osg/Geode>
+#include <osg/Image>
 
 #include "Nurbs.h"
 #include "math.h"
@@ -53,6 +54,9 @@ typedef struct RoadSet:public osg::Referenced
 		_density = 1000;
 
 		_scale.set(10.0f,10.0f,1.0f);
+
+		_imgRoad = NULL;
+		_imgWall = NULL;
 	}
 	
 	const double _laneWidth;	//laneWidth = 3.75 Meters
@@ -65,7 +69,9 @@ typedef struct RoadSet:public osg::Referenced
 	osg::Vec3d _scale;
 	
 	std::string _texture;
+	osg::ref_ptr<osg::Image> _imgRoad;
 	std::string _textureWall;
+	osg::ref_ptr<osg::Image> _imgWall;
 	stringList _roadTxt;
 	nurbsList _nurbs;
 

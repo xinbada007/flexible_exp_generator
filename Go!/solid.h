@@ -57,8 +57,7 @@ public:
 
 	inline void setTexCoord(osg::ref_ptr<osg::Vec2Array> refT) { _texCoord = refT; };
 	inline const osg::ref_ptr<osg::Vec2Array> getTexCoord() const { return _texCoord; };
-	inline void setTexFile(const std::string &refF) { _texFile = refF; };
-	inline const std::string getTexFile() { return _texFile; };
+	inline const osg::ref_ptr<osg::Image> getImageTexture() const { return _imgTexture; };
 
 	inline void setIndex(const unsigned ref){ _index = ref; };
 	inline unsigned getIndex() const { return _index; };
@@ -111,7 +110,7 @@ public:
 protected:
 	~Solid();
 	osg::ref_ptr<osg::Vec2Array> _texCoord;
-	std::string _texFile;
+	osg::ref_ptr<osg::Image> _imgTexture;
 
 private:
 	bool _updated;

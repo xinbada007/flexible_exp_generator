@@ -72,9 +72,15 @@ void CarEvent::calculateCarMovement()
 	_carState->_direction = _carState->_direction * 
 							osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
 	_carState->_direction.normalize();
-
 	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed);
+
+	//apply the shift vector
+	_carState->_shiftD = (_carState->_speed == 0) ? osg::Vec3d(0.0f,0.0f,0.0f) : _carState->_shiftD;
 	_moment *= osg::Matrix::translate(_carState->_shiftD);
+	
+	//apply reset matrix;
+	_moment *= _reset;
+	_carState->_direction = _carState->_direction * osg::Matrix::rotate(_reset.getRotate());
 }
 
 void CarEvent::autoNavigation()
@@ -142,6 +148,28 @@ void CarEvent::autoNavigation()
 	return;
 }
 
+void CarEvent::makeResetMatrix()
+{
+	if (_carState->_midLine->empty())
+	{
+		return;
+	}
+
+	double degree(0.0f);
+	osg::Vec3d carD, roadD;
+	carD = _carState->_direction;
+	carD.normalize();
+	roadD = (_carState->_midLine->front() - _carState->_midLine->back());
+	roadD.normalize();
+	degree = asin((carD^roadD).z());
+
+	_reset.makeIdentity();
+	_reset *= osg::Matrix::translate(_carState->_O_Project - _carState->_O);
+	_reset *= osg::Matrix::translate(-_carState->_O);
+	_reset *= osg::Matrix::rotate(degree, Z_AXIS);
+	_reset *= osg::Matrix::translate(_carState->_O);
+}
+
 bool CarEvent::Joystick()
 {
 	extern bool poll_joystick(int &x, int &y, int &b);
@@ -153,7 +181,7 @@ bool CarEvent::Joystick()
 
 	const double MAX(32767.0f);
 	const double MAX_ANGLE = 120.0f;
-	const double DEAD = 0.10f;
+	const double DEAD = 0.05f;
 	const int DeadZone(MAX*DEAD);
 	_carState->_swangle = (x / MAX)*MAX_ANGLE;
 
@@ -166,13 +194,40 @@ bool CarEvent::Joystick()
 	else if ((abs(x)) <= DeadZone)
 	{
 		_carState->_angle = 0.0f;
-		_carState->_swangle = 0.0f;
 		_shifted = false;
 	}
 
 	if (abs(y) > DeadZone)
 	{
-		_carState->_speed += _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
+		_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
+	}
+
+	const int B = b;
+	switch (B)
+	{
+	case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	case 5:
+		break;
+	case 6:
+		makeResetMatrix();
+		break;
+	case 7:
+		break;
+	case 8:
+		break;
+	case 9:
+		break;
+	default:
+		break;
 	}
 	return true;
 }
@@ -223,6 +278,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			_updated = true;
 		}
 		_moment.makeIdentity();
+		_reset.makeIdentity();
 
 		Joystick();
 
@@ -257,11 +313,17 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 		case osgGA::GUIEventAdapter::FRAME:
 
-// 			if (_carState->_speed > 0 && _carState->_collide)
-// 			{
-// 				_carState->_speed = _vehicle->_speed * .01f;
-// 				_carState->_collide = false;
-// 			}
+			if (_carState->_collide)
+			{
+				int sign = (_carState->_speed > 0) ? 1 : -1;
+				_carState->_speed = _vehicle->_speed * 0.1f * sign;
+				_carState->_collide = false;
+			}
+
+			if (!_reset.isIdentity())
+			{
+				_carState->_speed = 0.0f;
+			}
 
 			//1st
 			dynamicApply();
@@ -293,9 +355,9 @@ void CarEvent::applyCarMovement()
 
 	_mTransform->setMatrix(_carState->_state);
 
-	if (!_carState->_lastQuad.empty())
+	if (*_carState->_OQuad)
 	{
-		osg::ref_ptr<osg::Vec3dArray> navigationEdge = _carState->_lastQuad.back()->getLoop()->getNavigationEdge();
+		osg::ref_ptr<osg::Vec3dArray> navigationEdge = (*_carState->_OQuad)->getLoop()->getNavigationEdge();
 		const osg::Vec3d naviEdge = navigationEdge->back() - navigationEdge->front();
 		const osg::Vec3d O = _carState->_O;
 		const double lamida = ((O - navigationEdge->front()) * naviEdge) / naviEdge.length2();
@@ -310,6 +372,7 @@ void CarEvent::applyCarMovement()
 		_carState->_updated = true;
 	}
 
+	//isNAN Test
 	bool NANTEST(true);
 	osg::Vec3dArray *testNAN = _carState->_backWheel;
 	osg::Vec3dArray::const_iterator i = testNAN->begin();
@@ -353,6 +416,6 @@ void CarEvent::applyCarMovement()
 
 	if (NANTEST)
 	{
-		osg::notify(osg::FATAL) << "NAN FOUND!!!" << std::endl;
+		osg::notify(osg::WARN) << "NAN FOUND!!!" << std::endl;
 	}
 }

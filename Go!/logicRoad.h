@@ -68,17 +68,17 @@ public:
 		if (refTag ==  ROAD)
 		{
 			_width = refRS->_width;
-			_texFile = refRS->_texture;
+			_imgTexture = refRS->_imgRoad;
 		}
 		else if (refTag == LWALL || refTag == RWALL)
 		{
 			_width = refRS->_wallHeight;
-			_texFile = refRS->_textureWall;
+			_imgTexture = refRS->_imgWall;
 		}
 		else
 		{
 			_width = 0.0f;
-			_texFile.clear();
+			_imgTexture = NULL;
 		}
 	}
 

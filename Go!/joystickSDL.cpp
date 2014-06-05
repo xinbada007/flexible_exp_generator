@@ -50,15 +50,19 @@ bool poll_joystick(int &x, int &y, int &b)
 	unsigned int n;
 	signed short a;
 
-	x = 0; y = 0; b = 0;
+	x = 0; y = 0; b = -1;
 	SDL_JoystickUpdate();
 
 	for (i = 0; i < SDL_JoystickNumButtons(JOYSTICK.front());i++)
 	{
 		n = SDL_JoystickGetButton(JOYSTICK.front(), i);
-		if (!n)
+// 		if (!n)
+// 		{
+// 			b += int(std::pow(2.0f, i));
+// 		}
+		if (n)
 		{
-			b += int(std::pow(2.0f, i));
+			b = i;
 		}
 	}
 

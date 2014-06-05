@@ -9,6 +9,7 @@
 
 #include <osg/Notify>
 #include <osg/Geometry>
+#include <osgDB/ReadFile>
 
 using namespace std;
 
@@ -118,6 +119,19 @@ void ReadConfig::initializeAfterReadTrial()
 		alignCtrlPoints(prve);
 		updateNurbs(new NurbsCurve);
 		_roads->_nurbs.push_back(_nurbs.release());
+	}
+	//load the pic as texture
+	_roads->_imgRoad = osgDB::readImageFile(_roads->_texture);
+	_roads->_imgWall = osgDB::readImageFile(_roads->_textureWall);
+	if (!_roads->_imgRoad.valid())
+	{
+		osg::notify(osg::WARN) << "Unable to load Road texture file. Exiting." << std::endl;
+		_roads->_imgRoad = NULL;
+	}
+	if (!_roads->_imgWall.valid())
+	{
+		osg::notify(osg::WARN) << "Unable to load Wall texture file. Exiting." << std::endl;
+		_roads->_imgWall = NULL;
 	}
 
 	//Initialize Camera

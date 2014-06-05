@@ -32,7 +32,7 @@ void TextureVisitor::apply(osg::Group &refNode)
 
 	if (refS)
 	{
-		if (!refS->getTexFile().empty())
+		if (refS->getImageTexture().valid())
 		{
 			osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
 			if (texCoord(refS)) { texture(refS); }
@@ -83,30 +83,20 @@ bool TextureVisitor::texCoord(Solid *refS)
 
 void TextureVisitor::texture(Solid *refS)
 {
-	if (!refS)
+	if (!refS || !refS->getImageTexture().valid())
 	{
-		return;
-	}
-	osg::Group *refG = refS->asGroup();
-	if (!refG)
-	{
+		osg::notify(osg::FATAL) << "Unable to load texture file. Exiting." << std::endl;
 		return;
 	}
 
-	osg::StateSet *ss = refG->getOrCreateStateSet();
+	osg::StateSet *ss = refS->getOrCreateStateSet();
 	osg::ref_ptr<osg::PolygonMode> pm = dynamic_cast<osg::PolygonMode*>(ss->getAttribute(osg::StateAttribute::POLYGONMODE));
 	if (pm)
 	{
 		pm->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
 	}
 
-	const std::string &filename(refS->getTexFile());
-	osg::ref_ptr<osg::Image> image = osgDB::readImageFile(filename);
-	if (!image.valid())
-	{
-		osg::notify(osg::FATAL) << "Unable to load texture file. Exiting." << std::endl;
-		return;
-	}
+	const osg::ref_ptr<osg::Image> image = refS->getImageTexture();
 	osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D;
 	tex->setImage(image);
 	tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);

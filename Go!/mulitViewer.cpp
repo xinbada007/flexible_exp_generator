@@ -6,6 +6,7 @@
 #include <osg/Depth>
 #include <osgText/Text>
 #include <osgDB/ReadFile>
+#include <osg/Multisample>
 
 MulitViewer::MulitViewer():
 _screens(NULL), _mainView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL)
@@ -57,6 +58,10 @@ osgViewer::View * MulitViewer::createPowerWall()
 	double fovy = (_screens->_realworld->empty()) ? _screens->_fovy : _screens->_realworld->front();
 
 	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;
+	osg::ref_ptr<osg::DisplaySettings> displaySettings = new osg::DisplaySettings;
+	displaySettings->setNumMultiSamples(16);
+	view->setDisplaySettings(displaySettings.get());
+
 	view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, _screens->_horDistance, 1000.0f);
 	view->getCamera()->setClearColor(osg::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
 
@@ -132,6 +137,7 @@ osg::Camera * MulitViewer::createSlaveCamerainMainView(const unsigned screenNum,
 	traits->doubleBuffer = true;
 	traits->sharedContext = 0;
 	traits->vsync = true;
+	traits->samples = 16;
 
 	osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
 

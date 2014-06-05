@@ -7,7 +7,7 @@
 
 Solid::Solid():
 _next(NULL), _prev(NULL), _updated(false), _numPoints(0), _numPlanes(0),
-_startPlane(NULL), _startE(NULL), _startP(NULL), _texCoord(NULL), _texFile(""),
+_startPlane(NULL), _startE(NULL), _startP(NULL), _texCoord(NULL), _imgTexture(NULL),
 _lastPlane(NULL), _index(0)
 {
 
@@ -16,7 +16,7 @@ _lastPlane(NULL), _index(0)
 Solid::Solid(const Solid &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
 osg::Group(copy,copyop),
 _next(copy._next), _prev(copy._prev), _updated(copy._updated), _numPoints(copy._numPoints), _numPlanes(copy._numPlanes),
-_startPlane(copy._startPlane), _startE(copy._startE), _startP(copy._startP), _texCoord(copy._texCoord), _texFile(copy._texFile),
+_startPlane(copy._startPlane), _startE(copy._startE), _startP(copy._startP), _texCoord(copy._texCoord), _imgTexture(copy._imgTexture),
 _lastPlane(copy._lastPlane), _index(copy._index)
 {
 
