@@ -167,6 +167,7 @@ typedef struct Subjects:public osg::Referenced
 		_age = 0;
 		_gender = "N/A";
 		_driving = 0;
+		_randomRoads = false;
 	};
 	void setName(const std::string ref){ _name = ref; };
 	void setAge(const int ref){ _age = ref; };
@@ -174,6 +175,7 @@ typedef struct Subjects:public osg::Referenced
 	void setDriving(const double ref){ _driving = ref; };
 	void setFilePath(const std::string ref){ _filePath = ref; };
 	void setRecPath(const std::string ref){ _recTxt = ref; };
+	void setRandomRoads(const bool ref){ _randomRoads = ref; };
 
 	std::string getName() const { return _name; };
 	int getAge() const { return _age; };
@@ -181,6 +183,7 @@ typedef struct Subjects:public osg::Referenced
 	double getDriving() const { return _driving; };
 	std::string getFilePath() const { return _filePath; };
 	std::string getRecPath() const { return _recTxt; };
+	bool getRandomRoads() const { return _randomRoads; };
 
 protected:
 	virtual ~Subjects(){ std::cout << "Deconstruct Subjects" << std::endl; };
@@ -190,6 +193,7 @@ private:
 	int _age;
 	std::string _gender;
 	double _driving;
+	bool _randomRoads;
 
 	std::string _filePath;
 	std::string _recTxt;

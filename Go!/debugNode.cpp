@@ -294,8 +294,8 @@ void deTexture::apply(osg::Group &refNode)
 	{
 		if (refS->getImageTexture().valid())
 		{
-			osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
-			osg::notify(osg::NOTICE) << "Index \t" << refS->getIndex() << std::endl;
+			//osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
+			//osg::notify(osg::NOTICE) << "Index \t" << refS->getIndex() << std::endl;
 			setTexture(refS);
 		}
 	}

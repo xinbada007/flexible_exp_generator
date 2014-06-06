@@ -98,8 +98,8 @@ void CarEvent::autoNavigation()
 	
 	const double DOTPRODUCT = roadHeading*carHeading;
 	const double CROSSPRODUCT = (roadHeading^carHeading).z();
-	const double COSANGLE = acos(DOTPRODUCT);
-	const double SINANGLE = asin(CROSSPRODUCT);
+	const double COSANGLE = acosR(DOTPRODUCT);
+	const double SINANGLE = asinR(CROSSPRODUCT);
 	const bool SAMEDIRECTION = (DOTPRODUCT >= 0);
 	const bool LEFT = (CROSSPRODUCT >= 0);
 	const bool TURN = SAMEDIRECTION ? !LEFT : LEFT;
@@ -118,8 +118,8 @@ void CarEvent::autoNavigation()
 		roadHeading.normalize();
 		const double DOTPRODUCT = roadHeading*carHeading;
 		const double CROSSPRODUCT = (roadHeading^carHeading).z();
-		const double SINANGLE = asin(CROSSPRODUCT);
-		const double COSANGLE = acos(DOTPRODUCT);
+		const double SINANGLE = asinR(CROSSPRODUCT);
+		const double COSANGLE = acosR(DOTPRODUCT);
 		const bool SAMEDIRECTION = (DOTPRODUCT >= 0);
 		const bool LEFT = (CROSSPRODUCT >= 0);
 		turnF = SAMEDIRECTION ? !LEFT : LEFT;
@@ -161,7 +161,7 @@ void CarEvent::makeResetMatrix()
 	carD.normalize();
 	roadD = (_carState->_midLine->front() - _carState->_midLine->back());
 	roadD.normalize();
-	degree = asin((carD^roadD).z());
+	degree = asinR((carD^roadD).z());
 
 	_reset.makeIdentity();
 	_reset *= osg::Matrix::translate(_carState->_O_Project - _carState->_O);

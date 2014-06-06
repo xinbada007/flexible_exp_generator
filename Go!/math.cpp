@@ -447,3 +447,17 @@ bool isletter(const char c)
 
 	return false;
 }
+
+double acosR(double product)
+{
+	int sign = (product > 0) ? 1 : -1;
+	product = (abs(product) > 1.0f) ? sign : product;
+	return acos(product);
+}
+
+double asinR(double product)
+{
+	int sign = (product > 0) ? 1 : -1;
+	product = (abs(product) > 1.0f) ? sign : product;
+	return asin(product);
+}

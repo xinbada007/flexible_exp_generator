@@ -229,18 +229,62 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 		iCar = carArray->begin();
 		while (iCar != carArray->end())
 		{
-			step = (!step) ? .05f * (*iQuad)->getHomeS()->getNumPlanes() : step;
-			Plane::reverse_across_iterator location = *iQuad;
-			Plane::reverse_across_iterator begin = location - step;
-			Plane::reverse_across_iterator end = location + step;
+			const unsigned iLoc = iCar - carArray->begin();
+			const unsigned iIndex = iCar - carArray->begin() + 1;
+			Plane *loc, *pl;
+			iQuad = lasQuad.cbegin();
+			while (iQuad != lasQuad.cend())
+			{
+				step = (!step) ? .05f * (*iQuad)->getHomeS()->getNumPlanes() : step;
+				Plane::reverse_across_iterator location = *iQuad;
+				Plane::reverse_across_iterator begin = location - step;
+				Plane::reverse_across_iterator end = location + step;
 
-			Plane *loc = locateCar(begin, end, *iCar);
-			Plane *pl = (loc) ? loc : *location;
-			list.push_back(pl);
-			curList.push_back(loc);
+				loc = locateCar(begin, end, *iCar);
+				location = lasQuad[iLoc];
+				pl = (loc) ? loc : *location;
+				if (loc)
+				{
+					if (list.size() < iIndex)
+					{
+						list.push_back(pl);
+					}
+					if (curList.size() < iIndex)
+					{
+						curList.push_back(loc);
+					}
+					break;
+				}
+				++iQuad;
+			}
+			if (list.size() < iIndex)
+			{
+				list.push_back(pl);
+			}
+			if (curList.size() < iIndex)
+			{
+				curList.push_back(loc);
+			}
 			++iCar;
-			++iQuad;
-		}		
+
+			
+// 			step = (!step) ? .05f * (*iQuad)->getHomeS()->getNumPlanes() : step;
+// 			Plane::reverse_across_iterator location = *iQuad;
+// 			Plane::reverse_across_iterator begin = location - step;
+// 			Plane::reverse_across_iterator end = location + step;
+// 
+// 			Plane *loc = locateCar(begin, end, *iCar);
+// 			Plane *pl = (loc) ? loc : *location;
+// 			list.push_back(pl);
+// 			curList.push_back(loc);
+// 			++iCar;
+// 			++iQuad;
+		}
+
+		if (list.size() != carArray->size() || curList.size() != carArray->size())
+		{
+			std::cout << "Hello" << std::endl;
+		}
 	}
 
 	//reduce the size of possible wall that the car would collide

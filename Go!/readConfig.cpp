@@ -68,6 +68,100 @@ void ReadConfig::assignConfig()
 
 void ReadConfig::initializeAfterReadTrial()
 {
+	//Initialize Subjects
+	//have to be first executed
+	if (_subjects)
+	{
+		const int numRoads = _roads->_roadTxt.size();
+		if (numRoads > 1 && _subjects->getRandomRoads())
+		{
+			srand((unsigned)time(NULL));
+			std::vector<int> roads;
+			while (roads.size() != numRoads)
+			{
+				int r = rand() % numRoads;
+				bool drop(false);
+				std::vector<int>::const_iterator i = roads.cbegin();
+				while (i != roads.cend())
+				{
+					if (r == *i)
+					{
+						drop = true;
+						break;
+					}
+					i++;
+				}
+				if (!drop)
+				{
+					roads.push_back(r);
+				}
+			}
+
+			std::vector<int>::const_iterator iroads = roads.cbegin();
+			stringList newRoadTxt;
+			while (newRoadTxt.size() != _roads->_roadTxt.size())
+			{
+				newRoadTxt.push_back(_roads->_roadTxt[*iroads++]);
+			}
+
+			_roads->_roadTxt.clear();
+			_roads->_roadTxt = newRoadTxt;
+			newRoadTxt.clear();
+		}
+
+		char timestr[10], datestr[10];
+		_strtime_s(timestr, sizeof(timestr));
+		_strdate_s(datestr, sizeof(datestr));
+		timestr[2] = '-', timestr[5] = '-';
+		datestr[2] = '-', datestr[5] = '-';
+
+		const string timedir = timestr;
+		const string datedir = datestr;
+		const string dirPath = "..\\" + _subjects->getName();
+		const string path = dirPath + ".\\" + datestr + '-' + timedir;
+		if (_access(dirPath.c_str(), 6) == -1) //if doesn't find the directory
+		{
+			if (_mkdir(dirPath.c_str()) == -1)//creat one
+			{
+				osg::notify(osg::FATAL) << "Cannot create folder" << endl;
+			}
+		}
+		if (_access((path).c_str(), 6) == -1)
+		{
+			if (_mkdir((path).c_str()) == -1)//creat sub dir based on time
+			{
+				osg::notify(osg::FATAL) << "Cannot create folder" << endl;
+			}
+		}
+		const string out = path + "\\" + _subjects->getName() + ".txt";
+		fstream fileout(out.c_str(), ios::out);
+		ifstream filein(_subjects->getFilePath().c_str());
+		if (!fileout.is_open() || !filein)
+		{
+			osg::notify(osg::FATAL) << "Cannot copy config file" << std::endl;
+			fileout.close();
+			filein.close();
+		}
+		else
+		{
+			filein.seekg(0, std::ios::beg);
+			fileout << filein.rdbuf();
+			stringList::const_iterator iRoads = _roads->_roadTxt.cbegin();
+			while (iRoads != _roads->_roadTxt.cend())
+			{
+				if (iRoads == _roads->_roadTxt.cbegin())
+				{
+					fileout << "\n" << "#" <<"Roads:\t";
+				}
+				fileout << *iRoads << ";";
+				iRoads++;
+			}
+			_subjects->setRecPath(path);
+			filein.close();
+			fileout.close();
+		}
+	}
+
 	//Initialize Screen
 	osg::GraphicsContext::WindowingSystemInterface *wsi;
 	wsi = osg::GraphicsContext::getWindowingSystemInterface();
@@ -143,52 +237,6 @@ void ReadConfig::initializeAfterReadTrial()
 		_camset->_offset->push_back(-_screens->_horDistance);
 		//set Z offset
 		_camset->_offset->push_back(_screens->_verDistance + _screens->_verOffset);
-	}
-
-	//Initialize Subjects
-	if (_subjects)
-	{
-		char timestr[10], datestr[10];
-		_strtime_s(timestr, sizeof(timestr));
-		_strdate_s(datestr, sizeof(datestr));
-		timestr[2] = '-', timestr[5] = '-';
-		datestr[2] = '-', datestr[5] = '-';
-
-		const string timedir = timestr;
-		const string datedir = datestr;
-		const string dirPath = "..\\" + _subjects->getName();
-		const string path = dirPath + ".\\" + datestr + '-' + timedir;
-		if (_access(dirPath.c_str(), 6) == -1) //if doesn't find the directory
-		{
-			if (_mkdir(dirPath.c_str()) == -1)//creat one
-			{
-				osg::notify(osg::FATAL) << "Cannot create folder" << endl;
-			}
-		}
-		if (_access((path).c_str(), 6) == -1)
-		{
-			if (_mkdir((path).c_str()) == -1)//creat sub dir based on time
-			{
-				osg::notify(osg::FATAL) << "Cannot create folder" << endl;
-			}
-		}
-		const string out = path + "\\" + _subjects->getName() + ".txt";
-		fstream fileout(out.c_str(), ios::out);
-		ifstream filein(_subjects->getFilePath().c_str());
-		if (!fileout.is_open() || !filein)
-		{
-			osg::notify(osg::FATAL) << "Cannot copy config file" << std::endl;
-			fileout.close();
-			filein.close();
-		}
-		else
-		{
-			filein.seekg(0, std::ios::beg);
-			fileout << filein.rdbuf();
-			_subjects->setRecPath(path);
-			filein.close();
-			fileout.close();
-		}
 	}
 }
 
@@ -286,6 +334,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string AGE = "AGE";
 		const string GENDER = "GENDER";
 		const string DRIVING = "DRIVING";
+		const string RROAD = "RANDOMROADS";
 		while (flag == SUBJECTS && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -321,6 +370,18 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == RROAD)
+			{
+				config.erase(config.begin(), config.begin() + RROAD.size());
+				if (!config.empty())
+				{
+					int rr = stoi(config);
+					bool RR = (rr == 1) ? true : false;
+					_subjects->setRandomRoads(RR);
+				}
+				continue;
+			}
+
 			flag = config;
 			flag = getTillFirstSpaceandToUpper(flag);
 			continue;

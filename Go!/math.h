@@ -52,6 +52,9 @@ bool ifPoint_IN_Polygon(Point refP, osg::ref_ptr<osg::Vec3dArray> refPoly, const
 
 bool isletter(const char c);
 
+double acosR(double product);
+double asinR(double product);
+
 struct searchIndex
 {
 	searchIndex(unsigned ref) :_index(ref){};
