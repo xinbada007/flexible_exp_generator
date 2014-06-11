@@ -57,6 +57,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//Build Road && Render Road && Texture Road
 	osg::ref_ptr<Road> road = obtainRoad(readConfig);
+
 	road->accept(*rv);
 	road->accept(*tv);
 

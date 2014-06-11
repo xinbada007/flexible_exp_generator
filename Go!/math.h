@@ -52,6 +52,9 @@ bool ifPoint_IN_Polygon(Point refP, osg::ref_ptr<osg::Vec3dArray> refPoly, const
 
 bool isletter(const char c);
 
+bool isNumber(const char c);
+bool isNumber(const std::string &ref);
+
 double acosR(double product);
 double asinR(double product);
 

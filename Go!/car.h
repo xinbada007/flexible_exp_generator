@@ -42,8 +42,13 @@ typedef struct CarState:public osg::Referenced
 
 		_OQuad = NULL;
 
+		_D_Speed = _speed;
+		_D_Angle = _angle;
+
 		_state.makeIdentity();
 		_moment.makeIdentity();
+
+		_saveState = new osg::MatrixdArray;
 	};
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
@@ -76,9 +81,16 @@ typedef struct CarState:public osg::Referenced
 
 	osg::Matrix _state;
 	osg::Matrix _moment;
+	osg::ref_ptr<osg::MatrixdArray> _saveState;
 
+	void convertSpeed(){ _D_Speed = _speed * frameRate *3.6f; };
+	void convertAngle(){ _D_Angle = _angle * frameRate / TO_RADDIAN; };
+	double getSpeed() const { return _D_Speed; };
+	double getAngle() const { return _D_Angle; };
 private:
 	~CarState(){};
+	double _D_Speed;
+	double _D_Angle;
 }CarState;
 
 class Car:public EulerPoly

@@ -397,6 +397,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string VOFFSET = "VOFFSET";
 		const string FOVY = "FOVY";
 		const string DISTOR = "DISTORTION";
+		const string FXAA = "MULTISAMPLES";
 		while (flag == SCREEN && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -480,6 +481,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_screens->_distortion = stod(config);
+				}
+				continue;
+			}
+			else if (title == FXAA)
+			{
+				config.erase(config.begin(), config.begin() + FXAA.size());
+				if (!config.empty())
+				{
+					_screens->_fxaa = stoi(config);
 				}
 				continue;
 			}

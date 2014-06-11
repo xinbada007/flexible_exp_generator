@@ -280,7 +280,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		_moment.makeIdentity();
 		_reset.makeIdentity();
 
-		Joystick();
+		//Joystick();
 
 		const int &key = ea->getKey();
 		switch (ea->getEventType())
@@ -288,8 +288,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		case osgGA::GUIEventAdapter::KEYDOWN:
 			if ((key == 'a' || key == 'd'))
 			{
-				_leftTurn = (key == 'a');
-				_carState->_angle += _vehicle->_rotate*_carState->_angle_incr;
+				int sign = (key == 'a') ? 1 : -1;
+				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
+				_leftTurn = (sign == 1);
 				_shifted = true;
 				break;
 			}
@@ -355,6 +356,7 @@ void CarEvent::applyCarMovement()
 
 	_mTransform->setMatrix(_carState->_state);
 
+	//set carstate
 	if (*_carState->_OQuad)
 	{
 		osg::ref_ptr<osg::Vec3dArray> navigationEdge = (*_carState->_OQuad)->getLoop()->getNavigationEdge();
@@ -370,6 +372,12 @@ void CarEvent::applyCarMovement()
 		copy(navigationEdge->begin(), navigationEdge->end(), std::back_inserter(*_carState->_midLine));
 
 		_carState->_updated = true;
+	}
+
+	//set carstate
+	{
+		_carState->convertSpeed();
+		_carState->convertAngle();
 	}
 
 	//isNAN Test

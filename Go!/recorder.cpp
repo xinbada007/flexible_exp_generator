@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <fstream>
+#include <atlstr.h>
 
 #include <osg/Notify>
 
@@ -35,6 +36,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f)
 	_outMoment.push_back(&_recS._HY);
 	_outMoment.push_back(&_recS._HZ);
 	_outMoment.push_back(&_recS._HA);
+	_outMoment.push_back(&_recS._AHA);
 	_outMoment.push_back(&_recS._speed);
 
 	_outMoment.push_back(&_recS._PERIOD);
@@ -58,6 +60,22 @@ bool Recorder::output(ReadConfig *rc)
 	}
 
 	wout << _txtRecorder << std::endl;
+
+	//save state
+	{
+		if (!_saveState.empty())
+		{
+			const std::string filename = rc->getSubjects()->getRecPath() + "\\savestate.txt";
+			ofstream wout(filename);
+			if (!wout)
+			{
+				osg::notify(osg::FATAL) << "cannot create savestate file" << std::endl;
+				return false;
+			}
+
+			wout << _saveState << std::endl;
+		}
+	}
 
 	return true;
 }
@@ -135,7 +153,7 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, HZ, nDigit);
 	_recS._HZ = tempd + _recS._TAB;
 
-	double speed = carState->_speed;
+	double speed = carState->getSpeed();
 	_gcvt_s(tempd, size_tempd, speed, nDigit);
 	_recS._speed = tempd + _recS._TAB;
 
@@ -146,16 +164,21 @@ void Recorder::rectoTxt(const CarState *carState)
 		osg::ref_ptr<osg::Vec3dArray> navigationEdge = carState->_lastQuad.back()->getLoop()->getNavigationEdge();
 		osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
 		naviEdge.normalize();
-		double dA = acosR(carD*naviEdge);
+		double dA = (acosR(carD*naviEdge) / TO_RADDIAN);
 		_gcvt_s(tempd, size_tempd, dA, nDigit);
 		_recS._dAngle = tempd + _recS._TAB;
 	}
 
 	osg::Vec3d carD_LastFrame = carState->_directionLastFrame;
 	carD_LastFrame.normalize();
-	const double HA = asinR((carD ^ carD_LastFrame).z());
+	const double AHA = (asinR((carD ^ carD_LastFrame).z()) / TO_RADDIAN);
+	const double HA = AHA * frameRate;
 	_gcvt_s(tempd, size_tempd, HA, nDigit);
 	_recS._HA = tempd + _recS._TAB;
+
+	_recS._accumulativeHeading += AHA;
+	_gcvt_s(tempd, size_tempd, _recS._accumulativeHeading, nDigit);
+	_recS._AHA = tempd + _recS._TAB;
 
 	const osg::Vec3d O = carState->_O;
 	const osg::Vec3d N = carState->_O_Project;
@@ -171,11 +194,43 @@ void Recorder::copy()
 	while (i != _outMoment.cend())
 	{
 		_txtRecorder += **i;
-		content += **i;
+		if (isNumber(**i))
+		{
+			float number = (stof(**i));
+			int i_number = number;
+			char temp[20];
+			unsigned temp_size = sizeof(temp);
+			if (!(number - i_number))
+			{
+				sprintf_s(temp, temp_size, "%d", i_number);
+			}
+			else
+			{
+				sprintf_s(temp, temp_size, "%.2f", number);
+			}
+			content += temp;
+			content.push_back('\t');
+		}
+		else
+		{
+			content += **i;
+		}
 		i++;
 	}
 
-	osgText::String text;
+	setStatus(content);
+}
+
+void Recorder::setStatus(const std::string &content)
+{
+	const unsigned TIME(0), FPS(1), FRAME(2), CRASH(3);
+	const unsigned RB(4), RU(5), LU(6), LB(7), OC(8);
+	const unsigned DITHER(9), DANGLE(10), SWANGLE(11);
+	const unsigned OX(12), OY(13), OZ(14);
+	const unsigned HX(15), HY(16), HZ(17);
+	const unsigned HA(18), SPEED(20);
+
+	std::string text;
 	std::string::const_iterator iter = content.cbegin();
 	unsigned numTab(0);
 	while (iter != content.cend())
@@ -189,20 +244,50 @@ void Recorder::copy()
 			numTab++;
 			switch (numTab)
 			{
+			case 3:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "Crash: ";
+				break;
 			case 4:
 				text.push_back('\n');
+				text += "RB RU LU LB OC: ";
 				break;
 			case 9:
 				text.push_back('\n');
+				text += "Dither: ";
+				break;
+			case 10:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "DAngle: ";
+				break;
+			case 11:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "S\\W: ";
 				break;
 			case 12:
 				text.push_back('\n');
+				text += "Original: ";
 				break;
 			case 15:
 				text.push_back('\n');
+				text += "Heading: ";
 				break;
 			case 18:
 				text.push_back('\n');
+				text += "Wheel Angle: ";
+				break;
+			case 19:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "Accumulative Heading: ";
+				break;
+			case 20:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "SPEED: ";
 				break;
 			default:
 				text.push_back(' ');
@@ -230,6 +315,36 @@ void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		rectoTxt(carState);
 
 		copy();
+	}
+
+	//enable savestate
+	if (carState)
+	{
+		if (carState->_frameStamp > 1)
+		{
+			const osg::Matrixd &m = carState->_state;
+			char temp[10];
+			const unsigned temp_size = sizeof(temp);
+			_itoa_s(carState->_frameStamp, temp, temp_size);
+			_saveState += temp;
+			_saveState.push_back('\n');
+			//m is 4*4
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					double number = m(i, j);
+					char temp[20];
+					const unsigned temp_size = sizeof(temp);
+					const unsigned nDigit(6);
+					_gcvt_s(temp, temp_size, number, nDigit);
+					_saveState += temp;
+					_saveState.push_back('\t');
+				}
+				_saveState.push_back('\n');
+			}
+			_saveState.push_back('\n');
+		}
 	}
 
 	traverse(node, nv);

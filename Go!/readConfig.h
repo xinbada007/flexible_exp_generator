@@ -123,6 +123,7 @@ typedef struct Screens:public osg::Referenced
 		_verDistance = 1.2f;
 		_verOffset = 0.0f;
 		_distortion = 1.0f;
+		_fxaa = 4;
 
 		_scrs = new osg::UIntArray;
 		_realworld = new osg::DoubleArray;
@@ -135,6 +136,7 @@ typedef struct Screens:public osg::Referenced
 	double _verDistance;
 	double _verOffset;
 	double _distortion;
+	unsigned _fxaa;
 
 	osg::ref_ptr<osg::UIntArray> _scrs;
 	osg::ref_ptr<osg::DoubleArray> _realworld;

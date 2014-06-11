@@ -7,7 +7,8 @@
 
 #include <vector>
 
-typedef std::vector<LogicRoad*> logicRoadList;
+//typedef std::vector<osg::ref_ptr<LogicRoad>> logicRoadList;
+typedef std::vector<LogicRoad *> logicRoadList;
 
 class Road :
 	public osg::Switch
@@ -38,18 +39,13 @@ private:
 	logicRoadList _midList;
 };
 
-/*
+
 class ListRoadVisitor :
 	public osg::NodeVisitor
 {
+public:
 	ListRoadVisitor() :osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN){};
-	virtual ~ListRoadVisitor();
+	virtual ~ListRoadVisitor(){};
 
 	void apply(osg::Group &node);
 };
-
-void ListRoadVisitor::apply(osg::Group &node)
-{
-
-}
-*/

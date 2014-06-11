@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "DeConstructerVisitor.h"
+#include "logicRoad.h"
 
 #include <osg/Group>
 
@@ -33,5 +34,24 @@ void DeConstructerVisitor::apply(osg::Node& node)
 		{
 			group->removeChild(0,group->getNumChildren());
 		}
+	}
+	LogicRoad *lr = dynamic_cast<LogicRoad*>(&node);
+	if (lr)
+	{
+		lr->setPrev(NULL);
+	}
+	if (lr)
+	{
+		lr->setNext(NULL);
+	}
+
+	Solid *solid = dynamic_cast<Solid*>(&node);
+	if (solid)
+	{
+		solid->setPrev(NULL);
+	}
+	if (solid)
+	{
+		solid->setNext(NULL);
 	}
 }

@@ -239,3 +239,19 @@ osg::Group * Road::addLogRoadtoList(LogicRoad *refLR)
 
 	return NULL;
 }
+
+void ListRoadVisitor::apply(osg::Group &node)
+{
+	LogicRoad *lr = dynamic_cast<LogicRoad*>(&node);
+	if (lr)
+	{
+		std::cout << lr->referenceCount() << std::endl;
+		lr->setNext(NULL);
+		if (lr)
+		{
+			lr->setPrev(NULL);
+		}
+	}
+
+	traverse(node);
+}

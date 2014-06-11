@@ -448,6 +448,29 @@ bool isletter(const char c)
 	return false;
 }
 
+bool isNumber(const char c)
+{
+	if (c >= '0' && c <= '9')
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool isNumber(const std::string &ref)
+{
+	try
+	{
+		stod(ref);
+	}
+	catch (std::invalid_argument& ia)
+	{
+		return false;
+	}
+	return true;
+}
+
 double acosR(double product)
 {
 	int sign = (product > 0) ? 1 : -1;
