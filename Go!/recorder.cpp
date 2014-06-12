@@ -15,7 +15,7 @@
 using namespace std;
 
 Recorder::Recorder() :_statusText(new osgText::Text),
-_lastFrameStamp(0), _lastTimeReference(0.0f)
+_lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n")
 {
 	_outMoment.push_back(&_recS._time);
 	_outMoment.push_back(&_recS._fps);
@@ -38,10 +38,12 @@ _lastFrameStamp(0), _lastTimeReference(0.0f)
 	_outMoment.push_back(&_recS._HA);
 	_outMoment.push_back(&_recS._AHA);
 	_outMoment.push_back(&_recS._speed);
+	_outMoment.push_back(&_recS._dynamic);
+	_outMoment.push_back(&_recS._replay);
 
 	_outMoment.push_back(&_recS._PERIOD);
 
-	copy();
+	copyandSetHUDText();
 }
 
 Recorder::~Recorder()
@@ -50,7 +52,12 @@ Recorder::~Recorder()
 }
 
 bool Recorder::output(ReadConfig *rc)
-{
+{	
+	if (rc->isReplay())
+	{
+		return false;
+	}
+
 	const std::string filename = rc->getSubjects()->getRecPath() + "\\rec.txt";
 	ofstream wout(filename);
 	if (!wout)
@@ -128,6 +135,10 @@ void Recorder::rectoTxt(const CarState *carState)
 	_recS._lb = temp + _recS._TAB;
 	_itoa_s(oc, temp, size_temp);
 	_recS._oc = temp + _recS._TAB;
+
+	const int dynamic = (carState->_dynamic) ? 1 : 0;
+	_itoa_s(dynamic, temp, size_temp);
+	_recS._dynamic = temp + _recS._TAB;
 	
 	double swAngle = carState->_swangle;
 	_gcvt_s(tempd, size_tempd, swAngle, nDigit);
@@ -164,7 +175,8 @@ void Recorder::rectoTxt(const CarState *carState)
 		osg::ref_ptr<osg::Vec3dArray> navigationEdge = carState->_lastQuad.back()->getLoop()->getNavigationEdge();
 		osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
 		naviEdge.normalize();
-		double dA = (acosR(carD*naviEdge) / TO_RADDIAN);
+		const osg::Vec3d cross = naviEdge^carD;
+		double dA = (asinR(cross.z()) / TO_RADDIAN);
 		_gcvt_s(tempd, size_tempd, dA, nDigit);
 		_recS._dAngle = tempd + _recS._TAB;
 	}
@@ -185,15 +197,54 @@ void Recorder::rectoTxt(const CarState *carState)
 	const double dis = (N - O).length();
 	_gcvt_s(tempd, size_tempd, dis, nDigit);
 	_recS._dither = tempd + _recS._TAB;
+
+	if (carState->_replay)
+	{
+		_recS._replay = "\n" + carState->getReplayText();
+	}
 }
 
-void Recorder::copy()
+void Recorder::copyandSetHUDText()
 {
 	std::vector<const std::string*>::const_iterator i = _outMoment.cbegin();
 	std::string content;
 	while (i != _outMoment.cend())
 	{
 		_txtRecorder += **i;
+		if (isNumber(**i))
+		{
+			float number = (stof(**i));
+			int i_number = number;
+			char temp[20];
+			unsigned temp_size = sizeof(temp);
+			if (!(number - i_number))
+			{
+				sprintf_s(temp, temp_size, "%d", i_number);
+			}
+			else
+			{
+				sprintf_s(temp, temp_size, "%.2f", number);
+			}
+			content += temp;
+			content.push_back('\t');
+		}
+		else
+		{
+			content += **i;
+		}
+		i++;
+	}
+
+	setStatus(content);
+}
+
+void Recorder::setHUDText()
+{
+	std::vector<const std::string*>::const_iterator i = _outMoment.cbegin();
+	std::string content;
+
+	while (i != _outMoment.cend())
+	{
 		if (isNumber(**i))
 		{
 			float number = (stof(**i));
@@ -314,18 +365,27 @@ void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)
 	{
 		rectoTxt(carState);
 
-		copy();
+		if (carState->_replay)
+		{
+			setHUDText();
+		}
+		else
+		{
+			copyandSetHUDText();
+		}
 	}
 
 	//enable savestate
-	if (carState)
+	//last to apply
+	if (carState && !carState->_saveState)
 	{
 		if (carState->_frameStamp > 1)
 		{
-			const osg::Matrixd &m = carState->_state;
+			const osg::Matrixd &m = carState->_moment;
 			char temp[10];
 			const unsigned temp_size = sizeof(temp);
 			_itoa_s(carState->_frameStamp, temp, temp_size);
+			_saveState += "\nFrame:\t";
 			_saveState += temp;
 			_saveState.push_back('\n');
 			//m is 4*4
@@ -343,6 +403,7 @@ void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				}
 				_saveState.push_back('\n');
 			}
+			_saveState += "Dynamic:\t" + _recS._dynamic;
 			_saveState.push_back('\n');
 		}
 	}

@@ -25,7 +25,14 @@ Car * obtainCar(ReadConfig *rc)
 osg::MatrixTransform *obtainCarMatrix(Car *car)
 {
 	osg::ref_ptr<osg::MatrixTransform> carMatrix = new osg::MatrixTransform;
-	carMatrix->addEventCallback(new CarEvent);
+	if (!car->getCarState()->_saveState)
+	{
+		carMatrix->addEventCallback(new CarEvent);
+	}
+	else
+	{
+		carMatrix->addEventCallback(new CarReplay);
+	}
 	carMatrix->setUserData(car);
 	carMatrix->addChild(car);
 
@@ -41,14 +48,33 @@ CameraEvent *obtainCamMatrix(ReadConfig *rc, Car *car)
 	return camMatrix.release();
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int _tmain(int argc, char* argv[])
 {
 	extern bool init_joystick();
 	init_joystick();
 
-	//first read config from txt file
-	string filename = "../Resources/config.txt";
-	osg::ref_ptr<ReadConfig> readConfig = new ReadConfig(filename);
+	//obtain filename
+	string configFile;
+	string replayFile;
+	osg::ref_ptr<ReadConfig> readConfig;
+	if (argc == 1)
+	{
+		configFile = "..//Resources//config.txt";
+		replayFile = "..//Resources//savestate.txt";
+//		readConfig = new ReadConfig(configFile);
+		readConfig = new ReadConfig(configFile, replayFile);
+	}
+	else if (argc == 2)
+	{
+		configFile = argv[1];
+		readConfig = new ReadConfig(configFile);
+	}
+	else if (argc > 2)
+	{
+		configFile = argv[1];
+		replayFile = argv[2];
+		readConfig = new ReadConfig(configFile, replayFile);
+	}
 
 	//Always Render first and then texture
 	osg::ref_ptr<RenderVistor> rv = new RenderVistor;

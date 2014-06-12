@@ -24,6 +24,7 @@
 #include "solid.h"
 #include "switchVisitor.h"
 #include "textureVisitor.h"
+#include "carReplay.h"
 
 #include <iostream>
 

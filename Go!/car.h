@@ -22,6 +22,7 @@ typedef struct CarState:public osg::Referenced
 		_speed = 0.0f;
 		_speed_incr = 0.2f;
 		_dither = 0.0f;
+		_dynamic = true; //acceleration mode
 
 		_collide = false;
 		_updated = false;
@@ -48,7 +49,9 @@ typedef struct CarState:public osg::Referenced
 		_state.makeIdentity();
 		_moment.makeIdentity();
 
-		_saveState = new osg::MatrixdArray;
+		_saveState = NULL;
+		_dynamicState = NULL;
+		_replay = false;
 	};
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
@@ -72,6 +75,7 @@ typedef struct CarState:public osg::Referenced
 	double _speed;
 	double _speed_incr;	
 	double _dither;
+	bool _dynamic;
 
 	bool _collide;
 	bool _updated;
@@ -82,15 +86,20 @@ typedef struct CarState:public osg::Referenced
 	osg::Matrix _state;
 	osg::Matrix _moment;
 	osg::ref_ptr<osg::MatrixdArray> _saveState;
+	osg::ref_ptr<osg::IntArray> _dynamicState;
+	bool _replay;
 
 	void convertSpeed(){ _D_Speed = _speed * frameRate *3.6f; };
 	void convertAngle(){ _D_Angle = _angle * frameRate / TO_RADDIAN; };
 	double getSpeed() const { return _D_Speed; };
 	double getAngle() const { return _D_Angle; };
-private:
+	void setReplayText(std::string ref) { if (_replay) _replayText = ref; };
+	const std::string & getReplayText() const { return _replayText; };
 	~CarState(){};
+private:
 	double _D_Speed;
 	double _D_Angle;
+	std::string _replayText;
 }CarState;
 
 class Car:public EulerPoly

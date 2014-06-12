@@ -33,6 +33,7 @@ private:
 
 	osg::Vec3d _eye_X_Axis;
 	osg::Vec3d _eye_Z_Axis;
+	osg::Vec3d _eye_Y_Axis;
 
 	bool _reset;
 	bool _eyeTracker;

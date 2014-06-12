@@ -27,10 +27,10 @@ CarPic:		../Resources/texture/car.png
 [RoadSettings]
 RoadLanes:	4
 RoadPic:	../Resources/texture/road4096-2.png
-#RoadTxt:	../Resources/nurbsRoads/straightLine.txt;
-#RoadTxt:	../Resources/nurbsRoads/straightLine.txt;
-#RoadTxt:	../Resources/nurbsRoads/circularRoad.txt;
+
+#RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/1.txt;../Resources/nurbsRoads/0.txt;
+
 Density:	1000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg

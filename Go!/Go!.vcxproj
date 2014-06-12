@@ -88,6 +88,7 @@
     <ClInclude Include="cameraEvent.h" />
     <ClInclude Include="car.h" />
     <ClInclude Include="carEvent.h" />
+    <ClInclude Include="carReplay.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="collVisitor.h" />
     <ClInclude Include="debugNode.h" />
@@ -119,6 +120,7 @@
     <ClCompile Include="cameraEvent.cpp" />
     <ClCompile Include="car.cpp" />
     <ClCompile Include="carEvent.cpp" />
+    <ClCompile Include="carReplay.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="collVisitor.cpp" />
     <ClCompile Include="debugNode.cpp" />

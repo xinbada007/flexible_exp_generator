@@ -52,4 +52,16 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 		_carState->_carArray->back().z() = 0.0f;
 	}
 	_carState->_carArray->push_back(_carState->_O);
+
+	if (refRC->getSaveState())
+	{
+		_carState->_saveState = refRC->getSaveState();
+	}
+	if (refRC->getDynamicState())
+	{
+		_carState->_dynamicState = refRC->getDynamicState();
+	}
+
+	//set acceleration mode
+	_carState->_dynamic = _vehicle->_acceleration;
 }

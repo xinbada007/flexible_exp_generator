@@ -187,6 +187,7 @@ typedef struct Subjects:public osg::Referenced
 	std::string getRecPath() const { return _recTxt; };
 	bool getRandomRoads() const { return _randomRoads; };
 
+	stringList _roads;
 protected:
 	virtual ~Subjects(){ std::cout << "Deconstruct Subjects" << std::endl; };
 
@@ -206,6 +207,7 @@ class ReadConfig:public osg::Referenced
 {
 public:
 	ReadConfig(const std::string &filename);
+	ReadConfig(const std::string &config, const std::string &replay);
 
 	Nurbs * getNurbs() const { return _nurbs.get(); };
 	RoadSet * getRoadSet() const { return _roads.get(); };
@@ -215,7 +217,9 @@ public:
 	Subjects *getSubjects() const { return _subjects.get(); };
 	osg::Matrix getDistortionMatrix() const{  return osg::Matrix::scale(osg::Vec3d(1.0f,1.0f,1.0f / _screens->_distortion)); };
 	osg::Geode* measuer();
-
+	osg::MatrixdArray *getSaveState() const { return _saveState.get(); };
+	osg::IntArray *getDynamicState() const { return _dynamicState.get(); };
+	bool isReplay() const { return _replay; };
 	//test
 	osg::ref_ptr<osg::Vec3dArray> _measuerment;
 	//test
@@ -229,6 +233,7 @@ private:
 	bool byPassSpace(std::ifstream &in, std::string &content);
 	std::string getTillFirstSpaceandToUpper(std::string &content);
 	void readTrial(std::ifstream &filein);
+	void readReply(std::ifstream &filein);
 	void initializeAfterReadTrial();
 	Nurbs * readNurbs();
 	void scaleCtrlPoints();
@@ -244,4 +249,7 @@ private:
 	std::string _filename;
 
 	osg::Vec3d _alignPoint;
+	osg::ref_ptr<osg::MatrixdArray> _saveState;
+	osg::ref_ptr<osg::IntArray> _dynamicState;
+	bool _replay;
 };

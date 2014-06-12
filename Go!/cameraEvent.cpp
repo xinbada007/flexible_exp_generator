@@ -15,6 +15,7 @@ _reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offse
 
 	_eye_X_Axis = X_AXIS;
 	_eye_Z_Axis = Z_AXIS;
+	_eye_Y_Axis = Y_AXIS;
 
 	_offset.set(0.0f, 0.0f, 0.0f);
 	_offsetOrigin = _offset;
@@ -126,10 +127,16 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_X_Axis * (_offsetInterval / frameRate));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Add:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(Z_AXIS * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Z_Axis * (_offsetInterval / frameRate));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Subtract:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(-Z_AXIS * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Z_Axis * (_offsetInterval / frameRate));
+				break;
+			case osgGA::GUIEventAdapter::KEY_Page_Up:
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Y_Axis * (_offsetInterval / frameRate));
+				break;
+			case osgGA::GUIEventAdapter::KEY_Page_Down:
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Y_Axis * (_offsetInterval / frameRate));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Enter:
 				_reset = true;
@@ -146,7 +153,8 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			}
 			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Up || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Down
 				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Right
-				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Add || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Subtract)
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Add || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Subtract
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Page_Down || ea.getKey() == osgGA::GUIEventAdapter::KEY_Page_Up)
 			{
 				_eyeOffset.set(0.0f, 0.0f, 0.0f);
 			}
@@ -178,6 +186,7 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 
 			_eye_X_Axis = X_AXIS * osg::Matrix::rotate(refCS->_state.getRotate());
 			_eye_Z_Axis = Z_AXIS * osg::Matrix::rotate(refCS->_state.getRotate());
+			_eye_Y_Axis = Y_AXIS * osg::Matrix::rotate(refCS->_state.getRotate());
 
 			if (_reset)
 			{

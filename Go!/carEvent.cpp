@@ -6,7 +6,7 @@
 #include <osgGA/EventVisitor>
 
 CarEvent::CarEvent():
-_carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _acceleration(true), _updated(false)
+_carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
 , _lastAngle(0.0f), _shifted(false)
 {
 }
@@ -24,7 +24,7 @@ void CarEvent::calculateCarMovement()
 
 	//set rotation direction and limit
 	_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
-	_carState->_angle = (_carState->_speed == 0) ? 0.0f : _carState->_angle;
+	_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
 
 	//set the acceleration of rotation
 	const double MAX_ROTATIONACCL = _vehicle->_rotationAccl;
@@ -85,7 +85,7 @@ void CarEvent::calculateCarMovement()
 
 void CarEvent::autoNavigation()
 {
-	if (_acceleration || !(*_carState->_OQuad))
+	if (_carState->_dynamic || !(*_carState->_OQuad))
 	{
 		return;
 	}
@@ -234,7 +234,7 @@ bool CarEvent::Joystick()
 
 void CarEvent::dynamicApply()
 {
-	if (_acceleration || !_shifted)
+	if (_carState->_dynamic || !_shifted)
 	{
 		_carState->_shiftD = osg::Vec3d(0.0f, 0.0f, 0.0f);
 		return;
@@ -274,7 +274,6 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			_carState = refC->getCarState();
 			_vehicle = refC->getVehicle();
 			_mTransform = refM;
-			_acceleration = _vehicle->_acceleration;
 			_updated = true;
 		}
 		_moment.makeIdentity();
@@ -302,7 +301,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 			if ((key == '`'))
 			{
-				_acceleration = !_acceleration;
+				_carState->_dynamic = !_carState->_dynamic;
 				break;
 			}
 		case osgGA::GUIEventAdapter::KEYUP:

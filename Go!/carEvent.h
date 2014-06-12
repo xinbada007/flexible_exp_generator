@@ -26,7 +26,6 @@ private:
 	osg::Matrix _reset;
 
 	bool _leftTurn;
-	bool _acceleration;
 	double _lastAngle;
 	bool _shifted;
 
