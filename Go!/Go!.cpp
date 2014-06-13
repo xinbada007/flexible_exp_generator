@@ -61,8 +61,8 @@ int _tmain(int argc, char* argv[])
 	{
 		configFile = "..//Resources//config.txt";
 		replayFile = "..//Resources//savestate.txt";
-//		readConfig = new ReadConfig(configFile);
-		readConfig = new ReadConfig(configFile, replayFile);
+		readConfig = new ReadConfig(configFile);
+//		readConfig = new ReadConfig(configFile, replayFile);
 	}
 	else if (argc == 2)
 	{

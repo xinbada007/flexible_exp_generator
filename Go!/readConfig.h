@@ -87,7 +87,8 @@ typedef struct Vehicle:public osg::Referenced
 		_length = 4.7;
 		_height = 0.15;
 
-		_speed = 60 / 3.6 / frameRate;
+		_speed = 60 / 3.6f / frameRate;
+		_speedincr = 20 / 3.6f / frameRate;
 		_rotate = 42.5*TO_RADDIAN;
 		_rotationAccl = _rotate;
 		_acceleration = 1;
@@ -95,6 +96,9 @@ typedef struct Vehicle:public osg::Referenced
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
 	}
+	void increaseMaxSpeed() { _speed += _speedincr; };
+	void decreaseMaxSpeed() { _speed -= _speedincr; };
+
 	osg::ref_ptr<osg::Vec3dArray> _V;
 	osg::Vec3d _O;
 
@@ -103,6 +107,7 @@ typedef struct Vehicle:public osg::Referenced
 	double _length;
 	
 	double _speed;
+	double _speedincr;
 	double _rotate;
 	double _rotationAccl;
 	bool _acceleration;

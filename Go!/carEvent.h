@@ -20,7 +20,7 @@ private:
 	void makeResetMatrix();
 
 	osg::ref_ptr<CarState> _carState;
-	const Vehicle *_vehicle;
+	Vehicle *_vehicle;
 	osg::ref_ptr<osg::MatrixTransform> _mTransform;
 	osg::Matrix _moment;
 	osg::Matrix _reset;

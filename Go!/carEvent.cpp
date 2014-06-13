@@ -201,6 +201,10 @@ bool CarEvent::Joystick()
 	{
 		_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
 	}
+	else if (abs(y) <= DeadZone)
+	{
+		_carState->_speed = 0.0f;
+	}
 
 	const int B = b;
 	switch (B)
@@ -210,8 +214,10 @@ bool CarEvent::Joystick()
 	case 1:
 		break;
 	case 2:
+		_vehicle->increaseMaxSpeed();
 		break;
 	case 3:
+		_vehicle->decreaseMaxSpeed();
 		break;
 	case 4:
 		break;
@@ -279,7 +285,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		_moment.makeIdentity();
 		_reset.makeIdentity();
 
-		//Joystick();
+		Joystick();
 
 		const int &key = ea->getKey();
 		switch (ea->getEventType())

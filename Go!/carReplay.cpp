@@ -43,6 +43,7 @@ void CarReplay::operator()(osg::Node *node, osg::NodeVisitor *nv)
 					break;
 				}
 			case osgGA::GUIEventAdapter::FRAME:
+				_carState->_directionLastFrame = _carState->_direction;
 				if (!_pause)
 				{
 					_carState->setReplayText("Replay Running");
@@ -68,7 +69,6 @@ void CarReplay::operator()(osg::Node *node, osg::NodeVisitor *nv)
 void CarReplay::applyCarMovement(osg::Matrixd &m)
 {
 	//cacluate direction
-	_carState->_directionLastFrame = _carState->_direction;
 	_carState->_direction =	_carState->_direction = _carState->_direction * osg::Matrix::rotate(m.getRotate());
 	_carState->_direction.normalize();
 	//calculate speed

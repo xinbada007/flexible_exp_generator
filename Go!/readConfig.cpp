@@ -280,6 +280,8 @@ void ReadConfig::initializeAfterReadTrial()
 	//convert speed from KM/H to M/S
 	_vehicle->_speed /= 3.6f;
 	_vehicle->_speed /= frameRate;
+	_vehicle->_speedincr /= 3.6f;
+	_vehicle->_speedincr /= frameRate;
 
 	//Initialize Roads
 	_roads->_width = _roads->_roadLane * _roads->_laneWidth;
@@ -615,6 +617,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string CARHEIGHT = "CARHEIGHT";
 		const string CARLENGTH = "CARLENGTH";
 		const string WHEELACCL = "WHEELACCL";
+		const string SPEEDINCR = "SPEEDINCR";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -679,6 +682,15 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					_vehicle->_rotationAccl = stod(config);
 					_vehicle->_rotationAccl *= TO_RADDIAN;
+				}
+				continue;
+			}
+			else if (title == SPEEDINCR)
+			{
+				config.erase(config.begin(), config.begin() + SPEEDINCR.size());
+				if (!config.empty())
+				{
+					_vehicle->_speedincr = stod(config);
 				}
 				continue;
 			}
