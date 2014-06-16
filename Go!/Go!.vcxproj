@@ -95,6 +95,7 @@
     <ClInclude Include="DeConstructerVisitor.h" />
     <ClInclude Include="edge.h" />
     <ClInclude Include="eulerPoly.h" />
+    <ClInclude Include="experimentCallback.h" />
     <ClInclude Include="halfedge.h" />
     <ClInclude Include="headers.h" />
     <ClInclude Include="loop.h" />
@@ -127,6 +128,7 @@
     <ClCompile Include="DeConstructerVisitor.cpp" />
     <ClCompile Include="edge.cpp" />
     <ClCompile Include="eulerPoly.cpp" />
+    <ClCompile Include="experimentCallback.cpp" />
     <ClCompile Include="halfedge.cpp" />
     <ClCompile Include="Go!.cpp" />
     <ClCompile Include="joystickSDL.cpp" />

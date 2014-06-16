@@ -9,7 +9,7 @@
 #include <osg/Geometry>
 #include <osg/PolygonMode>
 #include <osg/linewidth>
-
+#include <osg/Point>
 
 RenderVistor::RenderVistor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
@@ -112,6 +112,11 @@ void RenderVistor::render(osg::Drawable *refD) const
 		refG->setDataVariance(osg::Object::DYNAMIC);
 
 		osg::ref_ptr<osg::DrawArrays> drawArray = new osg::DrawArrays(_beginMode, 0, refG->getVertexArray()->getNumElements());
+		if (_beginMode == GL_POINTS)
+		{
+			osg::ref_ptr<osg::Point> psize =new osg::Point(10.0f);
+			refG->getOrCreateStateSet()->setAttribute(psize);
+		}
 		if (!refG->getNumPrimitiveSets())
 		{
 			refG->addPrimitiveSet(drawArray);

@@ -101,6 +101,8 @@ void TextureVisitor::texture(Solid *refS)
 	tex->setImage(image);
 	tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
 	tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+	tex->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+	tex->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 	ss->setTextureAttributeAndModes(0, tex);
 	ss->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
 	osg::TexEnv *decalTexEnv = new osg::TexEnv();

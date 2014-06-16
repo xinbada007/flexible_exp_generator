@@ -173,7 +173,7 @@ void CarEvent::makeResetMatrix()
 bool CarEvent::Joystick()
 {
 	extern bool poll_joystick(int &x, int &y, int &b);
-	int x(0), y(0), b(0);
+	int x(0), y(0), b(-1);
 	if (!poll_joystick(x, y, b))
 	{
 		return false;
@@ -206,35 +206,40 @@ bool CarEvent::Joystick()
 		_carState->_speed = 0.0f;
 	}
 
-	const int B = b;
-	switch (B)
+	unsigned buttons[20];
+	memset(buttons, 0, sizeof(buttons));
+	buttons[b] = 1;
+	if (b == -1)
 	{
-	case 0:
-		break;
-	case 1:
-		break;
-	case 2:
-		_vehicle->increaseMaxSpeed();
-		break;
-	case 3:
-		_vehicle->decreaseMaxSpeed();
-		break;
-	case 4:
-		break;
-	case 5:
-		break;
-	case 6:
-		makeResetMatrix();
-		break;
-	case 7:
-		break;
-	case 8:
-		break;
-	case 9:
-		break;
-	default:
-		break;
+		if (buttons[0] == 1)
+		{
+			buttons[0] = 0;
+		}
+		else if (buttons[1] == 1)
+		{
+			buttons[1] = 0;
+		}
+		else if (buttons[2] == 1)
+		{
+//			_vehicle->increaseMaxSpeed();
+			buttons[2] = 0;
+		}
+		else if (buttons[3] == 1)
+		{
+//			_vehicle->decreaseMaxSpeed();
+			buttons[3] = 0;
+		}
+		else if (buttons[6] == 1)
+		{
+			makeResetMatrix();
+			buttons[6] = 0;
+		}
+		else if (buttons[7] == 1)
+		{
+			buttons[7] = 0;
+		}
 	}
+
 	return true;
 }
 
@@ -309,6 +314,14 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			{
 				_carState->_dynamic = !_carState->_dynamic;
 				break;
+			}
+			if (key == osgGA::GUIEventAdapter::KEY_Equals)
+			{
+				_vehicle->increaseMaxSpeed();
+			}
+			if (key == osgGA::GUIEventAdapter::KEY_Minus)
+			{
+				_vehicle->decreaseMaxSpeed();
 			}
 		case osgGA::GUIEventAdapter::KEYUP:
 			if (key == 'a' || key == 'd')

@@ -70,7 +70,8 @@ void ReadConfig::assignConfig()
 		_roads = new RoadSet;
 		_camset = new CameraSet;
 		_subjects = new Subjects;
-		
+		_experiment = new Experiment;
+
 		//read trial config
 		readTrial(filein);
 		initializeAfterReadTrial();
@@ -402,6 +403,7 @@ void ReadConfig::readTrial(ifstream &in)
 	const string ROAD = "[ROADSETTINGS]";
 	const string CAMERA = "[CAMERASETTINGS]";
 	const string SUBJECTS = "[SUBJECTS]";
+	const string EXPERIMENT = "[EXPERIMENT]";
 
 	string flag;
 	if (!in.eof())
@@ -829,6 +831,85 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_camset->_eyeTracker = (stoi(config) == 1);
+				}
+				continue;
+			}
+
+			flag = config;
+			flag = getTillFirstSpaceandToUpper(flag);
+			continue;
+		}
+
+		//set Experiment
+		const string TEXTIME("TEXTIME");
+		const string PERIOD("PERIOD");
+		const string TEXT("TEXT");
+		const string DYNAMICHANGE("DYNAMIC-CHANGE");
+		const string DYNAMICCHANGECONDITION("DYNAMIC-CHANGE-CONDITION");
+		while (flag == EXPERIMENT && !in.eof())
+		{
+			byPassSpace(in, config);
+			const string title = getTillFirstSpaceandToUpper(config);
+			if (title == TEXTIME)
+			{
+				config.erase(config.begin(), config.begin() + TEXTIME.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_textTime->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == PERIOD)
+			{
+				config.erase(config.begin(), config.begin() + PERIOD.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_textPeriod->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == TEXT)
+			{
+				config.erase(config.begin(), config.begin() + TEXT.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				if (!config.empty())
+				{
+					_experiment->_textContent.push_back(config);
+				}
+				continue;
+			}
+			else if (title == DYNAMICHANGE)
+			{
+				config.erase(config.begin(), config.begin() + DYNAMICHANGE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_dynamicChange->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == DYNAMICCHANGECONDITION)
+			{
+				config.erase(config.begin(), config.begin() + DYNAMICCHANGECONDITION.size());
+				std::vector<unsigned> read;
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					read.push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				if (read.size() >= 1)
+				{
+					_experiment->_dynamicChangeCondition = read.front();
+				}
+				if (read.size() >= 2)
+				{
+					_experiment->_dynamicChangeLasting = read.back();
 				}
 				continue;
 			}

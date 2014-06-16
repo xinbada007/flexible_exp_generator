@@ -25,6 +25,7 @@
 #include "switchVisitor.h"
 #include "textureVisitor.h"
 #include "carReplay.h"
+#include "experimentCallback.h"
 
 #include <iostream>
 

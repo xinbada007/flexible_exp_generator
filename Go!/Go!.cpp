@@ -83,12 +83,13 @@ int _tmain(int argc, char* argv[])
 
 	//Build Road && Render Road && Texture Road
 	osg::ref_ptr<Road> road = obtainRoad(readConfig);
-
 	road->accept(*rv);
 	road->accept(*tv);
 
 	//Build Car & Render Car && Obtain carMatrix
 	osg::ref_ptr<Car> car = obtainCar(readConfig);
+	rv->reset();
+	rv->setBeginMode(GL_POINTS);
 	car->accept(*rv);
 	osg::ref_ptr<osg::MatrixTransform> carMatrix = obtainCarMatrix(car);
 
@@ -111,11 +112,6 @@ int _tmain(int argc, char* argv[])
 	osg::ref_ptr<Recorder> recorder = new Recorder;
 	car->addUpdateCallback(recorder.get());
 
-	//Debug Node
-	osg::ref_ptr<DebugNode> debugger = new DebugNode;
-	debugger->setUserData(cv.get());
-	root->addEventCallback(debugger.get());
- 
 	//Camera event callback
 	osg::ref_ptr<CameraEvent> camMatrix = obtainCamMatrix(readConfig, car);
 
@@ -128,6 +124,17 @@ int _tmain(int argc, char* argv[])
 	mViewer->createHUDView();
 	mViewer->setHUDContent(recorder->getStatus());
 	mViewer->createBackgroundView();
+
+	//Debug Node
+	osg::ref_ptr<DebugNode> debugger = new DebugNode;
+	debugger->setUserData(cv.get());
+	root->addEventCallback(debugger.get());
+
+	//ExperimentControl
+	osg::ref_ptr<ExperimentCallback> expcontroller = new ExperimentCallback(readConfig);
+	expcontroller->setUserData(cv.get());
+	expcontroller->setHUDCamera(mViewer->getHuDView()->getCamera());
+	root->addUpdateCallback(expcontroller);
 
 	mViewer->setRunMaxFrameRate(frameRate);
 	mViewer->run();

@@ -7,6 +7,8 @@
 #include <vector>
 
 std::vector<SDL_Joystick *> JOYSTICK;
+unsigned buttonLimiter[20];
+unsigned buttonHitter[20];
 
 bool init_joystick()
 {
@@ -36,6 +38,9 @@ bool init_joystick()
 
 	SDL_JoystickEventState(SDL_QUERY);
 
+	memset(buttonLimiter, 0, sizeof(buttonLimiter));
+	memset(buttonHitter, 0, sizeof(buttonHitter));
+
 	return true;
 }
 
@@ -50,19 +55,18 @@ bool poll_joystick(int &x, int &y, int &b)
 	unsigned int n;
 	signed short a;
 
-	x = 0; y = 0; b = -1;
-	SDL_JoystickUpdate();
+//	SDL_JoystickUpdate();
 
 	for (i = 0; i < SDL_JoystickNumButtons(JOYSTICK.front());i++)
 	{
 		n = SDL_JoystickGetButton(JOYSTICK.front(), i);
-// 		if (!n)
-// 		{
-// 			b += int(std::pow(2.0f, i));
-// 		}
+//		if (!n)
+//		{
+//			b += int(std::pow(2.0f, i));
+//		}
 		if (n)
 		{
-			b = i;
+			b = n;
 		}
 	}
 
@@ -89,4 +93,9 @@ void close_joystick()
 		SDL_JoystickClose(*i);
 		i++;
 	}
+}
+
+unsigned getNumButtons()
+{
+	return SDL_JoystickNumButtons(JOYSTICK.front());
 }

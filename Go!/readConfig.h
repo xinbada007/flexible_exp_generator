@@ -10,6 +10,28 @@
 #include "Nurbs.h"
 #include "math.h"
 
+typedef std::vector<std::string> stringList;
+
+typedef struct Experiment :public osg::Referenced
+{
+	Experiment()
+	{
+		_textTime = new osg::UIntArray;
+		_textPeriod = new osg::DoubleArray;
+		_dynamicChange = new osg::UIntArray;
+	};
+
+	osg::ref_ptr <osg::UIntArray> _textTime;
+	osg::ref_ptr <osg::DoubleArray> _textPeriod;
+	stringList _textContent;
+	osg::ref_ptr <osg::UIntArray> _dynamicChange;
+	unsigned _dynamicChangeCondition;
+	unsigned _dynamicChangeLasting;
+
+protected:
+	virtual ~Experiment(){ std::cout << "Deconstruct Experiment" << std::endl; };
+}Experiment;
+
 typedef struct Nurbs:public osg::Referenced
 {
 	Nurbs()
@@ -40,8 +62,8 @@ protected:
 	virtual ~Nurbs(){ std::cout << "Deconstruct Nurbs" << std::endl; };
 }Nurbs;
 
-typedef std::vector<std::string> stringList;
 typedef std::vector<osg::ref_ptr<Nurbs>> nurbsList;
+
 typedef struct RoadSet:public osg::Referenced
 {
 	RoadSet():
@@ -81,7 +103,7 @@ protected:
 
 typedef struct Vehicle:public osg::Referenced
 {
-	Vehicle()
+	Vehicle() :_MAXSPEED(280 / 3.6f / frameRate)
 	{
 		_width = 1.7;
 		_length = 4.7;
@@ -96,8 +118,8 @@ typedef struct Vehicle:public osg::Referenced
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
 	}
-	void increaseMaxSpeed() { _speed += _speedincr; };
-	void decreaseMaxSpeed() { _speed -= _speedincr; };
+	void increaseMaxSpeed() { _speed += _speedincr; _speed = (_speed > _MAXSPEED) ? _MAXSPEED : _speed; };
+	void decreaseMaxSpeed() { _speed -= _speedincr; _speed = (_speed > 0) ? _speed : 0; };
 
 	osg::ref_ptr<osg::Vec3dArray> _V;
 	osg::Vec3d _O;
@@ -108,6 +130,7 @@ typedef struct Vehicle:public osg::Referenced
 	
 	double _speed;
 	double _speedincr;
+	const double _MAXSPEED;
 	double _rotate;
 	double _rotationAccl;
 	bool _acceleration;
@@ -220,6 +243,7 @@ public:
 	Screens * getScreens() const { return _screens.get(); };
 	CameraSet *getCameraSet() const { return _camset.get(); };
 	Subjects *getSubjects() const { return _subjects.get(); };
+	Experiment *getExpSetting() const { return _experiment.get(); };
 	osg::Matrix getDistortionMatrix() const{  return osg::Matrix::scale(osg::Vec3d(1.0f,1.0f,1.0f / _screens->_distortion)); };
 	osg::Geode* measuer();
 	osg::MatrixdArray *getSaveState() const { return _saveState.get(); };
@@ -251,6 +275,7 @@ private:
 	osg::ref_ptr<RoadSet> _roads;
 	osg::ref_ptr<CameraSet> _camset;
 	osg::ref_ptr<Subjects> _subjects;
+	osg::ref_ptr<Experiment> _experiment;
 	std::string _filename;
 
 	osg::Vec3d _alignPoint;
