@@ -18,12 +18,15 @@ private:
 	const Experiment *_expSetting;
 	CarState *_carState;
 	double _expTime;
+	osg::ref_ptr<osg::UIntArray> _dynamic;
+	bool _dynamicUpdated;
+	double _thisMomentDynamic;
 
-	osg::Camera *_camera;
-	osg::ref_ptr<osg::Switch> _txtSwithcer;
-	osg::ref_ptr<osgText::Text> _text;
-	osg::ref_ptr<osg::Geode> _geode;
-	void laneChange();
+	osg::Camera *_cameraHUD;
+	osg::ref_ptr<osgText::Text> _textHUD;
+	osg::ref_ptr<osg::Geode> _geodeHUD;
+	osg::ref_ptr<osg::Group> _root;
+	osg::ref_ptr<osg::Switch> _road;
 	void dynamicChange();
 	void showText();
 };

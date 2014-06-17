@@ -1,14 +1,18 @@
 #include "stdafx.h"
 #include "experimentCallback.h"
 #include "collVisitor.h"
+#include "debugNode.h"
 
 #include <osg/Switch>
+#include <osgGA/EventVisitor>
+#include <osgDB/ReadFile>
 
-ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _camera(NULL)
+ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
+, _road(NULL), _root(NULL), _dynamicUpdated(false)
 {
-	_txtSwithcer = new osg::Switch;
-	_text = new osgText::Text;
-	_geode = new osg::Geode;
+	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
+	_textHUD = new osgText::Text;
+	_geodeHUD = new osg::Geode;
 }
 
 ExperimentCallback::~ExperimentCallback()
@@ -18,15 +22,37 @@ ExperimentCallback::~ExperimentCallback()
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
 	const CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
-	if (refCV && refCV->getCar())
+	if (refCV && refCV->getCar() && !_carState)
 	{
 		_carState = refCV->getCar()->getCarState();
 	}
-
-	if (_carState)
+	if (!_root)
 	{
-		_expTime = _carState->_timeReference;
-		showText();
+		_root = dynamic_cast<osg::Group*>(node);
+	}
+	if (!_road)
+	{
+		switchRoad swRD;
+		_root->accept(swRD);
+		_road = swRD.getSwRoad();
+	}
+
+	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
+	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
+	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
+
+	if (_carState && ea)
+	{
+		switch (ea->getEventType())
+		{
+		case::osgGA::GUIEventAdapter::FRAME:
+			_expTime = _carState->_timeReference;
+			showText();
+			dynamicChange();
+			break;
+		default:
+			break;
+		}
 	}
 
 	traverse(node, nv);
@@ -62,38 +88,60 @@ void ExperimentCallback::showText()
 		i++;
 	}
 
-	_text->setText((whichshow)?(*whichshow):(""));
+	_textHUD->setText((whichshow)?(*whichshow):(""));
 }
 
 void ExperimentCallback::dynamicChange()
 {
-	const osg::UIntArray *dynamicC = _expSetting->_dynamicChange;
-	osg::UIntArray::const_iterator i = dynamicC->begin();
-	while (i != dynamicC->end())
+	if (!_dynamic->empty())
 	{
-		if (_expTime == *i)
+		osg::UIntArray::iterator i = _dynamic->end() - 1;
+		while (i != _dynamic->begin() - 1)
 		{
-			_carState->_dynamic = !_carState->_dynamic;
+			if (_expTime > *i)
+			{
+				_carState->_dynamic = !_carState->_dynamic;
+				_dynamicUpdated = true;
+				_thisMomentDynamic = _expTime;
+				_dynamic->pop_back();
+				break;
+			}
+			i--;
 		}
+	}
 
-		i++;
+	if (_dynamicUpdated)
+	{
+		if (_expTime <= _thisMomentDynamic + _expSetting->_dynamicChangeLasting)
+		{
+			if (!_expSetting->_dynamicChangeCondition)
+			{
+				_road->setAllChildrenOff();
+				_dynamicUpdated = true;
+			}
+		}
+		else
+		{
+			_road->setAllChildrenOn();
+			_dynamicUpdated = false;
+		}
 	}
 }
 
 void ExperimentCallback::setHUDCamera(osg::Camera *cam)
 {
-	_camera = cam;
+	_cameraHUD = cam;
 
-	const double X = _camera->getViewport()->width();
-	const double Y = _camera->getViewport()->height();
+	const double X = _cameraHUD->getViewport()->width();
+	const double Y = _cameraHUD->getViewport()->height();
 
 	osg::Vec3d position(0.4*X, 0.5*Y, 0.0f);
 	std::string font("fonts/arial.ttf");
-	_text->setFont(font);
-	_text->setFontResolution(512, 512);
-	_text->setPosition(position);
-	_text->setDataVariance(osg::Object::DYNAMIC);
+	_textHUD->setFont(font);
+	_textHUD->setFontResolution(512, 512);
+	_textHUD->setPosition(position);
+	_textHUD->setDataVariance(osg::Object::DYNAMIC);
 
-	_geode->addDrawable(_text);
-	_camera->addChild(_geode);
+	_geodeHUD->addDrawable(_textHUD);
+	_cameraHUD->addChild(_geodeHUD);
 }

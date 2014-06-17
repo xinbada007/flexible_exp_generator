@@ -112,6 +112,11 @@ int _tmain(int argc, char* argv[])
 	osg::ref_ptr<Recorder> recorder = new Recorder;
 	car->addUpdateCallback(recorder.get());
 
+	//Debug Node
+	osg::ref_ptr<DebugNode> debugger = new DebugNode;
+	debugger->setUserData(cv.get());
+	root->addEventCallback(debugger.get());
+
 	//Camera event callback
 	osg::ref_ptr<CameraEvent> camMatrix = obtainCamMatrix(readConfig, car);
 
@@ -125,16 +130,11 @@ int _tmain(int argc, char* argv[])
 	mViewer->setHUDContent(recorder->getStatus());
 	mViewer->createBackgroundView();
 
-	//Debug Node
-	osg::ref_ptr<DebugNode> debugger = new DebugNode;
-	debugger->setUserData(cv.get());
-	root->addEventCallback(debugger.get());
-
 	//ExperimentControl
 	osg::ref_ptr<ExperimentCallback> expcontroller = new ExperimentCallback(readConfig);
 	expcontroller->setUserData(cv.get());
 	expcontroller->setHUDCamera(mViewer->getHuDView()->getCamera());
-	root->addUpdateCallback(expcontroller);
+	root->addEventCallback(expcontroller);
 
 	mViewer->setRunMaxFrameRate(frameRate);
 	mViewer->run();
@@ -146,23 +146,3 @@ int _tmain(int argc, char* argv[])
 	extern void close_joystick();
 	close_joystick();
 }
-
-/*
-int main()
-{
-	const double R(2.0f);
-	const int gear(96);
-	const double theta(2 * PI / gear);
-	ofstream fileout("circularRoad.txt");
-	for (int i = 0; i <= gear;i++)
-	{
-		double x = R*sin(theta*i);
-		double y = R*cos(theta*i);
-
-		std::cout << x << "\t" << y << std::endl;
-		fileout << x << "\t" << y << std::endl;
-	}
-	fileout.close();
-	getchar();
-}
-*/

@@ -24,6 +24,7 @@ public:
 
 	inline osgViewer::View * getMainView() const { return _mainView; };
 	inline osgViewer::View * getHuDView() const { return _HUDView; };
+	inline osgViewer::View * getBGView() const { return _BGView; };
 	inline std::vector<osg::Camera*> getSlaveCamerasinMainView() const { return _slaveCamerasinMainView; };
 
 	void genMainView(osg::ref_ptr<ReadConfig> refRC);

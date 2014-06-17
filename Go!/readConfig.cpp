@@ -264,6 +264,13 @@ void ReadConfig::initializeAfterReadTrial()
 		_screens->_aspect = (double)(sum_width) / (double)(min_height);
 	}
 
+	_screens->_imgBg = osgDB::readImageFile(_screens->_background);
+	if (!_screens->_imgBg.valid())
+	{
+		osg::notify(osg::WARN) << "Unable to load Background texture file. Exiting." << std::endl;
+		_screens->_imgBg = NULL;
+	}
+
 	//Initialize Vehicle
 	const double halfW = _vehicle->_width * 0.5f;
 	const double halfL = _vehicle->_length * 0.5f;
@@ -322,6 +329,14 @@ void ReadConfig::initializeAfterReadTrial()
 		_camset->_offset->push_back(-_screens->_horDistance);
 		//set Z offset
 		_camset->_offset->push_back(_screens->_verDistance + _screens->_verOffset);
+	}
+
+	//Initialize Experiment
+	_experiment->_imgDynamic = osgDB::readImageFile(_experiment->_dynamicPic);
+	if (!_experiment->_imgDynamic.valid())
+	{
+		osg::notify(osg::WARN) << "Unable to load Dynamic texture file. Exiting." << std::endl;
+		_experiment->_imgDynamic = NULL;
 	}
 }
 
@@ -846,6 +861,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string TEXT("TEXT");
 		const string DYNAMICHANGE("DYNAMIC-CHANGE");
 		const string DYNAMICCHANGECONDITION("DYNAMIC-CHANGE-CONDITION");
+		const string DYNAMICCHANGEPIC("DYNAMIC-CHANGE-PIC");
 		while (flag == EXPERIMENT && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -910,6 +926,16 @@ void ReadConfig::readTrial(ifstream &in)
 				if (read.size() >= 2)
 				{
 					_experiment->_dynamicChangeLasting = read.back();
+				}
+				continue;
+			}
+			else if (title == DYNAMICCHANGEPIC)
+			{
+				config.erase(config.begin(), config.begin() + DYNAMICCHANGEPIC.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				if (!config.empty())
+				{
+					_experiment->_dynamicPic = config;
 				}
 				continue;
 			}

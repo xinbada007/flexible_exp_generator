@@ -19,6 +19,7 @@ typedef struct Experiment :public osg::Referenced
 		_textTime = new osg::UIntArray;
 		_textPeriod = new osg::DoubleArray;
 		_dynamicChange = new osg::UIntArray;
+		_imgDynamic = NULL;
 	};
 
 	osg::ref_ptr <osg::UIntArray> _textTime;
@@ -27,6 +28,8 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr <osg::UIntArray> _dynamicChange;
 	unsigned _dynamicChangeCondition;
 	unsigned _dynamicChangeLasting;
+	std::string _dynamicPic;
+	osg::ref_ptr<osg::Image> _imgDynamic;
 
 protected:
 	virtual ~Experiment(){ std::cout << "Deconstruct Experiment" << std::endl; };
@@ -155,7 +158,7 @@ typedef struct Screens:public osg::Referenced
 
 		_scrs = new osg::UIntArray;
 		_realworld = new osg::DoubleArray;
-		_background = "";
+		_imgBg = NULL;
 	}
 
 	double _aspect;
@@ -169,6 +172,7 @@ typedef struct Screens:public osg::Referenced
 	osg::ref_ptr<osg::UIntArray> _scrs;
 	osg::ref_ptr<osg::DoubleArray> _realworld;
 	std::string _background;
+	osg::ref_ptr<osg::Image> _imgBg;
 
 protected:
 	virtual ~Screens(){ std::cout << "Deconstruct Screens" << std::endl; };

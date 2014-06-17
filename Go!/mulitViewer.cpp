@@ -234,12 +234,12 @@ void MulitViewer::createBackgroundView()
 	{
 		return;
 	}
-	osg::ref_ptr<osg::Image> image = osgDB::readImageFile(_screens->_background);
-	if (!image->valid())
+	if (!_screens->_imgBg)
 	{
-		osg::notify(osg::FATAL) << "Unable to load BG pic" << std::endl;
 		return;
 	}
+
+	osg::Image *image = _screens->_imgBg;
 
 	osg::ref_ptr<osg::Texture2D> background = new osg::Texture2D;
 	background->setImage(image);
@@ -250,6 +250,7 @@ void MulitViewer::createBackgroundView()
 	geode->addDrawable(quad.release());
 
 	_BGView = new osgViewer::View;
+	_BGView->getCamera()->addChild(geode.get());
 	osgViewer::Viewer::Windows windows;
 	this->getWindows(windows);
 	double x_start(0.0f);
@@ -267,8 +268,7 @@ void MulitViewer::createBackgroundView()
 		camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 1.0f, 1.0f));
 		camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::BACKGROUND);
 
-		camera->addChild(geode.get());
-		_BGView->addSlave(camera, false);
+		_BGView->addSlave(camera, true);
 	}
 
 	this->addView(_BGView);

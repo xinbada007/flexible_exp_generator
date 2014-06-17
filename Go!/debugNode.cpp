@@ -325,7 +325,7 @@ void deTexture::setTexture(Solid *refS)
 }
 
 switchRoad::switchRoad():
-osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _road(NULL)
 {
 }
 
