@@ -103,6 +103,7 @@
     <ClInclude Include="mulitViewer.h" />
     <ClInclude Include="Nurbs.h" />
     <ClInclude Include="logicRoad.h" />
+    <ClInclude Include="obstacle.h" />
     <ClInclude Include="pickHandler.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="points.h" />
@@ -137,6 +138,7 @@
     <ClCompile Include="mulitViewer.cpp" />
     <ClCompile Include="NurbsCurve.cpp" />
     <ClCompile Include="logicRoad.cpp" />
+    <ClCompile Include="obstacle.cpp" />
     <ClCompile Include="pickHandler.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="points.cpp" />

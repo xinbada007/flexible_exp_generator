@@ -22,6 +22,8 @@ private:
 	bool _dynamicUpdated;
 	double _thisMomentDynamic;
 
+	osg::ref_ptr<osg::UIntArray> _obstacle;
+
 	osg::Camera *_cameraHUD;
 	osg::ref_ptr<osgText::Text> _textHUD;
 	osg::ref_ptr<osg::Geode> _geodeHUD;
@@ -29,5 +31,6 @@ private:
 	osg::ref_ptr<osg::Switch> _road;
 	void dynamicChange();
 	void showText();
+	void createObstacle();
 };
 

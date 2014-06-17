@@ -862,6 +862,8 @@ void ReadConfig::readTrial(ifstream &in)
 		const string DYNAMICHANGE("DYNAMIC-CHANGE");
 		const string DYNAMICCHANGECONDITION("DYNAMIC-CHANGE-CONDITION");
 		const string DYNAMICCHANGEPIC("DYNAMIC-CHANGE-PIC");
+		const string OBSTACLE("OBSTACLE");
+		const string OBSTACLERANGE("OBSTACLE-RANGE");
 		while (flag == EXPERIMENT && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -936,6 +938,28 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_dynamicPic = config;
+				}
+				continue;
+			}
+			else if (title == OBSTACLE)
+			{
+				config.erase(config.begin(), config.begin() + OBSTACLE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obstaclesTime->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == OBSTACLERANGE)
+			{
+				config.erase(config.begin(), config.begin() + OBSTACLERANGE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obstacleRange->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;
 			}

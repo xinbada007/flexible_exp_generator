@@ -17,7 +17,7 @@ public:
 	META_Node(BP, Solid);
 	inline Plane * getPlane() const { return _startPlane; };
 //	inline void setPlane(Plane *ref) { _startPlane = ref; };
-	inline Plane *getLastPlane() const { return _lastPlane->getPrev(); };
+	inline Plane *getLastPlane() const { return (_lastPlane->getAbstract())?_lastPlane->getPrev():_lastPlane; };
 	inline Edge * getEdge() const { return _startE; };
 //	inline void setEdge(Edge *refE) { _startE = refE; };
 	inline Points * getPoint() const { return _startP; };

@@ -19,17 +19,26 @@ typedef struct Experiment :public osg::Referenced
 		_textTime = new osg::UIntArray;
 		_textPeriod = new osg::DoubleArray;
 		_dynamicChange = new osg::UIntArray;
+		_dynamicChangeCondition = 0;
+		_dynamicChangeLasting = 0;
 		_imgDynamic = NULL;
+
+		_obstaclesTime = new osg::UIntArray;
+		_obstacleRange = new osg::DoubleArray;
 	};
 
 	osg::ref_ptr <osg::UIntArray> _textTime;
 	osg::ref_ptr <osg::DoubleArray> _textPeriod;
 	stringList _textContent;
+
 	osg::ref_ptr <osg::UIntArray> _dynamicChange;
 	unsigned _dynamicChangeCondition;
 	unsigned _dynamicChangeLasting;
 	std::string _dynamicPic;
 	osg::ref_ptr<osg::Image> _imgDynamic;
+
+	osg::ref_ptr<osg::UIntArray> _obstaclesTime;
+	osg::ref_ptr<osg::DoubleArray> _obstacleRange;
 
 protected:
 	virtual ~Experiment(){ std::cout << "Deconstruct Experiment" << std::endl; };

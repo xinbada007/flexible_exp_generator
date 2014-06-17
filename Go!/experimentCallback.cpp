@@ -2,15 +2,19 @@
 #include "experimentCallback.h"
 #include "collVisitor.h"
 #include "debugNode.h"
+#include "obstacle.h"
+#include "renderVistor.h"
 
 #include <osg/Switch>
 #include <osgGA/EventVisitor>
 #include <osgDB/ReadFile>
+#include <osg/ShapeDrawable>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
+	_obstacle = new osg::UIntArray(_expSetting->_obstaclesTime->rbegin(), _expSetting->_obstaclesTime->rend());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
 }
@@ -49,6 +53,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			_expTime = _carState->_timeReference;
 			showText();
 			dynamicChange();
+			createObstacle();
 			break;
 		default:
 			break;
@@ -64,9 +69,9 @@ void ExperimentCallback::showText()
 	const osg::DoubleArray *period = _expSetting->_textPeriod;
 	const stringList &content = _expSetting->_textContent;
 
-	const int size_moment = moment->size();
-	const int size_period = period->size();
-	const int size_content = content.size();
+	const int &size_moment = moment->size();
+	const int &size_period = period->size();
+	const int &size_content = content.size();
 	if (size_moment != size_content || size_moment != size_period)
 	{
 		osg::notify(osg::WARN) << "cannot display text because time and period and text are inconsistent" << std::endl;
@@ -124,6 +129,73 @@ void ExperimentCallback::dynamicChange()
 		{
 			_road->setAllChildrenOn();
 			_dynamicUpdated = false;
+		}
+	}
+}
+
+void ExperimentCallback::createObstacle()
+{
+	if (_obstacle->empty())
+	{
+		return;
+	}
+
+	const int &ob_size = _expSetting->_obstaclesTime->size();
+	const int &range_size = _expSetting->_obstacleRange->size();
+	if (ob_size != range_size)
+	{
+		osg::notify(osg::WARN) << "cannot put obstacles because size are inconsistent" << std::endl;
+		return;
+	}
+
+	bool hit(false);
+	osg::UIntArray::iterator i = _obstacle->end() - 1;
+	while (i != _obstacle->begin() - 1)
+	{
+		if (_expTime > *i)
+		{
+			hit = true;
+			_obstacle->pop_back();
+			break;
+		}
+		i--;
+	}
+
+	if (hit)
+	{
+		int k = i - _obstacle->end();
+		osg::DoubleArray::iterator j = _expSetting->_obstacleRange->begin() + (i - _obstacle->end());
+		Plane::reverse_across_iterator curO = *_carState->_OQuad;
+		if (*curO)
+		{
+			double distance(0.0f);
+			osg::ref_ptr<osg::Vec3dArray> navi = (*curO)->getLoop()->getNavigationEdge();
+			osg::Vec3d mid = navi->front() - navi->back();
+			while (distance < *j)
+			{
+				curO++;
+				navi = (*curO)->getLoop()->getNavigationEdge();
+				mid = navi->front() - navi->back();
+				distance += mid.length();
+			}
+
+			osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
+// 			osg::ref_ptr<osg::Box> box = new osg::Box;
+// 			box->setCenter(center);
+// 			box->setHalfLengths(osg::Vec3d(1.0f, 1.0f, 1.0f));
+// 
+// 			osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+// 			geode->addDrawable(new osg::ShapeDrawable(box.get()));
+// 
+// 			_road->addChild(geode);
+
+			osg::ref_ptr<Obstacle> obs = new Obstacle;
+			obs->createBox(center, osg::Vec3d(1.0f, 1.0f, 1.0f));
+			osg::ref_ptr<RenderVistor> rv = new RenderVistor;
+			rv->setBeginMode(GL_QUADS);
+			obs->accept(*rv);
+			_road->addChild(obs);
+			hit = false;
 		}
 	}
 }

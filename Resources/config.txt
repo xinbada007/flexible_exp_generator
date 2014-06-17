@@ -26,7 +26,7 @@ CarLength:	4.7
 CarPic:		../Resources/texture/car.png
 
 [RoadSettings]
-RoadLanes:	8
+RoadLanes:	4
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
@@ -35,7 +35,7 @@ RoadTxt:	../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/1.txt;../Resource
 Density:	1000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
-ScaleVector:	200,200,1		#DO NOT mess around with this
+ScaleVector:	100,100,1		#DO NOT mess around with this
 
 [CameraSettings]
 #this is the camera's position realtively to the original point of vehicle
@@ -60,4 +60,7 @@ Text:	Please Change Lane 4
 Text:	Please Change Lane 8
 
 Dynamic-Change: 1	20	25
-Dynamic-Change-Condition:	0	10	#black for 10seconds
+Dynamic-Change-Condition:	0	2	#black for 10seconds
+
+Obstacle:	1	10
+Obstacle-Range:	50	25

@@ -26,6 +26,7 @@
 #include "textureVisitor.h"
 #include "carReplay.h"
 #include "experimentCallback.h"
+#include "obstacle.h"
 
 #include <iostream>
 

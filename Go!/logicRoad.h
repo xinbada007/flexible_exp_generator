@@ -93,8 +93,6 @@ private:
 	FlagEdgeArrayList _eFlagArray;
 
 	osg::ref_ptr<osg::Vec3dArray> _project_LineV;
-//	LogicRoad *_next;
-//	LogicRoad *_prev;
 	osg::ref_ptr<LogicRoad> _next;
 	osg::ref_ptr<LogicRoad> _prev;
 	
