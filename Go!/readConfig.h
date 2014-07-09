@@ -16,6 +16,8 @@ typedef struct Experiment :public osg::Referenced
 {
 	Experiment()
 	{
+		_startLane = 0;
+
 		_textTime = new osg::UIntArray;
 		_textPeriod = new osg::DoubleArray;
 		_dynamicChange = new osg::UIntArray;
@@ -25,7 +27,11 @@ typedef struct Experiment :public osg::Referenced
 
 		_obstaclesTime = new osg::UIntArray;
 		_obstacleRange = new osg::DoubleArray;
+		_obstaclePos = new osg::IntArray;
+
+		_offset = 0.0f;
 	};
+	int _startLane;
 
 	osg::ref_ptr <osg::UIntArray> _textTime;
 	osg::ref_ptr <osg::DoubleArray> _textPeriod;
@@ -39,6 +45,9 @@ typedef struct Experiment :public osg::Referenced
 
 	osg::ref_ptr<osg::UIntArray> _obstaclesTime;
 	osg::ref_ptr<osg::DoubleArray> _obstacleRange;
+	osg::ref_ptr<osg::IntArray> _obstaclePos;
+
+	double _offset;
 
 protected:
 	virtual ~Experiment(){ std::cout << "Deconstruct Experiment" << std::endl; };
@@ -126,6 +135,7 @@ typedef struct Vehicle:public osg::Referenced
 		_rotate = 42.5*TO_RADDIAN;
 		_rotationAccl = _rotate;
 		_acceleration = 1;
+		_dynamicSensitive = 1.0f;
 
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
@@ -146,6 +156,7 @@ typedef struct Vehicle:public osg::Referenced
 	double _rotate;
 	double _rotationAccl;
 	bool _acceleration;
+	double _dynamicSensitive;
 	std::string _texture;
 
 protected:

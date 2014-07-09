@@ -260,6 +260,7 @@ void CarEvent::dynamicApply()
 	osg::Vec3d r = origin - _carState->_O;
 	double R = r.length();
 	R *= abs(_carState->_angle);
+	R *= _vehicle->_dynamicSensitive;
 
 	_carState->_shiftD *= R;
 	_carState->_shiftD /= frameRate;

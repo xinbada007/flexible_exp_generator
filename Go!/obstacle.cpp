@@ -5,13 +5,33 @@
 
 Obstacle::Obstacle()
 {
+	_tag = OBS;
 }
 
+Obstacle::Obstacle(const Obstacle &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
+LogicRoad(copy,copyop)
+{
+
+}
 
 Obstacle::~Obstacle()
 {
 }
 
+void Obstacle::genBoxTexture()
+{
+	osg::ref_ptr<osg::Vec2Array> tex = new osg::Vec2Array;
+	Plane::reverse_iterator i = this->getLastPlane();
+	while (*i)
+	{
+		tex->push_back(osg::Vec2(0.0f, 0.0f));
+		tex->push_back(osg::Vec2(1.0f, 0.0f));
+		tex->push_back(osg::Vec2(1.0f, 1.0f));
+		tex->push_back(osg::Vec2(0.0f, 1.0f));
+		i++;
+	}
+	this->setTexCoord(tex);
+}
 
 void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 {
@@ -33,6 +53,8 @@ void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 	link(left_top, left_bottom);
 
 	sweep(radius.z());
+
+	genBoxTexture();
 }
 
 void Obstacle::sweep(const int height)

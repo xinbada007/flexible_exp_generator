@@ -45,6 +45,9 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 	_carState->_backWheel->front().z() = 0.0f;
 	_carState->_backWheel->back().z() = 0.0f;
 
+	//Set-up Original Point of Car
+	_carState->_O = _vehicle->_O;
+
 	while (i != refV->end())
 	{
 		//from right-bottom to left-bottom under counter-clockwise

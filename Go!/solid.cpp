@@ -8,7 +8,7 @@
 Solid::Solid():
 _next(NULL), _prev(NULL), _updated(false), _numPoints(0), _numPlanes(0),
 _startPlane(NULL), _startE(NULL), _startP(NULL), _texCoord(NULL), _imgTexture(NULL),
-_lastPlane(NULL), _index(0)
+_lastPlane(NULL), _index(0), _texMode(SOLID_TEX_FLAT), _ccw(true), _ccwupdated(false)
 {
 
 }
@@ -17,7 +17,7 @@ Solid::Solid(const Solid &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COP
 osg::Group(copy,copyop),
 _next(copy._next), _prev(copy._prev), _updated(copy._updated), _numPoints(copy._numPoints), _numPlanes(copy._numPlanes),
 _startPlane(copy._startPlane), _startE(copy._startE), _startP(copy._startP), _texCoord(copy._texCoord), _imgTexture(copy._imgTexture),
-_lastPlane(copy._lastPlane), _index(copy._index)
+_lastPlane(copy._lastPlane), _index(copy._index), _texMode(copy._texMode), _ccw(copy._ccw), _ccwupdated(copy._ccwupdated)
 {
 
 }
@@ -189,4 +189,72 @@ Points * Solid::findPoint(osg::Vec3d refP)
 	} while (objP);
 
 	return NULL;
+}
+
+bool Solid::ifPointinSolid(const osg::Vec3d p) const
+{
+	if (getAbstract())
+	{
+		return false;
+	}
+
+	if (!_ccwupdated)
+	{
+		caclCCW();
+	}
+
+	Plane::reverse_iterator i = _lastPlane;
+	while (*i)
+	{
+		double sign = (*i)->getLoop()->substituePointinEQU(p);
+		if (_ccw && sign > 0)
+		{
+			return false;
+		}
+		if (!_ccw && sign < 0)
+		{
+			return false;
+		}
+		i++;
+	}
+
+	return true;
+}
+
+void Solid::caclCCW() const
+{
+	planeEQU &e = getLastPlane()->getLoop()->getPlaneEQU();
+	osg::Vec3d v(e[0], e[1], e[2]);
+	v.normalize();
+
+	bool outside(false);
+
+	if (isEqual(v*X_AXIS, 1.0f))
+	{
+		if (v.x() > 0)
+		{
+			outside = true;
+		}
+	}
+	else if (isEqual(v*Y_AXIS, 1.0f))
+	{
+		if (v.y() > 0)
+		{
+			outside = true;
+		}
+	}
+	else if (isEqual(v*Z_AXIS, 1.0f))
+	{
+		if (v.z() > 0)
+		{
+			outside = true;
+		}
+	}
+	else
+	{
+		outside = (v*Z_AXIS > 0) ? true : false;
+	}
+
+	_ccw = outside;
+	_ccwupdated = true;
 }

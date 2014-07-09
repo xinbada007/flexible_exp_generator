@@ -169,6 +169,52 @@ quadList Collision::listCollsion(const Car *refC, const quadList obs)
 	return list;
 }
 
+bool Collision::ifObsCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Solid *obs)
+{
+	osg::Vec3dArray::const_iterator j = planeMove->begin();
+	while (j != planeMove->end())
+	{
+		if (obs->ifPointinSolid(*j)) return true;
+		j++;
+	}
+
+	return false;
+}
+
+solidList Collision::listObsCollsion(const Car *refC, const solidList obs)
+{
+	solidList list;
+
+	if (refC && !obs.empty())
+	{
+		const CarState *refCS = refC->getCarState();
+		const osg::ref_ptr<osg::Vec3dArray> carArray = refCS->_carArray;
+
+		//attention! last element of carArray is the original point of car
+		//which should be removed when doing collision detection
+		const unsigned wheelsofCar(4);
+		osg::ref_ptr<osg::Vec3dArray> carRealArray = new osg::Vec3dArray(carArray->begin(), carArray->begin() + wheelsofCar);
+		osg::Vec3dArray::iterator iCar = carRealArray->begin();
+		while (iCar != carRealArray->end())
+		{
+			(*iCar).z() = refC->getVehicle()->_height;
+			iCar++;
+		}
+
+		solidList::const_iterator i = obs.cbegin();
+		while (i != obs.cend())
+		{
+			if (ifObsCollide(carRealArray,*i))
+			{
+				list.push_back(*i);
+			}
+			i++;
+		}
+	}
+
+	return list;
+}
+
 bool Collision::detectLocation(const Point pMove, const Plane *planeRoad)
 {
 	if (!planeRoad)
@@ -351,7 +397,7 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			refC->getCarState()->_OQuad = listRoad.back();
 		}
 
-		//collision detect
+		//collision against Wall detect
 		quadList listWall;
 		listWall = listCollsion(refC, _wall_reduced);
 		if (!listWall.empty())
@@ -363,6 +409,19 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		{
 			refC->getCarState()->_collide = false;
 		}
+
+		//collision against Obstacle detection
+		solidList listObs;
+		listObs = listObsCollsion(refC, refCV->getObstacle());
+		if (!listObs.empty())
+		{
+			refC->getCarState()->_collide = true;
+		}
+		else
+		{
+			refC->getCarState()->_collide = false;
+		}
+		
 	}
 	
 	traverse(node, nv);

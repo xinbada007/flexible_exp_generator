@@ -58,7 +58,12 @@ bool TextureVisitor::texCoord(Solid *refS)
 	//So we should first check if the size of the tex coord array is consistent with the Num of geometry of the Solid
 	const unsigned numTexPixels = 4;
 	const unsigned numGeometry = refS->getNumGeometry();
-	if (refTex->size()/numTexPixels <= numGeometry)
+	if (refTex->size() / numTexPixels <= numGeometry && refS->getAbstract())
+	{
+		osg::notify(osg::FATAL) << "Tex Coord Array is not consistent with Solid" << std::endl;
+		return false;
+	}
+	if (refTex->size() / numTexPixels < numGeometry && !refS->getAbstract())
 	{
 		osg::notify(osg::FATAL) << "Tex Coord Array is not consistent with Solid" << std::endl;
 		return false;

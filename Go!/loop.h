@@ -39,6 +39,7 @@ public:
 
 	void setPlaneEQU(planeEQU ref) { _planeEQU = ref; };
 	planeEQU getPlaneEQU() const { return _planeEQU; };
+	inline double substituePointinEQU(const osg::Vec3d p) { return _planeEQU[0] * p.x() + _planeEQU[1] * p.y() + _planeEQU[2] * p.z() + _planeEQU[3]; };
 
 	const osg::ref_ptr<osg::Vec3dArray> getPoints();
 private:

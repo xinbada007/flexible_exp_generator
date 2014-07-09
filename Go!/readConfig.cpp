@@ -338,6 +338,11 @@ void ReadConfig::initializeAfterReadTrial()
 		osg::notify(osg::WARN) << "Unable to load Dynamic texture file. Exiting." << std::endl;
 		_experiment->_imgDynamic = NULL;
 	}
+	_experiment->_offset = _roads->_width;
+	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
+	osg::Matrix m = osg::Matrix::translate(startOffset);
+	arrayByMatrix(_vehicle->_V, m);
+	_vehicle->_O = _vehicle->_O * m;
 }
 
 bool ReadConfig::byPassSpace(ifstream &in, std::string &content)
@@ -635,6 +640,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string CARLENGTH = "CARLENGTH";
 		const string WHEELACCL = "WHEELACCL";
 		const string SPEEDINCR = "SPEEDINCR";
+		const string DYNAMICSENSITIVE = "DYNAMICSENSITIVELEVEL";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -643,6 +649,15 @@ void ReadConfig::readTrial(ifstream &in)
 			{
 				config.erase(config.begin(), config.begin() + ACCEL.size());
 				_vehicle->_acceleration = (stoi(config) == 1) ? true : false;
+				continue;
+			}
+			if (title == DYNAMICSENSITIVE)
+			{
+				config.erase(config.begin(), config.begin() + DYNAMICSENSITIVE.size());
+				if (!config.empty())
+				{
+					_vehicle->_dynamicSensitive = stod(config);
+				}
 				continue;
 			}
 			else if (title == CARSPEED)
@@ -856,6 +871,7 @@ void ReadConfig::readTrial(ifstream &in)
 		}
 
 		//set Experiment
+		const string STARTLANE("START-LANE");
 		const string TEXTIME("TEXTIME");
 		const string PERIOD("PERIOD");
 		const string TEXT("TEXT");
@@ -864,10 +880,20 @@ void ReadConfig::readTrial(ifstream &in)
 		const string DYNAMICCHANGEPIC("DYNAMIC-CHANGE-PIC");
 		const string OBSTACLE("OBSTACLE");
 		const string OBSTACLERANGE("OBSTACLE-RANGE");
+		const string OBSTACLEPOSITION("OBSTACLE-POSITION");
 		while (flag == EXPERIMENT && !in.eof())
 		{
 			byPassSpace(in, config);
 			const string title = getTillFirstSpaceandToUpper(config);
+			if (title == STARTLANE)
+			{
+				config.erase(config.begin(), config.begin() + STARTLANE.size());
+				if (!config.empty())
+				{
+					_experiment->_startLane = stoi(config);
+				}
+				continue;
+			}
 			if (title == TEXTIME)
 			{
 				config.erase(config.begin(), config.begin() + TEXTIME.size());
@@ -959,6 +985,17 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					std::string::size_type sz;
 					_experiment->_obstacleRange->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == OBSTACLEPOSITION)
+			{
+				config.erase(config.begin(), config.begin() + OBSTACLEPOSITION.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obstaclePos->push_back(stoi(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;

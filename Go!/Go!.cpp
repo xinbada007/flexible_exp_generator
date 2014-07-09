@@ -137,6 +137,12 @@ int _tmain(int argc, char* argv[])
 	root->addEventCallback(expcontroller);
 
 	mViewer->setRunMaxFrameRate(frameRate);
+	root->setDataVariance(osg::Object::DYNAMIC);
+	osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
+	mViewer->setThreadingModel(th);
+	osgUtil::Optimizer optimizer;
+	optimizer.optimize(root, osgUtil::Optimizer::SHARE_DUPLICATE_STATE|osgUtil::Optimizer::OPTIMIZE_TEXTURE_SETTINGS|
+		osgUtil::Optimizer::INDEX_MESH|osgUtil::Optimizer::VERTEX_PRETRANSFORM|osgUtil::Optimizer::VERTEX_POSTTRANSFORM);
 	mViewer->run();
 
 	//final work

@@ -10,7 +10,8 @@ typedef enum ROADTAG
 	MIDQUAD,
 	CTRL,
 	LWALL, RWALL,
-	ROAD
+	ROAD,
+	OBS
 }ROADTAG;
 
 typedef enum FLAGTYPE
@@ -88,6 +89,8 @@ public:
 
 protected:
 	~LogicRoad();
+	ROADTAG _tag;
+
 private:	
 	osg::ref_ptr<edgeFlag> _eFlag;
 	FlagEdgeArrayList _eFlagArray;
@@ -95,8 +98,6 @@ private:
 	osg::ref_ptr<osg::Vec3dArray> _project_LineV;
 	osg::ref_ptr<LogicRoad> _next;
 	osg::ref_ptr<LogicRoad> _prev;
-	
-	ROADTAG _tag;
 
 	//Raw information for logicRoad
 	std::string _roadTxt;

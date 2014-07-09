@@ -4,6 +4,7 @@
 #include "debugNode.h"
 #include "obstacle.h"
 #include "renderVistor.h"
+#include "textureVisitor.h"
 
 #include <osg/Switch>
 #include <osgGA/EventVisitor>
@@ -14,7 +15,7 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _
 , _road(NULL), _root(NULL), _dynamicUpdated(false)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
-	_obstacle = new osg::UIntArray(_expSetting->_obstaclesTime->rbegin(), _expSetting->_obstaclesTime->rend());
+	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
 }
@@ -108,7 +109,7 @@ void ExperimentCallback::dynamicChange()
 				_carState->_dynamic = !_carState->_dynamic;
 				_dynamicUpdated = true;
 				_thisMomentDynamic = _expTime;
-				_dynamic->pop_back();
+				_dynamic->erase(i);
 				break;
 			}
 			i--;
@@ -142,60 +143,69 @@ void ExperimentCallback::createObstacle()
 
 	const int &ob_size = _expSetting->_obstaclesTime->size();
 	const int &range_size = _expSetting->_obstacleRange->size();
-	if (ob_size != range_size)
+	const int &pos_size = _expSetting->_obstaclePos->size();
+	if (ob_size != range_size || ob_size != pos_size)
 	{
 		osg::notify(osg::WARN) << "cannot put obstacles because size are inconsistent" << std::endl;
 		return;
 	}
 
 	bool hit(false);
-	osg::UIntArray::iterator i = _obstacle->end() - 1;
-	while (i != _obstacle->begin() - 1)
+	osg::IntArray::iterator obsi = _obstacle->begin();
+	osg::UIntArray::iterator obsTi = _expSetting->_obstaclesTime->begin();
+	while (obsTi != _expSetting->_obstaclesTime->end())
 	{
-		if (_expTime > *i)
+		if (_expTime > *obsTi && *obsi != -1)
 		{
 			hit = true;
-			_obstacle->pop_back();
+			*obsi = -1;
 			break;
 		}
-		i--;
+		obsTi++;
+		obsi++;
 	}
 
 	if (hit)
 	{
-		int k = i - _obstacle->end();
-		osg::DoubleArray::iterator j = _expSetting->_obstacleRange->begin() + (i - _obstacle->end());
 		Plane::reverse_across_iterator curO = *_carState->_OQuad;
 		if (*curO)
 		{
+			const int offset = obsTi - _expSetting->_obstaclesTime->begin();
+			osg::DoubleArray::iterator requiedDistance = _expSetting->_obstacleRange->begin() + offset;
 			double distance(0.0f);
 			osg::ref_ptr<osg::Vec3dArray> navi = (*curO)->getLoop()->getNavigationEdge();
 			osg::Vec3d mid = navi->front() - navi->back();
-			while (distance < *j)
+			while (distance < *requiedDistance)
 			{
 				curO++;
 				navi = (*curO)->getLoop()->getNavigationEdge();
 				mid = navi->front() - navi->back();
 				distance += mid.length();
 			}
-
+			osg::IntArray::iterator pos = _expSetting->_obstaclePos->begin() + offset;
 			osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
-// 			osg::ref_ptr<osg::Box> box = new osg::Box;
-// 			box->setCenter(center);
-// 			box->setHalfLengths(osg::Vec3d(1.0f, 1.0f, 1.0f));
-// 
-// 			osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-// 			geode->addDrawable(new osg::ShapeDrawable(box.get()));
-// 
-// 			_road->addChild(geode);
-
+			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25f);
+			const double hflength = _expSetting->_offset * 0.20f;
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
-			obs->createBox(center, osg::Vec3d(1.0f, 1.0f, 1.0f));
+			obs->createBox(center, osg::Vec3d(hflength,1.0f,1.0f));
+
+			//render
 			osg::ref_ptr<RenderVistor> rv = new RenderVistor;
 			rv->setBeginMode(GL_QUADS);
 			obs->accept(*rv);
 			_road->addChild(obs);
-			hit = false;
+			//texture
+			osg::ref_ptr<osg::Image> img = osgDB::readImageFile("..\\Resources\\texture\\CSP.png");
+			obs->setImage(img);
+			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
+			obs->accept(*tv);
+			//visitor
+			CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
+			if (refCV)
+			{
+				refCV->setMode(OBS);
+				_road->accept(*refCV);
+			}
 		}
 	}
 }

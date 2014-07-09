@@ -8,6 +8,12 @@
 class Points;
 class Edge;
 
+typedef enum SolidTexture
+{
+	SOLID_TEX_FLAT,
+	SOLID_TEX_CUBE
+}SolidTexture;
+
 class Solid:public osg::Group
 {
 public:
@@ -62,6 +68,12 @@ public:
 	inline void setIndex(const unsigned ref){ _index = ref; };
 	inline unsigned getIndex() const { return _index; };
 
+	inline bool getCCW() const { if(!_ccwupdated) caclCCW(); return _ccw; };
+
+	bool ifPointinSolid(const osg::Vec3d p) const;
+
+	void caclCCW() const;
+
 	struct iterator
 	{
 		iterator(){};
@@ -114,6 +126,8 @@ protected:
 
 private:
 	bool _updated;
+	mutable bool _ccw;
+	mutable bool _ccwupdated;
 
 	Plane *_startPlane;
 	Edge* _startE;
@@ -126,4 +140,6 @@ private:
 	osg::ref_ptr<Solid> _prev;
 
 	unsigned _index;
+
+	SolidTexture _texMode;
 };

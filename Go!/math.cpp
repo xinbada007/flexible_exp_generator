@@ -464,7 +464,7 @@ bool isNumber(const std::string &ref)
 	{
 		stod(ref);
 	}
-	catch (std::invalid_argument& ia)
+	catch (std::invalid_argument&)
 	{
 		return false;
 	}

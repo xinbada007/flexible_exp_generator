@@ -6,12 +6,13 @@
 #include "edge.h"
 #include "halfedge.h"
 
-EulerPoly::EulerPoly()
+EulerPoly::EulerPoly():
+_ccwupdated(false)
 {
 }
 
 EulerPoly::EulerPoly(const EulerPoly &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
-Solid(copy,copyop)
+Solid(copy, copyop), _ccwupdated(copy._ccwupdated)
 {
 
 }
@@ -70,8 +71,10 @@ void EulerPoly::mef(Points *oldP, Points *newP)
 	refL->splitLoop(newE, newL);
 
 	//set plane's normal and equation
-	Loop *norL = (refL->getHomeP()->getAbstract()) ? newL : refL;
-	calcPlaneEQU(norL);
+	calcPlaneEQU(newL);
+	calcPlaneEQU(refL);
+
+//	Loop *norL = (refL->getHomeP()->getAbstract()) ? newL : refL;
 }
 
 void EulerPoly::calcPlaneEQU(Loop *refL)

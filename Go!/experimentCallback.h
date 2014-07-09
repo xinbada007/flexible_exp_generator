@@ -22,7 +22,7 @@ private:
 	bool _dynamicUpdated;
 	double _thisMomentDynamic;
 
-	osg::ref_ptr<osg::UIntArray> _obstacle;
+	osg::ref_ptr<osg::IntArray> _obstacle;
 
 	osg::Camera *_cameraHUD;
 	osg::ref_ptr<osgText::Text> _textHUD;
