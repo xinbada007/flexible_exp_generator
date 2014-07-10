@@ -17,7 +17,7 @@ MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 [CarSettings]
 Acceleration:	0
 DynamicSensitiveLevel:	8	#could be float number like 1.2532564766578
-CarSpeed:	90
+CarSpeed:	240
 SpeedIncr:	20
 CarWheel:	42.5
 WheelAccl:	0	#normally do not apply this
@@ -36,7 +36,7 @@ RoadTxt:	../Resources/nurbsRoads/2.txt;../Resources/nurbsRoads/1.txt;../Resource
 Density:	1000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
-ScaleVector:	1000,1000,1		#DO NOT mess around with this
+ScaleVector:	500,500,1		#DO NOT mess around with this
 
 [Subjects]
 Name:	Xu Xin

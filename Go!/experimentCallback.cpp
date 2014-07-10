@@ -195,7 +195,7 @@ void ExperimentCallback::createObstacle()
 			obs->accept(*rv);
 			_road->addChild(obs);
 			//texture
-			osg::ref_ptr<osg::Image> img = osgDB::readImageFile("..\\Resources\\texture\\CSP.png");
+			osg::ref_ptr<osg::Image> img = osgDB::readImageFile("..\\Resources\\texture\\tio.jpg");
 			obs->setImage(img);
 			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
 			obs->accept(*tv);

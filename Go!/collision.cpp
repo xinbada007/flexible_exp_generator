@@ -405,10 +405,6 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			refC->getCarState()->_collisionQuad = listWall;
 			refC->getCarState()->_collide = true;
 		}
-		else
-		{
-			refC->getCarState()->_collide = false;
-		}
 
 		//collision against Obstacle detection
 		solidList listObs;
@@ -417,7 +413,8 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		{
 			refC->getCarState()->_collide = true;
 		}
-		else
+
+		if (listObs.empty() && listWall.empty())
 		{
 			refC->getCarState()->_collide = false;
 		}
