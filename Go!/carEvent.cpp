@@ -28,7 +28,7 @@ void CarEvent::calculateCarMovement()
 
 	//set the acceleration of rotation
 	const double MAX_ROTATIONACCL = _vehicle->_rotationAccl;
-	if (MAX_ROTATIONACCL)
+	if (MAX_ROTATIONACCL && !_carState->_dynamic)
 	{
 		const double ROTATIONACCL = abs(_carState->_angle - _lastAngle)*frameRate;
 		if (ROTATIONACCL > MAX_ROTATIONACCL)

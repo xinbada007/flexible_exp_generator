@@ -194,8 +194,8 @@ void ExperimentCallback::createObstacle()
 			rv->setBeginMode(GL_QUADS);
 			obs->accept(*rv);
 			_road->addChild(obs);
-			//texture
-			osg::ref_ptr<osg::Image> img = osgDB::readImageFile("..\\Resources\\texture\\tio.jpg");
+			//texture      
+			osg::ref_ptr<osg::Image> img = osgDB::readImageFile("..\\Resources\\texture\\wall.jpg");
 			obs->setImage(img);
 			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
 			obs->accept(*tv);
