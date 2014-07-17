@@ -9,6 +9,7 @@ CarEvent::CarEvent():
 _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
 , _lastAngle(0.0f), _shifted(false)
 {
+	_buttons->assign(10, 0);
 }
 
 CarEvent::~CarEvent()
@@ -206,37 +207,38 @@ bool CarEvent::Joystick()
 		_carState->_speed = 0.0f;
 	}
 
-	unsigned buttons[20];
-	memset(buttons, 0, sizeof(buttons));
-	buttons[b] = 1;
-	if (b == -1)
+	if (b >= 0 && b < _buttons->size())
 	{
-		if (buttons[0] == 1)
+		_buttons->at(b) = 1;
+	}
+	else if (b == -1)
+	{
+		if (_buttons->at(0) == 1)
 		{
-			buttons[0] = 0;
+			_buttons->at(0) = 0;
 		}
-		else if (buttons[1] == 1)
+		else if (_buttons->at(1) == 1)
 		{
-			buttons[1] = 0;
+			_buttons->at(1) = 0;
 		}
-		else if (buttons[2] == 1)
+		else if (_buttons->at(2) == 1)
 		{
 //			_vehicle->increaseMaxSpeed();
-			buttons[2] = 0;
+			_buttons->at(2) = 0;
 		}
-		else if (buttons[3] == 1)
+		else if (_buttons->at(3) == 1)
 		{
 //			_vehicle->decreaseMaxSpeed();
-			buttons[3] = 0;
+			_buttons->at(3) = 0;
 		}
-		else if (buttons[6] == 1)
+		else if (_buttons->at(6) == 1)
 		{
 			makeResetMatrix();
-			buttons[6] = 0;
+			_buttons->at(6) = 0;
 		}
-		else if (buttons[7] == 1)
+		else if (_buttons->at(7) == 1)
 		{
-			buttons[7] = 0;
+			_buttons->at(7) = 0;
 		}
 	}
 

@@ -151,4 +151,6 @@ int _tmain(int argc, char* argv[])
 
 	extern void close_joystick();
 	close_joystick();
+
+	return 0;
 }

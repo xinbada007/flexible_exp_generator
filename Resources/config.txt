@@ -17,7 +17,7 @@ MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 [CarSettings]
 Acceleration:	0
 DynamicSensitiveLevel:	6	#could be float number like 1.2532564766578
-CarSpeed:	80
+CarSpeed:	70
 SpeedIncr:	20
 CarWheel:	42.5
 WheelAccl:	85	#0	#normally do not apply this
@@ -31,9 +31,9 @@ RoadLanes:	3
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../../roadDesign/CtrlPoints/9/0.txt;../../roadDesign/CtrlPoints/9/0.txt;#../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt	#../Resources/nurbsRoads/test(2).txt;
+RoadTxt:	../../roadDesign/CtrlPoints/16/0.txt;../../roadDesign/CtrlPoints/9/0.txt;#../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt	#../Resources/nurbsRoads/test(2).txt;
 
-Density:	2000
+Density:	3000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
 ScaleVector:	500,500,1		#DO NOT mess around with this

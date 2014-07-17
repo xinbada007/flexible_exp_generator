@@ -30,5 +30,7 @@ private:
 	bool _shifted;
 
 	bool _updated;
+
+	osg::ref_ptr<osg::UIntArray> _buttons;
 };
 

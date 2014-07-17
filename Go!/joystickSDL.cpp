@@ -36,7 +36,7 @@ bool init_joystick()
 		return false;
 	}
 
-	SDL_JoystickEventState(SDL_QUERY);
+	SDL_JoystickEventState(SDL_ENABLE);
 
 	memset(buttonLimiter, 0, sizeof(buttonLimiter));
 	memset(buttonHitter, 0, sizeof(buttonHitter));
@@ -55,7 +55,7 @@ bool poll_joystick(int &x, int &y, int &b)
 	unsigned int n;
 	signed short a;
 
-//	SDL_JoystickUpdate();
+	SDL_JoystickUpdate();
 
 	for (i = 0; i < SDL_JoystickNumButtons(JOYSTICK.front());i++)
 	{
