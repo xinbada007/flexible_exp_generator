@@ -66,7 +66,7 @@ bool poll_joystick(int &x, int &y, int &b)
 //		}
 		if (n)
 		{
-			b = n;
+			b = i;
 		}
 	}
 

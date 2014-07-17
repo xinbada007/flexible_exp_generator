@@ -9,6 +9,7 @@ CarEvent::CarEvent():
 _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
 , _lastAngle(0.0f), _shifted(false)
 {
+	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
 }
 
