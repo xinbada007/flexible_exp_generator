@@ -35,6 +35,9 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n")
 	_outMoment.push_back(&_recS._HX);
 	_outMoment.push_back(&_recS._HY);
 	_outMoment.push_back(&_recS._HZ);
+	_outMoment.push_back(&_recS._DX);
+	_outMoment.push_back(&_recS._DY);
+	_outMoment.push_back(&_recS._DZ);
 	_outMoment.push_back(&_recS._HA);
 	_outMoment.push_back(&_recS._AHA);
 	_outMoment.push_back(&_recS._speed);
@@ -154,15 +157,25 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, OZ, nDigit);
 	_recS._OZ = tempd + _recS._TAB;
 
-	double HX = carState->_direction.x();
-	double HY = carState->_direction.y();
-	double HZ = carState->_direction.z();
+	double HX = carState->_heading.x();
+	double HY = carState->_heading.y();
+	double HZ = carState->_heading.z();
 	_gcvt_s(tempd, size_tempd, HX, nDigit);
 	_recS._HX = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, HY, nDigit);
 	_recS._HY = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, HZ, nDigit);
 	_recS._HZ = tempd + _recS._TAB;
+
+	double DX = carState->_direction.x();
+	double DY = carState->_direction.y();
+	double DZ = carState->_direction.z();
+	_gcvt_s(tempd, size_tempd, DX, nDigit);
+	_recS._DX = tempd + _recS._TAB;
+	_gcvt_s(tempd, size_tempd, DY, nDigit);
+	_recS._DY = tempd + _recS._TAB;
+	_gcvt_s(tempd, size_tempd, DZ, nDigit);
+	_recS._DZ = tempd + _recS._TAB;
 
 	double speed = carState->getSpeed();
 	_gcvt_s(tempd, size_tempd, speed, nDigit);
@@ -279,7 +292,8 @@ void Recorder::setStatus(const std::string &content)
 	const unsigned DITHER(9), DANGLE(10), SWANGLE(11);
 	const unsigned OX(12), OY(13), OZ(14);
 	const unsigned HX(15), HY(16), HZ(17);
-	const unsigned HA(18), SPEED(20);
+	const unsigned DX(18), DY(19), DZ(20);
+	const unsigned HA(21), AHA(22), SPEED(23);
 
 	std::string text;
 	std::string::const_iterator iter = content.cbegin();
@@ -295,47 +309,52 @@ void Recorder::setStatus(const std::string &content)
 			numTab++;
 			switch (numTab)
 			{
-			case 3:
+			case CRASH:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Crash: ";
 				break;
-			case 4:
+			case RB:
 				text.push_back('\n');
 				text += "RB RU LU LB OC: ";
 				break;
-			case 9:
+			case DITHER:
 				text.push_back('\n');
 				text += "Dither: ";
 				break;
-			case 10:
+			case DANGLE:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "DAngle: ";
 				break;
-			case 11:
+			case SWANGLE:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "S\\W: ";
 				break;
-			case 12:
+			case OX:
 				text.push_back('\n');
 				text += "Original: ";
 				break;
-			case 15:
+			case HX:
 				text.push_back('\n');
 				text += "Heading: ";
 				break;
-			case 18:
+			case DX:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "Direction: ";
+				break;
+			case HA:
 				text.push_back('\n');
 				text += "Wheel Angle: ";
 				break;
-			case 19:
+			case AHA:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Accumulative Heading: ";
 				break;
-			case 20:
+			case SPEED:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "SPEED: ";

@@ -12,7 +12,7 @@
 #include <osg/ShapeDrawable>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false)
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
@@ -48,6 +48,35 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
 	if (_carState && ea)
 	{
+		Plane::reverse_across_iterator start = *_carState->_OQuad;
+		if (*start)
+		{
+			start.add((int)((*start)->getHomeS()->getNumGeometry()*0.05f));
+			if (!(*start))
+			{
+				if (_mv)
+				{
+					_mv->setDone(true);
+				}
+			}
+		}
+		
+		quadList::const_iterator i = _carState->_currentQuad.cbegin();
+		unsigned notFound(0);
+		while(i != _carState->_currentQuad.cend())
+		{
+			if (!(*i)) notFound++;
+			i++;
+		}
+		if (notFound == _carState->_currentQuad.size())
+		{
+			_carState->_reset = true;
+		}
+		else
+		{
+			_carState->_reset = false;
+		}
+
 		switch (ea->getEventType())
 		{
 		case::osgGA::GUIEventAdapter::FRAME:

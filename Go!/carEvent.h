@@ -12,12 +12,16 @@ public:
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
 private:
 	~CarEvent();
-	void dynamicApply();
 	void applyCarMovement();
 	void calculateCarMovement();
-	void autoNavigation();
+
 	bool Joystick();
+
 	void makeResetMatrix();
+
+	void shiftVehicle();
+	void autoNavigation();
+	void checkRotationLimit();
 
 	osg::ref_ptr<CarState> _carState;
 	Vehicle *_vehicle;
@@ -27,6 +31,7 @@ private:
 
 	bool _leftTurn;
 	double _lastAngle;
+	bool _autoNavi;
 	bool _shifted;
 
 	bool _updated;

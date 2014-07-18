@@ -134,6 +134,8 @@ int _tmain(int argc, char* argv[])
 	osg::ref_ptr<ExperimentCallback> expcontroller = new ExperimentCallback(readConfig);
 	expcontroller->setUserData(cv.get());
 	expcontroller->setHUDCamera(mViewer->getHuDView()->getCamera());
+	expcontroller->setMultiViewer(mViewer.get());
+
 	root->addEventCallback(expcontroller);
 
 	mViewer->setRunMaxFrameRate(frameRate);

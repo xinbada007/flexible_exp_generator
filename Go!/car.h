@@ -15,6 +15,7 @@ typedef struct CarState:public osg::Referenced
 		this->_O.set(O_POINT);
 		this->_O_Project.set(O_POINT);
 		this->_direction.set(UP_DIR);
+		this->_heading.set(_direction);
 		this->_directionLastFrame.set(_direction);
 		_angle = 0.0f;
 		_angle_incr = 0.2f;
@@ -43,6 +44,8 @@ typedef struct CarState:public osg::Referenced
 
 		_OQuad = NULL;
 
+		_reset = false;
+
 		_D_Speed = _speed;
 		_D_Angle = _angle;
 
@@ -56,6 +59,7 @@ typedef struct CarState:public osg::Referenced
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
 	osg::Vec3d _shiftD;
+	osg::Vec3d _heading;
 	osg::Vec3d _direction;
 	osg::Vec3d _directionLastFrame;
 	osg::ref_ptr<osg::Vec3dArray> _midLine;
@@ -68,6 +72,8 @@ typedef struct CarState:public osg::Referenced
 	quadList _currentQuad;
 	quadList _collisionQuad;
 	Plane::iterator _OQuad;
+
+	bool _reset;
 
 	double _angle;
 	double _angle_incr;
