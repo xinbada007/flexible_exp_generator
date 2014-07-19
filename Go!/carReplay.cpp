@@ -92,8 +92,7 @@ void CarReplay::applyCarMovement(osg::Matrixd &m)
 		osg::Vec3d midD = _carState->_midLine->front() - _carState->_midLine->back();
 		int sign = (midD * _carState->_direction > 0) ? 1 : -1;
 		_carState->_speed *= sign;
-		_carState->convertSpeed();
-		_carState->convertAngle();
+		_carState->cacluateSpeedandAngle();
 	}
 
 	//set carstate

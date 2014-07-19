@@ -13,11 +13,13 @@ typedef struct CarState:public osg::Referenced
 	CarState()
 	{
 		this->_O.set(O_POINT);
+		this->_lastO.set(O_POINT);
 		this->_O_Project.set(O_POINT);
 		this->_direction.set(UP_DIR);
 		this->_heading.set(_direction);
 		this->_directionLastFrame.set(_direction);
 		_angle = 0.0f;
+		_lastAngle = _angle;
 		_angle_incr = 0.2f;
 		_swangle = 0.0f;
 		_speed = 0.0f;
@@ -30,6 +32,7 @@ typedef struct CarState:public osg::Referenced
 
 		_frameStamp = 0;
 		_timeReference = 0.0f;
+		_lastTimeR = 0.0f;
 
 		//mid-Line of current Road
 		_midLine = new osg::Vec3dArray;
@@ -47,7 +50,9 @@ typedef struct CarState:public osg::Referenced
 		_reset = false;
 
 		_D_Speed = _speed;
+		_R_Speed = _speed;
 		_D_Angle = _angle;
+		_R_Angle = _angle;
 
 		_state.makeIdentity();
 		_moment.makeIdentity();
@@ -95,16 +100,45 @@ typedef struct CarState:public osg::Referenced
 	osg::ref_ptr<osg::IntArray> _dynamicState;
 	bool _replay;
 
-	void convertSpeed(){ _D_Speed = _speed * frameRate *3.6f; };
-	void convertAngle(){ _D_Angle = _angle * frameRate / TO_RADDIAN; };
-	double getSpeed() const { return _D_Speed; };
-	double getAngle() const { return _D_Angle; };
-	void setReplayText(std::string ref) { if (_replay) _replayText = ref; };
-	const std::string & getReplayText() const { return _replayText; };
+	inline void cacluateSpeedandAngle() const
+	{ 
+		_D_Speed = _speed * frameRate *3.6f;
+		_D_Angle = _angle * frameRate / TO_RADDIAN;
+
+		if (_lastTimeR != _timeReference)
+		{
+			_R_Speed = ((_O - _lastO).length());
+			_R_Speed /= (_timeReference - _lastTimeR);
+			_R_Speed *= 3.6f;
+
+			_R_Angle = abs(_angle - _lastAngle);
+			_R_Angle /= (_timeReference - _lastTimeR);
+			_R_Angle /= TO_RADDIAN;
+
+			_lastTimeR = _timeReference;
+			_lastO = _O;
+			_lastAngle = _angle;
+		}
+	};
+	inline double getSpeed() const { return _D_Speed; };
+	inline double getRSpeed() const { return _R_Speed; };
+	inline double getAngle() const { return _D_Angle; };
+	inline double getRAngle() const { return _R_Angle; };
+	inline void updateLastO(osg::Vec3d ref) { _lastO = ref; };
+	inline void setReplayText(std::string ref) { if (_replay) _replayText = ref; };
+	inline const std::string & getReplayText() const { return _replayText; };
 	~CarState(){};
 private:
-	double _D_Speed;
-	double _D_Angle;
+	mutable double _D_Speed;
+	mutable double _R_Speed;
+	mutable double _D_Angle;
+	mutable double _R_Angle;
+
+	mutable osg::Vec3d _lastO;
+	mutable double _lastAngle;
+
+	mutable double _lastTimeR;
+
 	std::string _replayText;
 }CarState;
 

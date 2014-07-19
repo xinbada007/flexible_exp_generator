@@ -47,6 +47,7 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 
 	//Set-up Original Point of Car
 	_carState->_O = _vehicle->_O;
+	_carState->updateLastO(_carState->_O);
 
 	while (i != refV->end())
 	{

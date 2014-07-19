@@ -15,14 +15,14 @@ typedef struct recState
 		_TAB("\t"), _PERIOD("\n"), _time("Time"), _fps("FPS"), _frame("Frame"), _crash("Crash"),
 		_rb("RB"), _ru("RU"), _lu("LU"), _lb("LB"), _oc("OC"), _dither("Dither"), _dAngle("DAngle"),
 		_swAngle("swAngle"), _OX("OX"), _OY("OY"), _OZ("OZ"), _HX("HX"), _HY("HY"),
-		_HZ("HZ"), _DX("DX"), _DY("DY"), _DZ("DZ"),_HA("HA"), _AHA("AccumulativeHeading(Y)"),
-		_speed("Speed"), _dynamic("Dynamic"), _replay(""), _accumulativeHeading(0.0f)
+		_HZ("HZ"), _DX("DX"), _DY("DY"), _DZ("DZ"), _HA("HA"), _RHA("RHA"), _AHA("AccumulativeHeading(Y)"),
+		_speed("Speed"), _Rspeed("RSpeed"), _dynamic("Dynamic"), _replay(""), _accumulativeHeading(0.0f)
 	{
 		_time += _TAB; _fps += _TAB; _frame += _TAB; _crash += _TAB;
 		_rb += _TAB; _ru += _TAB; _lu += _TAB; _lb += _TAB; _oc += _TAB; _dither += _TAB;
 		_dAngle += _TAB; _swAngle += _TAB; _OX += _TAB; _OY += _TAB; _OZ += _TAB;
 		_HX += _TAB; _HY += _TAB; _HZ += _TAB; _DX += _TAB; _DY += _TAB; _DZ += _TAB;
-		_HA += _TAB; _AHA += _TAB; _speed += _TAB;
+		_HA += _TAB; _RHA += _TAB;  _AHA += _TAB; _speed += _TAB; _Rspeed += _TAB;
 
 	}
 	std::string _time;
@@ -47,8 +47,10 @@ typedef struct recState
 	std::string _DY;
 	std::string _DZ;
 	std::string _HA;
+	std::string _RHA;
 	std::string _AHA;
 	std::string _speed;
+	std::string _Rspeed;
 	std::string _dynamic;
 	std::string _replay;
 

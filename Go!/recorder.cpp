@@ -39,8 +39,10 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n")
 	_outMoment.push_back(&_recS._DY);
 	_outMoment.push_back(&_recS._DZ);
 	_outMoment.push_back(&_recS._HA);
+	_outMoment.push_back(&_recS._RHA);
 	_outMoment.push_back(&_recS._AHA);
 	_outMoment.push_back(&_recS._speed);
+	_outMoment.push_back(&_recS._Rspeed);
 	_outMoment.push_back(&_recS._dynamic);
 	_outMoment.push_back(&_recS._replay);
 
@@ -108,6 +110,7 @@ void Recorder::rectoTxt(const CarState *carState)
 	_recS._time = tempd + _recS._TAB;
 
 	const double fps = (frameStamp - _lastFrameStamp) / (timeReference - _lastTimeReference);
+	const double timePeriod = timeReference - _lastTimeReference;
 	_gcvt_s(tempd, size_tempd, fps, nDigit);
 	_recS._fps = tempd + _recS._TAB;
 	_lastFrameStamp = frameStamp;
@@ -177,9 +180,15 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, DZ, nDigit);
 	_recS._DZ = tempd + _recS._TAB;
 
+	carState->cacluateSpeedandAngle();
+
 	double speed = carState->getSpeed();
 	_gcvt_s(tempd, size_tempd, speed, nDigit);
 	_recS._speed = tempd + _recS._TAB;
+
+	double Rspeed = carState->getRSpeed();
+	_gcvt_s(tempd, size_tempd, Rspeed, nDigit);
+	_recS._Rspeed = tempd + _recS._TAB;
 
 	osg::Vec3d carD = carState->_direction;
 	carD.normalize();
@@ -200,6 +209,9 @@ void Recorder::rectoTxt(const CarState *carState)
 	const double HA = AHA * frameRate;
 	_gcvt_s(tempd, size_tempd, HA, nDigit);
 	_recS._HA = tempd + _recS._TAB;
+	const double RHA = (!timePeriod) ? AHA * frameRate : AHA / timePeriod;
+	_gcvt_s(tempd, size_tempd, RHA, nDigit);
+	_recS._RHA = tempd + _recS._TAB;
 
 	_recS._accumulativeHeading += AHA;
 	_gcvt_s(tempd, size_tempd, _recS._accumulativeHeading, nDigit);
@@ -293,7 +305,8 @@ void Recorder::setStatus(const std::string &content)
 	const unsigned OX(12), OY(13), OZ(14);
 	const unsigned HX(15), HY(16), HZ(17);
 	const unsigned DX(18), DY(19), DZ(20);
-	const unsigned HA(21), AHA(22), SPEED(23);
+	const unsigned HA(21), RHA(22), AHA(23), SPEED(24);
+	const unsigned RSPEED(25), DYNAMIC(26);
 
 	std::string text;
 	std::string::const_iterator iter = content.cbegin();
@@ -352,12 +365,16 @@ void Recorder::setStatus(const std::string &content)
 			case AHA:
 				text.push_back(' ');
 				text.push_back(' ');
-				text += "Accumulative Heading: ";
+				text += "Accu. Heading: ";
 				break;
 			case SPEED:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "SPEED: ";
+				break;
+			case DYNAMIC:
+				text.push_back('\n');
+				text += "Dynamic: ";
 				break;
 			default:
 				text.push_back(' ');

@@ -559,7 +559,8 @@ void CarEvent::calculateCarMovement()
 		_carState->_direction = _carState->_direction * osg::Matrix::rotate(qt);
 	}
 	_carState->_direction.normalize();
-	_carState->_angle = 0.0f;
+//	_carState->_angle = 0.0f;
+
 	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed);
 
 	//apply the shift vector
@@ -654,13 +655,14 @@ void CarEvent::makeResetMatrix()
 	carD.normalize();
 	roadD = (_carState->_midLine->front() - _carState->_midLine->back());
 	roadD.normalize();
-	degree = asinR((carD^roadD).z());
+	osg::Quat qt;
+	qt.makeRotate(carD, roadD);
 
 	_reset.makeIdentity();
 	_reset *= osg::Matrix::translate(_carState->_O_Project - _carState->_O);
-	_reset *= osg::Matrix::translate(-_carState->_O);
-	_reset *= osg::Matrix::rotate(degree, Z_AXIS);
-	_reset *= osg::Matrix::translate(_carState->_O);
+	_reset *= osg::Matrix::translate(-_carState->_O_Project);
+	_reset *= osg::Matrix::rotate(qt);
+	_reset *= osg::Matrix::translate(_carState->_O_Project);
 }
 
 void CarEvent::shiftVehicle()
@@ -765,58 +767,65 @@ bool CarEvent::Joystick()
 
 void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 {
-	osg::MatrixTransform *refM = dynamic_cast<osg::MatrixTransform*> (node);
-	Car *refC = (refM) ? dynamic_cast<Car*>(refM->getUserData()) : NULL;
-
-	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
-	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
-	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
-
-	if (refC && ea)
+	if (!_updated)
 	{
-		//update
-		if (!_updated)
+		osg::MatrixTransform *refM = dynamic_cast<osg::MatrixTransform*> (node);
+		Car *refC = (refM) ? dynamic_cast<Car*>(refM->getUserData()) : NULL;
+
+		if (refC)
 		{
 			_carState = refC->getCarState();
 			_vehicle = refC->getVehicle();
 			_mTransform = refM;
 			_updated = true;
 		}
-		_moment.makeIdentity();
-		_reset.makeIdentity();
+	}
+	
+	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
+	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
+	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
 
+	if (_carState && ea)
+	{
 		Joystick();
 
 		const int &key = ea->getKey();
 		switch (ea->getEventType())
 		{
 		case osgGA::GUIEventAdapter::KEYDOWN:
-			if ((key == 'a' || key == 'd'))
+			if ((key == osgGA::GUIEventAdapter::KEY_A || key == osgGA::GUIEventAdapter::KEY_D))
 			{
-				int sign = (key == 'a') ? 1 : -1;
+				int sign = (key == osgGA::GUIEventAdapter::KEY_A) ? 1 : -1;
 				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
 				_leftTurn = (sign == 1);
 				_shifted = true;
 				break;
 			}
-			if (key == 'w' || key == 's')
+			else if (key == osgGA::GUIEventAdapter::KEY_W || key == osgGA::GUIEventAdapter::KEY_S)
 			{
-				int sign = (key == 'w') ? 1 : -1;
+				int sign = (key == osgGA::GUIEventAdapter::KEY_W) ? 1 : -1;
 				_carState->_speed += _vehicle->_speed*sign*_carState->_speed_incr;
 				break;
 			}
-			if ((key == '`'))
+			else if (key == osgGA::GUIEventAdapter::KEY_R)
+			{
+				makeResetMatrix();
+				break;
+			}
+			else if ((key == '`'))
 			{
 				_carState->_dynamic = !_carState->_dynamic;
 				break;
 			}
-			if (key == osgGA::GUIEventAdapter::KEY_Equals)
+			else if (key == osgGA::GUIEventAdapter::KEY_Equals)
 			{
 				_vehicle->increaseMaxSpeed();
+				break;
 			}
-			if (key == osgGA::GUIEventAdapter::KEY_Minus)
+			else if (key == osgGA::GUIEventAdapter::KEY_Minus)
 			{
 				_vehicle->decreaseMaxSpeed();
+				break;
 			}
 		case osgGA::GUIEventAdapter::KEYUP:
 			if (key == 'a' || key == 'd')
@@ -875,11 +884,18 @@ void CarEvent::applyCarMovement()
 
 	_mTransform->setMatrix(_carState->_state);
 
+	//Initialize
+	_moment.makeIdentity();
+	_reset.makeIdentity();
+
 	//update heading
 	osg::Vec3d hD = (_carState->_frontWheel->front() + _carState->_frontWheel->back()) * 0.5f;
 	hD -= _carState->_O;
 	hD.normalize();
 	_carState->_heading = hD;
+
+	//set carstate
+//	_carState->cacluateSpeedandAngle();
 
 	//set carstate
 	if (*_carState->_OQuad)
@@ -899,11 +915,6 @@ void CarEvent::applyCarMovement()
 		_carState->_updated = true;
 	}
 
-	//set carstate
-	{
-		_carState->convertSpeed();
-		_carState->convertAngle();
-	}
 
 	//isNAN Test
 	bool NANTEST(true);
@@ -939,6 +950,7 @@ void CarEvent::applyCarMovement()
 		i++;
 	}
 
+	NANTEST = NANTEST && _carState->_heading.isNaN();
 	NANTEST = NANTEST && _carState->_direction.isNaN();
 	NANTEST = NANTEST && _carState->_directionLastFrame.isNaN();
 	NANTEST = NANTEST && _carState->_moment.isNaN();
