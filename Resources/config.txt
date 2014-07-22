@@ -7,7 +7,7 @@ TrialConfig
 #Num of Screent starts from 0
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.25	#1.25
-screen:		1
+screen:		0
 aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
 fovy:		42.175	#Disable when RealWorld is enabled
 RealWorld:	0:	42.175 , 65.217 , 42.391
@@ -16,11 +16,11 @@ MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
 Acceleration:	0
-DynamicSensitiveLevel:	6	#could be float number like 1.2532564766578
+DynamicSensitiveLevel:	5	#could be float number like 1.2532564766578
 CarSpeed:	80
 SpeedIncr:	20
 CarWheel:	42.5
-WheelAccl:	85	#0	#normally do not apply this
+WheelAccl:	180	#0	#normally do not apply this
 CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
@@ -31,8 +31,8 @@ RoadLanes:	3
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-#RoadTxt:	../../roadDesign/CtrlPoints/6/0.txt;#../../roadDesign/CtrlPoints/0.txt;#../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt	#../Resources/nurbsRoads/test(2).txt;
-RoadTxt:	../Resources/nurbsRoads/test(2).txt;
+RoadTxt:	../../roadDesign/CtrlPoints/1/0.txt;../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt;../../roadDesign/CtrlPoints/12/0.txt	#../Resources/nurbsRoads/test(2).txt;
+#RoadTxt:	../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt;../../roadDesign/CtrlPoints/12/0.txt;
 
 Density:	3000
 WallHeight:	1.0

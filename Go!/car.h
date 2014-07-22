@@ -127,8 +127,8 @@ typedef struct CarState:public osg::Referenced
 	inline void updateLastO(osg::Vec3d ref) { _lastO = ref; };
 	inline void setReplayText(std::string ref) { if (_replay) _replayText = ref; };
 	inline const std::string & getReplayText() const { return _replayText; };
-	~CarState(){};
 private:
+	~CarState(){ std::cout << "Deconstruct CarState" << std::endl; };
 	mutable double _D_Speed;
 	mutable double _R_Speed;
 	mutable double _D_Angle;

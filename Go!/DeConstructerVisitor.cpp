@@ -1,4 +1,5 @@
 #include "stdafx.h"
+
 #include "DeConstructerVisitor.h"
 #include "logicRoad.h"
 
@@ -16,14 +17,8 @@ DeConstructerVisitor::~DeConstructerVisitor()
 
 void DeConstructerVisitor::apply(osg::Node& node)
 {
-	while (node.getEventCallback())
-	{
-		node.removeEventCallback(node.getEventCallback());
-	}
-	while (node.getUpdateCallback())
-	{
-		node.removeUpdateCallback(node.getUpdateCallback());
-	}
+	node.setEventCallback(NULL);
+	node.setUpdateCallback(NULL);
 
 	traverse(node);
 

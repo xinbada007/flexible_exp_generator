@@ -27,11 +27,13 @@ osg::MatrixTransform *obtainCarMatrix(Car *car)
 	osg::ref_ptr<osg::MatrixTransform> carMatrix = new osg::MatrixTransform;
 	if (!car->getCarState()->_saveState)
 	{
-		carMatrix->addEventCallback(new CarEvent);
+		osg::ref_ptr<CarEvent> carEvent = new CarEvent;
+		carMatrix->addEventCallback(carEvent);
 	}
 	else
 	{
-		carMatrix->addEventCallback(new CarReplay);
+		osg::ref_ptr<CarReplay> carReplay = new CarReplay;
+		carMatrix->addEventCallback(carReplay);
 	}
 	carMatrix->setUserData(car);
 	carMatrix->addChild(car);
@@ -149,6 +151,7 @@ int _tmain(int argc, char* argv[])
 
 	//final work
 	recorder->output(readConfig.get());
+
 	root->accept(*new DeConstructerVisitor);
 
 	extern void close_joystick();
