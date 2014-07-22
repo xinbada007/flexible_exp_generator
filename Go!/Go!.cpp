@@ -3,6 +3,8 @@
 #include "stdafx.h"
 #include "headers.h"
 #include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -50,7 +52,7 @@ CameraEvent *obtainCamMatrix(ReadConfig *rc, Car *car)
 	return camMatrix.release();
 }
 
-int _tmain(int argc, char* argv[])
+int main(int argc, char** argv)
 {
 	extern bool init_joystick();
 	init_joystick();
@@ -69,7 +71,6 @@ int _tmain(int argc, char* argv[])
 	else if (argc == 2)
 	{
 		configFile = argv[1];
-		configFile += ".txt";
 		readConfig = new ReadConfig(configFile);
 	}
 	else if (argc > 2)
