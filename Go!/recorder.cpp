@@ -44,6 +44,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n")
 	_outMoment.push_back(&_recS._speed);
 	_outMoment.push_back(&_recS._Rspeed);
 	_outMoment.push_back(&_recS._dynamic);
+	_outMoment.push_back(&_recS._usrHit);
 	_outMoment.push_back(&_recS._replay);
 
 	_outMoment.push_back(&_recS._PERIOD);
@@ -126,25 +127,69 @@ void Recorder::rectoTxt(const CarState *carState)
 		return;
 	}
 	quadList::const_iterator i = carState->_currentQuad.cbegin();
-	int rb = (*i) ? (*i)->getIndex() : -1; i++;
-	int ru = (*i) ? (*i)->getIndex() : -1; i++;
-	int lu = (*i) ? (*i)->getIndex() : -1; i++;
-	int lb = (*i) ? (*i)->getIndex() : -1; i++;
-	int oc = (*i) ? (*i)->getIndex() : -1;
+	int rb(-1), ru(-1), lu(-1), lb(-1), oc(-1);
+	int srb(-1), sru(-1), slu(-1), slb(-1), soc(-1);
+	if (*i)
+	{
+		rb = (*i)->getIndex();
+		srb = (*i)->getHomeS()->getIndex();
+		i++;
+	}
+	if (*i)
+	{
+		ru = (*i)->getIndex();
+		sru = (*i)->getHomeS()->getIndex();
+		i++;
+	}
+	if (*i)
+	{
+		lu = (*i)->getIndex();
+		slu = (*i)->getHomeS()->getIndex();
+		i++;
+	}
+	if (*i)
+	{
+		lb = (*i)->getIndex();
+		slb = (*i)->getHomeS()->getIndex();
+		i++;
+	}
+	if (*i)
+	{
+		oc = (*i)->getIndex();
+		soc = (*i)->getHomeS()->getIndex();
+	}
+	_itoa_s(srb, temp, size_temp);
+	_recS._rb = "("; _recS._rb += temp; _recS._rb += ")";
 	_itoa_s(rb, temp, size_temp);
-	_recS._rb = temp + _recS._TAB;
+	_recS._rb += temp + _recS._TAB;
+	
+	_itoa_s(sru,temp,size_temp);
+	_recS._ru = "("; _recS._ru += temp; _recS._ru += ")";
 	_itoa_s(ru, temp, size_temp);
-	_recS._ru = temp + _recS._TAB;
+	_recS._ru += temp + _recS._TAB;
+
+	_itoa_s(slu, temp, size_temp);
+	_recS._lu = "("; _recS._lu += temp; _recS._lu += ")";
 	_itoa_s(lu, temp, size_temp);
-	_recS._lu = temp + _recS._TAB;
+	_recS._lu += temp + _recS._TAB;
+	
+	_itoa_s(slb, temp, size_temp);
+	_recS._lb = "("; _recS._lb += temp; _recS._lb += ")";
 	_itoa_s(lb, temp, size_temp);
-	_recS._lb = temp + _recS._TAB;
+	_recS._lb += temp + _recS._TAB;
+	
+	_itoa_s(soc, temp, size_temp);
+	_recS._oc = "("; _recS._oc += temp; _recS._oc += ")";
 	_itoa_s(oc, temp, size_temp);
-	_recS._oc = temp + _recS._TAB;
+	_recS._oc += temp + _recS._TAB;
 
 	const int dynamic = (carState->_dynamic) ? 1 : 0;
 	_itoa_s(dynamic, temp, size_temp);
 	_recS._dynamic = temp + _recS._TAB;
+
+	const int usrHit = carState->_userHit;
+	_itoa_s(usrHit, temp, size_temp);
+	_recS._usrHit = temp + _recS._TAB;
 	
 	double swAngle = carState->_swangle;
 	_gcvt_s(tempd, size_tempd, swAngle, nDigit);
@@ -306,7 +351,7 @@ void Recorder::setStatus(const std::string &content)
 	const unsigned HX(15), HY(16), HZ(17);
 	const unsigned DX(18), DY(19), DZ(20);
 	const unsigned HA(21), RHA(22), AHA(23), SPEED(24);
-	const unsigned RSPEED(25), DYNAMIC(26);
+	const unsigned RSPEED(25), DYNAMIC(26), USRHIT(27);
 
 	std::string text;
 	std::string::const_iterator iter = content.cbegin();
@@ -376,6 +421,10 @@ void Recorder::setStatus(const std::string &content)
 				text.push_back('\n');
 				text += "Dynamic: ";
 				break;
+			case USRHIT:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "Hit: ";
 			default:
 				text.push_back(' ');
 				text.push_back(' ');

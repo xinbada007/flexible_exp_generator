@@ -269,11 +269,19 @@ bool CarEvent::Joystick()
 	if (b >= 0 && b < _buttons->size())
 	{
 		_buttons->at(b) = 1;
+
+		//Record User Hit
+		if (b == 0)
+		{
+			_carState->_userHit = 0;
+		}
 	}
 	else if (b == -1)
 	{
 		if (_buttons->at(0) == 1)
 		{
+			//Reset UserHit
+			_carState->_userHit = -1;
 			_buttons->at(0) = 0;
 		}
 		else if (_buttons->at(1) == 1)

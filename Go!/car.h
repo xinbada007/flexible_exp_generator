@@ -28,6 +28,8 @@ typedef struct CarState:public osg::Referenced
 		_dynamic = true; //acceleration mode
 
 		_collide = false;
+		_userHit = -1;
+
 		_updated = false;
 
 		_frameStamp = 0;
@@ -89,6 +91,8 @@ typedef struct CarState:public osg::Referenced
 	bool _dynamic;
 
 	bool _collide;
+	int _userHit;
+
 	bool _updated;
 
 	unsigned _frameStamp;
