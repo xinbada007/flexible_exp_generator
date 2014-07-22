@@ -63,6 +63,7 @@ void ReadConfig::assignConfig()
 	string config;
 	byPassSpace(filein, config);
 	const string title = getTillFirstSpaceandToUpper(config);
+	const string REPLAY = "TRIALREPLAY";
 	if (title == TRAIL)
 	{
 		_screens = new Screens;
@@ -77,9 +78,7 @@ void ReadConfig::assignConfig()
 		initializeAfterReadTrial();
 		return;
 	}
-
-	const string REPLAY = "TRIALREPLAY";
-	if (title == REPLAY)
+	else if (title == REPLAY)
 	{
 		_saveState = new osg::MatrixdArray;
 		_dynamicState = new osg::IntArray;
@@ -87,6 +86,8 @@ void ReadConfig::assignConfig()
 		_replay = true;
 		return;
 	}
+	else
+		filein.close();
 }
 
 void ReadConfig::readReply(std::ifstream &filein)
@@ -641,6 +642,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string WHEELACCL = "WHEELACCL";
 		const string SPEEDINCR = "SPEEDINCR";
 		const string DYNAMICSENSITIVE = "DYNAMICSENSITIVELEVEL";
+		const string STARTDELAY = "STARTDELAY";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -723,6 +725,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_vehicle->_speedincr = stod(config);
+				}
+				continue;
+			}
+			else if (title == STARTDELAY)
+			{
+				config.erase(config.begin(), config.begin() + STARTDELAY.size());
+				if (!config.empty())
+				{
+					_vehicle->_startDelay = stod(config);
 				}
 				continue;
 			}

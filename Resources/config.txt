@@ -20,7 +20,7 @@ DynamicSensitiveLevel:	5	#could be float number like 1.2532564766578
 CarSpeed:	80
 SpeedIncr:	20
 CarWheel:	42.5
-WheelAccl:	180	#0	#normally do not apply this
+WheelAccl:	360	#180	#0	#normally do not apply this
 CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
@@ -31,7 +31,7 @@ RoadLanes:	3
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../../roadDesign/CtrlPoints/1/0.txt;../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt;../../roadDesign/CtrlPoints/12/0.txt	#../Resources/nurbsRoads/test(2).txt;
+RoadTxt:	../../roadDesign/CtrlPoints/1/0.txt;#../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt;../../roadDesign/CtrlPoints/12/0.txt	#../Resources/nurbsRoads/test(2).txt;
 #RoadTxt:	../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt;../../roadDesign/CtrlPoints/12/0.txt;
 
 Density:	3000

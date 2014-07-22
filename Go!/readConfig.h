@@ -137,6 +137,8 @@ typedef struct Vehicle:public osg::Referenced
 		_acceleration = 1;
 		_dynamicSensitive = 1.0f;
 
+		_startDelay = 1.0f;
+
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
 	}
@@ -158,6 +160,8 @@ typedef struct Vehicle:public osg::Referenced
 	bool _acceleration;
 	double _dynamicSensitive;
 	std::string _texture;
+
+	double _startDelay;
 
 protected:
 	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };
