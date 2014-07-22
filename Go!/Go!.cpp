@@ -69,6 +69,7 @@ int _tmain(int argc, char* argv[])
 	else if (argc == 2)
 	{
 		configFile = argv[1];
+		configFile += ".txt";
 		readConfig = new ReadConfig(configFile);
 	}
 	else if (argc > 2)

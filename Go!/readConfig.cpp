@@ -55,7 +55,7 @@ void ReadConfig::assignConfig()
 	if (!filein)
 	{
 		cout << "File Open Failed" << endl;
-		cout << _filename << "does not exist!" << endl;
+		cout << _filename << " does not exist!" << endl;
 		return;
 	}
 
@@ -192,7 +192,7 @@ void ReadConfig::initializeAfterReadTrial()
 
 			const string timedir = timestr;
 			const string datedir = datestr;
-			const string subD = ".\\Subjects";
+			const string subD = "..\\Subjects";
 			if (_access(subD.c_str(), 6) == -1) //if doesn't find the directory
 			{
 				if (_mkdir(subD.c_str()) == -1) //creat one
