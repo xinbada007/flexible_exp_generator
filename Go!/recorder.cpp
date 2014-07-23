@@ -133,26 +133,26 @@ void Recorder::rectoTxt(const CarState *carState)
 	{
 		rb = (*i)->getIndex();
 		srb = (*i)->getHomeS()->getIndex();
-		i++;
 	}
+	i++;
 	if (*i)
 	{
 		ru = (*i)->getIndex();
 		sru = (*i)->getHomeS()->getIndex();
-		i++;
 	}
+	i++;
 	if (*i)
 	{
 		lu = (*i)->getIndex();
 		slu = (*i)->getHomeS()->getIndex();
-		i++;
 	}
+	i++;
 	if (*i)
 	{
 		lb = (*i)->getIndex();
 		slb = (*i)->getHomeS()->getIndex();
-		i++;
 	}
+	i++;
 	if (*i)
 	{
 		oc = (*i)->getIndex();

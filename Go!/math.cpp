@@ -243,7 +243,6 @@ double ifPoints_ON_Plane(const osg::Vec3d refP, const planeEQU refEQU)
 	const double &D = *i;
 
 	double S = A*x + B*y + C*z + D;
-	S /= refP.length2();
 
 	if (isEqual(S,0.0f))
 	{
