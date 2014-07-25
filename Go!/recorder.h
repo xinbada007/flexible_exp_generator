@@ -76,6 +76,7 @@ private:
 	void rectoTxt(const CarState *carState);
 	void copyandSetHUDText();
 	void setHUDText();
+	void setStatusLess(const std::string &txt);
 	void setStatus(const std::string &txt);
 
 	std::string _txtRecorder;

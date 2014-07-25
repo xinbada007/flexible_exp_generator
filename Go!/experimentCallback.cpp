@@ -51,7 +51,8 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		Plane::reverse_across_iterator start = *_carState->_OQuad;
 		if (*start)
 		{
-			start.add((int)((*start)->getHomeS()->getNumGeometry()*0.01f));
+			const int future = (int)((*start)->getHomeS()->getNumGeometry()*0.01f) + 1;
+			start.add(future);
 			if (!(*start))
 			{
 				if (_mv)

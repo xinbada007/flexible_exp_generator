@@ -276,11 +276,75 @@ void Recorder::rectoTxt(const CarState *carState)
 
 void Recorder::copyandSetHUDText()
 {
+	const unsigned TIME(0), FPS(1), FRAME(2), CRASH(3);
+	const unsigned RB(4), RU(5), LU(6), LB(7), OC(8);
+	const unsigned DITHER(9), DANGLE(10), SWANGLE(11);
+	const unsigned OX(12), OY(13), OZ(14);
+	const unsigned HX(15), HY(16), HZ(17);
+	const unsigned DX(18), DY(19), DZ(20);
+	const unsigned HA(21), RHA(22), AHA(23), SPEED(24);
+	const unsigned RSPEED(25), DYNAMIC(26), USRHIT(27);
+
 	std::vector<const std::string*>::const_iterator i = _outMoment.cbegin();
 	std::string content;
+	std::string lesscontent;
 	while (i != _outMoment.cend())
 	{
+		const unsigned seq(i - _outMoment.cbegin());
 		_txtRecorder += **i;
+		if (isNumber(**i))
+		{
+			float number = (stof(**i));
+			int i_number = number;
+			char temp[20];
+			unsigned temp_size = sizeof(temp);
+			if (!(number - i_number))
+			{
+				sprintf_s(temp, temp_size, "%d", i_number);
+			}
+			else
+			{
+				sprintf_s(temp, temp_size, "%.2f", number);
+			}
+			content += temp;
+			content.push_back('\t');
+			switch (seq)
+			{
+			case TIME:
+				lesscontent += temp;
+				lesscontent.push_back('\t');
+				break;
+			case SPEED:
+				lesscontent += temp;
+				lesscontent.push_back('\t');
+				break;
+			case USRHIT:
+				lesscontent += temp;
+				lesscontent.push_back('\t');
+				break;
+			default:
+				break;
+			}
+		}
+		else
+		{
+			content += **i;
+		}
+		i++;
+	}
+
+//	setStatus(content);
+	setStatusLess(lesscontent);
+}
+
+void Recorder::setHUDText()
+{
+	std::vector<const std::string*>::const_iterator i = _outMoment.cbegin();
+	std::string content;
+	std::string lesscontent;
+
+	while (i != _outMoment.cend())
+	{
 		if (isNumber(**i))
 		{
 			float number = (stof(**i));
@@ -308,38 +372,51 @@ void Recorder::copyandSetHUDText()
 	setStatus(content);
 }
 
-void Recorder::setHUDText()
+void Recorder::setStatusLess(const std::string &txt)
 {
-	std::vector<const std::string*>::const_iterator i = _outMoment.cbegin();
-	std::string content;
-
-	while (i != _outMoment.cend())
+	if (txt.empty())
 	{
-		if (isNumber(**i))
+		return;
+	}
+
+	//1. Time
+	std::string::const_iterator i = txt.cbegin();
+	std::string text;
+	text += "TIME:  ";
+	while (*i != '\t' && i != txt.cend())
+	{
+		text.push_back(*i);
+		i++;
+	}
+	(*i == '\t') ? ++i : i;
+
+	//2. Speed
+	text += (i == txt.cend()) ? "" : "\n\nSPEED:  ";
+	while (*i != '\t' && i != txt.cend())
+	{
+		text.push_back(*i);
+		i++;
+	}
+	(*i == '\t') ? ++i : i;
+
+	//3. UserHit
+	text += (i == txt.cend()) ? "" : "\n\nRec.:  ";
+	char rec('0');
+	if (*i != '\t' && i != txt.cend())
+	{
+		if (*i == '0')
 		{
-			float number = (stof(**i));
-			int i_number = number;
-			char temp[20];
-			unsigned temp_size = sizeof(temp);
-			if (!(number - i_number))
-			{
-				sprintf_s(temp, temp_size, "%d", i_number);
-			}
-			else
-			{
-				sprintf_s(temp, temp_size, "%.2f", number);
-			}
-			content += temp;
-			content.push_back('\t');
+			text += "Recording...";
 		}
 		else
 		{
-			content += **i;
+			text += "OK";
 		}
-		i++;
+		
 	}
 
-	setStatus(content);
+	_statusText->setText(text);
+	_statusText->update();
 }
 
 void Recorder::setStatus(const std::string &content)

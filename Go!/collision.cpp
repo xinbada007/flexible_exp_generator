@@ -231,13 +231,19 @@ bool Collision::detectLocation(const Point pMove, const Plane *planeRoad)
 Plane * Collision::locateCar(Plane::reverse_across_iterator begin, Plane::reverse_across_iterator end, const Point pMove)
 {
 	Plane::reverse_across_iterator i = begin;
-	while (i != end)
+	Plane *endFlag = (*end == *(end + 1)) ? *end : NULL;
+	while (*i != endFlag)
 	{
 		if (detectLocation(pMove,*i))
 		{
 			return *i;
 		}
 		i++;
+	}
+
+	if (detectLocation(pMove,*i))
+	{
+		return *i;
 	}
 
 	return NULL;
