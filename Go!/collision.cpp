@@ -231,19 +231,13 @@ bool Collision::detectLocation(const Point pMove, const Plane *planeRoad)
 Plane * Collision::locateCar(Plane::reverse_across_iterator begin, Plane::reverse_across_iterator end, const Point pMove)
 {
 	Plane::reverse_across_iterator i = begin;
-	Plane *endFlag = (*end == *(end + 1)) ? *end : NULL;
-	while (*i != endFlag)
+	while (i != end)
 	{
 		if (detectLocation(pMove,*i))
 		{
 			return *i;
 		}
 		i++;
-	}
-
-	if (detectLocation(pMove,*i))
-	{
-		return *i;
 	}
 
 	return NULL;
@@ -290,7 +284,8 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 				step = (!step) ? .05f * (*iQuad)->getHomeS()->getNumPlanes() : step;
 				Plane::reverse_across_iterator location = *iQuad;
 				Plane::reverse_across_iterator begin = location - step;
-				Plane::reverse_across_iterator end = location + step;
+				//Plane::reverse_across_iterator end = location + step;
+				Plane::reverse_across_iterator end = location; end.add(step);
 
 				loc = locateCar(begin, end, *iCar);
 				location = lasQuad[iLoc];

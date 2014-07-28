@@ -129,7 +129,6 @@ int main(int argc, char** argv)
 	mViewer->genMainView(readConfig.get());
 	mViewer->getMainView()->setCameraManipulator(camMatrix.get());
 	mViewer->getMainView()->setSceneData(root.get());
-
 	mViewer->createHUDView();
 	mViewer->setHUDContent(recorder->getStatus());
 	mViewer->createBackgroundView();
@@ -139,7 +138,6 @@ int main(int argc, char** argv)
 	expcontroller->setUserData(cv.get());
 	expcontroller->setHUDCamera(mViewer->getHuDView()->getCamera());
 	expcontroller->setMultiViewer(mViewer.get());
-
 	root->addEventCallback(expcontroller);
 
 	mViewer->setRunMaxFrameRate(frameRate);

@@ -103,6 +103,12 @@ void ExperimentCallback::showText()
 	const int &size_moment = moment->size();
 	const int &size_period = period->size();
 	const int &size_content = content.size();
+	
+	if (!size_moment || !size_period || !size_content)
+	{
+		return;
+	}
+
 	if (size_moment != size_content || size_moment != size_period)
 	{
 		osg::notify(osg::WARN) << "cannot display text because time and period and text are inconsistent" << std::endl;
@@ -174,6 +180,12 @@ void ExperimentCallback::createObstacle()
 	const int &ob_size = _expSetting->_obstaclesTime->size();
 	const int &range_size = _expSetting->_obstacleRange->size();
 	const int &pos_size = _expSetting->_obstaclePos->size();
+
+	if (!ob_size || !range_size || !pos_size)
+	{
+		return;
+	}
+
 	if (ob_size != range_size || ob_size != pos_size)
 	{
 		osg::notify(osg::WARN) << "cannot put obstacles because size are inconsistent" << std::endl;
