@@ -5,8 +5,8 @@ TrialConfig
 
 [ScreenSettings]
 #Num of Screent starts from 0
-Hdistance:	0.6	#2.72	#5.44	#0.6
-Vdistance:	1.25	#1.25
+Hdistance:	2.72	#5.44	#0.6
+Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
 fovy:		42.175	#Disable when RealWorld is enabled
@@ -17,10 +17,10 @@ MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 [CarSettings]
 Acceleration:	0
 DynamicSensitiveLevel:	5	#could be float number like 1.2532564766578
-CarSpeed:	180
+CarSpeed:	100
 SpeedIncr:	20
 CarWheel:	42.5
-WheelAccl:	360	#180	#0	#normally do not apply this
+WheelAccl:	0	#720	#180	#0	#normally do not apply this
 CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
@@ -31,13 +31,14 @@ RoadLanes:	3
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../../roadDesign/CtrlPoints/1/0.txt;#../../roadDesign/CtrlPoints/2/0.txt;#../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt;../../roadDesign/CtrlPoints/12/0.txt	#../Resources/nurbsRoads/test(2).txt;
-#RoadTxt:	../../roadDesign/CtrlPoints/2/0.txt;../../roadDesign/CtrlPoints/4/0.txt;../../roadDesign/CtrlPoints/8/0.txt;../../roadDesign/CtrlPoints/12/0.txt;
+RoadTxt:	../Resources/speed/100/1.txt;../Resources/speed/100/2.txt;../Resources/speed/100/4.txt;
+RoadTxt:	../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;../Resources/speed/100/16.txt;
+RoadTxt:	../Resources/speed/100/24.txt;../Resources/speed/100/32.txt;../Resources/speed/100/40.txt;
 
-Density:	100
+Density:	3000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
-ScaleVector:	50,50,1		#DO NOT mess around with this
+ScaleVector:	200,200,200		#DO NOT mess around with this
 
 [Subjects]
 Name:	Xu Xin
@@ -48,8 +49,8 @@ RandomRoads:	0
 
 [Experiment]
 Start-Lane:	-1	#1 = R	#-1 = L
-Textime:	1	10	20	30
-Period:		100	2	4	8
+#Textime:	0
+#Period:	100	2	4	8
 #must line by line
 Text:	Please Change Lane 100
 Text:	Please Change Lane 2
@@ -57,11 +58,11 @@ Text:	Please Change Lane 4
 Text:	Please Change Lane 8
 
 #Dynamic-Change: 1	20	25
-Dynamic-Change-Condition:	1	0	#black for 10 seconds
+#Dynamic-Change-Condition:	1	0	#black for 10 seconds
 
-Obstacle:	#1	5	10
-Obstacle-Range:	#10	50	100
-Obstacle-Position:	#-1	1	-1	#1 = R	#-1 = L
+#Obstacle:	1	5	10
+#Obstacle-Range:	10	50	100
+#Obstacle-Position:	-1	1	-1	#1 = R	#-1 = L
 
 [CameraSettings]
 #this is the camera's position realtively to the original point of vehicle
