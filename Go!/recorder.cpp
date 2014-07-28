@@ -69,10 +69,11 @@ bool Recorder::output(ReadConfig *rc)
 	if (!wout)
 	{
 		osg::notify(osg::FATAL) << "cannot create recorder file" << std::endl;
-		return false;
 	}
-
-	wout << _txtRecorder << std::endl;
+	else
+	{
+		wout << _txtRecorder << std::endl;
+	}
 
 	//save state
 	{
@@ -83,10 +84,82 @@ bool Recorder::output(ReadConfig *rc)
 			if (!wout)
 			{
 				osg::notify(osg::FATAL) << "cannot create savestate file" << std::endl;
-				return false;
 			}
+			else
+			{
+				wout << _saveState << std::endl;
+			}
+		}
+	}
 
-			wout << _saveState << std::endl;
+	//save all the points that comprise the road
+	{
+		nurbsList nurbs = rc->getRoadSet()->_nurbs;
+		if (!nurbs.empty())
+		{
+			const std::string filename = rc->getSubjects()->getRecPath() + "\\roads.txt";
+			ofstream wout(filename);
+			if (!wout)
+			{
+				osg::notify(osg::FATAL) << "cannot create roads file" << std::endl;
+			}
+			else
+			{
+				string roads,roads_left,roads_right;
+				char tempd[20];
+				const unsigned size_tempd(sizeof(tempd));
+				const unsigned numDigit(6);
+				nurbsList::const_iterator i = nurbs.cbegin();
+				while (i != nurbs.cend())
+				{
+					osg::Vec3dArray::const_iterator j = (*i)->_path->begin();
+					osg::Vec3dArray::const_iterator j_left = (*i)->_path_left->begin();
+					osg::Vec3dArray::const_iterator j_right = (*i)->_path_right->begin();
+					while (j != (*i)->_path->end())
+					{
+						_gcvt_s(tempd, size_tempd, (*j).x(), numDigit);
+						roads += tempd;
+						roads += "\t";
+						_gcvt_s(tempd, size_tempd, (*j).y(), numDigit);
+						roads += tempd;
+						roads += "\t";
+						_gcvt_s(tempd, size_tempd, (*j).z(), numDigit);
+						roads += tempd;
+						roads += "\n";
+						j++;
+
+						if (j_left != (*i)->_path_left->end())
+						{
+							_gcvt_s(tempd, size_tempd, (*j_left).x(), numDigit);
+							roads_left += tempd;
+							roads_left += "\t";
+							_gcvt_s(tempd, size_tempd, (*j_left).y(), numDigit);
+							roads_left += tempd;
+							roads_left += "\t";
+							_gcvt_s(tempd, size_tempd, (*j_left).z(), numDigit);
+							roads_left += tempd;
+							roads_left += "\n";
+							j_left++;
+						}
+
+						if (j_right != (*i)->_path_right->end())
+						{
+							_gcvt_s(tempd, size_tempd, (*j_right).x(), numDigit);
+							roads_right += tempd;
+							roads_right += "\t";
+							_gcvt_s(tempd, size_tempd, (*j_right).y(), numDigit);
+							roads_right += tempd;
+							roads_right += "\t";
+							_gcvt_s(tempd, size_tempd, (*j_right).z(), numDigit);
+							roads_right += tempd;
+							roads_right += "\n";
+							j_right++;
+						}
+					}
+					i++;
+				}
+				wout << roads << std::endl;
+			}
 		}
 	}
 
