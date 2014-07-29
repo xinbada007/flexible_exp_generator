@@ -16,7 +16,7 @@ typedef struct recState
 		_rb("RB"), _ru("RU"), _lu("LU"), _lb("LB"), _oc("OC"), _dither("Dither"), _dAngle("DAngle"),
 		_swAngle("swAngle"), _OX("OX"), _OY("OY"), _OZ("OZ"), _HX("HX"), _HY("HY"),
 		_HZ("HZ"), _DX("DX"), _DY("DY"), _DZ("DZ"), _HA("HA"), _RHA("RHA"), _AHA("AccumulativeHeading(Y)"),
-		_speed("Speed"), _Rspeed("RSpeed"), _dynamic("Dynamic"), _usrHit(""), _replay(""), _accumulativeHeading(0.0f)
+		_speed("Speed"), _Rspeed("RSpeed"), _dynamic("Dynamic"), _usrHit("USRHIT"), _replay(""), _accumulativeHeading(0.0f)
 	{
 		_time += _TAB; _fps += _TAB; _frame += _TAB; _crash += _TAB;
 		_rb += _TAB; _ru += _TAB; _lu += _TAB; _lb += _TAB; _oc += _TAB; _dither += _TAB;
