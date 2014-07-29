@@ -98,8 +98,12 @@ bool Recorder::output(ReadConfig *rc)
 		if (!nurbs.empty())
 		{
 			const std::string filename = rc->getSubjects()->getRecPath() + "\\roads.txt";
+			const std::string filename_left = rc->getSubjects()->getRecPath() + "\\roadsLeft.txt";
+			const std::string filename_right = rc->getSubjects()->getRecPath() + "\\roadsRight.txt";
 			ofstream wout(filename);
-			if (!wout)
+			ofstream wout_left(filename_left);
+			ofstream wout_right(filename_right);
+			if (!wout || !wout_left || !wout_right)
 			{
 				osg::notify(osg::FATAL) << "cannot create roads file" << std::endl;
 			}
@@ -159,6 +163,8 @@ bool Recorder::output(ReadConfig *rc)
 					i++;
 				}
 				wout << roads << std::endl;
+				wout_left << roads_left << std::endl;
+				wout_right << roads_right << std::endl;
 			}
 		}
 	}
