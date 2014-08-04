@@ -70,3 +70,5 @@ Text:	Please Change Lane 2
 #shouldn't mess around with this, set as 0 to let program to define
 Offset:		0	#system decide
 EyeTracker:	0	#normally do not apply
+
+#Roads:	../Resources/speed/r.txt;

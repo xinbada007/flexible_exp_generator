@@ -12,6 +12,8 @@
 #include <osg/Geode>
 #include <osg/Notify>
 #include <osg/PolygonMode>
+#include <osg/LineWidth>
+#include <osg/Point>
 
 #include <string>
 
@@ -30,6 +32,13 @@ _z_deepth(getZDeepth())
 		}
 	}
 	_i_color = _colorIndex->begin() + 1;
+
+	_test = new osg::Vec3dArray;
+	_testR = new osg::Vec3dArray;
+	_testL = new osg::Vec3dArray;
+
+	_testO = new osg::Geometry;
+	_testOL = new osg::Geometry;
 }
 
 
@@ -75,7 +84,8 @@ osg::ref_ptr<osg::Geometry> DebugNode::addCarDebuggerDrawables(osg::Vec3dArray *
 
 	else
 	{
-		carDebugGmt->addPrimitiveSet(new osg::DrawArrays(GL_LINES, 0, refArray->size()));
+		//carDebugGmt->addPrimitiveSet(new osg::DrawArrays(GL_LINES, 0, refArray->size()));
+		carDebugGmt->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, refArray->size()));
 	}
 
 	return carDebugGmt.release();
@@ -111,6 +121,28 @@ void DebugNode::addCarDebugger()
 			i++;
 		}
 
+		_testO->setVertexArray(_test);
+		osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+		color->push_back(osg::Vec4d(1.0f, 0.0f, 0.0f, 1.0f));
+		_testO->setColorArray(color);
+		_testO->setColorBinding(osg::Geometry::BIND_OVERALL);
+		_testO->setDataVariance(osg::Object::DYNAMIC);
+		_testO->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, _test->size()));
+		osg::ref_ptr<osg::LineWidth> lw = new osg::LineWidth(5.0f);
+		_testO->getOrCreateStateSet()->setAttribute(lw);
+
+		_testOL->setVertexArray(_testL);
+		osg::ref_ptr<osg::Vec4Array> colorL = new osg::Vec4Array;
+		colorL->push_back(osg::Vec4d(1.0f, 1.0f, 1.0f, 1.0f));
+		_testOL->setColorArray(colorL);
+		_testOL->setColorBinding(osg::Geometry::BIND_OVERALL);
+		_testOL->setDataVariance(osg::Object::DYNAMIC);
+		_testOL->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, _testL->size()));
+		osg::ref_ptr<osg::Point> pw = new osg::Point(5.0f);
+		_testOL->getOrCreateStateSet()->setAttribute(pw);
+
+		_carDebugGde->addDrawable(_testO);
+		_carDebugGde->addDrawable(_testOL);
 		return;
 	}
 
@@ -121,7 +153,11 @@ void DebugNode::addCarDebugger()
 		drawableList.back()->dirtyDisplayList();
 		drawableList.pop_back();
 	}
-
+	if (_test->size() > 3)
+	{
+		_testO->setPrimitiveSet(0, new osg::DrawArrays(GL_LINE_STRIP, 0, _test->size()));
+	}
+	_testOL->setPrimitiveSet(0, new osg::DrawArrays(GL_POINTS, 0, _testL->size()));
 	_carDebugGde->dirtyBound();
 }
 
@@ -150,6 +186,25 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 	if (refCV)
 	{
 		CarState *carState = refCV->getCar()->getCarState();
+		if (carState)
+		{
+			osg::Vec3d OP = carState->_O;
+			if (_test->size())
+			{
+				if (_test->back() != OP)
+				{
+					_test->push_back(OP);
+					if (carState->_dither >= 0)
+					{
+						_testL->push_back(OP);
+					}
+				}
+			}
+			else
+			{
+				_test->push_back(OP);
+			}
+		}
 		if (carState->_updated)
 		{
 			std::vector<osg::ref_ptr<osg::Vec3dArray>>::iterator i = _carDebugArray.begin();
@@ -175,7 +230,10 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			i++;
 
 			setDeepth(_carDebugArray);
-			addCarDebugger();
+			if (carState->_frameStamp < 10)
+			{
+				addCarDebugger();
+			}
 
 			carState->_updated = false;
 		}
@@ -199,6 +257,7 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			{
 				if (!_carDebugSwitch->getNewChildDefaultValue())
 				{
+					addCarDebugger();
 					_carDebugSwitch->setAllChildrenOn();
 				}
 				else

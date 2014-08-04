@@ -57,7 +57,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			{
 				if (_mv)
 				{
-					_mv->setDone(true);
+					//_mv->setDone(true);
 				}
 			}
 		}
@@ -71,7 +71,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		}
 		if (notFound == _carState->_currentQuad.size())
 		{
-			_carState->_reset = true;
+			//_carState->_reset = true;
 		}
 		else
 		{

@@ -31,7 +31,7 @@ RoadLanes:	3
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../Resources/speed/r.txt;
+RoadTxt:	../Resources/speed/0.txt;
 #RoadTxt:	../Resources/speed/100/1.txt;../Resources/speed/100/2.txt;../Resources/speed/100/4.txt;
 #RoadTxt:	../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;../Resources/speed/100/16.txt;
 #RoadTxt:	../Resources/speed/100/24.txt;../Resources/speed/100/32.txt;../Resources/speed/100/40.txt;
@@ -50,7 +50,7 @@ RandomRoads:	0
 
 [Experiment]
 Start-Lane:	-1	#1 = R	#-1 = L
-Textime:	1	20	
+Textime:	10	20	
 Period:	100	2
 #must line by line
 Text:	Please Change Lane 100
@@ -70,3 +70,5 @@ Text:	Please Change Lane 2
 #shouldn't mess around with this, set as 0 to let program to define
 Offset:		0	#system decide
 EyeTracker:	0	#normally do not apply
+
+#Roads:	../Resources/speed/0.txt;

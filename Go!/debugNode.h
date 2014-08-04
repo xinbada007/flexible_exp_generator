@@ -38,6 +38,13 @@ private:
 
 	double _z_deepth;
 	void setDeepth(std::vector<osg::ref_ptr<osg::Vec3dArray>> &refVector);
+
+	osg::ref_ptr<osg::Vec3dArray> _test;
+	osg::ref_ptr<osg::Vec3dArray> _testR;
+	osg::ref_ptr<osg::Vec3dArray> _testL;
+	
+	osg::ref_ptr<osg::Geometry> _testO;
+	osg::ref_ptr<osg::Geometry> _testOL;
 };
 
 class deTexture :

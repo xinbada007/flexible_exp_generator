@@ -117,9 +117,9 @@ int main(int argc, char** argv)
 	car->addUpdateCallback(recorder.get());
 
 	//Debug Node
-// 	osg::ref_ptr<DebugNode> debugger = new DebugNode;
-// 	debugger->setUserData(cv.get());
-// 	root->addEventCallback(debugger.get());
+	osg::ref_ptr<DebugNode> debugger = new DebugNode;
+	debugger->setUserData(cv.get());
+	root->addEventCallback(debugger.get());
 
 	//Camera event callback
 	osg::ref_ptr<CameraEvent> camMatrix = obtainCamMatrix(readConfig, car);
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 	osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
 	mViewer->setThreadingModel(th);
 	osgUtil::Optimizer optimizer;
-	optimizer.optimize(root);
+//	optimizer.optimize(root);
 // 	optimizer.optimize(root, osgUtil::Optimizer::SHARE_DUPLICATE_STATE|osgUtil::Optimizer::OPTIMIZE_TEXTURE_SETTINGS|
 // 		osgUtil::Optimizer::INDEX_MESH|osgUtil::Optimizer::VERTEX_PRETRANSFORM|osgUtil::Optimizer::VERTEX_POSTTRANSFORM);
 	mViewer->run();

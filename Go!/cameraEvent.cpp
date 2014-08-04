@@ -6,7 +6,7 @@
 #include <osgViewer/Viewer>
 
 CameraEvent::CameraEvent():
-_reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(1.0f)
+_reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(2.0f)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);

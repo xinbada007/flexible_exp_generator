@@ -387,7 +387,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			{
 				const double MAXSPEED(1.0f / frameRate);
 				int sign = (_carState->_speed > 0) ? 1 : -1;
-				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
+				//_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
 				_carState->_collide = false;
 			}
 
@@ -453,8 +453,23 @@ void CarEvent::applyCarMovement()
 		const osg::Vec3d O = _carState->_O;
 		const double lamida = ((O - navigationEdge->front()) * naviEdge) / naviEdge.length2();
 		const osg::Vec3d N = navigationEdge->back()*lamida + navigationEdge->front()*(1 - lamida);
-		const double dis = (N - O).length();
+		double dis = (N - O).length();
 		_carState->_O_Project = N;
+
+		if (!_carState->_lastQuad.empty())
+		{
+			osg::Vec3d DON = (N - O);
+			DON.normalize();
+			osg::ref_ptr<osg::Vec3dArray> navigationEdge = _carState->_lastQuad.back()->getLoop()->getNavigationEdge();
+			osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
+			naviEdge.normalize();
+
+			const osg::Vec3d cross = naviEdge^DON;
+			if (cross.z() < 0)
+			{
+				dis = -dis;
+			}
+		}
 		_carState->_dither = dis;
 
 		_carState->_midLine->clear();
