@@ -30,6 +30,8 @@ typedef struct Experiment :public osg::Referenced
 		_obstaclePos = new osg::IntArray;
 
 		_offset = 0.0f;
+
+		_deviation = 0.0f;
 	};
 	int _startLane;
 
@@ -48,6 +50,9 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::IntArray> _obstaclePos;
 
 	double _offset;
+
+	double _deviation;
+	std::string _deviationWarn;
 
 protected:
 	virtual ~Experiment(){ std::cout << "Deconstruct Experiment" << std::endl; };

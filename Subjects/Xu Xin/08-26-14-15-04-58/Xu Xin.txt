@@ -53,7 +53,7 @@ Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 
 ##==Deviation Warn Setting===============
 Deviation:	2.0	#Units:	Metres
-Deviation-Warn: DEVIATE TOO MUCH
+Deviation-Warn: GO BACK
 
 ##==Text Setting=========================
 #Textime:	0
@@ -75,3 +75,5 @@ Deviation-Warn: DEVIATE TOO MUCH
 #shouldn't mess around with this, set as 0 to let program to define
 Offset:		0	#system decide
 EyeTracker:	0	#normally do not apply
+
+#Roads:	../Resources/speed/0.txt;

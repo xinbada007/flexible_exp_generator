@@ -892,6 +892,8 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSTACLE("OBSTACLE");
 		const string OBSTACLERANGE("OBSTACLE-RANGE");
 		const string OBSTACLEPOSITION("OBSTACLE-POSITION");
+		const string DEVIATION("DEVIATION");
+		const string DEVIATIONWARN("DEVIATION-WARN");
 		while (flag == EXPERIMENT && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1008,6 +1010,29 @@ void ReadConfig::readTrial(ifstream &in)
 					std::string::size_type sz;
 					_experiment->_obstaclePos->push_back(stoi(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == DEVIATION)
+			{
+				config.erase(config.begin(), config.begin() + DEVIATION.size());
+				if (!config.empty())
+				{
+					_experiment->_deviation = stod(config);
+				}
+				continue;
+			}
+			else if (title == DEVIATIONWARN)
+			{
+				config.erase(config.begin(), config.begin() + DEVIATIONWARN.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				if (!config.empty())
+				{
+					_experiment->_deviationWarn = config;
+				}
+				else
+				{
+					_experiment->_deviationWarn = "DEVIATE TOO MUCH";
 				}
 				continue;
 			}

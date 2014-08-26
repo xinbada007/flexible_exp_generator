@@ -98,20 +98,17 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
 void ExperimentCallback::deviationCheck()
 {
-	_deviationWarn = (_carState->_dither > 2.0f) ? true : false;
+	_deviationWarn = (_carState->_dither > _expSetting->_deviation) ? true : false;
 }
 
 void ExperimentCallback::showText()
 {
 	//First display Warn Information
 	const std::string *warnshow(NULL);
-	std::string warnTxt;
 	if (_deviationWarn && ((_carState->_frameStamp / 20) % 2))
 	{
-		warnTxt = "DEVIATE TOO MUCH";
+		warnshow = &_expSetting->_deviationWarn;
 	}
-	warnshow = (!warnTxt.empty()) ? &warnTxt : NULL;
-
 
 	//Display designed Information
 	const osg::UIntArray *moment = _expSetting->_textTime;
