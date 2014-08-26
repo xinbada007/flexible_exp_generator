@@ -212,16 +212,18 @@ void MulitViewer::setHUDContent(osgText::Text *ref)
 	double X = _HUDView->getCamera()->getViewport()->width();
 	double Y = _HUDView->getCamera()->getViewport()->height();
 
-	osg::Vec3d position(0.10*X, 0.7*Y, 0.0f);
+	osg::Vec3d position(0.10*X, 0.75*Y, 0.0f);
 	std::string font("fonts/arial.ttf");
 	_HUDText->setFont(font);
 	_HUDText->setFontResolution(512,512);
 	_HUDText->setPosition(position);
-	//_HUDText->setCharacterSize(24);
+
 	_HUDText->setDataVariance(osg::Object::DYNAMIC);	
 	
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	geode->getOrCreateStateSet()->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
 	geode->addDrawable(_HUDText);
+	
 	_HUDView->getCamera()->addChild(geode);
 }
 

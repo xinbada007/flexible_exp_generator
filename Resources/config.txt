@@ -36,7 +36,7 @@ RoadTxt:	../Resources/speed/0.txt;
 #RoadTxt:	../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;../Resources/speed/100/16.txt;
 #RoadTxt:	../Resources/speed/100/24.txt;../Resources/speed/100/32.txt;../Resources/speed/100/40.txt;
 
-Density:	10000
+Density:	1000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
 ScaleVector:	1,1,1		#DO NOT mess around with this
@@ -49,14 +49,14 @@ Driving:	3	#how many years since driving
 RandomRoads:	0
 
 [Experiment]
-Start-Lane:	-1	#1 = R	#-1 = L
+Start-Lane:	0	#1 = R	#-1 = L
 #Textime:	0
 #Period:	100	2	4	8
 #must line by line
-Text:	Please Change Lane 100
-Text:	Please Change Lane 2
-Text:	Please Change Lane 4
-Text:	Please Change Lane 8
+#Text:	Please Change Lane 100
+#Text:	Please Change Lane 2
+#Text:	Please Change Lane 4
+#Text:	Please Change Lane 8
 
 #Dynamic-Change: 1	20	25
 #Dynamic-Change-Condition:	1	0	#black for 10 seconds

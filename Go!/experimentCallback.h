@@ -22,6 +22,7 @@ private:
 	double _expTime;
 	osg::ref_ptr<osg::UIntArray> _dynamic;
 	bool _dynamicUpdated;
+	bool _deviationWarn;
 	double _thisMomentDynamic;
 
 	osg::ref_ptr<osg::IntArray> _obstacle;
@@ -35,5 +36,6 @@ private:
 	void dynamicChange();
 	void showText();
 	void createObstacle();
+	void deviationCheck();
 };
 

@@ -12,12 +12,13 @@
 #include <osg/ShapeDrawable>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL)
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _deviationWarn(false)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
+	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 }
 
 ExperimentCallback::~ExperimentCallback()
@@ -82,6 +83,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		{
 		case::osgGA::GUIEventAdapter::FRAME:
 			_expTime = _carState->_timeReference;
+			deviationCheck();
 			showText();
 			dynamicChange();
 			createObstacle();
@@ -94,8 +96,24 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	traverse(node, nv);
 }
 
+void ExperimentCallback::deviationCheck()
+{
+	_deviationWarn = (_carState->_dither > 2.0f) ? true : false;
+}
+
 void ExperimentCallback::showText()
 {
+	//First display Warn Information
+	const std::string *warnshow(NULL);
+	std::string warnTxt;
+	if (_deviationWarn && ((_carState->_frameStamp / 20) % 2))
+	{
+		warnTxt = "DEVIATE TOO MUCH";
+	}
+	warnshow = (!warnTxt.empty()) ? &warnTxt : NULL;
+
+
+	//Display designed Information
 	const osg::UIntArray *moment = _expSetting->_textTime;
 	const osg::DoubleArray *period = _expSetting->_textPeriod;
 	const stringList &content = _expSetting->_textContent;
@@ -104,10 +122,10 @@ void ExperimentCallback::showText()
 	const int &size_period = period->size();
 	const int &size_content = content.size();
 	
-	if (!size_moment || !size_period || !size_content)
-	{
-		return;
-	}
+// 	if (!size_moment || !size_period || !size_content)
+// 	{
+// 		return;
+// 	}
 
 	if (size_moment != size_content || size_moment != size_period)
 	{
@@ -130,7 +148,21 @@ void ExperimentCallback::showText()
 		i++;
 	}
 
-	_textHUD->setText((whichshow)?(*whichshow):(""));
+	std::string totalTxt;
+	totalTxt.push_back('\n');
+	if (warnshow)
+	{
+		totalTxt += *warnshow;
+	}
+	if (whichshow)
+	{
+		totalTxt += *whichshow;
+	}
+
+	_textHUD->setText(totalTxt);
+	_textHUD->setColor(osg::Vec4(1.0f,0.0f,0.0f,1.0f));
+
+	//_textHUD->setText((whichshow)?(*whichshow):(""));
 }
 
 void ExperimentCallback::dynamicChange()
