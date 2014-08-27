@@ -16,7 +16,7 @@ MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
 Acceleration:	0
-DynamicSensitiveLevel:	2	#could be float number like 1.2532564766578
+DynamicSensitiveLevel:	1	#could be float number like 1.2532564766578
 CarSpeed:	100
 SpeedIncr:	20
 CarWheel:	42.5
@@ -73,3 +73,5 @@ Deviation-Warn: DEVIATE TOO MUCH
 #shouldn't mess around with this, set as 0 to let program to define
 Offset:		0	#system decide
 EyeTracker:	0	#normally do not apply
+
+#Roads:	../Resources/speed/100/4.txt;../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;

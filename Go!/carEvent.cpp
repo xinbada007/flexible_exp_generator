@@ -219,12 +219,12 @@ void CarEvent::shiftVehicle()
 
 	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
 	osg::Vec3d r = origin - _carState->_O;
+
 	double R = r.length();
-	R *= abs(_carState->_angle);
+	R *= sin(abs(_carState->_angle) * 1.0f / frameRate);
 	R *= _vehicle->_dynamicSensitive;
 
 	_carState->_shiftD *= R;
-	_carState->_shiftD /= frameRate;
 	_carState->_shiftD = (_leftTurn) ? -_carState->_shiftD : _carState->_shiftD;
 
 	_shifted = false;
@@ -385,16 +385,16 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 			if (_carState->_collide)
 			{
-				const double MAXSPEED(1.0f / frameRate);
-				int sign = (_carState->_speed > 0) ? 1 : -1;
-				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
-				_carState->_collide = false;
+// 				const double MAXSPEED(1.0f / frameRate);
+// 				int sign = (_carState->_speed > 0) ? 1 : -1;
+// 				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
+// 				_carState->_collide = false;
 			}
 
 			if (_carState->_reset)
 			{
-				makeResetMatrix();
-				_carState->_reset = false;
+// 				makeResetMatrix();
+// 				_carState->_reset = false;
 			}
 
 			if (!_reset.isIdentity())

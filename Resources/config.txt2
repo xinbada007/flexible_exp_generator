@@ -5,8 +5,8 @@ TrialConfig
 
 [ScreenSettings]
 #Num of Screent starts from 0
-Hdistance:	2.72	#5.44	#0.6
-Vdistance:	1.5	#1.25
+Hdistance:	0.6	#5.44	#0.6
+Vdistance:	1.25	#1.25
 screen:		0
 aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
 fovy:		42.175	#Disable when RealWorld is enabled
@@ -16,11 +16,11 @@ MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
 Acceleration:	0
-DynamicSensitiveLevel:	2	#could be float number like 1.2532564766578
+DynamicSensitiveLevel:	5	#could be float number like 1.2532564766578
 CarSpeed:	100
 SpeedIncr:	20
 CarWheel:	42.5
-WheelAccl:	0	#720	#180	#0	#normally do not apply this
+WheelAccl:	540	#720	#180	#0	#normally do not apply this
 CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
@@ -31,26 +31,28 @@ RoadLanes:	3
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../Resources/speed/100/4.txt;../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
-RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
+RoadTxt:	../Resources/speed/0.txt;
+#RoadTxt:	../Resources/speed/100/1.txt;../Resources/speed/100/2.txt;../Resources/speed/100/4.txt;
+#RoadTxt:	../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;../Resources/speed/100/16.txt;
+#RoadTxt:	../Resources/speed/100/24.txt;../Resources/speed/100/32.txt;../Resources/speed/100/40.txt;
 
-Density:	3000
+Density:	1000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
-ScaleVector:	200,200,200		#DO NOT mess around with this
+ScaleVector:	1,1,1		#DO NOT mess around with this
 
 [Subjects]
-Name:	Hossein Jahanabadi
-Age:	33
-Gender: Male	
-Driving:	15	#how many years since driving
+Name:	Xu Xin
+Age:	29
+Gender:	Male
+Driving:	3	#how many years since driving
 RandomRoads:	0
 
 [Experiment]
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 
 ##==Deviation Warn Setting===============
-Deviation:	0.0	#Units:	Metres
+Deviation:	2.0	#Units:	Metres
 Deviation-Warn: DEVIATE TOO MUCH
 
 ##==Text Setting=========================

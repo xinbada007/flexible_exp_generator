@@ -98,6 +98,11 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
 void ExperimentCallback::deviationCheck()
 {
+	if (!_expSetting->_deviation)
+	{
+		return;
+	}
+
 	_deviationWarn = (_carState->_dither > _expSetting->_deviation) ? true : false;
 }
 
