@@ -53,8 +53,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(OSG_INCLUDE_PATH);$(OSG_3RDPARTY_INCLUDE);$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OSG_LIBRARY_PATH);$(OSG_3RDPARTY_LIB);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(FMOD_INCLUDE);$(OSG_AUDIO_INCLUDE);$(OSG_3RDPARTY_INCLUDE);$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(FMOD_LIB);$(OSG_AUDIO_LIB);$(OSG_LIBRARY_PATH);$(OSG_3RDPARTY_LIB);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -75,7 +75,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -88,7 +88,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>sdl2.lib;osg.lib;osgDB.lib;osgGA.lib;osgText.lib;osgUtil.lib;osgViewer.lib;OpenThreads.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sdl2.lib;osg.lib;osgDB.lib;osgGA.lib;osgText.lib;osgUtil.lib;osgViewer.lib;OpenThreads.lib;osgAudio.lib;fmodex_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -111,6 +111,7 @@
     <ClInclude Include="loop.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="mulitViewer.h" />
+    <ClInclude Include="musicPlayer.h" />
     <ClInclude Include="Nurbs.h" />
     <ClInclude Include="logicRoad.h" />
     <ClInclude Include="obstacle.h" />
@@ -146,6 +147,7 @@
     <ClCompile Include="loop.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="mulitViewer.cpp" />
+    <ClCompile Include="musicPlayer.cpp" />
     <ClCompile Include="NurbsCurve.cpp" />
     <ClCompile Include="logicRoad.cpp" />
     <ClCompile Include="obstacle.cpp" />

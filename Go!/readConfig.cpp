@@ -894,6 +894,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSTACLEPOSITION("OBSTACLE-POSITION");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
+		const string DEVIATIONSIREN("DEVIATION-SIREN");
 		while (flag == EXPERIMENT && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1033,6 +1034,16 @@ void ReadConfig::readTrial(ifstream &in)
 				else
 				{
 					_experiment->_deviationWarn = "DEVIATE TOO MUCH";
+				}
+				continue;
+			}
+			else if (title == DEVIATIONSIREN)
+			{
+				config.erase(config.begin(), config.begin() + DEVIATIONSIREN.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				if (!config.empty())
+				{
+					_experiment->_deviationSiren = config;
 				}
 				continue;
 			}

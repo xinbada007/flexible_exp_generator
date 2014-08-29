@@ -31,10 +31,10 @@ RoadLanes:	3
 RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../Resources/speed/100/4.txt;../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
-RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
+RoadTxt:	../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
+#RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
 
-Density:	3000
+Density:	1000
 WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
 ScaleVector:	200,200,200		#DO NOT mess around with this
@@ -50,8 +50,9 @@ RandomRoads:	0
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 
 ##==Deviation Warn Setting===============
-Deviation:	0.0	#Units:	Metres
+Deviation:	1.0	#Units:	Metres
 Deviation-Warn: DEVIATE TOO MUCH
+Deviation-Siren:	../Resources/sound/warnpullup.mp3
 
 ##==Text Setting=========================
 #Textime:	0

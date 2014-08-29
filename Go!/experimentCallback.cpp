@@ -11,18 +11,45 @@
 #include <osgDB/ReadFile>
 #include <osg/ShapeDrawable>
 
+#include <osgAudio/SoundManager.h>
+
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _deviationWarn(false)
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _deviationWarn(false), _siren(NULL)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+	osg::ref_ptr<osgAudio::FileStream> sample = NULL;
+	try
+	{
+		sample = new osgAudio::FileStream(_expSetting->_deviationSiren);
+	}
+	catch (std::exception &e)
+	{
+		osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
+		sample = NULL;
+	}
+	if (sample)
+	{
+		_siren = new osgAudio::SoundState("siren");
+		_siren->allocateSource(20);
+		_siren->setStream(sample.release());
+		_siren->setAmbient(true);
+		_siren->setPlay(false);
+		_siren->setLooping(false);
+		osgAudio::SoundManager::instance()->addSoundState(_siren);
+	}
 }
 
 ExperimentCallback::~ExperimentCallback()
 {
+	if (_siren)
+	{
+		_siren.release();
+	}
 }
 
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -104,6 +131,10 @@ void ExperimentCallback::deviationCheck()
 	}
 
 	_deviationWarn = (_carState->_dither > _expSetting->_deviation) ? true : false;
+	if (_siren)
+	{
+		_siren->setPlay(_deviationWarn);
+	}
 }
 
 void ExperimentCallback::showText()

@@ -27,9 +27,19 @@
 #include "carReplay.h"
 #include "experimentCallback.h"
 #include "obstacle.h"
+#include "musicPlayer.h"
 
 #include <iostream>
 
 #include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
 #include <osg/MatrixTransform>
 #include <osgUtil/Optimizer>
+#include <osg/DeleteHandler>
+
+#include <osgAudio/FileStream.h>
+#include <osgAudio/SoundUpdateCB.h>
+#include <osgAudio/SoundRoot.h>
+#include <osgAudio/SoundManager.h>
+#include <osgAudio/SoundState.h>
+

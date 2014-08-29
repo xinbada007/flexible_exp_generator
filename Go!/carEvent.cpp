@@ -282,31 +282,12 @@ bool CarEvent::Joystick()
 		{
 			//Reset UserHit
 			_carState->_userHit = -1;
-			_buttons->at(0) = 0;
-		}
-		else if (_buttons->at(1) == 1)
-		{
-			_buttons->at(1) = 0;
-		}
-		else if (_buttons->at(2) == 1)
-		{
-			//_vehicle->increaseMaxSpeed();
-			_buttons->at(2) = 0;
-		}
-		else if (_buttons->at(3) == 1)
-		{
-			//_vehicle->decreaseMaxSpeed();
-			_buttons->at(3) = 0;
 		}
 		else if (_buttons->at(6) == 1)
 		{
 			makeResetMatrix();
-			_buttons->at(6) = 0;
 		}
-		else if (_buttons->at(7) == 1)
-		{
-			_buttons->at(7) = 0;
-		}
+		_buttons->assign(_buttons->size(), 0);
 	}
 
 	return true;

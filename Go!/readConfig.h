@@ -53,6 +53,7 @@ typedef struct Experiment :public osg::Referenced
 
 	double _deviation;
 	std::string _deviationWarn;
+	std::string _deviationSiren;
 
 protected:
 	virtual ~Experiment(){ std::cout << "Deconstruct Experiment" << std::endl; };

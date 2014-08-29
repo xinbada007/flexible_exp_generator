@@ -2,6 +2,7 @@
 #include <osg/NodeCallback>
 #include <osg/Camera>
 #include <osgText/Text>
+#include <osgAudio/SoundState.h>
 
 #include "car.h"
 #include "readConfig.h"
@@ -24,6 +25,8 @@ private:
 	bool _dynamicUpdated;
 	bool _deviationWarn;
 	double _thisMomentDynamic;
+
+	osg::ref_ptr<osgAudio::SoundState> _siren;
 
 	osg::ref_ptr<osg::IntArray> _obstacle;
 

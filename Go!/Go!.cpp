@@ -57,6 +57,8 @@ int main(int argc, char** argv)
 	extern bool init_joystick();
 	init_joystick();
 
+	osgAudio::SoundManager::instance()->init(16, true);
+
 	//obtain filename
 	string configFile;
 	string replayFile;
@@ -128,6 +130,7 @@ int main(int argc, char** argv)
 	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer;
 	mViewer->genMainView(readConfig.get());
 	mViewer->getMainView()->setCameraManipulator(camMatrix.get());
+	mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
 	mViewer->getMainView()->setSceneData(root.get());
 	mViewer->createHUDView();
 	mViewer->setHUDContent(recorder->getStatus());
@@ -140,6 +143,12 @@ int main(int argc, char** argv)
 	expcontroller->setMultiViewer(mViewer.get());
 	root->addEventCallback(expcontroller);
 
+	//Sound&Music
+	osg::ref_ptr<osgAudio::SoundRoot> sound_root = new osgAudio::SoundRoot;
+	root->addChild(sound_root);
+	mViewer->getMainView()->addEventHandler(new MusicPlayer);
+
+	//Ready to Run
 	mViewer->setRunMaxFrameRate(frameRate);
 	root->setDataVariance(osg::Object::DYNAMIC);
 	osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
@@ -158,5 +167,12 @@ int main(int argc, char** argv)
 	extern void close_joystick();
 	close_joystick();
 
+	if (osg::Referenced::getDeleteHandler()) {
+		osg::Referenced::getDeleteHandler()->setNumFramesToRetainObjects(0);
+		osg::Referenced::getDeleteHandler()->flushAll();
+	}
+
+	osgAudio::SoundManager::instance()->shutdown();
+	//exit the main function
 	return 0;
 }
