@@ -114,10 +114,6 @@ int main(int argc, char** argv)
 	roadSwitcher->setUserData(cv.get());
 	road->addUpdateCallback(roadSwitcher.get());
 
-	//Record Car
-	osg::ref_ptr<Recorder> recorder = new Recorder;
-	car->addUpdateCallback(recorder.get());
-
 	//Debug Node
 // 	osg::ref_ptr<DebugNode> debugger = new DebugNode;
 // 	debugger->setUserData(cv.get());
@@ -130,23 +126,29 @@ int main(int argc, char** argv)
 	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer;
 	mViewer->genMainView(readConfig.get());
 	mViewer->getMainView()->setCameraManipulator(camMatrix.get());
-	mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
+//	mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
 	mViewer->getMainView()->setSceneData(root.get());
 	mViewer->createHUDView();
-	mViewer->setHUDContent(recorder->getStatus());
 	mViewer->createBackgroundView();
+
+	//Record Car
+	osg::ref_ptr<Recorder> recorder = new Recorder;
+	recorder->setHUDCamera(mViewer->getHUDCamera());
+	car->addUpdateCallback(recorder.get());
 
 	//ExperimentControl
 	osg::ref_ptr<ExperimentCallback> expcontroller = new ExperimentCallback(readConfig);
 	expcontroller->setUserData(cv.get());
-	expcontroller->setHUDCamera(mViewer->getHuDView()->getCamera());
+	expcontroller->setHUDCamera(mViewer->getHUDCamera());
 	expcontroller->setMultiViewer(mViewer.get());
 	root->addEventCallback(expcontroller);
 
 	//Sound&Music
 	osg::ref_ptr<osgAudio::SoundRoot> sound_root = new osgAudio::SoundRoot;
 	root->addChild(sound_root);
-	mViewer->getMainView()->addEventHandler(new MusicPlayer);
+	osg::ref_ptr<MusicPlayer> musicplayer = new MusicPlayer;
+	musicplayer->setHUDCamera(mViewer->getHUDCamera());
+	mViewer->getMainView()->addEventHandler(musicplayer);
 
 	//Ready to Run
 	mViewer->setRunMaxFrameRate(frameRate);

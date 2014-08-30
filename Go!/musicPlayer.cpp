@@ -3,6 +3,7 @@
 
 #include <osgAudio/SoundManager.h>
 
+#include <osgDB/FileNameUtils>
 #include <osgDB/FileUtils>
 #include <osg/Notify>
 
@@ -10,15 +11,44 @@ const unsigned MusicPlayer::MUSICBUTTON = 3;
 const unsigned MusicPlayer::CHANGEMUSIC = 4;
 
 MusicPlayer::MusicPlayer():
-_music(NULL), _fileMusic(NULL), _ifPlay(false)
+_music(NULL), _ifPlay(false), _cameraHUD(NULL)
+, _geodeHUD(NULL), _textHUD(NULL)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
 
-	std::string dir("..\\Resources\\sound\\bgm");
+	std::string dir("..\\Resources\\sound\\bgm\\");
 	_mList = osgDB::getSortedDirectoryContents(dir);
-	_mList.erase(_mList.begin(), _mList.begin() + 2);
+	osgDB::DirectoryContents::iterator del = std::find(_mList.begin(), _mList.end(), ".");
+	_mList.erase(del);
+	del = std::find(_mList.begin(), _mList.end(), "..");
+	_mList.erase(del);
+
 	_nthMusic = _mList.cbegin();
+	while (_nthMusic != _mList.cend())
+	{
+		osg::ref_ptr<osgAudio::FileStream> fm = NULL;
+		try
+		{
+			fm = new osgAudio::FileStream(dir + *_nthMusic);
+		}
+		catch (std::exception &e)
+		{
+			osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
+			osg::notify(osg::WARN) << "File Corrupted" << *_nthMusic << std::endl;
+			fm = NULL;
+		}
+
+		if (fm)
+		{
+			_fileMusic.push_back(new osgAudio::FileStream(dir + *_nthMusic));
+		}
+
+		_nthMusic++;
+	}
+	_mList.push_back(dir);
+	_nthMusic = _mList.cbegin();
+	_nthFileStream = _fileMusic.cbegin();
 
 	_music = new osgAudio::SoundState;
 	_music->setAmbient(true);
@@ -26,11 +56,30 @@ _music(NULL), _fileMusic(NULL), _ifPlay(false)
 	_music->setPlay(false);
 	_music->allocateSource(10);
 	osgAudio::SoundManager::instance()->addSoundState(_music);
+
+	_textHUD = new osgText::Text;
+	if (_music->getStream())
+	{
+		_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
+	}
+	_geodeHUD = new osg::Geode;
+	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+	_geodeHUD->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 }
 
 
 MusicPlayer::~MusicPlayer()
 {
+	if (!_fileMusic.empty())
+	{
+		MusicFileList::iterator i = _fileMusic.begin();
+		while (i != _fileMusic.end())
+		{
+			(*i).release();
+			i++;
+		}
+	}
+
 	if (_music)
 	{
 		_music.release();
@@ -72,6 +121,9 @@ bool MusicPlayer::joystick()
 
 bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
 {
+	bool changedMusic(false);
+	bool setPlay(false);
+
 	if (joystick())
 	{
 		if (_buttons->at(MUSICBUTTON) == 2)
@@ -79,6 +131,7 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 			if (_music)
 			{
 				_ifPlay = (!_music->isPlaying());
+				setPlay = true;
 			}
 		}
 		if (_buttons->at(CHANGEMUSIC) == 2)
@@ -86,6 +139,7 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 			if (_music)
 			{
 				_nthMusic++;
+				_nthFileStream++;
 				_ifPlay = true;
 			}
 		}
@@ -99,37 +153,68 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 			if (_music)
 			{
 				_ifPlay = (!_music->isPlaying());
+				setPlay = true;
+			}
+		}
+		if (key == ea.KEY_Space)
+		{
+			if (_music)
+			{
+				_nthMusic++;
+				_nthFileStream++;
+				changedMusic = true;
 			}
 		}
 	}
 
-	loadMusic();
-	playMusic();
+	if (changedMusic)
+	{
+		loadMusic();
+	}
+	if (setPlay)
+	{
+		playMusic();
+	}
+
 	return false;
 }
 
 void MusicPlayer::loadMusic()
 {
-	if (_nthMusic == _mList.cend())
+	if (_nthMusic == _mList.cend() - 1)
 	{
 		_nthMusic = _mList.cbegin();
 	}
 
-	try
+// 	std::string file = _mList.back() + *_nthMusic;
+// 
+// 	try
+// 	{
+// 		_fileMusic = new osgAudio::FileStream(file);
+// 	}
+// 	catch (std::exception &e)
+// 	{
+// 		osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
+// 		osg::notify(osg::WARN) << "File Corrupted" << file << std::endl;
+// 		_fileMusic = NULL;
+// 	}
+// 
+// 	if (_fileMusic)
+// 	{
+// 		_music->setStream(_fileMusic.release());
+// 		_music->setPlay(_ifPlay);
+// 
+// 		_textHUD->setText(osgDB::getNameLessAllExtensions(*_nthMusic));
+// 	}
+
+	if (_nthFileStream == _fileMusic.cend())
 	{
-		_fileMusic = new osgAudio::FileStream(*_nthMusic);
-	}
-	catch (std::exception &e)
-	{
-		osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
-		osg::notify(osg::WARN) << "File Corrupted" << *_nthMusic << std::endl;
-		_fileMusic = NULL;
+		_nthFileStream = _fileMusic.cbegin();
 	}
 
-	if (_fileMusic)
-	{
-		_music->setStream(_fileMusic.release());
-	}
+	_music->setStream(*_nthFileStream);
+	_music->setPlay(_ifPlay);
+	_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
 }
 
 void MusicPlayer::playMusic()
@@ -138,4 +223,38 @@ void MusicPlayer::playMusic()
 	{
 		_music->setPlay(_ifPlay);
 	}
+
+	if (!_ifPlay)
+	{
+		_textHUD->setText("");
+	}
+	else if (_music->getStream())
+	{
+		_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
+	}
+}
+
+void MusicPlayer::setHUDCamera(osg::Camera *cam)
+{
+	if (!cam)
+	{
+		return;
+	}
+
+	_cameraHUD = cam;
+
+	const double X = _cameraHUD->getViewport()->width();
+	const double Y = _cameraHUD->getViewport()->height();
+
+	osg::Vec3d position(0.5*X, 0.95*Y, 0.0f);
+	std::string font("fonts/arial.ttf");
+	_textHUD->setFont(font);
+	_textHUD->setCharacterSize(24);
+	_textHUD->setFontResolution(24, 24);
+	_textHUD->setAlignment(osgText::TextBase::CENTER_TOP);
+	_textHUD->setPosition(position);
+	_textHUD->setDataVariance(osg::Object::DYNAMIC);
+
+	_geodeHUD->addDrawable(_textHUD);
+	_cameraHUD->addChild(_geodeHUD);
 }

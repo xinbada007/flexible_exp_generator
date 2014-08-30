@@ -319,16 +319,23 @@ void ExperimentCallback::createObstacle()
 
 void ExperimentCallback::setHUDCamera(osg::Camera *cam)
 {
+	if (!cam)
+	{
+		return;
+	}
+
 	_cameraHUD = cam;
 
 	const double X = _cameraHUD->getViewport()->width();
 	const double Y = _cameraHUD->getViewport()->height();
 
-	osg::Vec3d position(0.4*X, 0.5*Y, 0.0f);
+	osg::Vec3d position(0.5*X, 0.5*Y, 0.0f);
 	std::string font("fonts/arial.ttf");
 	_textHUD->setFont(font);
-	_textHUD->setFontResolution(512, 512);
+	_textHUD->setFontResolution(28, 28);
+	_textHUD->setCharacterSize(28);
 	_textHUD->setPosition(position);
+	_textHUD->setAlignment(osgText::TextBase::CENTER_CENTER);
 	_textHUD->setDataVariance(osg::Object::DYNAMIC);
 
 	_geodeHUD->addDrawable(_textHUD);

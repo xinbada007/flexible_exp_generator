@@ -15,7 +15,8 @@
 using namespace std;
 
 Recorder::Recorder() :_statusText(new osgText::Text),
-_lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n")
+_lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _cameraHUD(NULL)
+, _geodeHUD(new osg::Geode)
 {
 	_outMoment.push_back(&_recS._time);
 	_outMoment.push_back(&_recS._fps);
@@ -50,6 +51,9 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n")
 	_outMoment.push_back(&_recS._PERIOD);
 
 	copyandSetHUDText();
+
+	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+	_geodeHUD->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 }
 
 Recorder::~Recorder()
@@ -661,4 +665,29 @@ void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)
 	}
 
 	traverse(node, nv);
+}
+
+void Recorder::setHUDCamera(osg::Camera *cam)
+{
+	if (!cam)
+	{
+		return;
+	}
+
+	_cameraHUD = cam;
+
+	const double X = _cameraHUD->getViewport()->width();
+	const double Y = _cameraHUD->getViewport()->height();
+
+	osg::Vec3d position(0.05*X, 0.75*Y, 0.0f);
+	std::string font("fonts/arial.ttf");
+	_statusText->setFont(font);
+	_statusText->setCharacterSize(28);
+	_statusText->setFontResolution(28, 28);
+	_statusText->setAlignment(osgText::TextBase::LEFT_CENTER);
+	_statusText->setPosition(position);
+	_statusText->setDataVariance(osg::Object::DYNAMIC);
+
+	_geodeHUD->addDrawable(_statusText);
+	_cameraHUD->addChild(_geodeHUD);
 }

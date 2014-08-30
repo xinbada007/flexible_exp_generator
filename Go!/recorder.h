@@ -1,6 +1,7 @@
 #pragma once
 #include <osg/NodeCallback>
 #include <osgText/Text>
+#include <osg/Geode>
 
 #include <vector>
 #include <string>
@@ -71,6 +72,7 @@ public:
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
 	bool output(ReadConfig *rc);
 	osgText::Text * getStatus() const { return _statusText.get(); };
+	void setHUDCamera(osg::Camera *cam);
 
 private:
 	void rectoTxt(const CarState *carState);
@@ -87,4 +89,7 @@ private:
 
 	unsigned _lastFrameStamp;
 	double _lastTimeReference;
+
+	osg::Camera *_cameraHUD;
+	osg::ref_ptr<osg::Geode> _geodeHUD;
 };
