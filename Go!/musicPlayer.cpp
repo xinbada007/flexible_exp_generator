@@ -168,10 +168,25 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 	if (changedMusic)
 	{
 		loadMusic();
+		playMusic();
 	}
 	if (setPlay)
 	{
 		playMusic();
+	}
+
+	std::string display;
+	if (_music)
+	{
+		if (_music->getStream() && _ifPlay && (!_music->isPlaying()))
+		{
+			display += osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename()));
+			display += "ENDED";
+		}
+	}
+	if (!display.empty())
+	{
+		_textHUD->setText(display);
 	}
 
 	return false;
@@ -211,8 +226,6 @@ void MusicPlayer::loadMusic()
 	}
 
 	_music->setStream(*_nthFileStream);
-	playMusic();
-	//_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
 }
 
 void MusicPlayer::playMusic()
