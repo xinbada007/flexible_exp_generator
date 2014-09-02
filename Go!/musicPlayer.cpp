@@ -140,7 +140,7 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 			{
 				_nthMusic++;
 				_nthFileStream++;
-				_ifPlay = true;
+				changedMusic = true;
 			}
 		}
 	}
