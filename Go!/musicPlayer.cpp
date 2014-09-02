@@ -8,7 +8,7 @@
 #include <osg/Notify>
 
 const unsigned MusicPlayer::MUSICBUTTON = 3;
-const unsigned MusicPlayer::CHANGEMUSIC = 4;
+const unsigned MusicPlayer::CHANGEMUSIC = 2;
 
 MusicPlayer::MusicPlayer():
 _music(NULL), _ifPlay(false), _cameraHUD(NULL)
@@ -61,6 +61,10 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 	if (_music->getStream())
 	{
 		_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
+	}
+	else
+	{
+		_textHUD->setText("MUSIC OFF");
 	}
 	_geodeHUD = new osg::Geode;
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -226,7 +230,7 @@ void MusicPlayer::playMusic()
 
 	if (!_ifPlay)
 	{
-		_textHUD->setText("");
+		_textHUD->setText("MUSIC OFF");
 	}
 	else if (_music->getStream())
 	{
