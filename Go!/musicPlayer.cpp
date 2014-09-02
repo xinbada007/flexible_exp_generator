@@ -53,22 +53,16 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 	_music = new osgAudio::SoundState;
 	_music->setAmbient(true);
 	_music->setLooping(false);
-	_music->setPlay(false);
+	_music->setPlay(_ifPlay);
 	_music->allocateSource(10);
 	osgAudio::SoundManager::instance()->addSoundState(_music);
 
 	_textHUD = new osgText::Text;
-	if (_music->getStream())
-	{
-		_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
-	}
-	else
-	{
-		_textHUD->setText("MUSIC OFF");
-	}
 	_geodeHUD = new osg::Geode;
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+	playMusic();
 }
 
 
@@ -217,25 +211,32 @@ void MusicPlayer::loadMusic()
 	}
 
 	_music->setStream(*_nthFileStream);
-	_music->setPlay(_ifPlay);
-	_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
+	playMusic();
+	//_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
 }
 
 void MusicPlayer::playMusic()
 {
-	if (_music->getStream())
+	if (!_music->getStream())
 	{
-		_music->setPlay(_ifPlay);
+		return;
 	}
 
-	if (!_ifPlay)
+	_music->setPlay(_ifPlay);
+
+	std::string display;
+	display += osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename()));
+
+	if (!_music->isPlaying())
 	{
-		_textHUD->setText("MUSIC OFF");
+		display += " - NOT PLAYING";
 	}
-	else if (_music->getStream())
+	else
 	{
-		_textHUD->setText(osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename())));
+		display += " - PLAYING";
 	}
+
+	_textHUD->setText(display);
 }
 
 void MusicPlayer::setHUDCamera(osg::Camera *cam)
