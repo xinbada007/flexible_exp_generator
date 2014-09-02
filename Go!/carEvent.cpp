@@ -366,16 +366,16 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 			if (_carState->_collide)
 			{
-// 				const double MAXSPEED(1.0f / frameRate);
-// 				int sign = (_carState->_speed > 0) ? 1 : -1;
-// 				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
-// 				_carState->_collide = false;
+				const double MAXSPEED(1.0f / frameRate);
+				int sign = (_carState->_speed > 0) ? 1 : -1;
+				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
+				_carState->_collide = false;
 			}
 
 			if (_carState->_reset)
 			{
-// 				makeResetMatrix();
-// 				_carState->_reset = false;
+				makeResetMatrix();
+				_carState->_reset = false;
 			}
 
 			if (!_reset.isIdentity())

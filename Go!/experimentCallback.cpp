@@ -39,7 +39,7 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _
 		_siren->setStream(sample.release());
 		_siren->setAmbient(true);
 		_siren->setPlay(false);
-		_siren->setLooping(false);
+		_siren->setLooping(true);
 		osgAudio::SoundManager::instance()->addSoundState(_siren);
 	}
 }
@@ -133,7 +133,10 @@ void ExperimentCallback::deviationCheck()
 	_deviationWarn = (_carState->_dither > _expSetting->_deviation) ? true : false;
 	if (_siren)
 	{
-		_siren->setPlay(_deviationWarn);
+		if (_siren->isPlaying() != _deviationWarn)
+		{
+			_siren->setPlay(_deviationWarn);
+		}
 	}
 }
 

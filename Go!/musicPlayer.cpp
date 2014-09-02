@@ -181,7 +181,7 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 		if (_music->getStream() && _ifPlay && (!_music->isPlaying()))
 		{
 			display += osgDB::getNameLessAllExtensions(osgDB::getSimpleFileName(_music->getStream()->getFilename()));
-			display += "ENDED";
+			display += " - ENDED";
 		}
 	}
 	if (!display.empty())
