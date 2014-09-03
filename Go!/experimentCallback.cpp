@@ -22,10 +22,11 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _
 	_geodeHUD = new osg::Geode;
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
-	osg::ref_ptr<osgAudio::FileStream> sample = NULL;
+//	osg::ref_ptr<osgAudio::FileStream> sample = NULL;
+	osg::ref_ptr<osgAudio::Sample> sample = NULL;
 	try
 	{
-		sample = new osgAudio::FileStream(_expSetting->_deviationSiren);
+		sample = new osgAudio::Sample(_expSetting->_deviationSiren);
 	}
 	catch (std::exception &e)
 	{
@@ -36,7 +37,7 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _
 	{
 		_siren = new osgAudio::SoundState("siren");
 		_siren->allocateSource(20);
-		_siren->setStream(sample.release());
+		_siren->setSample(sample.release());
 		_siren->setAmbient(true);
 		_siren->setPlay(false);
 		_siren->setLooping(true);
