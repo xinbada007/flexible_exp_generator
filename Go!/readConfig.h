@@ -32,6 +32,7 @@ typedef struct Experiment :public osg::Referenced
 		_offset = 0.0f;
 
 		_deviation = 0.0f;
+		_deviationBaseline = 0.0f;
 	};
 	int _startLane;
 
@@ -52,6 +53,7 @@ typedef struct Experiment :public osg::Referenced
 	double _offset;
 
 	double _deviation;
+	double _deviationBaseline;
 	std::string _deviationWarn;
 	std::string _deviationSiren;
 
@@ -145,6 +147,8 @@ typedef struct Vehicle:public osg::Referenced
 
 		_startDelay = 1.0f;
 
+		_baseline = 0.0f;
+
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
 	}
@@ -168,6 +172,8 @@ typedef struct Vehicle:public osg::Referenced
 	std::string _texture;
 
 	double _startDelay;
+
+	double _baseline;
 
 protected:
 	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };

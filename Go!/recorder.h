@@ -14,13 +14,13 @@ typedef struct recState
 {
 	recState::recState() :
 		_TAB("\t"), _PERIOD("\n"), _time("Time"), _fps("FPS"), _frame("Frame"), _crash("Crash"),
-		_rb("RB"), _ru("RU"), _lu("LU"), _lb("LB"), _oc("OC"), _dither("Dither"), _dAngle("DAngle"),
-		_swAngle("swAngle"), _OX("OX"), _OY("OY"), _OZ("OZ"), _HX("HX"), _HY("HY"),
+		_rb("RB"), _ru("RU"), _lu("LU"), _lb("LB"), _oc("OC"), _dither("Dither"), _customDither("CustomDither"),
+		_dAngle("DAngle"), _swAngle("swAngle"), _OX("OX"), _OY("OY"), _OZ("OZ"), _HX("HX"), _HY("HY"),
 		_HZ("HZ"), _DX("DX"), _DY("DY"), _DZ("DZ"), _HA("HA"), _RHA("RHA"), _AHA("AccumulativeHeading(Y)"),
 		_speed("Speed"), _Rspeed("RSpeed"), _dynamic("Dynamic"), _usrHit("USRHIT"), _replay(""), _accumulativeHeading(0.0f)
 	{
 		_time += _TAB; _fps += _TAB; _frame += _TAB; _crash += _TAB;
-		_rb += _TAB; _ru += _TAB; _lu += _TAB; _lb += _TAB; _oc += _TAB; _dither += _TAB;
+		_rb += _TAB; _ru += _TAB; _lu += _TAB; _lb += _TAB; _oc += _TAB; _dither += _TAB; _customDither += _TAB;
 		_dAngle += _TAB; _swAngle += _TAB; _OX += _TAB; _OY += _TAB; _OZ += _TAB;
 		_HX += _TAB; _HY += _TAB; _HZ += _TAB; _DX += _TAB; _DY += _TAB; _DZ += _TAB;
 		_HA += _TAB; _RHA += _TAB;  _AHA += _TAB; _speed += _TAB; _Rspeed += _TAB;
@@ -36,6 +36,7 @@ typedef struct recState
 	std::string _lb;
 	std::string _oc;
 	std::string _dither;
+	std::string _customDither;
 	std::string _dAngle;
 	std::string _swAngle;
 	std::string _OX;
@@ -92,4 +93,16 @@ private:
 
 	osg::Camera *_cameraHUD;
 	osg::ref_ptr<osg::Geode> _geodeHUD;
+
+	enum TypeofText
+	{
+		TIME, FPS, FRAME, CRASH,
+		RB, RU, LU, LB, OC,
+		DITHER, CUSTOMD, DANGLE, SWANGLE,
+		OX, OY, OZ,
+		HX, HY, HZ,
+		DX, DY, DZ,
+		HA, RHA, AHA, SPEED,
+		RSPEED, DYNAMIC, USRHIT
+	} TypeTxt;
 };

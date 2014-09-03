@@ -35,7 +35,7 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 		catch (std::exception &e)
 		{
 			osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
-			osg::notify(osg::WARN) << "File Corrupted" << *_nthMusic << std::endl;
+			osg::notify(osg::WARN) << "File Corrupted: " << *_nthMusic << std::endl;
 			fm = NULL;
 		}
 

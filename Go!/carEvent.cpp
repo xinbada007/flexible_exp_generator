@@ -436,7 +436,13 @@ void CarEvent::applyCarMovement()
 		const osg::Vec3d N = navigationEdge->back()*lamida + navigationEdge->front()*(1 - lamida);
 		const double dis = (N - O).length();
 		_carState->_O_Project = N;
-		_carState->_dither = dis;
+		const osg::Vec3d midL = -naviEdge;
+		const osg::Vec3d disL = O - N;
+		const int sign = (disL^midL).z() > 0 ? 1 : -1;
+		const double distherwithsign = dis*sign;
+		
+		_carState->_distancefromBase = distherwithsign - _vehicle->_baseline;
+		_carState->_dither = distherwithsign;
 
 		_carState->_midLine->clear();
 		copy(navigationEdge->begin(), navigationEdge->end(), std::back_inserter(*_carState->_midLine));

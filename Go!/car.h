@@ -25,6 +25,7 @@ typedef struct CarState:public osg::Referenced
 		_speed = 0.0f;
 		_speed_incr = 0.2f;
 		_dither = 0.0f;
+		_distancefromBase = 0.0f;
 		_dynamic = true; //acceleration mode
 
 		_collide = false;
@@ -88,6 +89,7 @@ typedef struct CarState:public osg::Referenced
 	double _speed;
 	double _speed_incr;	
 	double _dither;
+	double _distancefromBase;
 	bool _dynamic;
 
 	bool _collide;

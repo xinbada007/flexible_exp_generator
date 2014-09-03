@@ -344,6 +344,7 @@ void ReadConfig::initializeAfterReadTrial()
 	osg::Matrix m = osg::Matrix::translate(startOffset);
 	arrayByMatrix(_vehicle->_V, m);
 	_vehicle->_O = _vehicle->_O * m;
+	_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
 }
 
 bool ReadConfig::byPassSpace(ifstream &in, std::string &content)
@@ -895,6 +896,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
 		const string DEVIATIONSIREN("DEVIATION-SIREN");
+		const string DEVIATIONBASELINE("DEVIATION-BASELINE");
 		while (flag == EXPERIMENT && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1044,6 +1046,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_deviationSiren = config;
+				}
+				continue;
+			}
+			else if (title == DEVIATIONBASELINE)
+			{
+				config.erase(config.begin(), config.begin() + DEVIATIONBASELINE.size());
+				if (!config.empty())
+				{
+					_experiment->_deviationBaseline = stod(config);
 				}
 				continue;
 			}

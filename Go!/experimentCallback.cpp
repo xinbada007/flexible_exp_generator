@@ -130,7 +130,7 @@ void ExperimentCallback::deviationCheck()
 		return;
 	}
 
-	_deviationWarn = (_carState->_dither > _expSetting->_deviation) ? true : false;
+	_deviationWarn = (abs(_carState->_distancefromBase) > _expSetting->_deviation) ? true : false;
 	if (_siren)
 	{
 		if (_siren->isPlaying() != _deviationWarn)

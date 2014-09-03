@@ -28,6 +28,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._lb);
 	_outMoment.push_back(&_recS._oc);
 	_outMoment.push_back(&_recS._dither);
+	_outMoment.push_back(&_recS._customDither);
 	_outMoment.push_back(&_recS._dAngle);
 	_outMoment.push_back(&_recS._swAngle);
 	_outMoment.push_back(&_recS._OX);
@@ -334,9 +335,13 @@ void Recorder::rectoTxt(const CarState *carState)
 	osg::Vec3d carD_LastFrame = carState->_directionLastFrame;
 	carD_LastFrame.normalize();
 	const double AHA = (asinR((carD ^ carD_LastFrame).z()) / TO_RADDIAN);
-	const double HA = AHA * frameRate;
+// 	const double HA = AHA * frameRate;
+// 	_gcvt_s(tempd, size_tempd, HA, nDigit);
+// 	_recS._HA = tempd + _recS._TAB;
+	const double HA = carState->_angle / TO_RADDIAN;
 	_gcvt_s(tempd, size_tempd, HA, nDigit);
 	_recS._HA = tempd + _recS._TAB;
+
 	const double RHA = (!timePeriod) ? AHA * frameRate : AHA / timePeriod;
 	_gcvt_s(tempd, size_tempd, RHA, nDigit);
 	_recS._RHA = tempd + _recS._TAB;
@@ -345,11 +350,17 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, _recS._accumulativeHeading, nDigit);
 	_recS._AHA = tempd + _recS._TAB;
 
-	const osg::Vec3d O = carState->_O;
-	const osg::Vec3d N = carState->_O_Project;
-	const double dis = (N - O).length();
+// 	const osg::Vec3d O = carState->_O;
+// 	const osg::Vec3d N = carState->_O_Project;
+//	const double dis = (N - O).length();
+	const double dis = carState->_dither;
+
 	_gcvt_s(tempd, size_tempd, dis, nDigit);
 	_recS._dither = tempd + _recS._TAB;
+
+	const double customD = carState->_distancefromBase;
+	_gcvt_s(tempd, size_tempd, customD, nDigit);
+	_recS._customDither = tempd + _recS._TAB;
 
 	if (carState->_replay)
 	{
@@ -359,15 +370,6 @@ void Recorder::rectoTxt(const CarState *carState)
 
 void Recorder::copyandSetHUDText()
 {
-	const unsigned TIME(0), FPS(1), FRAME(2), CRASH(3);
-	const unsigned RB(4), RU(5), LU(6), LB(7), OC(8);
-	const unsigned DITHER(9), DANGLE(10), SWANGLE(11);
-	const unsigned OX(12), OY(13), OZ(14);
-	const unsigned HX(15), HY(16), HZ(17);
-	const unsigned DX(18), DY(19), DZ(20);
-	const unsigned HA(21), RHA(22), AHA(23), SPEED(24);
-	const unsigned RSPEED(25), DYNAMIC(26), USRHIT(27);
-
 	std::vector<const std::string*>::const_iterator i = _outMoment.cbegin();
 	std::string content;
 	std::string lesscontent;
@@ -393,19 +395,19 @@ void Recorder::copyandSetHUDText()
 			content.push_back('\t');
 			switch (seq)
 			{
-			case TIME:
+			case Recorder::TypeofText::TIME:
 				lesscontent += temp;
 				lesscontent.push_back('\t');
 				break;
-			case DITHER:
+			case Recorder::TypeofText::CUSTOMD:
 				lesscontent += temp;
 				lesscontent.push_back('\t');
 				break;
-			case SPEED:
+			case Recorder::TypeofText::SPEED:
 				lesscontent += temp;
 				lesscontent.push_back('\t');
 				break;
-			case USRHIT:
+			case Recorder::TypeofText::USRHIT:
 				lesscontent += temp;
 				lesscontent.push_back('\t');
 				break;
@@ -515,15 +517,6 @@ void Recorder::setStatusLess(const std::string &txt)
 
 void Recorder::setStatus(const std::string &content)
 {
-	const unsigned TIME(0), FPS(1), FRAME(2), CRASH(3);
-	const unsigned RB(4), RU(5), LU(6), LB(7), OC(8);
-	const unsigned DITHER(9), DANGLE(10), SWANGLE(11);
-	const unsigned OX(12), OY(13), OZ(14);
-	const unsigned HX(15), HY(16), HZ(17);
-	const unsigned DX(18), DY(19), DZ(20);
-	const unsigned HA(21), RHA(22), AHA(23), SPEED(24);
-	const unsigned RSPEED(25), DYNAMIC(26), USRHIT(27);
-
 	std::string text;
 	std::string::const_iterator iter = content.cbegin();
 	unsigned numTab(0);
@@ -538,61 +531,61 @@ void Recorder::setStatus(const std::string &content)
 			numTab++;
 			switch (numTab)
 			{
-			case CRASH:
+			case Recorder::TypeofText::CRASH:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Crash: ";
 				break;
-			case RB:
+			case Recorder::TypeofText::RB:
 				text.push_back('\n');
 				text += "RB RU LU LB OC: ";
 				break;
-			case DITHER:
+			case Recorder::TypeofText::DITHER:
 				text.push_back('\n');
 				text += "Dither: ";
 				break;
-			case DANGLE:
+			case Recorder::TypeofText::DANGLE:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "DAngle: ";
 				break;
-			case SWANGLE:
+			case Recorder::TypeofText::SWANGLE:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "S\\W: ";
 				break;
-			case OX:
+			case Recorder::TypeofText::OX:
 				text.push_back('\n');
 				text += "Original: ";
 				break;
-			case HX:
+			case Recorder::TypeofText::HX:
 				text.push_back('\n');
 				text += "Heading: ";
 				break;
-			case DX:
+			case Recorder::TypeofText::DX:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Direction: ";
 				break;
-			case HA:
+			case Recorder::TypeofText::HA:
 				text.push_back('\n');
 				text += "Wheel Angle: ";
 				break;
-			case AHA:
+			case Recorder::TypeofText::AHA:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Accu. Heading: ";
 				break;
-			case SPEED:
+			case Recorder::TypeofText::SPEED:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "SPEED: ";
 				break;
-			case DYNAMIC:
+			case Recorder::TypeofText::DYNAMIC:
 				text.push_back('\n');
 				text += "Dynamic: ";
 				break;
-			case USRHIT:
+			case Recorder::TypeofText::USRHIT:
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Hit: ";
