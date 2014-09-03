@@ -149,6 +149,8 @@ typedef struct Vehicle:public osg::Referenced
 
 		_baseline = 0.0f;
 
+		_visibility = true;
+
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
 	}
@@ -174,6 +176,8 @@ typedef struct Vehicle:public osg::Referenced
 	double _startDelay;
 
 	double _baseline;
+
+	bool _visibility;
 
 protected:
 	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };

@@ -644,6 +644,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string SPEEDINCR = "SPEEDINCR";
 		const string DYNAMICSENSITIVE = "DYNAMICSENSITIVELEVEL";
 		const string STARTDELAY = "STARTDELAY";
+		const string CARVISIBLE = "CARVISIBLE";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -735,6 +736,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_vehicle->_startDelay = stod(config);
+				}
+				continue;
+			}
+			else if (title == CARVISIBLE)
+			{
+				config.erase(config.begin(), config.begin() + CARVISIBLE.size());
+				if (!config.empty())
+				{
+					_vehicle->_visibility = (stoi(config) == 0) ? false : true;
 				}
 				continue;
 			}

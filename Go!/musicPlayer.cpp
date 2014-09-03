@@ -266,7 +266,7 @@ void MusicPlayer::playMusic()
 
 void MusicPlayer::setHUDCamera(osg::Camera *cam)
 {
-	if (!cam || _music || !_textHUD || !_geodeHUD)
+	if (!cam || !_music || !_textHUD || !_geodeHUD)
 	{
 		return;
 	}

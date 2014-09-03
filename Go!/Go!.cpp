@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 	osg::ref_ptr<Car> car = obtainCar(readConfig);
 	rv->reset();
 	rv->setBeginMode(GL_POINTS);
-	car->accept(*rv);
+	if (car->getVehicle()->_visibility) car->accept(*rv);
 	osg::ref_ptr<osg::MatrixTransform> carMatrix = obtainCarMatrix(car);
 
 	//Root Node && collect information for tracing car and collision detection

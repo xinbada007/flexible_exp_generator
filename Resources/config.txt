@@ -25,6 +25,7 @@ CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
 CarPic:		../Resources/texture/car.png
+CarVisible:	1	#1=Visible	0=Invisible
 
 [RoadSettings]
 RoadLanes:	3
