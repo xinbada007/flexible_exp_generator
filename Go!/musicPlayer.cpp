@@ -54,18 +54,19 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 
 	_mList.push_back(dir);
 	_nthMusic = _mList.cbegin();
-	_nthFileStream = _fileMusic.cbegin();
 
 	if (_fileMusic.empty())
 	{
 		return;
 	}
+	_nthFileStream = _fileMusic.cbegin();
 
 	_music = new osgAudio::SoundState;
 	_music->setAmbient(true);
 	_music->setLooping(false);
 	_music->setPlay(_ifPlay);
 	_music->allocateSource(10);
+	_music->setStream(*_nthFileStream);
 	osgAudio::SoundManager::instance()->addSoundState(_music);
 
 	_textHUD = new osgText::Text;
@@ -176,6 +177,16 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 		}
 	}
 
+	if (changedMusic)
+	{
+		loadMusic();
+		playMusic();
+	}
+	if (setPlay)
+	{
+		playMusic();
+	}
+
 	std::string display;
 	if (_music)
 	{
@@ -189,16 +200,7 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 	{
 		_textHUD->setText(display);
 		_nthFileStream++;
-		changedMusic = true;
-	}
-
-	if (changedMusic)
-	{
 		loadMusic();
-		playMusic();
-	}
-	if (setPlay)
-	{
 		playMusic();
 	}
 
