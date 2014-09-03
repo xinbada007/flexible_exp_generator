@@ -188,6 +188,7 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 	if (!display.empty())
 	{
 		_textHUD->setText(display);
+		_nthFileStream++;
 		changedMusic = true;
 	}
 
