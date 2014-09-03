@@ -24,6 +24,11 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 	del = std::find(_mList.begin(), _mList.end(), "..");
 	_mList.erase(del);
 
+	if (_mList.empty())
+	{
+		return;
+	}
+
 	_nthMusic = _mList.cbegin();
 	while (_nthMusic != _mList.cend())
 	{
@@ -46,9 +51,15 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 
 		_nthMusic++;
 	}
+
 	_mList.push_back(dir);
 	_nthMusic = _mList.cbegin();
 	_nthFileStream = _fileMusic.cbegin();
+
+	if (_fileMusic.empty())
+	{
+		return;
+	}
 
 	_music = new osgAudio::SoundState;
 	_music->setAmbient(true);
@@ -165,16 +176,6 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 		}
 	}
 
-	if (changedMusic)
-	{
-		loadMusic();
-		playMusic();
-	}
-	if (setPlay)
-	{
-		playMusic();
-	}
-
 	std::string display;
 	if (_music)
 	{
@@ -187,6 +188,17 @@ bool MusicPlayer::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 	if (!display.empty())
 	{
 		_textHUD->setText(display);
+		changedMusic = true;
+	}
+
+	if (changedMusic)
+	{
+		loadMusic();
+		playMusic();
+	}
+	if (setPlay)
+	{
+		playMusic();
 	}
 
 	return false;
@@ -254,7 +266,7 @@ void MusicPlayer::playMusic()
 
 void MusicPlayer::setHUDCamera(osg::Camera *cam)
 {
-	if (!cam)
+	if (!cam || _music || !_textHUD || !_geodeHUD)
 	{
 		return;
 	}

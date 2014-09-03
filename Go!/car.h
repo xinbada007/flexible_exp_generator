@@ -63,6 +63,8 @@ typedef struct CarState:public osg::Referenced
 		_saveState = NULL;
 		_dynamicState = NULL;
 		_replay = false;
+
+		_detailedDisplay = false;
 	};
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
@@ -105,6 +107,8 @@ typedef struct CarState:public osg::Referenced
 	osg::ref_ptr<osg::MatrixdArray> _saveState;
 	osg::ref_ptr<osg::IntArray> _dynamicState;
 	bool _replay;
+
+	bool _detailedDisplay;
 
 	inline void cacluateSpeedandAngle() const
 	{ 

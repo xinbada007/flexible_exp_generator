@@ -355,6 +355,11 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				_vehicle->decreaseMaxSpeed();
 				break;
 			}
+			else if (key == osgGA::GUIEventAdapter::KEY_H)
+			{
+				_carState->_detailedDisplay = !_carState->_detailedDisplay;
+				break;
+			}
 		case osgGA::GUIEventAdapter::KEYUP:
 			if (key == 'a' || key == 'd')
 			{

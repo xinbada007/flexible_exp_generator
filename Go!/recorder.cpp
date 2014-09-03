@@ -16,7 +16,7 @@ using namespace std;
 
 Recorder::Recorder() :_statusText(new osgText::Text),
 _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _cameraHUD(NULL)
-, _geodeHUD(new osg::Geode)
+, _geodeHUD(new osg::Geode), _detailed(false)
 {
 	_outMoment.push_back(&_recS._time);
 	_outMoment.push_back(&_recS._fps);
@@ -362,6 +362,8 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, customD, nDigit);
 	_recS._customDither = tempd + _recS._TAB;
 
+	_detailed = carState->_detailedDisplay;
+
 	if (carState->_replay)
 	{
 		_recS._replay = "\n" + carState->getReplayText();
@@ -422,8 +424,14 @@ void Recorder::copyandSetHUDText()
 		i++;
 	}
 
-//	setStatus(content);
-	setStatusLess(lesscontent);
+	if (_detailed)
+	{
+		setStatus(content);
+	}
+	else
+	{
+		setStatusLess(lesscontent);
+	}
 }
 
 void Recorder::setHUDText()

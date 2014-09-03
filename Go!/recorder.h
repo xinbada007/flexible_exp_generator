@@ -94,6 +94,8 @@ private:
 	osg::Camera *_cameraHUD;
 	osg::ref_ptr<osg::Geode> _geodeHUD;
 
+	bool _detailed;
+
 	enum TypeofText
 	{
 		TIME, FPS, FRAME, CRASH,
