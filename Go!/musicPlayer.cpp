@@ -11,7 +11,7 @@ const unsigned MusicPlayer::MUSICBUTTON = 3;
 const unsigned MusicPlayer::CHANGEMUSIC = 2;
 
 MusicPlayer::MusicPlayer():
-_music(NULL), _ifPlay(false), _cameraHUD(NULL)
+_music(NULL), _ifPlay(true), _cameraHUD(NULL)
 , _geodeHUD(NULL), _textHUD(NULL)
 {
 	_buttons = new osg::UIntArray;
@@ -63,7 +63,7 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 
 	_music = new osgAudio::SoundState;
 	_music->setAmbient(true);
-	_music->setLooping(false);
+	_music->setLooping(true);
 	_music->setPlay(_ifPlay);
 	_music->allocateSource(10);
 	_music->setStream(*_nthFileStream);
