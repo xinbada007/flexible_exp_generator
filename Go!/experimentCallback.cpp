@@ -14,7 +14,7 @@
 #include <osgAudio/SoundManager.h>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _deviationWarn(false), _siren(NULL)
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
@@ -132,6 +132,7 @@ void ExperimentCallback::deviationCheck()
 	}
 
 	_deviationWarn = (abs(_carState->_distancefromBase) > _expSetting->_deviation) ? true : false;
+	_deviationLeft = _carState->_distancefromBase < 0;
 	if (_siren)
 	{
 		if (_siren->isPlaying() != _deviationWarn)
@@ -145,9 +146,20 @@ void ExperimentCallback::showText()
 {
 	//First display Warn Information
 	const std::string *warnshow(NULL);
+	std::string deviationDisplay;
 	if (_deviationWarn && ((_carState->_frameStamp / 20) % 2))
 	{
-		warnshow = &_expSetting->_deviationWarn;
+		deviationDisplay = _expSetting->_deviationWarn;
+		if (_deviationLeft)
+		{
+			deviationDisplay += "\nTO RIGHT";
+		}
+		else
+		{
+			deviationDisplay += "\nTO LEFT";
+		}
+
+		warnshow = &deviationDisplay;		
 	}
 
 	//Display designed Information

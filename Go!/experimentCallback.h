@@ -24,6 +24,7 @@ private:
 	osg::ref_ptr<osg::UIntArray> _dynamic;
 	bool _dynamicUpdated;
 	bool _deviationWarn;
+	bool _deviationLeft;
 	double _thisMomentDynamic;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
