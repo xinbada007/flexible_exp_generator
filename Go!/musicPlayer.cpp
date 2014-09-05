@@ -17,7 +17,7 @@ _music(NULL), _ifPlay(false), _cameraHUD(NULL)
 	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
 
-	std::string dir("..\\Resources\\sound\\bgm\\");
+	std::string dir("..\\Resources\\sound\\music\\");
 	_mList = osgDB::getSortedDirectoryContents(dir);
 	osgDB::DirectoryContents::iterator del = std::find(_mList.begin(), _mList.end(), ".");
 	_mList.erase(del);
