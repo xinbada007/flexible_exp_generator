@@ -19,10 +19,14 @@ _music(NULL), _ifPlay(true), _cameraHUD(NULL)
 
 	std::string dir("..\\Resources\\sound\\music\\");
 	_mList = osgDB::getSortedDirectoryContents(dir);
+	if (_mList.empty())
+	{
+		return;
+	}
 	osgDB::DirectoryContents::iterator del = std::find(_mList.begin(), _mList.end(), ".");
-	_mList.erase(del);
+	if (del != _mList.end()) _mList.erase(del);
 	del = std::find(_mList.begin(), _mList.end(), "..");
-	_mList.erase(del);
+	if (del != _mList.end()) _mList.erase(del);
 
 	if (_mList.empty())
 	{
