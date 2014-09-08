@@ -409,10 +409,10 @@ void Recorder::copyandSetHUDText()
 				lesscontent += temp;
 				lesscontent.push_back('\t');
 				break;
-			case Recorder::TypeofText::USRHIT:
-				lesscontent += temp;
-				lesscontent.push_back('\t');
-				break;
+// 			case Recorder::TypeofText::USRHIT:
+// 				lesscontent += temp;
+// 				lesscontent.push_back('\t');
+// 				break;
 			default:
 				break;
 			}

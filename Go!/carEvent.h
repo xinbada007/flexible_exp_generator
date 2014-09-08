@@ -33,6 +33,7 @@ private:
 	double _lastAngle;
 	bool _autoNavi;
 	bool _shifted;
+	bool _speedLock;
 
 	bool _updated;
 

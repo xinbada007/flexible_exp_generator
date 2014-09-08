@@ -7,7 +7,7 @@
 
 CarEvent::CarEvent() :
 _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
-, _lastAngle(0.0f), _autoNavi(false), _shifted(false)
+, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
@@ -257,13 +257,16 @@ bool CarEvent::Joystick()
 		_shifted = false;
 	}
 
-	if (abs(y) > DeadZone)
+	if (!_speedLock)
 	{
-		_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
-	}
-	else if (abs(y) <= DeadZone)
-	{
-		_carState->_speed = 0.0f;
+		if (abs(y) > DeadZone)
+		{
+			_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
+		}
+		else if (abs(y) <= DeadZone)
+		{
+			_carState->_speed = 0.0f;
+		}
 	}
 
 	if (b >= 0 && b < _buttons->size())
@@ -282,6 +285,14 @@ bool CarEvent::Joystick()
 		{
 			//Reset UserHit
 			_carState->_userHit = -1;
+		}
+		else if (_buttons->at(1) == 1)
+		{
+			if (_carState->_O == _vehicle->_O)
+			{
+				_carState->_speed = _vehicle->_speed;
+				_speedLock = !_speedLock;
+			}
 		}
 		else if (_buttons->at(6) == 1)
 		{
@@ -376,7 +387,13 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
 				_carState->_collide = false;
 			}
-
+			else
+			{
+				if (_speedLock)
+				{
+					_carState->_speed = _vehicle->_speed;
+				}
+			}
 			if (_carState->_reset)
 			{
 				makeResetMatrix();
