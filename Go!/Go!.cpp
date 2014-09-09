@@ -56,15 +56,15 @@ int main(int argc, char** argv)
 {
 	int curRep(1);
 	int totalRep(1);
-// 	if (argc == 3)
-// 	{
-// 		totalRep = *(argv[1]) - '0';
-// 	}
-// 	else
-// 	{
-// 		std::cout << ("Require at least 2 inputs\n") << std::endl;
-// 		return 0;
-// 	}
+	if (argc >= 3)
+	{
+		totalRep = *(argv[1]) - '0';
+	}
+	else
+	{
+		std::cout << ("Require at least 2 inputs\n") << std::endl;
+		return 0;
+	}
 
 	extern bool init_joystick();
 	init_joystick();
@@ -83,14 +83,14 @@ int main(int argc, char** argv)
 	std::vector<osg::ref_ptr<Recorder>> recorder;
 	std::vector<osg::ref_ptr<ExperimentCallback>> expcontroller;
 
-	curRep = 1;
-	totalRep = 2;
+// 	curRep = 1;
+// 	totalRep = 2;
 
 	while (curRep <= totalRep)
 	{
 		//obtain filename
-//		string configFile = argv[1 + curRep];
-		string configFile = "..\\Resources\\config.txt";
+		string configFile = argv[1 + curRep];
+//		string configFile = "..\\Resources\\config.txt";
 		string replayFile;
 		readConfig.push_back(new ReadConfig(configFile));
 
@@ -193,6 +193,13 @@ int main(int argc, char** argv)
 		recorder.at(i) = NULL;
 		readConfig.at(i) = NULL;
 		root.at(i) = NULL;
+		road.at(i) = NULL;
+		car.at(i) = NULL;
+		carMatrix.at(i) = NULL;
+		colldetect.at(i) = NULL;
+		roadSwitcher.at(i) = NULL;
+		camMatrix.at(i) = NULL;
+		expcontroller.at(i) = NULL;
 
 		if (osg::Referenced::getDeleteHandler()) {
 			osg::Referenced::getDeleteHandler()->setNumFramesToRetainObjects(0);

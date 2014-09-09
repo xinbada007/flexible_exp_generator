@@ -1,0 +1,80 @@
+#only comma, colon, space, and semicolon are allowed to use
+#folder path MUST NOT contain SPACE
+
+TrialConfig
+
+[ScreenSettings]
+#Num of Screent starts from 0
+Hdistance:	2.72	#5.44	#0.6
+Vdistance:	1.5	#1.25
+screen:		0
+aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		42.175	#Disable when RealWorld is enabled
+RealWorld:	0:	42.175 , 65.217 , 42.391
+background:	../Resources/texture/A0005332_LARGE.jpg
+MultiSamples:	2	#on-board, old ,rubbish cards use 4	#nice cards use 16
+
+[CarSettings]
+Acceleration:	0
+DynamicSensitiveLevel:	2	#could be float number like 1.2532564766578
+CarSpeed:	100
+SpeedIncr:	20
+CarWheel:	42.5
+WheelAccl:	0	#720	#180	#0	#normally do not apply this
+CarWidth:	1.7
+CarHeight:	0.15
+CarLength:	4.7
+CarPic:		../Resources/texture/car.png
+CarVisible:	1	#1=Visible	0=Invisible
+
+[RoadSettings]
+RoadLanes:	3
+RoadPic:	../Resources/texture/road4096-2.png
+
+#RoadTxt is disabled when Roads in Subjects Section is enabled
+RoadTxt:	../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
+#RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
+
+Density:	1000
+WallHeight:	1.0
+WallPic:	../Resources/texture/wall1024-2.jpg
+ScaleVector:	200,200,200		#DO NOT mess around with this
+
+[Subjects]
+Name:	Demo
+Age:
+Gender: 
+Driving:		#how many years since driving
+RandomRoads:	0
+
+[Experiment]
+Start-Lane:	-1	#1 = R	#-1 = L	#0 = Middle
+
+##==Deviation Warn Setting===============
+Deviation:	1.0	#Units:	Metres
+Deviation-BaseLine:	-1	#1 = R	#-1 = L	#0 = Middle
+Deviation-Warn: DEVIATION TOO HIGH
+Deviation-Siren:	../Resources/sound/warnpullup.mp3
+
+##==Text Setting=========================
+#Textime:	0
+#Period:	10
+##==must line by line====================
+#Text:	Please Change Lane
+
+##==Dynamic Setting======================
+#Dynamic-Change: 1	20	25
+#Dynamic-Change-Condition:	1	0	#black for 10 seconds
+
+##==Obstacle Setting=====================
+#Obstacle:	1	5	10
+#Obstacle-Range:	10	50	100
+#Obstacle-Position:	-1	1	-1	#1 = R	#-1 = L
+
+[CameraSettings]
+#this is the camera's position realtively to the original point of vehicle
+#shouldn't mess around with this, set as 0 to let program to define
+Offset:		0	#system decide
+EyeTracker:	0	#normally do not apply
+
+#Roads:	../Resources/speed/100/4.txt;
