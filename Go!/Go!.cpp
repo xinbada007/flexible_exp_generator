@@ -171,15 +171,15 @@ int main(int argc, char** argv)
 // 	//Sound&Music
 // 	osg::ref_ptr<osgAudio::SoundRoot> sound_root = new osgAudio::SoundRoot;
 // 	root->addChild(sound_root);
-// 	osg::ref_ptr<MusicPlayer> musicplayer = new MusicPlayer;
-// 	musicplayer->setHUDCamera(mViewer->getHUDCamera());
-// 	mViewer->getMainView()->addEventHandler(musicplayer);
+	osg::ref_ptr<MusicPlayer> musicplayer = new MusicPlayer;
 
 	//Ready to Run
 	int i = 0;
 	while (i < totalRep)
 	{
 		MulitViewer *viewer = mViewer.at(i);
+		musicplayer->setHUDCamera(viewer->getHUDCamera());
+		viewer->getMainView()->addEventHandler(musicplayer);
 		viewer->run();
 
 		Recorder *rec = recorder.at(i);
@@ -199,7 +199,15 @@ int main(int argc, char** argv)
 			osg::Referenced::getDeleteHandler()->flushAll();
 		}
 
-		osgAudio::SoundManager::instance()->stopAllSources();
+		osgAudio::SoundState *sound = osgAudio::SoundManager::instance()->findSoundState("GOsiren");
+		if (sound)
+		{
+			sound->setPlay(false);
+		}
+		else
+		{
+			osgAudio::SoundManager::instance()->stopAllSources();
+		}
 
 		++i;
 	}

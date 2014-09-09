@@ -35,13 +35,17 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _
 	}
 	if (sample)
 	{
-		_siren = new osgAudio::SoundState("siren");
-		_siren->allocateSource(20);
-		_siren->setSample(sample.release());
-		_siren->setAmbient(true);
-		_siren->setPlay(false);
-		_siren->setLooping(true);
-		osgAudio::SoundManager::instance()->addSoundState(_siren);
+		_siren = osgAudio::SoundManager::instance()->findSoundState("GOsiren");
+		if (!_siren)
+		{
+			_siren = new osgAudio::SoundState("GOsiren");
+			_siren->allocateSource(20);
+			_siren->setSample(sample.release());
+			_siren->setAmbient(true);
+			_siren->setPlay(false);
+			_siren->setLooping(true);
+			osgAudio::SoundManager::instance()->addSoundState(_siren);
+		}
 	}
 }
 

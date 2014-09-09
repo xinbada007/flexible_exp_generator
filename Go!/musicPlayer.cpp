@@ -65,13 +65,17 @@ _music(NULL), _ifPlay(true), _cameraHUD(NULL)
 	}
 	_nthFileStream = _fileMusic.cbegin();
 
-	_music = new osgAudio::SoundState;
-	_music->setAmbient(true);
-	_music->setLooping(true);
-	_music->setPlay(_ifPlay);
-	_music->allocateSource(10);
-	_music->setStream(*_nthFileStream);
-	osgAudio::SoundManager::instance()->addSoundState(_music);
+	_music = osgAudio::SoundManager::instance()->findSoundState("GOmusic");
+	if (!_music)
+	{
+		_music = new osgAudio::SoundState("GOmusic");
+		_music->setAmbient(true);
+		_music->setLooping(true);
+		_music->setPlay(_ifPlay);
+		_music->allocateSource(10);
+		_music->setStream(*_nthFileStream);
+		osgAudio::SoundManager::instance()->addSoundState(_music);
+	}
 
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
