@@ -401,10 +401,10 @@ void Recorder::copyandSetHUDText()
 				lesscontent += temp;
 				lesscontent.push_back('\t');
 				break;
-			case Recorder::TypeofText::CUSTOMD:
-				lesscontent += temp;
-				lesscontent.push_back('\t');
-				break;
+// 			case Recorder::TypeofText::CUSTOMD:
+// 				lesscontent += temp;
+// 				lesscontent.push_back('\t');
+// 				break;
 			case Recorder::TypeofText::SPEED:
 				lesscontent += temp;
 				lesscontent.push_back('\t');
@@ -487,13 +487,13 @@ void Recorder::setStatusLess(const std::string &txt)
 	(*i == '\t') ? ++i : i;
 
 	//2. Deviation
-	text += (i == txt.cend()) ? "" : "\n\nDEVIATION:  ";
-	while (*i != '\t' && i != txt.cend())
-	{
-		text.push_back(*i);
-		i++;
-	}
-	(*i == '\t') ? ++i : i;
+// 	text += (i == txt.cend()) ? "" : "\n\nDEVIATION:  ";
+// 	while (*i != '\t' && i != txt.cend())
+// 	{
+// 		text.push_back(*i);
+// 		i++;
+// 	}
+// 	(*i == '\t') ? ++i : i;
 
 	//3. Speed
 	text += (i == txt.cend()) ? "" : "\n\nSPEED:  ";
@@ -505,19 +505,19 @@ void Recorder::setStatusLess(const std::string &txt)
 	(*i == '\t') ? ++i : i;
 
 	//4. UserHit
-	text += (i == txt.cend()) ? "" : "\n\nREC.:  ";
-	char rec('0');
-	if (*i != '\t' && i != txt.cend())
-	{
-		if (*i == '0')
-		{
-			text += "Recording...Release to Stop...";
-		}
-		else
-		{
-			text += "Hold Left Turn Light to Record";
-		}
-	}
+// 	text += (i == txt.cend()) ? "" : "\n\nREC.:  ";
+// 	char rec('0');
+// 	if (*i != '\t' && i != txt.cend())
+// 	{
+// 		if (*i == '0')
+// 		{
+// 			text += "Recording...Release to Stop...";
+// 		}
+// 		else
+// 		{
+// 			text += "Hold Left Turn Light to Record";
+// 		}
+// 	}
 
 	_statusText->setText(text);
 	_statusText->update();

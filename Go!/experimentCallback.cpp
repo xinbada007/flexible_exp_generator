@@ -150,14 +150,14 @@ void ExperimentCallback::showText()
 	if (_deviationWarn && ((_carState->_frameStamp / 20) % 2))
 	{
 		deviationDisplay = _expSetting->_deviationWarn;
-		if (_deviationLeft)
-		{
-			deviationDisplay += "\nTO RIGHT";
-		}
-		else
-		{
-			deviationDisplay += "\nTO LEFT";
-		}
+// 		if (_deviationLeft)
+// 		{
+// 			deviationDisplay += "\nTO RIGHT";
+// 		}
+// 		else
+// 		{
+// 			deviationDisplay += "\nTO LEFT";
+// 		}
 
 		warnshow = &deviationDisplay;		
 	}
