@@ -10,6 +10,8 @@
 #include <osg/Notify>
 #include <osg/Geometry>
 #include <osgDB/ReadFile>
+#include <osgDB/FileNameUtils>
+#include <osgDB/FileUtils>
 
 using namespace std;
 
@@ -208,14 +210,51 @@ void ReadConfig::initializeAfterReadTrial()
 					osg::notify(osg::FATAL) << "Cannot create folder" << endl;
 				}
 			}
-			const string path = dirPath + ".\\" + datestr + '-' + timedir;
-			if (_access((path).c_str(), 6) == -1)
+			string path;
+			path = dirPath + ".\\" + _subjects->getTrialName();
+			if (_access(path.c_str(),6) == -1)
 			{
-				if (_mkdir((path).c_str()) == -1)//creat sub dir based on time
+				if (_mkdir(path.c_str()) == -1)
 				{
-					osg::notify(osg::FATAL) << "Cannot create folder" << endl;
+					path = dirPath + ".\\" + datestr + '-' + timedir;
+					if (_access(path.c_str(),6) == -1)
+					{
+						if (_mkdir(path.c_str()) == -1)
+						{
+							osg::notify(osg::FATAL) << "Cannot create folder" << std::endl;
+							exit(0);
+						}
+					}
+					else
+					{
+						path += "R";
+						if (_access(path.c_str(), 6) == -1)
+						{
+							if (_mkdir(path.c_str()) == -1)
+							{
+								osg::notify(osg::FATAL) << "Cannot create folder" << std::endl;
+								exit(0);
+							}
+						}
+					}
 				}
 			}
+// 			if (_subjects->getTrialName().empty())
+// 			{
+// 				path = dirPath + ".\\" + datestr + '-' + timedir;
+// 			}
+// 			else
+// 			{
+// 				path = dirPath + ".\\" + _subjects->getTrialName();
+// 			}
+// 			
+// 			if (_access((path).c_str(), 6) == -1)
+// 			{
+// 				if (_mkdir((path).c_str()) == -1)
+// 				{
+// 					osg::notify(osg::FATAL) << "Cannot create folder" << endl;
+// 				}
+// 			}
 			const string out = path + "\\" + _subjects->getName() + ".txt";
 			fstream fileout(out.c_str(), ios::out);
 			ifstream filein(_subjects->getFilePath().c_str());
@@ -224,6 +263,7 @@ void ReadConfig::initializeAfterReadTrial()
 				osg::notify(osg::FATAL) << "Cannot copy config file" << std::endl;
 				fileout.close();
 				filein.close();
+				exit(0);
 			}
 			else
 			{
@@ -426,6 +466,7 @@ void ReadConfig::readTrial(ifstream &in)
 	const string CAMERA = "[CAMERASETTINGS]";
 	const string SUBJECTS = "[SUBJECTS]";
 	const string EXPERIMENT = "[EXPERIMENT]";
+	const string SPACE = " ";
 
 	string flag;
 	if (!in.eof())
@@ -444,6 +485,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string DRIVING = "DRIVING";
 		const string RROAD = "RANDOMROADS";
 		const string SUBROADS = "ROADS";
+		const string TRIALNAME = "TRIALNAME";
 		while (flag == SUBJECTS && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -452,7 +494,7 @@ void ReadConfig::readTrial(ifstream &in)
 			if (title == NAME)
 			{
 				config.erase(config.begin(), config.begin() + NAME.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				_subjects->setName(config);
 				continue;
 			}
@@ -494,7 +536,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == SUBROADS)
 			{
 				config.erase(config.begin(), config.begin() + SUBROADS.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				while (!config.empty())
 				{
 					std::string txtRoad;
@@ -510,7 +552,28 @@ void ReadConfig::readTrial(ifstream &in)
 					}
 					_subjects->_roads.push_back(txtRoad);
 					config.erase(config.begin(), config.begin() + found_to);
-					config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+					config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				}
+				continue;
+			}
+			else if (title == TRIALNAME)
+			{
+				config.erase(config.begin(), config.begin() + TRIALNAME.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				if (!config.empty())
+				{
+					std::string::size_type sz;
+					int tn = stoi(config, &sz);
+					if (tn == 1)
+					{
+						_subjects->setTrialName(osgDB::getSimpleFileName(osgDB::getNameLessAllExtensions(_filename)));
+					}
+					else if (tn == 2)
+					{
+						config.erase(config.begin(), config.begin() + sz);
+						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+						_subjects->setTrialName(config);
+					}
 				}
 				continue;
 			}
@@ -568,7 +631,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == BGPIC)
 			{
 				config.erase(config.begin(), config.begin() + BGPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				_screens->_background = config;
 				continue;
 			}
@@ -680,7 +743,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == CARPIC)
 			{
 				config.erase(config.begin(), config.begin() + CARPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				_vehicle->_texture = config;
 				continue;
 			}
@@ -778,14 +841,14 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == ROADPIC)
 			{
 				config.erase(config.begin(), config.begin() + ROADPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				_roads->_texture = config;
 				continue;
 			}
 			else if (title == ROADTXT)
 			{
 				config.erase(config.begin(), config.begin() + ROADTXT.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				while (!config.empty())
 				{
 					std::string txtRoad;
@@ -801,7 +864,7 @@ void ReadConfig::readTrial(ifstream &in)
 					}
 					_roads->_roadTxt.push_back(txtRoad);
 					config.erase(config.begin(), config.begin() + found_to);
-					config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+					config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				}
 				continue;
 			}
@@ -843,7 +906,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == WALLPIC)
 			{
 				config.erase(config.begin(), config.begin() + WALLPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				_roads->_textureWall = config;
 				continue;
 			}
@@ -945,7 +1008,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == TEXT)
 			{
 				config.erase(config.begin(), config.begin() + TEXT.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				if (!config.empty())
 				{
 					_experiment->_textContent.push_back(config);
@@ -986,7 +1049,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == DYNAMICCHANGEPIC)
 			{
 				config.erase(config.begin(), config.begin() + DYNAMICCHANGEPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				if (!config.empty())
 				{
 					_experiment->_dynamicPic = config;
@@ -1038,7 +1101,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == DEVIATIONWARN)
 			{
 				config.erase(config.begin(), config.begin() + DEVIATIONWARN.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				if (!config.empty())
 				{
 					_experiment->_deviationWarn = config;
@@ -1052,7 +1115,7 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == DEVIATIONSIREN)
 			{
 				config.erase(config.begin(), config.begin() + DEVIATIONSIREN.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(" "));
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				if (!config.empty())
 				{
 					_experiment->_deviationSiren = config;

@@ -250,6 +250,7 @@ typedef struct Subjects:public osg::Referenced
 	void setFilePath(const std::string ref){ _filePath = ref; };
 	void setRecPath(const std::string ref){ _recTxt = ref; };
 	void setRandomRoads(const bool ref){ _randomRoads = ref; };
+	void setTrialName(const std::string ref){ _trialName = ref; };
 
 	std::string getName() const { return _name; };
 	int getAge() const { return _age; };
@@ -258,6 +259,7 @@ typedef struct Subjects:public osg::Referenced
 	std::string getFilePath() const { return _filePath; };
 	std::string getRecPath() const { return _recTxt; };
 	bool getRandomRoads() const { return _randomRoads; };
+	std::string getTrialName() const { return _trialName; };
 
 	stringList _roads;
 protected:
@@ -272,6 +274,7 @@ private:
 
 	std::string _filePath;
 	std::string _recTxt;
+	std::string _trialName;
 
 }Subjects;
 

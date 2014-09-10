@@ -29,7 +29,7 @@ CarVisible:	1	#1=Visible	0=Invisible
 
 [RoadSettings]
 RoadLanes:	3
-#RoadPic:	../Resources/texture/road4096-2.png
+RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
@@ -37,7 +37,7 @@ RoadTxt:	../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources
 
 Density:	1000
 WallHeight:	1.0
-#WallPic:	../Resources/texture/wall1024-2.jpg
+WallPic:	../Resources/texture/wall1024-2.jpg
 ScaleVector:	200,200,200		#DO NOT mess around with this
 
 [Subjects]
@@ -46,7 +46,7 @@ Age:
 Gender: 	
 Driving:		#how many years since driving
 RandomRoads:	0
-TrialName:	2	<	#0 = System Time	1 = Same as Name of this config File	2 = Custom Name
+TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
@@ -78,3 +78,5 @@ Deviation-Siren:	../Resources/sound/warnpullup.mp3
 #shouldn't mess around with this, set as 0 to let program to define
 Offset:		0	#system decide
 EyeTracker:	0	#normally do not apply
+
+#Roads:	../Resources/speed/100/4.txt;

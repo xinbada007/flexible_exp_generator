@@ -56,6 +56,7 @@ int main(int argc, char** argv)
 {
 	int curRep(1);
 	int totalRep(1);
+	argc = 3;
 	if (argc >= 3)
 	{
 		totalRep = *(argv[1]) - '0';
@@ -83,14 +84,14 @@ int main(int argc, char** argv)
 	std::vector<osg::ref_ptr<Recorder>> recorder;
 	std::vector<osg::ref_ptr<ExperimentCallback>> expcontroller;
 
-// 	curRep = 1;
-// 	totalRep = 2;
+	curRep = 1;
+	totalRep = 2;
 
 	while (curRep <= totalRep)
 	{
 		//obtain filename
-		string configFile = argv[1 + curRep];
-//		string configFile = "..\\Resources\\config.txt";
+//		string configFile = argv[1 + curRep];
+		string configFile = "..\\Resources\\config.txt";
 		string replayFile;
 		readConfig.push_back(new ReadConfig(configFile));
 
