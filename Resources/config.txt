@@ -46,7 +46,7 @@ Age:
 Gender: 	
 Driving:		#how many years since driving
 RandomRoads:	0
-TrialName:	2	<	#0 = System Time	1 = Same as Name of this config File	2 = Custom Name
+TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
