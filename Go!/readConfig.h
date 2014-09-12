@@ -74,6 +74,8 @@ typedef struct Nurbs:public osg::Referenced
 		_ctrlPoints = new osg::Vec3dArray;
 
 		_knotVector = new osg::DoubleArray;
+		_radius = new osg::DoubleArray;
+
 		_order = 0;
 	};
 	osg::ref_ptr <osg::Vec3dArray> _path;
@@ -85,6 +87,8 @@ typedef struct Nurbs:public osg::Referenced
 
 	osg::ref_ptr <osg::Vec3dArray> _ctrlPoints;
 	osg::ref_ptr <osg::DoubleArray> _knotVector;
+	osg::ref_ptr<osg::DoubleArray> _radius;
+
 	unsigned _order;
 
 protected:
@@ -104,10 +108,12 @@ typedef struct RoadSet:public osg::Referenced
 		_wallHeight = 0.50f;
 		_density = 1000;
 
-		_scale.set(10.0f,10.0f,1.0f);
+		_scale.set(1.0f,1.0f,1.0f);
 
 		_imgRoad = NULL;
 		_imgWall = NULL;
+
+		_nurbsMethod = 1;
 	}
 	
 	const double _laneWidth;	//laneWidth = 3.75 Meters
@@ -125,6 +131,8 @@ typedef struct RoadSet:public osg::Referenced
 	osg::ref_ptr<osg::Image> _imgWall;
 	stringList _roadTxt;
 	nurbsList _nurbs;
+
+	int _nurbsMethod;
 
 protected:
 	virtual ~RoadSet(){ std::cout << "Deconstruct RoadSet" << std::endl; };
@@ -292,10 +300,11 @@ public:
 	Subjects *getSubjects() const { return _subjects.get(); };
 	Experiment *getExpSetting() const { return _experiment.get(); };
 	osg::Matrix getDistortionMatrix() const{  return osg::Matrix::scale(osg::Vec3d(1.0f,1.0f,1.0f / _screens->_distortion)); };
-	osg::Geode* measuer();
 	osg::MatrixdArray *getSaveState() const { return _saveState.get(); };
 	osg::IntArray *getDynamicState() const { return _dynamicState.get(); };
 	bool isReplay() const { return _replay; };
+
+	osg::Geode* measuer();
 	//test
 	osg::ref_ptr<osg::Vec3dArray> _measuerment;
 	//test
@@ -315,6 +324,7 @@ private:
 	void scaleCtrlPoints();
 	void alignCtrlPoints(Nurbs *refNurbs);
 	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB);
+	void updateNurbs();
 	
 	osg::ref_ptr<Nurbs> _nurbs;
 	osg::ref_ptr<Vehicle> _vehicle;

@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
+#include <stdlib.h>
 #include <io.h>
 #include <direct.h>
 
@@ -12,6 +13,8 @@
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
 #include <osgDB/FileUtils>
+
+#include <sisl.h>
 
 using namespace std;
 
@@ -239,22 +242,6 @@ void ReadConfig::initializeAfterReadTrial()
 					}
 				}
 			}
-// 			if (_subjects->getTrialName().empty())
-// 			{
-// 				path = dirPath + ".\\" + datestr + '-' + timedir;
-// 			}
-// 			else
-// 			{
-// 				path = dirPath + ".\\" + _subjects->getTrialName();
-// 			}
-// 			
-// 			if (_access((path).c_str(), 6) == -1)
-// 			{
-// 				if (_mkdir((path).c_str()) == -1)
-// 				{
-// 					osg::notify(osg::FATAL) << "Cannot create folder" << endl;
-// 				}
-// 			}
 			const string out = path + "\\" + _subjects->getName() + ".txt";
 			fstream fileout(out.c_str(), ios::out);
 			ifstream filein(_subjects->getFilePath().c_str());
@@ -344,7 +331,7 @@ void ReadConfig::initializeAfterReadTrial()
 		scaleCtrlPoints();
 		Nurbs *prve = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());
 		alignCtrlPoints(prve);
-		updateNurbs(new NurbsCurve);
+		_roads->_nurbsMethod == 1 ? updateNurbs() : updateNurbs(new NurbsCurve);
 		_roads->_nurbs.push_back(_nurbs.release());
 	}
 	//load the pic as texture
@@ -825,6 +812,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string ROADLANE = "ROADLANES";
 		const string WALLPIC = "WALLPIC";
 		const string SCALE = "SCALEVECTOR";
+		const string METHOD = "METHOD";
 		while (flag == ROAD && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -908,6 +896,15 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + WALLPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				_roads->_textureWall = config;
+				continue;
+			}
+			else if (title == METHOD)
+			{
+				config.erase(config.begin(), config.begin() + METHOD.size());
+				if (!config.empty())
+				{
+					_roads->_nurbsMethod = stoi(config);
+				}
 				continue;
 			}
 
@@ -1301,6 +1298,134 @@ void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB)
 			_nurbs->_path_right = tmp;
 		}
 	}
+}
+
+void ReadConfig::updateNurbs()
+{
+	if (!_roads)
+	{
+		return;
+	}
+
+	const double width = _roads->_width;
+	const double halfW = width * 0.5f;
+	_nurbs->_ctrl_left = project_Line(_nurbs->_ctrlPoints, halfW);
+	_nurbs->_ctrl_right = project_Line(_nurbs->_ctrlPoints, -halfW);
+
+	const unsigned &numPoints = _nurbs->_ctrlPoints->getNumElements();
+	const unsigned &order = _nurbs->_order;
+	const unsigned degree = order - 1;
+	
+	const unsigned &numKnots = _nurbs->_knotVector->getNumElements();
+	double *knots = (double*)malloc(numKnots*sizeof(double));
+	for (int i = 0; i < numKnots; i++)
+	{
+		knots[i] = _nurbs->_knotVector->at(i);
+	}
+
+	const unsigned dim = _nurbs->_ctrlPoints->front().num_components;
+	double *ctrlpts = (double*)malloc(numPoints*dim*sizeof(double));
+	double *ctrlptsL = (double*)malloc(numPoints*dim*sizeof(double));
+	double *ctrlptsR = (double*)malloc(numPoints*dim*sizeof(double));
+
+	for (unsigned int i = 0; i < numPoints;i++)
+	{
+		int v = 0;
+		for (int j = (i*dim); j < (i+1)*dim;j++)
+		{
+			ctrlpts[j] = _nurbs->_ctrlPoints->at(i)._v[v];
+			ctrlptsL[j] = _nurbs->_ctrl_left->at(i)._v[v];
+			ctrlptsR[j] = _nurbs->_ctrl_right->at(i)._v[v];
+			++v;
+		}
+	}
+
+	const unsigned kind = 1;
+	SISLCurve *sc = newCurve(numPoints, order, knots, ctrlpts, kind, dim, 1);
+	SISLCurve *scL = newCurve(numPoints, order, knots, ctrlptsL, kind, dim, 1);
+	SISLCurve *scR = newCurve(numPoints, order, knots, ctrlptsR, kind, dim, 1);
+
+	const int der(0);
+	double *derive = (double*)calloc((der + 1)*dim, sizeof(double));
+	double *curvature = (double*)calloc(dim, sizeof(double));
+	double radius;
+	int jstat, jstatR, jstatL;
+	const double density = ((double)(_roads->_density) / (double)(numKnots - order - degree)) + 0.5f;
+	for (unsigned int i = degree; i < numKnots - order;i++)
+	{
+		int leftknot = i;
+		const double left = knots[i];
+		const double right = knots[i + 1];
+		const double step = (right - left) / density;
+		for (int j = 0; j < density; j++)
+		{
+			double k = left + step*j;
+			if (k > right) k = right;
+			s1225(sc, der, k, &leftknot, derive, curvature, &radius, &jstat);
+			if (!jstat)
+			{
+				_nurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+				_nurbs->_radius->push_back(radius);
+			}
+			s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
+			if (!jstatR) _nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
+			if (!jstatL) _nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			if (jstat || jstatR || jstatL)
+			{
+				osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
+				return;
+			}
+		}
+	}
+	int leftknot = numKnots - order - 1;
+	int k = knots[leftknot + 1];
+	s1225(sc, der, k, &leftknot, derive, curvature, &radius, &jstat);
+	if (!jstat)
+	{
+		_nurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+		_nurbs->_radius->push_back(radius);
+	}
+	s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
+	if (!jstatR) _nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+	s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
+	if (!jstatL) _nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+
+	//Adjust "Left" and "Right"
+	osg::Vec3d left = *_nurbs->_ctrl_left->begin() - *_nurbs->_ctrl_right->begin();
+	osg::Vec3d right = *(_nurbs->_ctrl_right->begin() + 1) - *_nurbs->_ctrl_right->begin();
+	osg::Vec3d dir = right^left;
+	if (dir.z() < 0)
+	{
+		osg::ref_ptr<osg::Vec3dArray> tmp = _nurbs->_ctrl_left;
+		_nurbs->_ctrl_left = _nurbs->_ctrl_right;
+		_nurbs->_ctrl_right = tmp;
+
+		tmp = _nurbs->_path_left;
+		_nurbs->_path_left = _nurbs->_path_right;
+		_nurbs->_path_right = tmp;
+	}
+
+	
+	freeCurve(sc);
+	freeCurve(scL);
+	freeCurve(scR);
+	delete knots;
+	delete ctrlpts;
+	delete ctrlptsL;
+	delete ctrlptsR;
+	delete derive;
+	delete curvature;
+
+	sc = NULL;
+	scL = NULL;
+	scR = NULL;
+	knots = NULL;
+	ctrlpts = NULL;
+	ctrlptsL = NULL;
+	ctrlptsR = NULL;
+	derive = NULL;
+	curvature = NULL;
 }
 
 osg::Geode* ReadConfig::measuer()

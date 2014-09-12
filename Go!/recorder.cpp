@@ -12,6 +12,8 @@
 
 #include <osg/Notify>
 
+#include <sisl.h>
+
 using namespace std;
 
 Recorder::Recorder() :_statusText(new osgText::Text),
@@ -96,10 +98,11 @@ bool Recorder::output(ReadConfig *rc)
 			}
 		}
 	}
+	
+	nurbsList nurbs = rc->getRoadSet()->_nurbs;
 
 	//save all the points that comprise the road
 	{
-		nurbsList nurbs = rc->getRoadSet()->_nurbs;
 		if (!nurbs.empty())
 		{
 			const std::string filename = rc->getSubjects()->getRecPath() + "\\roads.txt";
@@ -114,7 +117,7 @@ bool Recorder::output(ReadConfig *rc)
 			}
 			else
 			{
-				string roads,roads_left,roads_right;
+				string roads,roads_left,roads_right,radius;
 				char tempd[20];
 				const unsigned size_tempd(sizeof(tempd));
 				const unsigned numDigit(6);
@@ -124,6 +127,7 @@ bool Recorder::output(ReadConfig *rc)
 					osg::Vec3dArray::const_iterator j = (*i)->_path->begin();
 					osg::Vec3dArray::const_iterator j_left = (*i)->_path_left->begin();
 					osg::Vec3dArray::const_iterator j_right = (*i)->_path_right->begin();
+					osg::DoubleArray::const_iterator j_radius = (*i)->_radius->begin();
 					while (j != (*i)->_path->end())
 					{
 						_gcvt_s(tempd, size_tempd, (*j).x(), numDigit);
@@ -134,8 +138,19 @@ bool Recorder::output(ReadConfig *rc)
 						roads += "\t";
 						_gcvt_s(tempd, size_tempd, (*j).z(), numDigit);
 						roads += tempd;
-						roads += "\n";
+						roads += "\t";
 						j++;
+
+						if (j_radius != (*i)->_radius->end())
+						{
+							_gcvt_s(tempd, size_tempd, (*j_radius), numDigit);
+							radius += tempd;
+							radius += "\n";
+							j_radius++;
+
+							roads += tempd;
+							roads += "\t";
+						}
 
 						if (j_left != (*i)->_path_left->end())
 						{
@@ -164,6 +179,8 @@ bool Recorder::output(ReadConfig *rc)
 							roads_right += "\n";
 							j_right++;
 						}
+
+						roads += "\n";
 					}
 					i++;
 				}
@@ -368,6 +385,7 @@ void Recorder::rectoTxt(const CarState *carState)
 	{
 		_recS._replay = "\n" + carState->getReplayText();
 	}
+
 }
 
 void Recorder::copyandSetHUDText()
