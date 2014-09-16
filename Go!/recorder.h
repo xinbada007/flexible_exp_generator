@@ -17,13 +17,15 @@ typedef struct recState
 		_rb("RB"), _ru("RU"), _lu("LU"), _lb("LB"), _oc("OC"), _dither("Dither"), _customDither("CustomDither"),
 		_dAngle("DAngle"), _swAngle("swAngle"), _OX("OX"), _OY("OY"), _OZ("OZ"), _HX("HX"), _HY("HY"),
 		_HZ("HZ"), _DX("DX"), _DY("DY"), _DZ("DZ"), _HA("HA"), _RHA("RHA"), _AHA("AccumulativeHeading(Y)"),
-		_speed("Speed"), _Rspeed("RSpeed"), _dynamic("Dynamic"), _usrHit("USRHIT"), _replay(""), _accumulativeHeading(0.0f)
+		_speed("Speed"), _Rspeed("RSpeed"), _radius("radius"), _radiusR("radiusR"), _radiusL("radiusL"),
+		_dynamic("Dynamic"), _usrHit("USRHIT"), _replay(""), _accumulativeHeading(0.0f)
 	{
 		_time += _TAB; _fps += _TAB; _frame += _TAB; _crash += _TAB;
 		_rb += _TAB; _ru += _TAB; _lu += _TAB; _lb += _TAB; _oc += _TAB; _dither += _TAB; _customDither += _TAB;
 		_dAngle += _TAB; _swAngle += _TAB; _OX += _TAB; _OY += _TAB; _OZ += _TAB;
 		_HX += _TAB; _HY += _TAB; _HZ += _TAB; _DX += _TAB; _DY += _TAB; _DZ += _TAB;
 		_HA += _TAB; _RHA += _TAB;  _AHA += _TAB; _speed += _TAB; _Rspeed += _TAB;
+		_radius += _TAB; _radiusR += _TAB; _radiusL += _TAB;
 		_dynamic += _TAB; _usrHit += _TAB;
 	}
 	std::string _time;
@@ -53,6 +55,9 @@ typedef struct recState
 	std::string _AHA;
 	std::string _speed;
 	std::string _Rspeed;
+	std::string _radius;
+	std::string _radiusR;
+	std::string _radiusL;
 	std::string _dynamic;
 	std::string _usrHit;
 	std::string _replay;
@@ -67,11 +72,11 @@ class Recorder :
 	public osg::NodeCallback
 {
 public:
-	Recorder();
+	Recorder(ReadConfig *rc);
 	virtual ~Recorder();
 
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
-	bool output(ReadConfig *rc);
+	bool output();
 	osgText::Text * getStatus() const { return _statusText.get(); };
 	void setHUDCamera(osg::Camera *cam);
 
@@ -81,6 +86,8 @@ private:
 	void setHUDText();
 	void setStatusLess(const std::string &txt);
 	void setStatus(const std::string &txt);
+
+	ReadConfig *_rc;
 
 	std::string _txtRecorder;
 	std::string _saveState;
@@ -95,6 +102,7 @@ private:
 	osg::ref_ptr<osg::Geode> _geodeHUD;
 
 	bool _detailed;
+	bool _reced;
 
 	enum TypeofText
 	{
@@ -105,6 +113,7 @@ private:
 		HX, HY, HZ,
 		DX, DY, DZ,
 		HA, RHA, AHA, SPEED,
-		RSPEED, DYNAMIC, USRHIT
+		RSPEED, RADIUS, RADIUSR, RADIUSL,
+		DYNAMIC, USRHIT
 	} TypeTxt;
 };

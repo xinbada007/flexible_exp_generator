@@ -1368,9 +1368,18 @@ void ReadConfig::updateNurbs()
 				_nurbs->_radius->push_back(radius);
 			}
 			s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
-			if (!jstatR) _nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			if (!jstatR)
+			{
+				_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+				_nurbs->_radiusL->push_back(radius);
+			}
 			s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
-			if (!jstatL) _nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			if (!jstatL)
+			{
+				_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+				_nurbs->_radiusR->push_back(radius);
+			}
+
 			if (jstat || jstatR || jstatL)
 			{
 				osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
@@ -1387,9 +1396,17 @@ void ReadConfig::updateNurbs()
 		_nurbs->_radius->push_back(radius);
 	}
 	s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
-	if (!jstatR) _nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+	if (!jstatR)
+	{
+		_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+		_nurbs->_radiusL->push_back(radius);
+	}
 	s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
-	if (!jstatL) _nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+	if (!jstatL)
+	{
+		_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+		_nurbs->_radiusR->push_back(radius);
+	}
 
 	//Adjust "Left" and "Right"
 	osg::Vec3d left = *_nurbs->_ctrl_left->begin() - *_nurbs->_ctrl_right->begin();
@@ -1404,9 +1421,12 @@ void ReadConfig::updateNurbs()
 		tmp = _nurbs->_path_left;
 		_nurbs->_path_left = _nurbs->_path_right;
 		_nurbs->_path_right = tmp;
+
+		osg::ref_ptr<osg::DoubleArray> tmpR = _nurbs->_radiusL;
+		_nurbs->_radiusL = _nurbs->_radiusR;
+		_nurbs->_radiusR = tmpR;
 	}
 
-	
 	freeCurve(sc);
 	freeCurve(scL);
 	freeCurve(scR);

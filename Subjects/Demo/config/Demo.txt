@@ -35,7 +35,7 @@ RoadLanes:	3
 RoadTxt:	../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
 #RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
 
-Method:	0	# 0 = OSGNurbs Lib 1 = SISL Lib
+Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	5000
 WallHeight:	1.0

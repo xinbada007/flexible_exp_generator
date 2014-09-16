@@ -16,10 +16,12 @@
 
 using namespace std;
 
-Recorder::Recorder() :_statusText(new osgText::Text),
+Recorder::Recorder(ReadConfig *rc) : _rc(NULL), _statusText(new osgText::Text),
 _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _cameraHUD(NULL)
-, _geodeHUD(new osg::Geode), _detailed(false)
+, _geodeHUD(new osg::Geode), _detailed(false), _reced(false)
 {
+	_rc = rc;
+
 	_outMoment.push_back(&_recS._time);
 	_outMoment.push_back(&_recS._fps);
 	_outMoment.push_back(&_recS._frame);
@@ -47,6 +49,9 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._AHA);
 	_outMoment.push_back(&_recS._speed);
 	_outMoment.push_back(&_recS._Rspeed);
+	_outMoment.push_back(&_recS._radius);
+	_outMoment.push_back(&_recS._radiusR);
+	_outMoment.push_back(&_recS._radiusL);
 	_outMoment.push_back(&_recS._dynamic);
 	_outMoment.push_back(&_recS._usrHit);
 	_outMoment.push_back(&_recS._replay);
@@ -61,17 +66,22 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 
 Recorder::~Recorder()
 {
+	if (!_reced)
+	{
+		output();
+	}
+
 	std::cout << "Deconstruct Recorder" << std::endl;
 }
 
-bool Recorder::output(ReadConfig *rc)
+bool Recorder::output()
 {	
-	if (rc->isReplay())
+	if (_rc->isReplay())
 	{
 		return false;
 	}
 
-	const std::string filename = rc->getSubjects()->getRecPath() + "\\rec.txt";
+	const std::string filename = _rc->getSubjects()->getRecPath() + "\\rec.txt";
 	ofstream wout(filename);
 	if (!wout)
 	{
@@ -86,7 +96,7 @@ bool Recorder::output(ReadConfig *rc)
 	{
 		if (!_saveState.empty())
 		{
-			const std::string filename = rc->getSubjects()->getRecPath() + "\\savestate.txt";
+			const std::string filename = _rc->getSubjects()->getRecPath() + "\\savestate.txt";
 			ofstream wout(filename);
 			if (!wout)
 			{
@@ -99,15 +109,15 @@ bool Recorder::output(ReadConfig *rc)
 		}
 	}
 	
-	nurbsList nurbs = rc->getRoadSet()->_nurbs;
+	nurbsList nurbs = _rc->getRoadSet()->_nurbs;
 
 	//save all the points that comprise the road
 	{
 		if (!nurbs.empty())
 		{
-			const std::string filename = rc->getSubjects()->getRecPath() + "\\roads.txt";
-			const std::string filename_left = rc->getSubjects()->getRecPath() + "\\roadsLeft.txt";
-			const std::string filename_right = rc->getSubjects()->getRecPath() + "\\roadsRight.txt";
+			const std::string filename = _rc->getSubjects()->getRecPath() + "\\roads.txt";
+			const std::string filename_left = _rc->getSubjects()->getRecPath() + "\\roadsLeft.txt";
+			const std::string filename_right = _rc->getSubjects()->getRecPath() + "\\roadsRight.txt";
 			ofstream wout(filename);
 			ofstream wout_left(filename_left);
 			ofstream wout_right(filename_right);
@@ -117,7 +127,7 @@ bool Recorder::output(ReadConfig *rc)
 			}
 			else
 			{
-				string roads,roads_left,roads_right,radius;
+				string roads, roads_left, roads_right;
 				char tempd[20];
 				const unsigned size_tempd(sizeof(tempd));
 				const unsigned numDigit(6);
@@ -127,7 +137,10 @@ bool Recorder::output(ReadConfig *rc)
 					osg::Vec3dArray::const_iterator j = (*i)->_path->begin();
 					osg::Vec3dArray::const_iterator j_left = (*i)->_path_left->begin();
 					osg::Vec3dArray::const_iterator j_right = (*i)->_path_right->begin();
+
 					osg::DoubleArray::const_iterator j_radius = (*i)->_radius->begin();
+					osg::DoubleArray::const_iterator j_radiusL = (*i)->_radiusL->begin();
+					osg::DoubleArray::const_iterator j_radiusR = (*i)->_radiusR->begin();
 					while (j != (*i)->_path->end())
 					{
 						_gcvt_s(tempd, size_tempd, (*j).x(), numDigit);
@@ -140,12 +153,9 @@ bool Recorder::output(ReadConfig *rc)
 						roads += tempd;
 						roads += "\t";
 						j++;
-
 						if (j_radius != (*i)->_radius->end())
 						{
 							_gcvt_s(tempd, size_tempd, (*j_radius), numDigit);
-							radius += tempd;
-							radius += "\n";
 							j_radius++;
 
 							roads += tempd;
@@ -162,8 +172,16 @@ bool Recorder::output(ReadConfig *rc)
 							roads_left += "\t";
 							_gcvt_s(tempd, size_tempd, (*j_left).z(), numDigit);
 							roads_left += tempd;
-							roads_left += "\n";
+							roads_left += "\t";
 							j_left++;
+						}
+						if (j_radiusL != (*i)->_radiusL->end())
+						{
+							_gcvt_s(tempd, size_tempd, (*j_radiusL), numDigit);
+							j_radiusL++;
+
+							roads_left += tempd;
+							roads_left += "\t";
 						}
 
 						if (j_right != (*i)->_path_right->end())
@@ -176,11 +194,21 @@ bool Recorder::output(ReadConfig *rc)
 							roads_right += "\t";
 							_gcvt_s(tempd, size_tempd, (*j_right).z(), numDigit);
 							roads_right += tempd;
-							roads_right += "\n";
+							roads_right += "\t";
 							j_right++;
+						}
+						if (j_radiusR != (*i)->_radiusR->end())
+						{
+							_gcvt_s(tempd, size_tempd, (*j_radiusR), numDigit);
+							j_radiusR++;
+
+							roads_right += tempd;
+							roads_right += "\t";
 						}
 
 						roads += "\n";
+						roads_left += "\n";
+						roads_right += "\n";
 					}
 					i++;
 				}
@@ -191,6 +219,7 @@ bool Recorder::output(ReadConfig *rc)
 		}
 	}
 
+	_reced = true;
 	return true;
 }
 
@@ -378,6 +407,32 @@ void Recorder::rectoTxt(const CarState *carState)
 	const double customD = carState->_distancefromBase;
 	_gcvt_s(tempd, size_tempd, customD, nDigit);
 	_recS._customDither = tempd + _recS._TAB;
+
+	double radius(-2.00);
+	double radiusR(-2.00);
+	double radiusL(-2.00);
+	if (oc != -1 && soc != -1)
+	{
+		Nurbs *nurbs = _rc->getRoadSet()->_nurbs.at(soc);
+		if (!nurbs->_radius->empty())
+		{
+			radius = nurbs->_radius->at(oc);
+		}
+		if (!nurbs->_radiusR->empty())
+		{
+			radiusR = nurbs->_radiusR->at(oc);
+		}
+		if (!nurbs->_radiusL->empty())
+		{
+			radiusL = nurbs->_radiusL->at(oc);
+		}
+	}
+	_gcvt_s(tempd, size_tempd, radius, nDigit);
+	_recS._radius = tempd + _recS._TAB;
+	_gcvt_s(tempd, size_tempd, radiusR, nDigit);
+	_recS._radiusR = tempd + _recS._TAB;
+	_gcvt_s(tempd, size_tempd, radiusL, nDigit);
+	_recS._radiusL = tempd + _recS._TAB;
 
 	_detailed = carState->_detailedDisplay;
 

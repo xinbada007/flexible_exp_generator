@@ -56,16 +56,16 @@ int main(int argc, char** argv)
 {
 	int curRep(1);
 	int totalRep(1);
-//	argc = 3;
 	if (argc >= 3)
 	{
-		totalRep = *(argv[1]) - '0';
+		totalRep = stoi((argv[1]));
 	}
 	else
 	{
 		std::cout << ("Require at least 2 inputs\n") << std::endl;
 		return 0;
 	}
+	// 	totalRep = 2;
 
 	extern bool init_joystick();
 	init_joystick();
@@ -84,8 +84,6 @@ int main(int argc, char** argv)
 	std::vector<osg::ref_ptr<Recorder>> recorder;
 	std::vector<osg::ref_ptr<ExperimentCallback>> expcontroller;
 
-//	curRep = 1;
-//	totalRep = 2;
 
 	while (curRep <= totalRep)
 	{
@@ -145,7 +143,7 @@ int main(int argc, char** argv)
 		mViewer.back()->createBackgroundView();
 
 		//Record Car
-		recorder.push_back(new Recorder);
+		recorder.push_back(new Recorder(readConfig.back().get()));
 		recorder.back()->setHUDCamera(mViewer.back()->getHUDCamera());
 		car.back()->addUpdateCallback(recorder.back().get());
 
@@ -185,7 +183,7 @@ int main(int argc, char** argv)
 
 		Recorder *rec = recorder.at(i);
 		ReadConfig *rconfig = readConfig.at(i);
-		rec->output(rconfig);
+		rec->output();
 
 		osg::Group *rt = root.at(i);
 		rt->accept(*new DeConstructerVisitor);

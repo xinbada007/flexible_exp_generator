@@ -74,7 +74,10 @@ typedef struct Nurbs:public osg::Referenced
 		_ctrlPoints = new osg::Vec3dArray;
 
 		_knotVector = new osg::DoubleArray;
+
 		_radius = new osg::DoubleArray;
+		_radiusR = new osg::DoubleArray;
+		_radiusL = new osg::DoubleArray;
 
 		_order = 0;
 	};
@@ -87,7 +90,10 @@ typedef struct Nurbs:public osg::Referenced
 
 	osg::ref_ptr <osg::Vec3dArray> _ctrlPoints;
 	osg::ref_ptr <osg::DoubleArray> _knotVector;
+
 	osg::ref_ptr<osg::DoubleArray> _radius;
+	osg::ref_ptr<osg::DoubleArray> _radiusR;
+	osg::ref_ptr<osg::DoubleArray> _radiusL;
 
 	unsigned _order;
 
