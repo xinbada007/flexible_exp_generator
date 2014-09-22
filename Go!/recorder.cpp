@@ -380,7 +380,7 @@ void Recorder::rectoTxt(const CarState *carState)
 
 	osg::Vec3d carD_LastFrame = carState->_directionLastFrame;
 	carD_LastFrame.normalize();
-	const double AHA = (asinR((carD ^ carD_LastFrame).z()) / TO_RADDIAN);
+	const double AHA = (asinR((carD_LastFrame ^ carD).z()) / TO_RADDIAN);
 // 	const double HA = AHA * frameRate;
 // 	_gcvt_s(tempd, size_tempd, HA, nDigit);
 // 	_recS._HA = tempd + _recS._TAB;
