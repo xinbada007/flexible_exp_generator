@@ -56,13 +56,19 @@ int main(int argc, char** argv)
 {
 	int curRep(1);
 	int totalRep(1);
+	bool replyM(false);
 	if (argc >= 3)
 	{
 		totalRep = stoi((argv[1]));
+		if (!totalRep)
+		{
+			totalRep = 1;
+			replyM = true;
+		}
 	}
 	else
 	{
-		std::cout << ("Require at least 2 inputs\n") << std::endl;
+		std::cout << ("Require at least 1 input\n") << std::endl;
 		return 0;
 	}
 	// 	totalRep = 2;
@@ -84,14 +90,21 @@ int main(int argc, char** argv)
 	std::vector<osg::ref_ptr<Recorder>> recorder;
 	std::vector<osg::ref_ptr<ExperimentCallback>> expcontroller;
 
-
 	while (curRep <= totalRep)
 	{
 		//obtain filename
 		string configFile = argv[1 + curRep];
 //		string configFile = "..\\Resources\\config.txt";
 		string replayFile;
-		readConfig.push_back(new ReadConfig(configFile));
+		if (replyM)
+		{
+			replayFile = argv[1 + curRep + 1];
+			readConfig.push_back(new ReadConfig(configFile, replayFile));
+		}
+		else
+		{
+			readConfig.push_back(new ReadConfig(configFile));
+		}
 
 		//Always Render first and then texture
 		osg::ref_ptr<RenderVistor> rv = new RenderVistor;
