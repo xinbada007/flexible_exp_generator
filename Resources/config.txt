@@ -37,7 +37,7 @@ RoadTxt:	../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt
 
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
-Density:	5000
+Density:	500
 WallHeight:	1.0
 #WallPic:	../Resources/texture/wall1024-2.jpg
 ScaleVector:	1,1,1		#DO NOT mess around with this
@@ -52,7 +52,7 @@ TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Na
 
 [Experiment]
 ##==Starting Condition===================
-Start-Lane:	-1	#1 = R	#-1 = L	#0 = Middle
+Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 
 ##==Deviation Warn Setting===============
 Deviation:	1.0	#Units:	Metres
