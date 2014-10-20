@@ -294,10 +294,13 @@ bool CarEvent::Joystick()
 				_speedLock = !_speedLock;
 			}
 		}
-		else if (_buttons->at(6) == 1)
-		{
-			makeResetMatrix();
-		}
+// 		else if (_buttons->at(6) == 1)
+// 		{
+// 			if (_carState->_O != _vehicle->_O)
+// 			{
+// 				makeResetMatrix();
+// 			}
+// 		}
 		_buttons->assign(_buttons->size(), 0);
 	}
 

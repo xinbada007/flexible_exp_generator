@@ -1474,7 +1474,7 @@ osg::Geode* ReadConfig::measuer()
 	  
 	osg::Vec3 test = offset - (A + B) / 2;
 	test.set(0.0f, -offset.y(), 0.0f);
-	osg::Matrix mm = osg::Matrix::translate(test) * osg::Matrix::rotate(0 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
+	osg::Matrix mm = osg::Matrix::translate(test) * osg::Matrix::rotate(45 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
 	A = A * mm;
 	B = B * mm;
 	AA = AA * mm;
@@ -1483,7 +1483,7 @@ osg::Geode* ReadConfig::measuer()
 	x = ((AA + BB) / 2 - offset).length();
 
 	osg::Vec3 RA(OA), RB(OB), RAA(OAA), RBB(OBB);
-	mm = osg::Matrix::translate(test) *  osg::Matrix::rotate(0 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
+	mm = osg::Matrix::translate(test) *  osg::Matrix::rotate(-45 * TO_RADDIAN, osg::Vec3(0.0, 0.0, 1.0f)) * osg::Matrix::translate(-test);
 	RA = RA*mm;
 	RB = RB*mm;
 	RAA = RAA*mm;
