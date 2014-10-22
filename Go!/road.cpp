@@ -143,6 +143,8 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 		return;
 	}
 
+	const bool buildWall = (_roadSet->_wallHeight == 0.0f ? false : true);
+
 	nurbsList::const_iterator i = _roadSet->_nurbs.cbegin();
 	while (i != _roadSet->_nurbs.cend())
 	{
@@ -169,13 +171,16 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 		_ctrlList.push_back(newLR.get());
 
 		//Add Walls
-		osg::ref_ptr<LogicRoad> lWall = universalLogicRoad(j,LWALL);
-		sw->addChild(addLogRoadtoList(lWall.get()));
-		_lWallList.push_back(lWall.get());
+		if (buildWall)
+		{
+			osg::ref_ptr<LogicRoad> lWall = universalLogicRoad(j, LWALL);
+			sw->addChild(addLogRoadtoList(lWall.get()));
+			_lWallList.push_back(lWall.get());
 
-		osg::ref_ptr<LogicRoad> rWall = universalLogicRoad(j,RWALL);
-		sw->addChild(addLogRoadtoList(rWall.get()));
-		_rWallList.push_back(rWall.get());
+			osg::ref_ptr<LogicRoad> rWall = universalLogicRoad(j, RWALL);
+			sw->addChild(addLogRoadtoList(rWall.get()));
+			_rWallList.push_back(rWall.get());
+		}
 
 		i++;
 	}

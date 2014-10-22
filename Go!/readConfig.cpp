@@ -695,6 +695,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string DYNAMICSENSITIVE = "DYNAMICSENSITIVELEVEL";
 		const string STARTDELAY = "STARTDELAY";
 		const string CARVISIBLE = "CARVISIBLE";
+		const string CARRESET = "CARRESET";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -798,7 +799,16 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-
+			else if (title == CARRESET)
+			{
+				config.erase(config.begin(), config.begin() + CARRESET.size());
+				if (!config.empty())
+				{
+					_vehicle->_carReset = stoi(config);
+				}
+				continue;
+			}
+			
 			flag = config;
 			flag = getTillFirstSpaceandToUpper(flag);
 			continue;
@@ -813,6 +823,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string WALLPIC = "WALLPIC";
 		const string SCALE = "SCALEVECTOR";
 		const string METHOD = "METHOD";
+		const string ROADVISIBLE = "ROADVISIBLE";
 		while (flag == ROAD && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -907,6 +918,15 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == ROADVISIBLE)
+			{
+				config.erase(config.begin(), config.begin() + ROADVISIBLE.size());
+				if (!config.empty())
+				{
+					_roads->_visible = stoi(config);
+				}
+				continue;
+			}
 
 			flag = config;
 			flag = getTillFirstSpaceandToUpper(flag);
@@ -963,6 +983,8 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSTACLE("OBSTACLE");
 		const string OBSTACLERANGE("OBSTACLE-RANGE");
 		const string OBSTACLEPOSITION("OBSTACLE-POSITION");
+		const string OBSPOSOFFSET("OBS-POSITION-OFFSET");
+		const string OBSSIZE("OBS-SIZE");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
 		const string DEVIATIONSIREN("DEVIATION-SIREN");
@@ -1082,6 +1104,33 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					std::string::size_type sz;
 					_experiment->_obstaclePos->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == OBSSIZE)
+			{
+				config.erase(config.begin(), config.begin() + OBSSIZE.size());
+				osg::ref_ptr<osg::DoubleArray> read = new osg::DoubleArray;
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					read->push_back(stod(config,&sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				if (read->size() >= 3)
+				{
+					_experiment->_obsSize.set(read->at(0), read->at(1), read->at(2));
+				}
+				continue;
+			}
+			else if (title == OBSPOSOFFSET)
+			{
+				config.erase(config.begin(), config.begin() + OBSPOSOFFSET.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obsPosOffset->push_back(stod(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;

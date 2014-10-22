@@ -57,21 +57,21 @@ int main(int argc, char** argv)
 	int curRep(1);
 	int totalRep(1);
 	bool replyM(false);
-	if (argc >= 3)
-	{
-		totalRep = stoi((argv[1]));
-		if (!totalRep)
-		{
-			totalRep = 1;
-			replyM = true;
-		}
-	}
-	else
-	{
-		std::cout << ("Require at least 1 input\n") << std::endl;
-		return 0;
-	}
-//	totalRep = 2;
+// 	if (argc >= 3)
+// 	{
+// 		totalRep = stoi((argv[1]));
+// 		if (!totalRep)
+// 		{
+// 			totalRep = 1;
+// 			replyM = true;
+// 		}
+// 	}
+// 	else
+// 	{
+// 		std::cout << ("Require at least 1 input\n") << std::endl;
+// 		return 0;
+// 	}
+	totalRep = 2;
 
 	extern bool init_joystick();
 	init_joystick();
@@ -93,8 +93,8 @@ int main(int argc, char** argv)
 	while (curRep <= totalRep)
 	{
 		//obtain filename
-		string configFile = argv[1 + curRep];
-//		string configFile = "..\\Resources\\config.txt";
+//		string configFile = argv[1 + curRep];
+		string configFile = "..\\Resources\\config.txt";
 		string replayFile;
 		if (replyM)
 		{
@@ -108,19 +108,25 @@ int main(int argc, char** argv)
 
 		//Always Render first and then texture
 		osg::ref_ptr<RenderVistor> rv = new RenderVistor;
-		rv->setBeginMode(GL_QUADS);
 		osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
 
 		//Build Road && Render Road && Texture Road
 		road.push_back(obtainRoad(readConfig.back()));
-		road.back()->accept(*rv);
-		road.back()->accept(*tv);
+		if (road.back()->getRoadSet()->_visible)
+		{
+			rv->setBeginMode(GL_QUADS);
+			road.back()->accept(*rv);
+			road.back()->accept(*tv);
+		}
 
 		//Build Car & Render Car && Obtain carMatrix
 		car.push_back(obtainCar(readConfig.back()));
-		rv->reset();
-		rv->setBeginMode(GL_POINTS);
-		if (car.back()->getVehicle()->_visibility) car.back()->accept(*rv);
+		if (car.back()->getVehicle()->_visibility)
+		{
+			rv->reset();
+			rv->setBeginMode(GL_POINTS);
+			car.back()->accept(*rv);
+		}
 		carMatrix.push_back(obtainCarMatrix(car.back()));
 
 		//Root Node && collect information for tracing car and collision detection
@@ -139,10 +145,10 @@ int main(int argc, char** argv)
 		road.back()->addUpdateCallback(roadSwitcher.back().get());
 
 		//Debug Node
-		// 	osg::ref_ptr<DebugNode> debugger = new DebugNode;
-		// 	debugger->setUserData(cv.get());
-		// 	root.back()->addEventCallback(debugger.get());
-		//	root.back()->addChild(readConfig.back()->measuer());
+// 		osg::ref_ptr<DebugNode> debugger = new DebugNode;
+// 		debugger->setUserData(cv.get());
+// 		root.back()->addEventCallback(debugger.get());
+// 		root.back()->addChild(readConfig.back()->measuer());
 
 		//Camera event callback
 		camMatrix.push_back(obtainCamMatrix(readConfig.back(), car.back().get()));

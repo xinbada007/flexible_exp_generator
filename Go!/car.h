@@ -23,7 +23,7 @@ typedef struct CarState:public osg::Referenced
 		_angle_incr = 0.2f;
 		_swangle = 0.0f;
 		_speed = 0.0f;
-		_speed_incr = 0.2f;
+		_speed_incr = 0.02f;
 		_dither = 0.0f;
 		_distancefromBase = 0.0f;
 		_dynamic = true; //acceleration mode

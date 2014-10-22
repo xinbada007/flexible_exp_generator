@@ -294,13 +294,13 @@ bool CarEvent::Joystick()
 				_speedLock = !_speedLock;
 			}
 		}
-// 		else if (_buttons->at(6) == 1)
-// 		{
-// 			if (_carState->_O != _vehicle->_O)
-// 			{
-// 				makeResetMatrix();
-// 			}
-// 		}
+		else if (_buttons->at(6) == 1)
+		{
+			if (_carState->_O != _vehicle->_O && _vehicle->_carReset == 2)
+			{
+				_carState->_reset = true;
+			}
+		}
 		_buttons->assign(_buttons->size(), 0);
 	}
 
@@ -346,12 +346,17 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			else if (key == osgGA::GUIEventAdapter::KEY_W || key == osgGA::GUIEventAdapter::KEY_S)
 			{
 				int sign = (key == osgGA::GUIEventAdapter::KEY_W) ? 1 : -1;
-				_carState->_speed += _vehicle->_speed*sign*_carState->_speed_incr;
+//				_carState->_speed += _vehicle->_speed*sign*_carState->_speed_incr;
+				sign *= sign > 0 ? 1 : 2.5;
+				_carState->_speed += sign*_vehicle->_speedincr;
 				break;
 			}
 			else if (key == osgGA::GUIEventAdapter::KEY_R)
 			{
-				makeResetMatrix();
+				if (_vehicle->_carReset == 2)
+				{
+					_carState->_reset = true;
+				}
 				break;
 			}
 			else if ((key == '`'))
@@ -397,7 +402,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 					_carState->_speed = _vehicle->_speed;
 				}
 			}
-			if (_carState->_reset)
+			if (_carState->_reset && _vehicle->_carReset)
 			{
 				makeResetMatrix();
 				_carState->_reset = false;

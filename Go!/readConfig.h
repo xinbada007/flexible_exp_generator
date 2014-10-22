@@ -28,6 +28,7 @@ typedef struct Experiment :public osg::Referenced
 		_obstaclesTime = new osg::UIntArray;
 		_obstacleRange = new osg::DoubleArray;
 		_obstaclePos = new osg::IntArray;
+		_obsPosOffset = new osg::DoubleArray;
 
 		_offset = 0.0f;
 
@@ -49,6 +50,8 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::UIntArray> _obstaclesTime;
 	osg::ref_ptr<osg::DoubleArray> _obstacleRange;
 	osg::ref_ptr<osg::IntArray> _obstaclePos;
+	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;
+	osg::Vec3d _obsSize;
 
 	double _offset;
 
@@ -120,6 +123,8 @@ typedef struct RoadSet:public osg::Referenced
 		_imgWall = NULL;
 
 		_nurbsMethod = 1;
+
+		_visible = 1;
 	}
 	
 	const double _laneWidth;	//laneWidth = 3.75 Meters
@@ -139,6 +144,7 @@ typedef struct RoadSet:public osg::Referenced
 	nurbsList _nurbs;
 
 	int _nurbsMethod;
+	int _visible;
 
 protected:
 	virtual ~RoadSet(){ std::cout << "Deconstruct RoadSet" << std::endl; };
@@ -164,6 +170,8 @@ typedef struct Vehicle:public osg::Referenced
 		_baseline = 0.0f;
 
 		_visibility = true;
+
+		_carReset = 0;
 
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
@@ -192,6 +200,8 @@ typedef struct Vehicle:public osg::Referenced
 	double _baseline;
 
 	bool _visibility;
+
+	int _carReset;
 
 protected:
 	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };

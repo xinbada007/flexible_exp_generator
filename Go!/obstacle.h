@@ -14,7 +14,7 @@ public:
 
 private:
 	virtual ~Obstacle();
-	void sweep(const int height);
+	void sweep(const double height);
 	void genBoxTexture();
 };
 

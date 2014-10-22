@@ -35,17 +35,17 @@ void Obstacle::genBoxTexture()
 
 void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 {
-	osg::Vec3d left_bottom = center * osg::Matrix::translate(-radius);
+	osg::Vec3d left_bottom = center * osg::Matrix::translate(-radius*0.5f);
 	left_bottom.z() = 0.0f;
 
 	osg::Vec3d right_bottom = left_bottom;
-	right_bottom.x() += 2 * radius.x();
+	right_bottom.x() += radius.x();
 
 	osg::Vec3d right_top = right_bottom;
-	right_top.y() += 2 * radius.y();
+	right_top.y() += radius.y();
 
 	osg::Vec3d left_top = right_top;
-	left_top.x() -= 2 * radius.x();
+	left_top.x() -= radius.x();
 
 	link(left_bottom, right_bottom);
 	link(right_bottom, right_top);
@@ -57,7 +57,7 @@ void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 	genBoxTexture();
 }
 
-void Obstacle::sweep(const int height)
+void Obstacle::sweep(const double height)
 {
 	Solid *refS = dynamic_cast<Solid*> (this);
 	if (!refS)

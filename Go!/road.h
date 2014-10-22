@@ -19,6 +19,7 @@ public:
 	META_Node(Road, Road);
 
 	void genRoad(osg::ref_ptr<ReadConfig> refRC);
+	const osg::ref_ptr<RoadSet> getRoadSet() const { return _roadSet; };
 private:
 	virtual ~Road();
 

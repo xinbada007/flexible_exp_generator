@@ -102,7 +102,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			if (!(*i)) notFound++;
 			i++;
 		}
-		if (notFound == _carState->_currentQuad.size())
+		if (notFound == _carState->_currentQuad.size() && _carState->_reset == 1)
 		{
 			_carState->_reset = true;
 		}
@@ -305,16 +305,22 @@ void ExperimentCallback::createObstacle()
 			while (distance < *requiedDistance)
 			{
 				curO++;
+				if (!(*curO))
+				{
+					break;
+				}
 				navi = (*curO)->getLoop()->getNavigationEdge();
 				mid = navi->front() - navi->back();
 				distance += mid.length();
 			}
+
 			osg::IntArray::iterator pos = _expSetting->_obstaclePos->begin() + offset;
+			osg::DoubleArray::iterator posOffset = _expSetting->_obsPosOffset->begin() + offset;
 			osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
-			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25f);
-			const double hflength = _expSetting->_offset * 0.20f;
+			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.5);
+			center = center * osg::Matrix::translate(X_AXIS * *posOffset);
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
-			obs->createBox(center, osg::Vec3d(hflength,1.0f,1.0f));
+			obs->createBox(center, _expSetting->_obsSize);
 
 			//render
 			osg::ref_ptr<RenderVistor> rv = new RenderVistor;

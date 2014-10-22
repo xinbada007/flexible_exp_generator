@@ -169,13 +169,53 @@ quadList Collision::listCollsion(const Car *refC, const quadList obs)
 	return list;
 }
 
-bool Collision::ifObsCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Solid *obs)
+bool Collision::ifObsCollide(const Car *refC, const Solid *obs)
 {
-	osg::Vec3dArray::const_iterator j = planeMove->begin();
+	//attention! last element of carArray is the original point of car
+	//which should be removed when doing collision detection
+
+	const unsigned wheelsofCar(4);
+	const osg::ref_ptr<osg::Vec3dArray> carArray = refC->getCarState()->_carArray;
+	osg::ref_ptr<osg::Vec3dArray> planeMove = new osg::Vec3dArray(carArray->begin(), carArray->begin() + wheelsofCar);
+	osg::Vec3dArray::iterator j = planeMove->begin();
+	const double height = refC->getVehicle()->_height;
 	while (j != planeMove->end())
 	{
-		if (obs->ifPointinSolid(*j)) return true;
+		if (obs->ifPointinSolid(*j))
+			return true;
 		j++;
+	}
+
+	Points *p = obs->getPoint();
+	planeEQU &equ = refC->getPlane()->getLoop()->getPlaneEQU();
+	while (p)
+	{
+		if (!(p->getPoint().z()))
+		{
+			if (ifPoint_IN_Polygon(p->getPoint(), planeMove, equ))
+				return true;
+		}
+		p = p->getNext();
+	}
+
+	return false;
+}
+
+bool Collision::detectObsDistance(const Car *refC, const Solid *obs)
+{
+	const osg::Vec3d &center = refC->getCarState()->_carArray->back();
+	double therold = std::max(refC->getVehicle()->_width, refC->getVehicle()->_length)*2;
+	therold = std::max(therold, refC->getCarState()->_speed * 2);
+
+	Points *p = obs->getPoint();
+	while (p)
+	{
+		if (!(p->getPoint().z()))
+		{
+			if ((center - p->getPoint()).length() < therold)
+				return true;
+		}
+		p = p->getNext();
 	}
 
 	return false;
@@ -187,26 +227,15 @@ solidList Collision::listObsCollsion(const Car *refC, const solidList obs)
 
 	if (refC && !obs.empty())
 	{
-		const CarState *refCS = refC->getCarState();
-		const osg::ref_ptr<osg::Vec3dArray> carArray = refCS->_carArray;
-
-		//attention! last element of carArray is the original point of car
-		//which should be removed when doing collision detection
-		const unsigned wheelsofCar(4);
-		osg::ref_ptr<osg::Vec3dArray> carRealArray = new osg::Vec3dArray(carArray->begin(), carArray->begin() + wheelsofCar);
-		osg::Vec3dArray::iterator iCar = carRealArray->begin();
-		while (iCar != carRealArray->end())
-		{
-			(*iCar).z() = refC->getVehicle()->_height;
-			iCar++;
-		}
-
 		solidList::const_iterator i = obs.cbegin();
 		while (i != obs.cend())
 		{
-			if (ifObsCollide(carRealArray,*i))
+			if (detectObsDistance(refC, *i))
 			{
-				list.push_back(*i);
+				if (ifObsCollide(refC, *i))
+				{
+					list.push_back(*i);
+				}
 			}
 			i++;
 		}
