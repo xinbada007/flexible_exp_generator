@@ -35,6 +35,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._customDither);
 	_outMoment.push_back(&_recS._dAngle);
 	_outMoment.push_back(&_recS._swAngle);
+	_outMoment.push_back(&_recS._swReal);
 	_outMoment.push_back(&_recS._OX);
 	_outMoment.push_back(&_recS._OY);
 	_outMoment.push_back(&_recS._OZ);
@@ -228,7 +229,7 @@ void Recorder::rectoTxt(const CarState *carState)
 	char temp[10];
 	const int size_temp = sizeof(temp);
 
-	const unsigned frameStamp = carState->_frameStamp;
+	const unsigned &frameStamp = carState->_frameStamp;
 	_itoa_s(frameStamp, temp, size_temp);
 	_recS._frame = temp + _recS._TAB;
 
@@ -236,7 +237,7 @@ void Recorder::rectoTxt(const CarState *carState)
 	char tempd[20];
 	const int size_tempd = sizeof(tempd);
 
-	const double timeReference = carState->_timeReference;
+	const double &timeReference = carState->_timeReference;
 	_gcvt_s(tempd, size_tempd, timeReference, nDigit);
 	_recS._time = tempd + _recS._TAB;
 
@@ -247,7 +248,7 @@ void Recorder::rectoTxt(const CarState *carState)
 	_lastFrameStamp = frameStamp;
 	_lastTimeReference = timeReference;
 
-	unsigned crash = carState->_collide;
+	const unsigned &crash = carState->_collide;
 	_itoa_s(crash, temp,size_temp);
 	_recS._crash = temp + _recS._TAB;
 	
@@ -313,21 +314,25 @@ void Recorder::rectoTxt(const CarState *carState)
 	_itoa_s(oc, temp, size_temp);
 	_recS._oc += temp + _recS._TAB;
 
-	const int dynamic = (carState->_dynamic) ? 1 : 0;
+	const int &dynamic = (carState->_dynamic) ? 1 : 0;
 	_itoa_s(dynamic, temp, size_temp);
 	_recS._dynamic = temp + _recS._TAB;
 
-	const int usrHit = carState->_userHit;
+	const int &usrHit = carState->_userHit;
 	_itoa_s(usrHit, temp, size_temp);
 	_recS._usrHit = temp + _recS._TAB;
 	
-	double swAngle = carState->_swangle;
+	const double &swAngle = carState->_swangle;
 	_gcvt_s(tempd, size_tempd, swAngle, nDigit);
 	_recS._swAngle = tempd + _recS._TAB;
+	const double &swReal = carState->_swDeDead;
+	_gcvt_s(tempd, size_tempd, swReal, nDigit);
+	_recS._swReal = tempd + _recS._TAB;
 
-	double OX = carState->_O.x();
-	double OY = carState->_O.y();
-	double OZ = carState->_O.z();
+
+	const double &OX = carState->_O.x();
+	const double &OY = carState->_O.y();
+	const double &OZ = carState->_O.z();
 	_gcvt_s(tempd, size_tempd, OX, nDigit);
 	_recS._OX = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, OY, nDigit);
@@ -335,9 +340,9 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, OZ, nDigit);
 	_recS._OZ = tempd + _recS._TAB;
 
-	double HX = carState->_heading.x();
-	double HY = carState->_heading.y();
-	double HZ = carState->_heading.z();
+	const double &HX = carState->_heading.x();
+	const double &HY = carState->_heading.y();
+	const double &HZ = carState->_heading.z();
 	_gcvt_s(tempd, size_tempd, HX, nDigit);
 	_recS._HX = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, HY, nDigit);
@@ -345,9 +350,9 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, HZ, nDigit);
 	_recS._HZ = tempd + _recS._TAB;
 
-	double DX = carState->_direction.x();
-	double DY = carState->_direction.y();
-	double DZ = carState->_direction.z();
+	const double &DX = carState->_direction.x();
+	const double &DY = carState->_direction.y();
+	const double &DZ = carState->_direction.z();
 	_gcvt_s(tempd, size_tempd, DX, nDigit);
 	_recS._DX = tempd + _recS._TAB;
 	_gcvt_s(tempd, size_tempd, DY, nDigit);
@@ -357,11 +362,11 @@ void Recorder::rectoTxt(const CarState *carState)
 
 	carState->cacluateSpeedandAngle();
 
-	double speed = carState->getSpeed();
+	const double &speed = carState->getSpeed();
 	_gcvt_s(tempd, size_tempd, speed, nDigit);
 	_recS._speed = tempd + _recS._TAB;
 
-	double Rspeed = carState->getRSpeed();
+	const double &Rspeed = carState->getRSpeed();
 	_gcvt_s(tempd, size_tempd, Rspeed, nDigit);
 	_recS._Rspeed = tempd + _recS._TAB;
 
@@ -380,15 +385,15 @@ void Recorder::rectoTxt(const CarState *carState)
 
 	osg::Vec3d carD_LastFrame = carState->_directionLastFrame;
 	carD_LastFrame.normalize();
-	const double AHA = (asinR((carD_LastFrame ^ carD).z()) / TO_RADDIAN);
+	const double &AHA = (asinR((carD_LastFrame ^ carD).z()) / TO_RADDIAN);
 // 	const double HA = AHA * frameRate;
 // 	_gcvt_s(tempd, size_tempd, HA, nDigit);
 // 	_recS._HA = tempd + _recS._TAB;
-	const double HA = carState->_angle / TO_RADDIAN;
+	const double &HA = carState->_angle / TO_RADDIAN;
 	_gcvt_s(tempd, size_tempd, HA, nDigit);
 	_recS._HA = tempd + _recS._TAB;
 
-	const double RHA = (!timePeriod) ? AHA * frameRate : AHA / timePeriod;
+	const double &RHA = (!timePeriod) ? AHA * frameRate : AHA / timePeriod;
 	_gcvt_s(tempd, size_tempd, RHA, nDigit);
 	_recS._RHA = tempd + _recS._TAB;
 
@@ -399,12 +404,12 @@ void Recorder::rectoTxt(const CarState *carState)
 // 	const osg::Vec3d O = carState->_O;
 // 	const osg::Vec3d N = carState->_O_Project;
 //	const double dis = (N - O).length();
-	const double dis = carState->_dither;
+	const double &dis = carState->_dither;
 
 	_gcvt_s(tempd, size_tempd, dis, nDigit);
 	_recS._dither = tempd + _recS._TAB;
 
-	const double customD = carState->_distancefromBase;
+	const double &customD = carState->_distancefromBase;
 	_gcvt_s(tempd, size_tempd, customD, nDigit);
 	_recS._customDither = tempd + _recS._TAB;
 
@@ -662,6 +667,10 @@ void Recorder::setStatus(const std::string &content)
 				text.push_back(' ');
 				text += "SPEED: ";
 				break;
+			case Recorder::TypeofText::RADIUS:
+				text.push_back('\n');
+				text += "Radii (Center-R-L): ";
+				break;
 			case Recorder::TypeofText::DYNAMIC:
 				text.push_back('\n');
 				text += "Dynamic: ";
@@ -670,6 +679,7 @@ void Recorder::setStatus(const std::string &content)
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Hit: ";
+				break;
 			default:
 				text.push_back(' ');
 				text.push_back(' ');

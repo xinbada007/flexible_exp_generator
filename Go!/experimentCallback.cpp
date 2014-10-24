@@ -317,7 +317,7 @@ void ExperimentCallback::createObstacle()
 			osg::IntArray::iterator pos = _expSetting->_obstaclePos->begin() + offset;
 			osg::DoubleArray::iterator posOffset = _expSetting->_obsPosOffset->begin() + offset;
 			osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
-			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.5);
+			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
 			center = center * osg::Matrix::translate(X_AXIS * *posOffset);
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
 			obs->createBox(center, _expSetting->_obsSize);
@@ -328,8 +328,7 @@ void ExperimentCallback::createObstacle()
 			obs->accept(*rv);
 			_road->addChild(obs);
 			//texture      
-			osg::ref_ptr<osg::Image> img = osgDB::readImageFile("..\\Resources\\texture\\wall.jpg");
-			obs->setImage(img);
+			obs->setImage(_expSetting->_imgOBS);
 			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
 			obs->accept(*tv);
 			//visitor

@@ -17,6 +17,7 @@ typedef struct Experiment :public osg::Referenced
 	Experiment()
 	{
 		_startLane = 0;
+		_laneOffset = 0.0f;
 
 		_textTime = new osg::UIntArray;
 		_textPeriod = new osg::DoubleArray;
@@ -29,6 +30,7 @@ typedef struct Experiment :public osg::Referenced
 		_obstacleRange = new osg::DoubleArray;
 		_obstaclePos = new osg::IntArray;
 		_obsPosOffset = new osg::DoubleArray;
+		_imgOBS = NULL;
 
 		_offset = 0.0f;
 
@@ -36,6 +38,7 @@ typedef struct Experiment :public osg::Referenced
 		_deviationBaseline = 0.0f;
 	};
 	int _startLane;
+	double _laneOffset;
 
 	osg::ref_ptr <osg::UIntArray> _textTime;
 	osg::ref_ptr <osg::DoubleArray> _textPeriod;
@@ -52,6 +55,8 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::IntArray> _obstaclePos;
 	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;
 	osg::Vec3d _obsSize;
+	std::string _obsPic;
+	osg::ref_ptr<osg::Image> _imgOBS;
 
 	double _offset;
 

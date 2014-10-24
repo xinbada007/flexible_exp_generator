@@ -16,7 +16,7 @@ MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
 Acceleration:	1
-DynamicSensitiveLevel:	20	#could be float number like 1.2532564766578
+DynamicSensitiveLevel:	25	#could be float number like 1.2532564766578
 CarSpeed:	100
 SpeedIncr:	1
 CarWheel:	42.5
@@ -29,21 +29,21 @@ CarVisible:	1	#1 = Visible	0 = Invisible
 CarReset:	2	#0 = disable	1 = auto	2 = manual
 
 [RoadSettings]
-RoadLanes:	3
+RoadLanes:	800
 #RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../Resources/1.txt;#../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
+RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
 #RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
 
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	1000
-RoadVisible:	1	#1 = Visible	0 = Invisible
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	0
 WallPic:	../Resources/texture/wall1024-2.jpg
-ScaleVector:	200,200,200	#DO NOT mess around with this
+ScaleVector:	510,510,510	#DO NOT mess around with this
 
 [Subjects]
 Name:	Demo
@@ -56,6 +56,7 @@ TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Na
 [Experiment]
 ##==Starting Condition===================
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
+Lane-Offset:	0	#Negtive = L	Positive = R
 
 ##==Deviation Warn Setting===============
 Deviation:	0	#Units:	Metres
@@ -64,11 +65,14 @@ Deviation-Warn: DEVIATION TOO HIGH
 Deviation-Siren:	../Resources/sound/warnpullup.mp3
 
 ##==Obstacle Setting=====================
-Obstacle:	1	1	#1	#10
-Obstacle-Range:	150	150	#120	#100
-Obstacle-Position:	0	0	#-1	#-1	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-1.3	1.3	#0	#Negtive = L	Positive = R
-OBS-Size:	1.0	1.0	1.0	#Length X Width X Deepth
+Obstacle:	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle-Range:	200 200	400 400 600 600 800 800	1000 1000
+Obstacle-Range:	1200 1200	1400 1400	1600 1600	1800 1800	2000 2000
+Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
+OBS-Position-Offset:	-20 -24	0 4 16 20 -16 -20 24 20 
+OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
+OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
+OBS-Pic:	../Resources/texture/tio.jpg;
 
 ##==Text Setting=========================
 #Textime:	0

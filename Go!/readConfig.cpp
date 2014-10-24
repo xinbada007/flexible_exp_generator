@@ -363,12 +363,39 @@ void ReadConfig::initializeAfterReadTrial()
 	_experiment->_imgDynamic = osgDB::readImageFile(_experiment->_dynamicPic);
 	if (!_experiment->_imgDynamic.valid())
 	{
-		osg::notify(osg::WARN) << "Unable to load Dynamic texture file. Exiting." << std::endl;
+//		osg::notify(osg::WARN) << "Unable to load Dynamic texture file. Exiting." << std::endl;
 		_experiment->_imgDynamic = NULL;
 	}
+
+	const unsigned &numObs = _experiment->_obstaclesTime->size();
+	const double defaultDistance = 200.0f;
+	const int defaultPos = 0;
+	const double defaultOffset = 0.0f;
+	if (_experiment->_obstacleRange->size() != numObs)
+	{
+		_experiment->_obstacleRange->resize(numObs,defaultDistance);
+		osg::notify(osg::WARN) << "Obstacles Range Resized" << std::endl;
+	}
+	if (_experiment->_obstaclePos->size() != numObs)
+	{
+		_experiment->_obstaclePos->resize(numObs, defaultPos);
+		osg::notify(osg::WARN) << "Obstacles Position Resized" << std::endl;
+	}
+	if (_experiment->_obsPosOffset->size() != numObs)
+	{
+		_experiment->_obsPosOffset->resize(numObs, defaultOffset);
+		osg::notify(osg::WARN) << "Obstacles PosOffset Resized" << std::endl;
+	}
+	_experiment->_imgOBS = osgDB::readImageFile(_experiment->_obsPic);
+	if (!_experiment->_imgOBS.valid())
+	{
+		_experiment->_imgOBS = NULL;
+	}
+
 	_experiment->_offset = _roads->_width;
 	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
 	osg::Matrix m = osg::Matrix::translate(startOffset);
+	m *= osg::Matrix::translate(X_AXIS * _experiment->_laneOffset);
 	arrayByMatrix(_vehicle->_V, m);
 	_vehicle->_O = _vehicle->_O * m;
 	_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
@@ -974,6 +1001,7 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//set Experiment
 		const string STARTLANE("START-LANE");
+		const string LANEOFFSET("LANE-OFFSET");
 		const string TEXTIME("TEXTIME");
 		const string PERIOD("PERIOD");
 		const string TEXT("TEXT");
@@ -985,6 +1013,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSTACLEPOSITION("OBSTACLE-POSITION");
 		const string OBSPOSOFFSET("OBS-POSITION-OFFSET");
 		const string OBSSIZE("OBS-SIZE");
+		const string OBSPIC("OBS-PIC");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
 		const string DEVIATIONSIREN("DEVIATION-SIREN");
@@ -1002,7 +1031,16 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-			if (title == TEXTIME)
+			else if (title == LANEOFFSET)
+			{
+				config.erase(config.begin(), config.begin() + LANEOFFSET.size());
+				if (!config.empty())
+				{
+					_experiment->_laneOffset = stod(config);
+				}
+				continue;
+			}
+			else if (title == TEXTIME)
 			{
 				config.erase(config.begin(), config.begin() + TEXTIME.size());
 				while (!config.empty())
@@ -1132,6 +1170,16 @@ void ReadConfig::readTrial(ifstream &in)
 					std::string::size_type sz;
 					_experiment->_obsPosOffset->push_back(stod(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == OBSPIC)
+			{
+				config.erase(config.begin(), config.begin() + OBSPIC.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				if (!config.empty())
+				{
+					_experiment->_obsPic = config;
 				}
 				continue;
 			}

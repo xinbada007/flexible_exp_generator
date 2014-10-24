@@ -241,18 +241,22 @@ bool CarEvent::Joystick()
 
 	const double MAX(32767.0f);
 	const double MAX_ANGLE = 120.0f;
-	const double DEAD = 0.05f;
+	const double DEAD = 0.075f;
 	const int DeadZone(MAX*DEAD);
 	_carState->_swangle = (x / MAX)*MAX_ANGLE;
 
 	if ((abs(x)) > DeadZone)
 	{
+		_carState->_swDeDead = (x / MAX)*MAX_ANGLE;
+
 		_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX);
 		_leftTurn = (x < 0);
 		_shifted = true;
 	}
 	else if ((abs(x)) <= DeadZone)
 	{
+		_carState->_swDeDead = 0.0f;
+
 		_carState->_angle = 0.0f;
 		_shifted = false;
 	}

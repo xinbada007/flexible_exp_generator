@@ -22,6 +22,7 @@ typedef struct CarState:public osg::Referenced
 		_lastAngle = _angle;
 		_angle_incr = 0.2f;
 		_swangle = 0.0f;
+		_swDeDead = 0.0f;
 		_speed = 0.0f;
 		_speed_incr = 0.02f;
 		_dither = 0.0f;
@@ -88,6 +89,7 @@ typedef struct CarState:public osg::Referenced
 	double _angle;
 	double _angle_incr;
 	double _swangle;
+	double _swDeDead;
 	double _speed;
 	double _speed_incr;	
 	double _dither;
