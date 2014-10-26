@@ -26,11 +26,11 @@ CarHeight:	0.15
 CarLength:	4.7
 CarPic:		../Resources/texture/car.png
 CarVisible:	1	#1 = Visible	0 = Invisible
-CarReset:	2	#0 = disable	1 = auto	2 = manual
+CarReset:	0	#0 = disable	1 = auto	2 = manual
 
 [RoadSettings]
-RoadLanes:	800
-#RoadPic:	../Resources/texture/road4096-2.png
+RoadLanes:	1000
+RoadPic:	../Resources/texture/road4096-2.png
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
@@ -38,7 +38,7 @@ RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/5
 
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
-Density:	1000
+Density:	4000
 RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	0
@@ -81,8 +81,8 @@ OBS-Pic:	../Resources/texture/tio.jpg;
 #Text:	Please Change Lane
 
 ##==Dynamic Setting======================
-#Dynamic-Change: 1	20	25
-#Dynamic-Change-Condition:	1	0	#black for 10 seconds
+Dynamic-Change: 20
+Dynamic-Change-Condition:	0	1	#black for 10 seconds
 
 [CameraSettings]
 #this is the camera's position realtively to the original point of vehicle
