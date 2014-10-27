@@ -82,7 +82,7 @@ void Obstacle::genTextureNoZ()
 
 void Obstacle::createCylinder(const osg::Vec3d &center, const double &radius, const double &height)
 {
-	const unsigned segment = (double(radius) / 1.0f) * 4;
+	const unsigned segment = (double(radius) / 1.0f) * 180;
 	const double R = radius*0.5f;
 	osg::ref_ptr<osg::Vec3dArray> cylinder = new osg::Vec3dArray;
 

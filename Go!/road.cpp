@@ -24,7 +24,9 @@ osg::ref_ptr<osg::Vec2Array> Road::universalTexture(const int i,const double siz
 	const osg::ref_ptr<osg::Vec3dArray> midline = _roadSet->_nurbs.at(i)->_path;
 	osg::Vec3dArray::const_iterator j = midline->begin();
 	osg::ref_ptr<osg::Vec2Array> texcoord = new osg::Vec2Array;
-	const double &std_distance = size;
+	const double &width = _roadSet->_textureWidth;
+	const double &std_distance = width;
+	const double repeat = size / width;
 	double tot_distance(0.0f);
 	while (j != midline->end())
 	{
@@ -34,8 +36,8 @@ osg::ref_ptr<osg::Vec2Array> Road::universalTexture(const int i,const double siz
 
 		osg::Vec2 a(ratio, 0.0f);
 		osg::Vec2 b(ratio + cur_distance / std_distance, 0.0f);
-		osg::Vec2 c(ratio + cur_distance / std_distance, 1.0f);
-		osg::Vec2 d(ratio, 1.0f);
+		osg::Vec2 c(ratio + cur_distance / std_distance, repeat);
+		osg::Vec2 d(ratio, repeat);
 
 		texcoord->push_back(d); texcoord->push_back(c);
 		texcoord->push_back(b); texcoord->push_back(a);

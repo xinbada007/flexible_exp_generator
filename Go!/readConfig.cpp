@@ -843,6 +843,7 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//Setting Road
 		const string ROADPIC = "ROADPIC";
+		const string TEXTUREWIDTH = "TEXTUREWIDTH";
 		const string ROADTXT = "ROADTXT";
 		const string ROADDT = "DENSITY";
 		const string WALLH = "WALLHEIGHT";
@@ -869,6 +870,15 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + ROADPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				_roads->_texture = config;
+				continue;
+			}
+			else if (title == TEXTUREWIDTH)
+			{
+				config.erase(config.begin(), config.begin() + TEXTUREWIDTH.size());
+				if (!config.empty())
+				{
+					_roads->_textureWidth = stod(config);
+				}
 				continue;
 			}
 			else if (title == ROADTXT)

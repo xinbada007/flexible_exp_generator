@@ -126,6 +126,7 @@ typedef struct RoadSet:public osg::Referenced
 
 		_scale.set(1.0f,1.0f,1.0f);
 
+		_textureWidth = 8.0f;
 		_imgRoad = NULL;
 		_imgWall = NULL;
 
@@ -144,7 +145,9 @@ typedef struct RoadSet:public osg::Referenced
 	osg::Vec3d _scale;
 	
 	std::string _texture;
+	double _textureWidth;
 	osg::ref_ptr<osg::Image> _imgRoad;
+	
 	std::string _textureWall;
 	osg::ref_ptr<osg::Image> _imgWall;
 	stringList _roadTxt;
