@@ -44,7 +44,8 @@ typedef std::vector<double> planeEQU;
 typedef osg::Vec3d Point;
 
 double ifPoints_ON_Plane(const Point refP, const planeEQU refEQU);
-bool isEqual(double a,double p,const double e = eps);
+bool isEqual(const double &a,const double &p,const double &e = eps);
+bool isEqual(const osg::Vec3d &p1, const osg::Vec3d &p2, const double &e = eps);
 
 osg::ref_ptr<osg::Vec3dArray> linetoRectangle(osg::ref_ptr<osg::Vec3dArray> line);
 bool ifRectangleOverlap(osg::ref_ptr<osg::Vec3dArray> rectA , osg::ref_ptr<osg::Vec3dArray> rectB);

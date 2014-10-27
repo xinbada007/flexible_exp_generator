@@ -2,7 +2,7 @@
 #include "plane.h"
 #include "loop.h"
 
-#include <osg/Group>
+#include <osg/Switch>
 #include <osg/Geometry>
 
 class Points;
@@ -14,7 +14,7 @@ typedef enum SolidTexture
 	SOLID_TEX_CUBE
 }SolidTexture;
 
-class Solid:public osg::Group
+class Solid:public osg::Switch
 {
 public:
 	Solid();

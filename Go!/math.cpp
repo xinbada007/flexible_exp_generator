@@ -1,4 +1,4 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
 #include "math.h"
 
 #include <algorithm>
@@ -12,7 +12,7 @@ osg::Vec3dArray * project_Line(const osg::Vec3dArray *refV, const double width)
 	const osg::Vec3dArray::const_iterator refV_begin = refV->begin();
 	const osg::Vec3dArray::const_iterator refV_end = refV->end();
 
-	//≥ı ºªØµ⁄“ªÃıœﬂ∂Œµƒ∆Ω“∆
+	//ÂàùÂßãÂåñÁ¨¨‰∏ÄÊù°Á∫øÊÆµÁöÑÂπ≥Áßª
 	const osg::Vec3d *p0 = refV_begin._Ptr;
 	const osg::Vec3d *p1 = p0 + 1;
 	osg::Vec3d project_0 = find_Prependicular(*p0, *p1, width);
@@ -35,7 +35,7 @@ osg::Vec3dArray * project_Line(const osg::Vec3dArray *refV, const double width)
 		const osg::Vec3d cross_v2v1 = v2_p2p1^v1_p1p0;
 		if (cross_v2v1.length() <= eps)
 		{
-			//¥À ±¡Ωœﬂ∂Œπ≤œﬂ£¨Õ∂”∞÷¬œ‡Õ¨µƒµ„…œ
+			//Ê≠§Êó∂‰∏§Á∫øÊÆµÂÖ±Á∫øÔºåÊäïÂΩ±Ëá¥Áõ∏ÂêåÁöÑÁÇπ‰∏ä
 			b = project_0 + *p2;
 			results->push_back(b);
 			continue;
@@ -49,20 +49,20 @@ osg::Vec3dArray * project_Line(const osg::Vec3dArray *refV, const double width)
 
 		if (abs(dot_v2v1) <= eps)
 		{
-			//¥À ±¡Ωœﬂ∂Œ¥π÷±
+			//Ê≠§Êó∂‰∏§Á∫øÊÆµÂûÇÁõ¥
 			osg::notify(osg::NOTICE) << "Perpendicular Line Found!" << std::endl;
 			project = project_1*v1_p1p0 > 0 ? project_1 : project_2;
 			project = project_0*v2_p2p1 < 0 ? project : -project;
 		}
 		else
 		{
-			//¥À ±£¨¡Ωœﬂ∂Œº»≤ªπ≤œﬂ£¨“≤≤ª¥π÷±£¨ Ù”⁄“ª∞„«Èøˆ
-			project = dot_pro1pro0*dot_v2v1>0 ? project_1 : project_2;
+			//Ê≠§Êó∂Ôºå‰∏§Á∫øÊÆµÊó¢‰∏çÂÖ±Á∫øÔºå‰πü‰∏çÂûÇÁõ¥ÔºåÂ±û‰∫é‰∏ÄËà¨ÊÉÖÂÜµ
+			project = dot_pro1pro0*dot_v2v1 > 0 ? project_1 : project_2;
 		}
 		a = project + *p1;
 		b = project + *p2;
 
-		//¥À ±»°µ√¡À’˝»∑µƒ∆Ω“∆œÚ¡ø£¨ø™ º—∞’“Ωªµ„
+		//Ê≠§Êó∂ÂèñÂæó‰∫ÜÊ≠£Á°ÆÁöÑÂπ≥ÁßªÂêëÈáèÔºåÂºÄÂßãÂØªÊâæ‰∫§ÁÇπ
 		const osg::Vec3dArray::iterator i_pro_now = results->end() - 1;
 		const double &x_a = i_pro_now._Ptr->x();
 		const double &y_a = i_pro_now._Ptr->y();
@@ -74,7 +74,7 @@ osg::Vec3dArray * project_Line(const osg::Vec3dArray *refV, const double width)
 		const osg::Vec3d a_b = (a - *i_pro_now._Ptr);
 		if (a_b.length() <= eps)
 		{
-			//¥À ±¡Ωœﬂ∂Œπ≤œﬂ£¨Õ∂”∞÷¬œ‡Õ¨µƒµ„…œ
+			//Ê≠§Êó∂‰∏§Á∫øÊÆµÂÖ±Á∫øÔºåÊäïÂΩ±Ëá¥Áõ∏ÂêåÁöÑÁÇπ‰∏ä
 			b = project_0 + (*p2);
 			results->push_back(b);
 			continue;
@@ -96,7 +96,7 @@ osg::Vec3dArray * project_Line(const osg::Vec3dArray *refV, const double width)
 			osg::notify(osg::NOTICE) << "x == " << x << std::endl;
 		}
 
-		//»Áπ˚Ωªµ„¬‰‘⁄∑¥œÚ—”≥§œﬂ…œ£¨‘Ú∏√Õ∂”∞Œﬁº∏∫Œ“‚“Â
+		//Â¶ÇÊûú‰∫§ÁÇπËêΩÂú®ÂèçÂêëÂª∂ÈïøÁ∫ø‰∏äÔºåÂàôËØ•ÊäïÂΩ±Êó†Âá†‰ΩïÊÑè‰πâ
 		const osg::Vec3d *p0_1 = (i_pro_now - 1)._Ptr;
 		const osg::Vec3d p1_reset(x, y, 0.0f);
 		const osg::Vec3d v_p1reset_p0 = p1_reset - *p0_1;
@@ -244,14 +244,14 @@ double ifPoints_ON_Plane(const osg::Vec3d refP, const planeEQU refEQU)
 
 	double S = A*x + B*y + C*z + D;
 
-	if (isEqual(S,0.0f))
+	if (isEqual(S, 0.0f))
 	{
 		return 0;
 	}
 	return S;
 }
 
-bool isEqual(double a, double p,const double e /* = eps */)
+bool isEqual(const double &a, const double &p, const double &e /* = eps */)
 {
 	if (a == p)
 	{
@@ -261,7 +261,22 @@ bool isEqual(double a, double p,const double e /* = eps */)
 	double max = std::max(a, p);
 	double min = std::min(a, p);
 
-	if (min+eps >= max)
+	if (min + eps >= max)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool isEqual(const osg::Vec3d &p1, const osg::Vec3d &p2, const double &e /* = eps */)
+{
+	if (p1 == p2)
+	{
+		return true;
+	}
+
+	else if ((p1-p2).length() <= eps)
 	{
 		return true;
 	}
@@ -313,8 +328,8 @@ bool ifRectangleOverlap(osg::ref_ptr<osg::Vec3dArray> rectA, osg::ref_ptr<osg::V
 	osg::Vec3d B_right_up = *(rectB->begin() + 2);
 	osg::Vec3d B_left_up = *(rectB->begin() + 3);
 
-	if (A_right_bottom.x()<B_left_bottom.x() ||
-		A_left_bottom.y()>B_left_up.y() ||
+	if (A_right_bottom.x() < B_left_bottom.x() ||
+		A_left_bottom.y() > B_left_up.y() ||
 		A_left_bottom.x() > B_right_bottom.x() ||
 		A_left_up.y() < B_left_bottom.y())
 	{
@@ -368,13 +383,13 @@ bool ifPoint_IN_Polygon(const Point refP, const osg::ref_ptr<osg::Vec3dArray> re
 	}
 
 	planeEQU::const_iterator j = refEQU.cbegin();
-	osg::Vec3d normal(*(j), *(j+1), *(j+2));
+	osg::Vec3d normal(*(j), *(j + 1), *(j + 2));
 	normal.normalize();
 
 	osg::Vec3dArray::const_iterator i = refPoly->begin();
 	osg::Vec3d line_ab, line_ap;
 	osg::Vec3d ab_ap;
-	while ((i+1) != refPoly->end())
+	while ((i + 1) != refPoly->end())
 	{
 		line_ab = *(i + 1) - *i;
 		line_ab.normalize();
@@ -384,7 +399,7 @@ bool ifPoint_IN_Polygon(const Point refP, const osg::ref_ptr<osg::Vec3dArray> re
 		ab_ap = line_ab^line_ap;
 		ab_ap.normalize();
 
-		if (!isEqual(ab_ap*normal,1.0f))
+		if (!isEqual(ab_ap*normal, 1.0f))
 		{
 			return false;
 		}
@@ -396,7 +411,7 @@ bool ifPoint_IN_Polygon(const Point refP, const osg::ref_ptr<osg::Vec3dArray> re
 	line_ap = refP - *i;
 	ab_ap = line_ab^line_ap;
 	ab_ap.normalize();
-	if (!isEqual(ab_ap*normal,1.0f))
+	if (!isEqual(ab_ap*normal, 1.0f))
 	{
 		return false;
 	}
@@ -428,7 +443,7 @@ osg::ref_ptr<osg::Vec3dArray> arrayLinearTransform(const osg::Vec3dArray *A, con
 		dest->push_back((*i) * lamida + (*j) * one_lamida);
 		i++, j++;
 	}
-	
+
 	return dest.release();
 }
 

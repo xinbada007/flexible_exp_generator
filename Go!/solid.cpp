@@ -14,7 +14,7 @@ _lastPlane(NULL), _index(0), _texMode(SOLID_TEX_FLAT), _ccw(true), _ccwupdated(f
 }
 
 Solid::Solid(const Solid &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
-osg::Group(copy,copyop),
+osg::Switch(copy,copyop),
 _next(copy._next), _prev(copy._prev), _updated(copy._updated), _numPoints(copy._numPoints), _numPlanes(copy._numPlanes),
 _startPlane(copy._startPlane), _startE(copy._startE), _startP(copy._startP), _texCoord(copy._texCoord), _imgTexture(copy._imgTexture),
 _lastPlane(copy._lastPlane), _index(copy._index), _texMode(copy._texMode), _ccw(copy._ccw), _ccwupdated(copy._ccwupdated)

@@ -10,11 +10,14 @@ public:
 	Obstacle(const Obstacle &copy, osg::CopyOp copyop = osg::CopyOp::SHALLOW_COPY);
 	META_Node(Obstacle, Obstacle);
 	void createBox(osg::Vec3d center, osg::Vec3d radius);
+	void createCylinder(const osg::Vec3d &center, const double &radius, const double &height);
+	void createSphere(const osg::Vec3d &centre);
 	inline void setImage(osg::ref_ptr<osg::Image> img) { _imgTexture = img; };
 
 private:
 	virtual ~Obstacle();
 	void sweep(const double height);
 	void genBoxTexture();
+	void genTextureNoZ();
 };
 

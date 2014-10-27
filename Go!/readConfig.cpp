@@ -1013,6 +1013,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSTACLEPOSITION("OBSTACLE-POSITION");
 		const string OBSPOSOFFSET("OBS-POSITION-OFFSET");
 		const string OBSSIZE("OBS-SIZE");
+		const string OBSSHAPE("OBS-SHAPE");
 		const string OBSPIC("OBS-PIC");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
@@ -1146,22 +1147,6 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-			else if (title == OBSSIZE)
-			{
-				config.erase(config.begin(), config.begin() + OBSSIZE.size());
-				osg::ref_ptr<osg::DoubleArray> read = new osg::DoubleArray;
-				while (!config.empty())
-				{
-					std::string::size_type sz;
-					read->push_back(stod(config,&sz));
-					config.erase(config.begin(), config.begin() + sz);
-				}
-				if (read->size() >= 3)
-				{
-					_experiment->_obsSize.set(read->at(0), read->at(1), read->at(2));
-				}
-				continue;
-			}
 			else if (title == OBSPOSOFFSET)
 			{
 				config.erase(config.begin(), config.begin() + OBSPOSOFFSET.size());
@@ -1170,6 +1155,31 @@ void ReadConfig::readTrial(ifstream &in)
 					std::string::size_type sz;
 					_experiment->_obsPosOffset->push_back(stod(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == OBSSIZE)
+			{
+				config.erase(config.begin(), config.begin() + OBSSIZE.size());
+				osg::ref_ptr<osg::DoubleArray> read = new osg::DoubleArray;
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					read->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				if (read->size() >= 3)
+				{
+					_experiment->_obsSize.set(read->at(0), read->at(1), read->at(2));
+				}
+				continue;
+			}
+			else if (title == OBSSHAPE)
+			{
+				config.erase(config.begin(), config.begin() + OBSSHAPE.size());
+				if (!config.empty())
+				{
+					_experiment->_obsShape = stoi(config);
 				}
 				continue;
 			}

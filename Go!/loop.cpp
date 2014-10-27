@@ -1,11 +1,11 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "loop.h"
 #include "halfedge.h"
 #include "edge.h"
 #include "points.h"
 #include "plane.h"
 
-Loop::Loop():
+Loop::Loop() :
 _startHE(NULL), _prev(NULL), _next(NULL), _homeP(NULL),
 _switch(true)
 {
@@ -13,7 +13,7 @@ _switch(true)
 }
 
 Loop::Loop(const Loop &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
-osg::Geometry(copy,copyop),
+osg::Geometry(copy, copyop),
 _startHE(copy.getHE()), _prev(copy.getPrev()), _next(copy.getNext()), _homeP(copy.getHomeP()),
 _switch(copy.getSwitch())
 {
@@ -48,7 +48,7 @@ bool Loop::isValid() const
 
 	HalfEdge *refHE = _startHE;
 	bool valid(false);
-	do 
+	do
 	{
 		if (refHE->getLoop() != this)
 		{
@@ -82,10 +82,10 @@ void Loop::addHEtoLoop(Edge *refE)
 
 	if (temphe)
 	{
-		//�������������һ���ߣ��������µ���
-		//newhe1��ָ��ĵ�Ϊ�´����ĵ�
-		//�õ���ָ����κ�һ����߶�û�����뵽����
-		//���Ҵ������ı�Ҳû���κ�һ��������뵽�κ�һ������
+		//这种情况，加入一条边，不构成新的面
+		//newhe1所指向的点为新创建的点
+		//该点所指向的任何一个半边都没有链入到环中
+		//并且传进来的边也没有任何一条半边链入到任何一个环中
 		if ((!newhe1->getPoint()->getHE()->getLoop()) && (!newhe1->getLoop()) && (!newhe2->getLoop()))
 		{
 			while (temphe->getPoint() != newhe2->getPoint())
@@ -94,13 +94,13 @@ void Loop::addHEtoLoop(Edge *refE)
 			forwardInsertHE(temphe, newhe1);
 			forwardInsertHE(newhe1, newhe2);
 
-			//ע�⣬��ǰ������ʼ���ʼ��Ϊnewhe1
+			//注意，当前环的起始半边始终为newhe1
 			_startHE = newhe1;
 		}
-		//�������������һ���ߣ������µ���
-		//��ǰ�ĳ��󻷽����ѳ�2������һ����ʵ�廷��һ���ǳ���
-		//newhe1��ָ��ĵ�Ϊ�Ѿ����ڵĵ�
-		//�õ���ָ��İ���Ѿ����뵽���У����Ǵ������ı���û���κ�һ��������뵽�κ�һ������
+		//这种情况，加入一条边，构成新的面
+		//当前的抽象环将分裂成2个环，一个是实体环，一个是抽象环
+		//newhe1所指向的点为已经存在的点
+		//该点所指向的半边已经链入到环中，但是传进来的边中没有任何一条半边链入到任何一个环中
 		else if ((newhe1->getPoint()->getHE()->getLoop()) && (!newhe1->getLoop()) && (!newhe2->getLoop()))
 		{
 			HalfEdge *temphe1, *temphe2;
@@ -121,8 +121,8 @@ void Loop::addHEtoLoop(Edge *refE)
 			newhe1->setNext(temphe1);
 			temphe2->setPrev(newhe2);
 		}
-		//�������������һ���߳�Ϊ�����ߣ��������뵽����
-		//��ʱ���������ı������ҽ���һ��������뵽һ������
+		//这种情况，分裂一条边成为两条边，重新链入到环中
+		//此时，传进来的边中有且仅有一条半边链入到一个环中
 		else if ((newhe1->getLoop()) || (newhe2->getLoop()))
 		{
 			while (temphe->getPoint() != newhe2->getPoint())
@@ -134,9 +134,9 @@ void Loop::addHEtoLoop(Edge *refE)
 
 	else
 	{
-		//���������Ϊ����ʵ��ʱ�ĳ�ʼ���
+		//这种情况，为创建实体时的初始情况
 		forwardInsertHE(newhe1, newhe2);
-		//ע�⣬��ǰ������ʼ���ʼ��Ϊnewhe1
+		//注意，当前环的起始半边始终为newhe1
 		_startHE = newhe1;
 	}
 }
@@ -149,20 +149,20 @@ void Loop::splitLoop(Edge *refE, Loop *newL)
 	HalfEdge *temphe1 = newhe1;
 	HalfEdge *temphe2 = newhe2;
 
-	//���ڡ�����������ͬʱ������
-	//Ŀ�ģ�1����֪����һ�����ǳ��󻷣����󻷱���������Ҫ�߹��İ�߸��ࣩ
+	//从内、外两个方向同时遍历环
+	//目的（1）：知道哪一个环是抽象环（抽象环遍历环所需要走过的半边更多）
 	do
 	{
 		temphe1 = temphe1->getNext();
 		temphe2 = temphe2->getNext();
 	} while (temphe1 != newhe1 && temphe2 != newhe2);
 
-	//TEMPHE1(��ʼ��ʼ��ָ����Žϴ�ĵ�)���ȱ�����
-	//����ȷ��TMEPHE1���ڵĻ����ǳ���
-	//�����γɵ����е��⻷ָ������Žϴ�������Ϊ��ʼ��İ��
-	//�������Ա�֤ƽ�������˳���봫�����Ĳ���˳��һ��
+	//TEMPHE1(起始点始终指向序号较大的点)首先遍历完
+	//可以确定TMEPHE1所在的环不是抽象环
+	//让新形成的面中的外环指向以序号较大的这个点为起始点的半边
+	//这样可以保证平面给出的顺序与传进来的参数顺序一致
 
-	//ֻҪ��֤��һ�����γɵ�˳��������˳��һ�£������������˳��Ҳ��Ψһȷ��
+	//只要保证第一个面形成的顺序跟输入的顺序一致，其他所有面的顺序也就唯一确定
 	HalfEdge *tempHE1 = (temphe1 == newhe1) ? temphe1 : temphe2;
 	HalfEdge *setupHE = (temphe1 == newhe1) ? newhe1 : newhe2;
 
@@ -192,7 +192,7 @@ const osg::ref_ptr<osg::Vec3dArray> Loop::getPoints()
 		points->push_back(he->getPoint()->getPoint());
 		he = he->getNext();
 	} while (he != _startHE);
-	
+
 	return points.release();
 }
 
@@ -200,7 +200,7 @@ const edgelist Loop::getFlagEdge() const
 {
 	const HalfEdge *he = _startHE;
 	edgelist list;
-	do 
+	do
 	{
 		if (he->getEdge()->getEdgeFlag())
 		{
@@ -219,7 +219,7 @@ const osg::ref_ptr<osg::Vec3dArray> Loop::getNavigationEdge() const
 	osg::ref_ptr<osg::Vec3dArray> edgeA = new osg::Vec3dArray;
 	osg::ref_ptr<osg::Vec3dArray> edgeB = new osg::Vec3dArray;
 
-	do 
+	do
 	{
 		if (he->getEdge()->getEdgeFlag())
 		{

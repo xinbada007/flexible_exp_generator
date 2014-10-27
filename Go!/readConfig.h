@@ -30,6 +30,7 @@ typedef struct Experiment :public osg::Referenced
 		_obstacleRange = new osg::DoubleArray;
 		_obstaclePos = new osg::IntArray;
 		_obsPosOffset = new osg::DoubleArray;
+		_obsShape = 1;
 		_imgOBS = NULL;
 
 		_offset = 0.0f;
@@ -55,6 +56,7 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::IntArray> _obstaclePos;
 	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;
 	osg::Vec3d _obsSize;
+	int _obsShape;
 	std::string _obsPic;
 	osg::ref_ptr<osg::Image> _imgOBS;
 

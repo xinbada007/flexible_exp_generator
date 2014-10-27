@@ -38,7 +38,7 @@ RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/5
 
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
-Density:	4000
+Density:	1000
 RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	0
@@ -65,14 +65,15 @@ Deviation-Warn: DEVIATION TOO HIGH
 Deviation-Siren:	../Resources/sound/warnpullup.mp3
 
 ##==Obstacle Setting=====================
-Obstacle:	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1
-Obstacle-Range:	200 200	400 400 600 600 800 800	1000 1000
+Obstacle:	1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle-Range:	10 10	200 200	400 400 600 600 800 800	1000 1000
 Obstacle-Range:	1200 1200	1400 1400	1600 1600	1800 1800	2000 2000
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-20 -24	0 4 16 20 -16 -20 24 20 
+OBS-Position-Offset:	-2 2	-20 -24	0 4 16 20 -16 -20 24 20 
 OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
 OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
-OBS-Pic:	../Resources/texture/tio.jpg;
+OBS-Shape:	1	# 0 = cube	1 = Cylinder
+#OBS-Pic:	../Resources/texture/tio.jpg;
 
 ##==Text Setting=========================
 #Textime:	0
@@ -81,8 +82,8 @@ OBS-Pic:	../Resources/texture/tio.jpg;
 #Text:	Please Change Lane
 
 ##==Dynamic Setting======================
-Dynamic-Change: 20
-Dynamic-Change-Condition:	0	1	#black for 10 seconds
+#Dynamic-Change: 20
+#Dynamic-Change-Condition:	0	1	#black for 10 seconds
 
 [CameraSettings]
 #this is the camera's position realtively to the original point of vehicle

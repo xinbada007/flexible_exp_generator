@@ -15,6 +15,7 @@ public:
 
 private:
 	void texture(Solid *refS);
+	void texturePerGeometry(Solid *refS);
 	bool texCoord(Solid *refS);
 };
 

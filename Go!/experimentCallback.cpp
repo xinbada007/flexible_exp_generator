@@ -320,24 +320,36 @@ void ExperimentCallback::createObstacle()
 			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
 			center = center * osg::Matrix::translate(X_AXIS * *posOffset);
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
-			obs->createBox(center, _expSetting->_obsSize);
+//			obs->createSphere(center);
+			switch (_expSetting->_obsShape)
+			{
+			case 0:
+				obs->createBox(center, _expSetting->_obsSize);
+				break;
+			case 1:
+				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
+				break;
+			default:
+//				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
+				break;
+			}
 
 			//render
 			osg::ref_ptr<RenderVistor> rv = new RenderVistor;
-			rv->setBeginMode(GL_QUADS);
+			rv->setBeginMode(GL_POINTS);
 			obs->accept(*rv);
 			_road->addChild(obs);
 			//texture      
-			obs->setImage(_expSetting->_imgOBS);
-			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
-			obs->accept(*tv);
+// 			obs->setImage(_expSetting->_imgOBS);
+// 			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
+// 			obs->accept(*tv);
 			//visitor
-			CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
-			if (refCV)
-			{
-				refCV->setMode(OBS);
-				_road->accept(*refCV);
-			}
+// 			CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
+// 			if (refCV)
+// 			{
+// 				refCV->setMode(OBS);
+// 				_road->accept(*refCV);
+// 			}
 		}
 	}
 }
