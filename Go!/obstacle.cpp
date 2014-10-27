@@ -295,7 +295,6 @@ void Obstacle::sweep(const double height)
 	}
 
 	Plane *p = refS->getPlane();
-//	Plane *p = refS->getAbstract();
 	Loop *l = p->getLoop();
 	HalfEdge *startHE = l->getHE();
 	const HalfEdge *const endHE = startHE;
@@ -322,39 +321,9 @@ void Obstacle::sweep(const double height)
 
 	link(firstP, lastP);
 
-// 	Plane *abs = this->getAbstract();
-// 	if (abs)
-// 	{
-// 		abs->setAbstract(false);
-// 	}
-
+	Plane *abs = this->getAbstract();
+	if (abs)
 	{
-		Plane *p = refS->getLastPlane();
-		//	Plane *p = refS->getAbstract();
-		Loop *l = p->getLoop();
-		HalfEdge *startHE = l->getHE();
-		const HalfEdge *const endHE = startHE;
-
-		osg::Vec3d firstP = startHE->getPoint()->getPoint();
-		firstP.z() += -height;
-		osg::Vec3d thisP = firstP;
-		osg::Vec3d lastP = thisP;
-
-		do
-		{
-			thisP = startHE->getPoint()->getPoint();
-			thisP.z() += -height;
-			link(startHE->getPoint()->getPoint(), thisP);
-
-			if (lastP != thisP)
-			{
-				link(lastP, thisP);
-			}
-
-			lastP = thisP;
-			startHE = startHE->getNext();
-		} while (startHE != endHE);
-
-		link(firstP, lastP);
+		abs->setAbstract(false);
 	}
 }
