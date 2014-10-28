@@ -42,6 +42,8 @@ public:
 	inline double substituePointinEQU(const osg::Vec3d p) { return _planeEQU[0] * p.x() + _planeEQU[1] * p.y() + _planeEQU[2] * p.z() + _planeEQU[3]; };
 
 	const osg::ref_ptr<osg::Vec3dArray> getPoints();
+	
+	bool ifPointinLoop(const osg::Vec3d &p);
 private:
 	void forwardInsertHE(HalfEdge *he1, HalfEdge *he2);
 	HalfEdge *_startHE;

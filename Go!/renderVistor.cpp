@@ -15,6 +15,8 @@ RenderVistor::RenderVistor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
 {
 	_beginMode = GL_POINTS;
+	_numLim = 0;
+	_candidate = GL_POINTS;
 }
 
 
@@ -34,6 +36,8 @@ void RenderVistor::reset()
 
 	_drawableList.clear();
 	_beginMode = GL_POINTS;
+	_numLim = 0;
+	_candidate = GL_POINTS;
 }
 
 void RenderVistor::apply(osg::Group &refNode)
@@ -111,7 +115,19 @@ void RenderVistor::render(osg::Drawable *refD) const
 		refG->setColorBinding(osg::Geometry::BIND_OVERALL);
 		refG->setDataVariance(osg::Object::DYNAMIC);
 
-		osg::ref_ptr<osg::DrawArrays> drawArray = new osg::DrawArrays(_beginMode, 0, refG->getVertexArray()->getNumElements());
+		osg::ref_ptr<osg::DrawArrays> drawArray;
+		if (!_numLim || refG->getVertexArray()->getNumElements() <= _numLim)
+		{
+			drawArray = new osg::DrawArrays(_beginMode, 0, refG->getVertexArray()->getNumElements());
+		}
+		else
+		{
+			if (refG->getVertexArray()->getNumElements() > _numLim)
+			{
+				drawArray = new osg::DrawArrays(_candidate, 0, refG->getVertexArray()->getNumElements());
+			}
+		}
+		
 		if (_beginMode == GL_POINTS)
 		{
 			osg::ref_ptr<osg::Point> psize =new osg::Point(10.0f);

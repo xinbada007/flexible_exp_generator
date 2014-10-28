@@ -142,6 +142,7 @@ void TextureVisitor::texturePerGeometry(Solid *refS)
 	tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 	tex->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
 	tex->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+//	tex->setMaxAnisotropy(16);
 
 	osg::TexEnv *decalTexEnv = new osg::TexEnv();
 	decalTexEnv->setMode(osg::TexEnv::DECAL);

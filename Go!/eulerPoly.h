@@ -10,6 +10,7 @@ public:
 	META_Node(EulerPoly, EulerPoly);
 protected:
 	void link(osg::Vec3d P1, osg::Vec3d P2);
+	Edge *insPt(Edge *mEdge,const osg::Vec3d &newP);
 	~EulerPoly();
 private:
 	bool _ccwupdated;
@@ -17,6 +18,7 @@ private:
 	void mev(Points *oldP, osg::Vec3d newP);
 	void mef(Points *oldP, Points *newP);
 	void mvfs(osg::Vec3d ref);
+	Edge * semv(Edge *mEdge, const osg::Vec3d &newP);
 
 	void calcPlaneEQU(Loop *refL);
 };

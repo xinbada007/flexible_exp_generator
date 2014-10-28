@@ -237,3 +237,20 @@ const osg::ref_ptr<osg::Vec3dArray> Loop::getNavigationEdge() const
 
 	return navigation.release();
 }
+
+bool Loop::ifPointinLoop(const osg::Vec3d &p)
+{
+	const HalfEdge *he = _startHE;
+
+	do 
+	{
+		if (p == he->getPoint()->getPoint())
+		{
+			return true;
+		}
+
+		he = he->getNext();
+	} while (he != _startHE);
+
+	return false;
+}

@@ -36,14 +36,14 @@ void Obstacle::genBoxTexture()
 void Obstacle::genTextureNoZ()
 {
 	Plane::reverse_iterator i = this->getLastPlane();
+	const osg::Vec3d zN1(0.0f, 0.0f, 1.0f);
+	const osg::Vec3d zN2(0.0f, 0.0f, -1.0f);
 	
 	unsigned total(0);
 	while (*i)
 	{
 		planeEQU pe = (*i)->getLoop()->getPlaneEQU();
 		const osg::Vec3d normal(pe.at(0), pe.at(1), pe.at(2));
-		const osg::Vec3d zN1(0.0f, 0.0f, 1.0f);
-		const osg::Vec3d zN2(0.0f, 0.0f, -1.0f);
 
 		if (!isEqual(normal,zN1) && !isEqual(normal,zN2))
 		{
@@ -59,7 +59,8 @@ void Obstacle::genTextureNoZ()
 	while (*i)
 	{
 		planeEQU pe = (*i)->getLoop()->getPlaneEQU();
-		if (!isEqual(abs(pe.at(2)), 1.0f))
+		const osg::Vec3d normal(pe.at(0), pe.at(1), pe.at(2));
+		if (!isEqual(normal, zN1) && !isEqual(normal, zN2))
 		{
 			osg::ref_ptr<osg::Vec2Array> tex = new osg::Vec2Array;
 			tex->push_back(osg::Vec2(startI, 0.0f));
@@ -71,7 +72,35 @@ void Obstacle::genTextureNoZ()
 			startI += step;
 			endI += step;
 		}
-		i++;
+		++i;
+	}
+
+	if (this->getTexCoord())
+	{
+		this->setTexCoord(NULL);
+	}
+}
+
+void Obstacle::genUnifiedTexture()
+{
+	Plane::reverse_iterator i = this->getLastPlane();
+	const osg::Vec3d zN1(0.0f, 0.0f, 1.0f);
+	const osg::Vec3d zN2(0.0f, 0.0f, -1.0f);
+
+	while (*i)
+	{
+		planeEQU pe = (*i)->getLoop()->getPlaneEQU();
+		const osg::Vec3d normal(pe.at(0), pe.at(1), pe.at(2));
+		if (!isEqual(normal, zN1) && !isEqual(normal, zN2))
+		{
+			osg::ref_ptr<osg::Vec2Array> tex = new osg::Vec2Array;
+			tex->push_back(osg::Vec2(0.0f, 0.0f));
+			tex->push_back(osg::Vec2(1.0f, 0.0f));
+			tex->push_back(osg::Vec2(1.0f, 1.0f));
+			tex->push_back(osg::Vec2(0.0f, 1.0f));
+			(*i)->getLoop()->setTexCoordArray(0, tex.release());
+		}
+		++i;
 	}
 
 	if (this->getTexCoord())
@@ -82,7 +111,8 @@ void Obstacle::genTextureNoZ()
 
 void Obstacle::createCylinder(const osg::Vec3d &center, const double &radius, const double &height)
 {
-	const unsigned segment = (double(radius) / 1.0f) * 180;
+//	const unsigned segment = (double(radius) / 1.0f) * 96;
+	const unsigned segment = 96;
 	const double R = radius*0.5f;
 	osg::ref_ptr<osg::Vec3dArray> cylinder = new osg::Vec3dArray;
 
@@ -111,6 +141,12 @@ void Obstacle::createCylinder(const osg::Vec3d &center, const double &radius, co
 
 	sweep(height);
 
+	Plane *abs = this->getAbstract();
+	if (abs)
+	{
+		abs->setAbstract(false);
+	}
+
 	genTextureNoZ();
 }
 
@@ -135,23 +171,27 @@ void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 
 	sweep(radius.z());
 
+	Plane *abs = this->getAbstract();
+	if (abs)
+	{
+		abs->setAbstract(false);
+	}
+
 	genBoxTexture();
 }
 
-void Obstacle::createSphere(const osg::Vec3d &centre)
+void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 {
-	const double radius = 1.0f;
-	const unsigned segment = (double(radius) / 1.0f) * 5;
-	const unsigned L = 5;
+//	const unsigned segment = (double(radius) / 1.0f) * 24;
+	const unsigned segment = 32;
+	const int L = 18;
 	const double R = radius*0.5f;
 	std::vector<osg::ref_ptr<osg::Vec3dArray>> sphereList;
-//	std::vector<osg::ref_ptr<osg::Vec3dArray>> sphereList1;
 
-	for (unsigned i = 0; i < L; i++)
+	for (int i = -(L-1); i < L; i++)
 	{
-		const double r = sqrt(R*R - (pow(((double(i) / double(L))*R), 2)));
+		const double r = sqrt(R*R - (pow(((double(abs(i)) / double(L))*R), 2)));
 		osg::ref_ptr<osg::Vec3dArray> circle = new osg::Vec3dArray;
-//		osg::ref_ptr<osg::Vec3dArray> circle1 = new osg::Vec3dArray;
 		for (unsigned j = 0; j < segment; j++)
 		{
 			const double theta = (double(j) / double(segment)) * 2 * PI;
@@ -162,121 +202,142 @@ void Obstacle::createSphere(const osg::Vec3d &centre)
 			osg::Vec3d p(x, y, z);
 			p = p * osg::Matrix::translate(centre);
 			circle->push_back(p);
-
-// 			if (abs(z) > 0)
-// 			{
-// 				osg::Vec3d p1(p);
-// 				p1.z() = -z;
-// 				circle1->push_back(p1);
-// 			}
 		}
 		if (!circle->empty())
 		{
 			sphereList.push_back(circle.release());
 		}
-// 		if (!circle1->empty())
-// 		{
-// 			sphereList1.push_back(circle1.release());
-// 		}
 	}
 
+	//Create Cylinder first
+	const double height = R*(double(L - 1) / double(L));
+	line1D(sphereList.front());
+	link(sphereList.front()->front(), sphereList.front()->back());
+	sweep(sphereList.back());
+	Plane *abs = this->getAbstract();
+	if (abs)
+	{
+		abs->setAbstract(false);
+	}
 
+	//Then stretch it until it becomes a Sphere
+	std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter_begin = sphereList.cbegin();
+	const std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter_end = sphereList.cend() - 1;
+	std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter_next;
+	osg::Vec3dArray::const_iterator pIter;
+	osg::Vec3dArray::const_iterator pNext;
+	osg::Vec3dArray::const_iterator pNIter;
 
-	
-// 	unsigned linkArray[L];
-// 	memset(linkArray, 0, sizeof(linkArray));
-// 	std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter = sphereList.cbegin();
-// 	const std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator startIter = sphereList.cbegin();
-// 	while (iter != sphereList.cend())
-// 	{
-// 		std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator preIter = iter++;
-// 
-// 		if (preIter != sphereList.cend() && iter != sphereList.cend())
-// 		{
-// 			const unsigned pre = preIter - startIter;
-// 			if (linkArray[pre] == 0)
-// 			{
-// 				this->line1D(*preIter);
-// 				link((*preIter)->front(), (*preIter)->back());
-// 				linkArray[pre] = 1;
-// 			}
-// 			this->line1D(*preIter, *iter);
-// 			const unsigned thi = iter - startIter;
-// 			if (linkArray[thi] == 0)
-// 			{
-// 				this->line1D(*iter);
-// 				link((*iter)->front(), (*iter)->back());
-// 				linkArray[iter - startIter] = 1;
-// 			}
-// 		}
-// 	}
+	std::vector<Loop *> loopList;
+	loopList.resize(iter_end - sphereList.cbegin() + 1);
+	int test(1);
 
-//	this->line1D(sphereList.front(), sphereList1.front());
-//	this->line1D(sphereList1.front());
+	while (iter_begin != iter_end)
+	{
+		iter_next = iter_begin + 1;
+		pIter = (*iter_begin)->begin();
+		pNext = (*iter_next)->begin();
+		pNIter = (*iter_end)->begin();
+		Loop *l(NULL);
+		while (pIter != (*iter_begin)->end())
+		{
+			Edge *mEdge = findEdge(*pIter, *pNIter);
+			Edge *newE = insPt(mEdge, *pNext);
+			pIter++;
+			pNIter++;
+			pNext++;
+		}		
+		iter_begin++;
+	}
 
-// 	{
-// 		unsigned linkArray[L];
-// 		memset(linkArray, 0, sizeof(linkArray));
-// 		std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter = sphereList1.cbegin();
-// 		const std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator startIter = sphereList1.cbegin();
-// 		this->line1D(sphereList.front(), sphereList1.front());
-// 		while (iter != sphereList1.cend())
-// 		{
-// 			std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator preIter = iter++;
-// 
-// 			if (preIter != sphereList1.cend() && iter != sphereList1.cend())
-// 			{
-// 				const unsigned pre = preIter - startIter;
-// 				if (linkArray[pre] == 0)
-// 				{
-// 					this->line1D(*preIter);
-// 					linkArray[pre] = 1;
-// 				}
-// 				this->line1D(*preIter, *iter);
-// 				const unsigned thi = iter - startIter;
-// 				if (linkArray[thi] == 0)
-// 				{
-// 					this->line1D(*iter);
-// 					linkArray[iter - startIter] = 1;
-// 				}
-// 			}
-// 		}
-// 	}
+	//Finally subdivide big Polygon into small polygons
+	abs = this->getAbstract();
+	if (abs)
+	{
+		abs->setAbstract(false);
+	}
 
-		
-// 	{
-// 		sphereList.clear();
-// 		for (unsigned i = 1; i < L; i++)
-// 		{
-// 			const double r = sqrt(R*R - (pow(((double(i) / double(L))*R), 2)));
-// 			osg::ref_ptr<osg::Vec3dArray> circle = new osg::Vec3dArray;
-// 			for (unsigned j = 0; j < segment; j++)
-// 			{
-// 				const double theta = (double(j) / double(segment)) * 2 * PI;
-// 				const double x = r * cos(theta);
-// 				const double y = r * sin(theta);
-// 				const double z = -R *((double)i / double(L));
-// 
-// 				osg::Vec3d p(x, y, z);
-// 				p = p * osg::Matrix::translate(centre);
-// 				circle->push_back(p);
-// 			}
-// 			sphereList.push_back(circle.release());
-// 		}
-// 
-// 		std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter = sphereList.cbegin();
-// 		while (iter != sphereList.cend())
-// 		{
-// 			std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator preIter = iter++;
-// 			if (preIter != sphereList.cend() && iter != sphereList.cend())
-// 			{
-// 				this->line1D(*preIter);
-// 				this->line1D(*preIter, *iter);
-// 				this->line1D(*iter);
-// 			}
-// 		}
-// 	}
-	
+	iter_begin = sphereList.cbegin() + 1;
+	while (iter_begin != iter_end)
+	{
+		pIter = (*iter_begin)->begin() + 1;
+		while (pIter != (*iter_begin)->end())
+		{
+			osg::Vec3dArray::const_iterator pPre = pIter - 1;
+			Loop *l = findLoop(*pPre, *pIter);
+			if (l)
+			{
+				l->getHomeP()->setAbstract(true);
+				link(*pPre, *pIter);
+				l->getHomeP()->setAbstract(false);
+			}
+			pIter++;
+		}
+
+		Loop *l = findLoop((*iter_begin)->front(), (*iter_begin)->back());
+		if (l)
+		{
+			l->getHomeP()->setAbstract(true);
+			link((*iter_begin)->front(), (*iter_begin)->back());
+			l->getHomeP()->setAbstract(false);
+		}
+		iter_begin++;
+	}
+
+	abs = this->getAbstract();
+	if (abs)
+	{
+		abs->setAbstract(false);
+	}
+
+	genUnifiedTexture();
+}
+
+void Obstacle::sweep(osg::ref_ptr<osg::Vec3dArray> swArray)
+{
+	Solid *refS = dynamic_cast<Solid*> (this);
+	if (!refS)
+	{
+		osg::notify(osg::FATAL) << "Cannot Sweep! Solid is not exist!" << std::endl;
+		return;
+	}
+
+	if (!refS->getNumPlanes())
+	{
+		osg::notify(osg::FATAL) << "Cannot Sweep! Solid is not created yet!" << std::endl;
+		return;
+	}
+
+	if (swArray->getNumElements() != refS->getNumPoints())
+	{
+		osg::notify(osg::FATAL) << "Cannot Sweep! Points are inconsistent!" << std::endl;
+		return;
+	}
+
+	Plane *p = refS->getPlane();
+	Loop *l = p->getLoop();
+	HalfEdge *startHE = l->getHE();
+	const HalfEdge *const endHE = startHE;
+
+	osg::Vec3d firstP = swArray->at(startHE->getPoint()->getIndex() - 1);
+	osg::Vec3d thisP = firstP;
+	osg::Vec3d lastP = thisP;
+
+	do
+	{
+		thisP = swArray->at(startHE->getPoint()->getIndex() - 1);
+		link(startHE->getPoint()->getPoint(), thisP);
+
+		if (lastP != thisP)
+		{
+			link(lastP, thisP);
+		}
+
+		lastP = thisP;
+		startHE = startHE->getNext();
+	} while (startHE != endHE);
+
+	link(firstP, lastP);
 }
 
 void Obstacle::sweep(const double height)
@@ -320,10 +381,4 @@ void Obstacle::sweep(const double height)
 	} while (startHE != endHE);
 
 	link(firstP, lastP);
-
-	Plane *abs = this->getAbstract();
-	if (abs)
-	{
-		abs->setAbstract(false);
-	}
 }

@@ -77,6 +77,40 @@ void EulerPoly::mef(Points *oldP, Points *newP)
 //	Loop *norL = (refL->getHomeP()->getAbstract()) ? newL : refL;
 }
 
+Edge * EulerPoly::semv(Edge *mEdge, const osg::Vec3d &newP)
+{
+	Loop *mLoop = mEdge->getHE1()->getLoop();
+	Solid *refS = mLoop->getHomeP()->getHomeS();
+
+	Loop *mHe1L = mEdge->getHE1()->getLoop();
+	Loop *mHe2L = mEdge->getHE2()->getLoop();
+
+	Points *newPn = new Points(newP);
+	refS->addPointtoList(newPn);
+	Edge *newE = new Edge;
+	refS->addEdgetoList(newE);
+
+	HalfEdge *newHE1 = new HalfEdge(newPn);
+	newE->addHEtoEdge(newHE1, mEdge->getHE1());
+	mHe2L->addHEtoLoop(newE);
+	HalfEdge *newHE1_1 = new HalfEdge(newPn);
+	mEdge->addHEtoEdge(newHE1_1,mEdge->getHE2());
+	mHe1L->addHEtoLoop(mEdge);
+
+	return newE;
+}
+
+Edge * EulerPoly::insPt(Edge *mEdge, const osg::Vec3d &newP)
+{
+	if (!mEdge)
+	{
+		osg::notify(osg::WARN) << "Error when inserting Points" << std::endl;
+		return NULL;
+	}
+
+	return semv(mEdge, newP);
+}
+
 void EulerPoly::calcPlaneEQU(Loop *refL)
 {
 	if (!refL)

@@ -4,6 +4,7 @@
 #include "edge.h"
 #include "points.h"
 #include "halfedge.h"
+#include "loop.h"
 
 Solid::Solid():
 _next(NULL), _prev(NULL), _updated(false), _numPoints(0), _numPlanes(0),
@@ -187,6 +188,69 @@ Points * Solid::findPoint(osg::Vec3d refP)
 		}
 		objP = objP->getNext();
 	} while (objP);
+
+	return NULL;
+}
+
+Edge * Solid::findEdge(const osg::Vec3d &p1, const osg::Vec3d &p2)
+{
+	Edge *e = _startE;
+
+	for (; e; e = e->getNext())
+	{
+		HalfEdge *he1 = e->getHE1();
+		HalfEdge *he2 = e->getHE2();
+
+		const osg::Vec3d &phe1 = he1->getPoint()->getPoint();
+		const osg::Vec3d &phe2 = he2->getPoint()->getPoint();
+
+		if (phe1 == p1 && phe2 == p2)
+		{
+			return e;
+		}
+		else if (phe1 == p2 && phe2 == p1)
+		{
+			return e;
+		}
+	}
+
+	return NULL;
+}
+
+Loop * Solid::findLoop(const Edge *e1, const Edge *e2)
+{
+	Loop *le1he1 = e1->getHE1()->getLoop();
+	Loop *le1he2 = e1->getHE2()->getLoop();
+
+	Loop *le2he1 = e2->getHE1()->getLoop();
+	Loop *le2he2 = e2->getHE2()->getLoop();
+
+	Loop *shared(NULL);
+	if (le1he1 == le2he1 || le1he1 == le2he2)
+	{
+		shared = le1he1;
+	}
+	else if (le1he2 == le2he1 || le1he2 == le2he2)
+	{
+		shared = le1he2;
+	}
+
+	return shared;
+}
+
+Loop * Solid::findLoop(const osg::Vec3d &p1, const osg::Vec3d &p2)
+{
+	Plane *p = _startPlane;
+	Loop *l = p->getLoop();
+
+	for (; p; p = p->getNext())
+	{
+		if (l->ifPointinLoop(p1) && l->ifPointinLoop(p2))
+		{
+			return l;
+		}
+		l = p->getLoop();
+	}
 
 	return NULL;
 }

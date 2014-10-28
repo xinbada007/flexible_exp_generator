@@ -328,6 +328,9 @@ void ExperimentCallback::createObstacle()
 			case 1:
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;
+			case 3:
+				obs->createSphere(center, _expSetting->_obsSize.x());
+				break;
 			default:
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;
@@ -335,7 +338,7 @@ void ExperimentCallback::createObstacle()
 
 			//render
 			osg::ref_ptr<RenderVistor> rv = new RenderVistor;
-			rv->setBeginMode(GL_POLYGON);
+			rv->setBeginMode(GL_QUADS, 4, GL_POLYGON);
 			obs->accept(*rv);
 			_road->addChild(obs);
 			//texture      

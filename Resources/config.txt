@@ -29,7 +29,7 @@ CarVisible:	1	#1 = Visible	0 = Invisible
 CarReset:	0	#0 = disable	1 = auto	2 = manual
 
 [RoadSettings]
-RoadLanes:	1000
+RoadLanes:	100
 RoadPic:	../Resources/texture/road4096-2.png
 TextureWidth:	8
 
@@ -40,11 +40,11 @@ RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/5
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	1000
-RoadVisible:	1	#1 = Visible	0 = Invisible
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	0
 WallPic:	../Resources/texture/wall1024-2.jpg
-ScaleVector:	510,510,510	#DO NOT mess around with this
+ScaleVector:	520,520,520	#DO NOT mess around with this
 
 [Subjects]
 Name:	Demo
@@ -73,8 +73,8 @@ Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	-2 2	-20 -24	0 4 16 20 -16 -20 24 20 
 OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
 OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
-OBS-Shape:	1	# 0 = cube	1 = Cylinder
-#OBS-Pic:	../Resources/texture/tio.jpg;
+OBS-Shape:	3	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Pic:	../Resources/texture/black.jpg;
 
 ##==Text Setting=========================
 #Textime:	0

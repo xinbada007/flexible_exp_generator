@@ -60,6 +60,9 @@ public:
 	void traverse();
 	bool isValid();
 	Points * findPoint(osg::Vec3d ref);
+	Edge * findEdge(const osg::Vec3d &p1, const osg::Vec3d &p2);
+	Loop * findLoop(const Edge *e1, const Edge *e2);
+	Loop * findLoop(const osg::Vec3d &p1, const osg::Vec3d &p2);
 
 	inline void setTexCoord(osg::ref_ptr<osg::Vec2Array> refT) { _texCoord = refT; };
 	inline const osg::ref_ptr<osg::Vec2Array> getTexCoord() const { return _texCoord; };
