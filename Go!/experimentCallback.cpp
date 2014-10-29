@@ -338,7 +338,7 @@ void ExperimentCallback::createObstacle()
 
 			//render
 			osg::ref_ptr<RenderVistor> rv = new RenderVistor;
-			rv->setBeginMode(GL_QUADS, 4, GL_POLYGON);
+			rv->setBeginMode(GL_QUADS);
 			obs->accept(*rv);
 			_road->addChild(obs);
 			//texture      

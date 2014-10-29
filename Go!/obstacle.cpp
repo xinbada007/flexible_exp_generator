@@ -33,28 +33,35 @@ void Obstacle::genBoxTexture()
 	this->setTexCoord(tex);
 }
 
-void Obstacle::genTextureNoZ()
+void Obstacle::genTextureNoZ(const bool perGmtry /* = false */)
 {
 	Plane::reverse_iterator i = this->getLastPlane();
 	const osg::Vec3d zN1(0.0f, 0.0f, 1.0f);
 	const osg::Vec3d zN2(0.0f, 0.0f, -1.0f);
 	
-	unsigned total(0);
-	while (*i)
+	double startI = 0.0f;
+	double step = 0.0f;
+	double endI = 1.0f;
+	if (!perGmtry)
 	{
-		planeEQU pe = (*i)->getLoop()->getPlaneEQU();
-		const osg::Vec3d normal(pe.at(0), pe.at(1), pe.at(2));
-
-		if (!isEqual(normal,zN1) && !isEqual(normal,zN2))
+		unsigned total(0);
+		while (*i)
 		{
-			++total;
+			planeEQU pe = (*i)->getLoop()->getPlaneEQU();
+			const osg::Vec3d normal(pe.at(0), pe.at(1), pe.at(2));
+
+			if (!isEqual(normal, zN1) && !isEqual(normal, zN2))
+			{
+				++total;
+			}
+			i++;
 		}
-		i++;
+
+		startI = 0.0f;
+		step = 1.0f / double(total);
+		endI = startI + step;
 	}
 
-	double startI = 0.0f;
-	double step = 1.0f / double (total);
-	double endI = startI + step;
 	i = this->getLastPlane();
 	while (*i)
 	{
@@ -67,38 +74,14 @@ void Obstacle::genTextureNoZ()
 			tex->push_back(osg::Vec2(endI, 0.0f));
 			tex->push_back(osg::Vec2(endI, 1.0f));
 			tex->push_back(osg::Vec2(startI, 1.0f));
-			(*i)->getLoop()->setTexCoordArray(0, tex.release());
+			(*i)->getLoop()->setTexCoord(0, tex.release());
 			
 			startI += step;
 			endI += step;
 		}
-		++i;
-	}
-
-	if (this->getTexCoord())
-	{
-		this->setTexCoord(NULL);
-	}
-}
-
-void Obstacle::genUnifiedTexture()
-{
-	Plane::reverse_iterator i = this->getLastPlane();
-	const osg::Vec3d zN1(0.0f, 0.0f, 1.0f);
-	const osg::Vec3d zN2(0.0f, 0.0f, -1.0f);
-
-	while (*i)
-	{
-		planeEQU pe = (*i)->getLoop()->getPlaneEQU();
-		const osg::Vec3d normal(pe.at(0), pe.at(1), pe.at(2));
-		if (!isEqual(normal, zN1) && !isEqual(normal, zN2))
+		else
 		{
-			osg::ref_ptr<osg::Vec2Array> tex = new osg::Vec2Array;
-			tex->push_back(osg::Vec2(0.0f, 0.0f));
-			tex->push_back(osg::Vec2(1.0f, 0.0f));
-			tex->push_back(osg::Vec2(1.0f, 1.0f));
-			tex->push_back(osg::Vec2(0.0f, 1.0f));
-			(*i)->getLoop()->setTexCoordArray(0, tex.release());
+			(*i)->getLoop()->setSwitch(false);
 		}
 		++i;
 	}
@@ -183,8 +166,9 @@ void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 {
 //	const unsigned segment = (double(radius) / 1.0f) * 24;
+	const osg::Vec3d center(centre.x(), centre.y(), centre.z() + radius);
 	const unsigned segment = 32;
-	const int L = 18;
+	const int L = 16;
 	const double R = radius*0.5f;
 	std::vector<osg::ref_ptr<osg::Vec3dArray>> sphereList;
 
@@ -200,7 +184,7 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 			const double z = R *((double)i / double(L));
 
 			osg::Vec3d p(x, y, z);
-			p = p * osg::Matrix::translate(centre);
+			p = p * osg::Matrix::translate(center);
 			circle->push_back(p);
 		}
 		if (!circle->empty())
@@ -223,31 +207,26 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 	//Then stretch it until it becomes a Sphere
 	std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter_begin = sphereList.cbegin();
 	const std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter_end = sphereList.cend() - 1;
-	std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter_next;
+	std::vector<osg::ref_ptr<osg::Vec3dArray>>::const_iterator iter_next = iter_begin + 1;
 	osg::Vec3dArray::const_iterator pIter;
 	osg::Vec3dArray::const_iterator pNext;
 	osg::Vec3dArray::const_iterator pNIter;
 
-	std::vector<Loop *> loopList;
-	loopList.resize(iter_end - sphereList.cbegin() + 1);
-	int test(1);
-
-	while (iter_begin != iter_end)
+	while (iter_next != iter_end)
 	{
-		iter_next = iter_begin + 1;
 		pIter = (*iter_begin)->begin();
 		pNext = (*iter_next)->begin();
 		pNIter = (*iter_end)->begin();
-		Loop *l(NULL);
 		while (pIter != (*iter_begin)->end())
 		{
 			Edge *mEdge = findEdge(*pIter, *pNIter);
-			Edge *newE = insPt(mEdge, *pNext);
+			insPt(mEdge, *pNext);
 			pIter++;
 			pNIter++;
 			pNext++;
 		}		
-		iter_begin++;
+		++iter_begin;
+		++iter_next;
 	}
 
 	//Finally subdivide big Polygon into small polygons
@@ -267,9 +246,12 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 			Loop *l = findLoop(*pPre, *pIter);
 			if (l)
 			{
-				l->getHomeP()->setAbstract(true);
-				link(*pPre, *pIter);
-				l->getHomeP()->setAbstract(false);
+				if (!findEdge(*pPre, *pIter))
+				{
+					l->getHomeP()->setAbstract(true);
+					link(*pPre, *pIter);
+					l->getHomeP()->setAbstract(false);
+				}
 			}
 			pIter++;
 		}
@@ -277,9 +259,12 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 		Loop *l = findLoop((*iter_begin)->front(), (*iter_begin)->back());
 		if (l)
 		{
-			l->getHomeP()->setAbstract(true);
-			link((*iter_begin)->front(), (*iter_begin)->back());
-			l->getHomeP()->setAbstract(false);
+			if (!findEdge((*iter_begin)->front(), (*iter_begin)->back()))
+			{
+				l->getHomeP()->setAbstract(true);
+				link((*iter_begin)->front(), (*iter_begin)->back());
+				l->getHomeP()->setAbstract(false);
+			}
 		}
 		iter_begin++;
 	}
@@ -290,7 +275,7 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 		abs->setAbstract(false);
 	}
 
-	genUnifiedTexture();
+	genTextureNoZ(true);
 }
 
 void Obstacle::sweep(osg::ref_ptr<osg::Vec3dArray> swArray)

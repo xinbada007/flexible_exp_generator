@@ -4,10 +4,11 @@
 #include "edge.h"
 #include "points.h"
 #include "plane.h"
+#include "solid.h"
 
 Loop::Loop() :
 _startHE(NULL), _prev(NULL), _next(NULL), _homeP(NULL),
-_switch(true)
+_switch(true), _numHE(0)
 {
 
 }
@@ -15,7 +16,7 @@ _switch(true)
 Loop::Loop(const Loop &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
 osg::Geometry(copy, copyop),
 _startHE(copy.getHE()), _prev(copy.getPrev()), _next(copy.getNext()), _homeP(copy.getHomeP()),
-_switch(copy.getSwitch())
+_switch(copy.getSwitch()), _numHE(copy._numHE)
 {
 
 }
@@ -167,18 +168,22 @@ void Loop::splitLoop(Edge *refE, Loop *newL)
 	HalfEdge *setupHE = (temphe1 == newhe1) ? newhe1 : newhe2;
 
 	newL->setHE(setupHE);
+	newL->_numHE = 0;
 	do
 	{
 		tempHE1->setLoop(newL);
 		tempHE1 = tempHE1->getNext();
+		++newL->_numHE;
 	} while (tempHE1 != setupHE);
 
 	_startHE = setupHE->getMate();
 	HalfEdge *tempHE2 = _startHE;
+	this->_numHE = 0;
 	do
 	{
 		tempHE2->setLoop(this);
 		tempHE2 = tempHE2->getNext();
+		++this->_numHE;
 	} while (tempHE2 != _startHE);
 }
 
@@ -253,4 +258,10 @@ bool Loop::ifPointinLoop(const osg::Vec3d &p)
 	} while (he != _startHE);
 
 	return false;
+}
+
+void Loop::setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding binding /* = osg::Array::BIND_UNDEFINED */)
+{
+	_homeP->getHomeS()->setTexMode(true);
+	setTexCoordArray(unit, array, binding);
 }

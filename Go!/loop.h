@@ -27,6 +27,7 @@ public:
 	inline void setHomeP(Plane *ref) { _homeP = ref; };
 	inline bool getSwitch() const { return _switch; };
 	inline void setSwitch(bool ref) { _switch = ref; };
+	inline unsigned getnumHalfEdges() const { return _numHE; };
 
 	const edgelist getFlagEdge() const;
 	const osg::ref_ptr<osg::Vec3dArray> getNavigationEdge() const;
@@ -44,6 +45,9 @@ public:
 	const osg::ref_ptr<osg::Vec3dArray> getPoints();
 	
 	bool ifPointinLoop(const osg::Vec3d &p);
+
+	void setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding binding = osg::Array::BIND_UNDEFINED);
+
 private:
 	void forwardInsertHE(HalfEdge *he1, HalfEdge *he2);
 	HalfEdge *_startHE;
@@ -53,5 +57,7 @@ private:
 	
 	planeEQU _planeEQU;
 	bool _switch;
+
+	unsigned _numHE;
 };
 

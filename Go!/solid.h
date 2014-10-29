@@ -8,12 +8,6 @@
 class Points;
 class Edge;
 
-typedef enum SolidTexture
-{
-	SOLID_TEX_FLAT,
-	SOLID_TEX_CUBE
-}SolidTexture;
-
 class Solid:public osg::Switch
 {
 public:
@@ -51,6 +45,9 @@ public:
 	inline unsigned getNumPlanes() const { return _numPlanes; };
 //	inline void setNumPlanes(unsigned ref) { _numPlanes = ref; };
 
+	inline void setTexMode(bool mode){ _texMode = mode; };
+	inline bool getTexMode() const { return _texMode; };
+
 	Plane * getAbstract() const;
 
 	void addPlanetoList(Plane *refPL);
@@ -64,7 +61,7 @@ public:
 	Loop * findLoop(const Edge *e1, const Edge *e2);
 	Loop * findLoop(const osg::Vec3d &p1, const osg::Vec3d &p2);
 
-	inline void setTexCoord(osg::ref_ptr<osg::Vec2Array> refT) { _texCoord = refT; };
+	inline void setTexCoord(osg::ref_ptr<osg::Vec2Array> refT) { _texCoord = refT; if (_texCoord) _texMode = true; };
 	inline const osg::ref_ptr<osg::Vec2Array> getTexCoord() const { return _texCoord; };
 	inline const osg::ref_ptr<osg::Image> getImageTexture() const { return _imgTexture; };
 
@@ -144,5 +141,5 @@ private:
 
 	unsigned _index;
 
-	SolidTexture _texMode;
+	bool _texMode;
 };

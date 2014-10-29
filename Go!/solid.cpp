@@ -9,7 +9,7 @@
 Solid::Solid():
 _next(NULL), _prev(NULL), _updated(false), _numPoints(0), _numPlanes(0),
 _startPlane(NULL), _startE(NULL), _startP(NULL), _texCoord(NULL), _imgTexture(NULL),
-_lastPlane(NULL), _index(0), _texMode(SOLID_TEX_FLAT), _ccw(true), _ccwupdated(false)
+_lastPlane(NULL), _index(0), _texMode(false), _ccw(true), _ccwupdated(false)
 {
 
 }

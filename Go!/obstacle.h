@@ -19,7 +19,7 @@ private:
 	void sweep(const double height);
 	void sweep(osg::ref_ptr<osg::Vec3dArray> swArray);
 	void genBoxTexture();
-	void genTextureNoZ();
-	void genUnifiedTexture();
+	void genTextureNoZ(const bool perGmtry = false);
+//	void genUnifiedTexture();
 };
 

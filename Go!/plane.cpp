@@ -52,8 +52,12 @@ void Plane::traverse()
 
 	do 
 	{
-		this->addDrawable(refL->asGeometry());
-		refL->draw();
+		if (refL->getSwitch())
+		{
+			this->addDrawable(refL->asGeometry());
+			refL->draw();
+		}
+		
 		refL = refL->getNext();
 	} while (refL);
 
