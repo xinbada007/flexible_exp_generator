@@ -52,10 +52,12 @@ void Plane::traverse()
 
 	do 
 	{
-		if (refL->getSwitch())
+		this->addDrawable(refL->asGeometry());
+		refL->draw();
+
+		if (!refL->getSwitch())
 		{
-			this->addDrawable(refL->asGeometry());
-			refL->draw();
+			refL->getHomeP()->getHomeS()->setChildValue((this), false);
 		}
 		
 		refL = refL->getNext();

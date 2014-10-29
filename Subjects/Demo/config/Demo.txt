@@ -73,7 +73,7 @@ Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	-2 2	-20 -24	0 4 16 20 -16 -20 24 20 
 OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
 OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
-OBS-Shape:	3	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Pic:	../Resources/texture/tio.jpg;
 
 ##==Text Setting=========================
