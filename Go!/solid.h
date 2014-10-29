@@ -119,6 +119,18 @@ public:
 		Solid *_value;
 	};
 
+	struct absoluteTerritory
+	{
+		absoluteTerritory()
+		{
+			_detectR = 0.0f;
+			_refuseR = 0.0f;
+		}
+		osg::Vec3d center;
+		double _detectR;
+		double _refuseR;
+	}absoluteTerritory;
+
 protected:
 	~Solid();
 	osg::ref_ptr<osg::Vec2Array> _texCoord;

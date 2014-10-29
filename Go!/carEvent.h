@@ -23,6 +23,7 @@ private:
 	void autoNavigation();
 	void checkRotationLimit();
 
+	osg::ref_ptr<Car> _car;
 	osg::ref_ptr<CarState> _carState;
 	Vehicle *_vehicle;
 	osg::ref_ptr<osg::MatrixTransform> _mTransform;

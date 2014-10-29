@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "car.h"
+#include <algorithm>
 
 Car::Car()
 {
@@ -68,4 +69,9 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 
 	//set acceleration mode
 	_carState->_dynamic = _vehicle->_acceleration;
+
+	this->absoluteTerritory.center = _carState->_O;
+	this->absoluteTerritory._detectR = std::max(_vehicle->_height, _vehicle->_width);
+	this->absoluteTerritory._detectR = std::max(this->absoluteTerritory._detectR, _vehicle->_length);
+	this->absoluteTerritory._refuseR = 0.0f;
 }

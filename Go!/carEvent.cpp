@@ -6,7 +6,7 @@
 #include <osgGA/EventVisitor>
 
 CarEvent::CarEvent() :
-_carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
+_car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
 , _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false)
 {
 	_buttons = new osg::UIntArray;
@@ -15,6 +15,7 @@ _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(f
 
 CarEvent::~CarEvent()
 {
+	_car = NULL;
 	_carState = NULL;
 	_vehicle = NULL;
 	_mTransform = NULL;
@@ -320,6 +321,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 		if (refC)
 		{
+			_car = refC;
 			_carState = refC->getCarState();
 			_vehicle = refC->getVehicle();
 			_mTransform = refM;
@@ -456,6 +458,8 @@ void CarEvent::applyCarMovement()
 	hD -= _carState->_O;
 	hD.normalize();
 	_carState->_heading = hD;
+
+	_car->absoluteTerritory.center = _carState->_O;
 
 	//set carstate
 //	_carState->cacluateSpeedandAngle();

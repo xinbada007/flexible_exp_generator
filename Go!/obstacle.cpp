@@ -2,6 +2,7 @@
 #include "obstacle.h"
 #include "halfedge.h"
 #include "points.h"
+#include <algorithm>
 
 Obstacle::Obstacle()
 {
@@ -130,6 +131,10 @@ void Obstacle::createCylinder(const osg::Vec3d &center, const double &radius, co
 		abs->setAbstract(false);
 	}
 
+	this->absoluteTerritory.center.set(center.x(), center.y(), center.z() + height*0.5f);
+	this->absoluteTerritory._detectR = 2 * std::max(radius, height);
+	this->absoluteTerritory._refuseR = 0.0f;
+
 	genTextureNoZ();
 }
 
@@ -160,13 +165,18 @@ void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 		abs->setAbstract(false);
 	}
 
+	this->absoluteTerritory.center.set(center.x(),center.y(),center.z() + radius.z()*0.5f);
+	this->absoluteTerritory._detectR = pow(std::max(radius.x(), radius.y()), 2) + pow((radius.z()*0.5f), 2);
+	this->absoluteTerritory._detectR = 2*sqrt(this->absoluteTerritory._detectR);
+	this->absoluteTerritory._refuseR = 0.0f;
+
 	genBoxTexture();
 }
 
 void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 {
 //	const unsigned segment = (double(radius) / 1.0f) * 24;
-	const osg::Vec3d center(centre.x(), centre.y(), centre.z() + radius);
+	const osg::Vec3d center(centre.x(), centre.y(), centre.z() + radius*0.5f);
 	const unsigned segment = 32;
 	const int L = 16;
 	const double R = radius*0.5f;
@@ -274,6 +284,10 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 	{
 		abs->setAbstract(false);
 	}
+
+	this->absoluteTerritory.center = center;
+	this->absoluteTerritory._detectR = R * 2.0f;
+	this->absoluteTerritory._refuseR = R;
 
 	genTextureNoZ(true);
 }

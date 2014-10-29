@@ -177,8 +177,27 @@ bool Collision::ifObsCollide(const Car *refC, const Solid *obs)
 	const unsigned wheelsofCar(4);
 	const osg::ref_ptr<osg::Vec3dArray> carArray = refC->getCarState()->_carArray;
 	osg::ref_ptr<osg::Vec3dArray> planeMove = new osg::Vec3dArray(carArray->begin(), carArray->begin() + wheelsofCar);
-	osg::Vec3dArray::iterator j = planeMove->begin();
-	const double height = refC->getVehicle()->_height;
+	osg::Vec3dArray::const_iterator j = planeMove->begin();
+
+	const double refuseR = obs->absoluteTerritory._refuseR;
+	if (refuseR)
+	{
+		osg::Vec3d center = obs->absoluteTerritory.center;
+		while (j != planeMove->end())
+		{
+			const double distance = (center - (*j)).length();
+			if (distance <= refuseR)
+			{
+				return true;
+			}
+			j++;
+		}
+		center.z() = 0.0f;
+		if (ifPoint_IN_Polygon(center, planeMove, refC->getPlane()->getLoop()->getPlaneEQU()))
+			return true;
+		return false;
+	}
+
 	while (j != planeMove->end())
 	{
 		if (obs->ifPointinSolid(*j))
@@ -203,10 +222,23 @@ bool Collision::ifObsCollide(const Car *refC, const Solid *obs)
 
 bool Collision::detectObsDistance(const Car *refC, const Solid *obs)
 {
-	const osg::Vec3d &center = refC->getCarState()->_carArray->back();
-	double therold = std::max(refC->getVehicle()->_width, refC->getVehicle()->_length)*2;
-	therold = std::max(therold, refC->getCarState()->_speed * 2);
+	const double &R1 = refC->absoluteTerritory._detectR;
+	const double &R2 = obs->absoluteTerritory._detectR;
+	if (R1 && R2)
+	{
+		const double distance = (obs->absoluteTerritory.center - refC->absoluteTerritory.center).length();
+		if (distance < R1 + R2)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 
+	const osg::Vec3d &center = refC->getCarState()->_carArray->back();
+	const double therold = std::max(refC->getVehicle()->_width, refC->getVehicle()->_length)*2;
 	Points *p = obs->getPoint();
 	while (p)
 	{
