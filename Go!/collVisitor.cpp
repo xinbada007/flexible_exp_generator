@@ -6,7 +6,7 @@
 
 CollVisitor::CollVisitor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
-_car(NULL), _mode(ROAD), _useMode(false)
+_car(NULL), _mode(ROAD)
 {
 }
 
@@ -20,22 +20,43 @@ void CollVisitor::reset()
 {
 	_obs.clear();
 	_rd.clear();
-	_wall.clear();
+	_lwall.clear();
+	_rwall.clear();
 	_mode = ROAD;
-	_useMode = false;
+	_car = NULL;
+}
+
+CollVisitor *CollVisitor::instance()
+{
+	static osg::ref_ptr<CollVisitor> cv = new CollVisitor;
+	return cv.get();
+}
+
+const solidList CollVisitor::getWall() const
+{
+	_wall.clear();
+
+	std::copy(_rwall.cbegin(), _rwall.cend(), std::back_inserter(_wall));
+	std::copy(_lwall.cbegin(), _lwall.cend(), std::back_inserter(_wall));
+
+	return _wall;
 }
 
 void CollVisitor::setMode(ROADTAG _ref)
 {
-	switch (_ref)
+	_mode = _ref;
+
+	switch (_mode)
 	{
 	case MIDQUAD:
 		break;
 	case CTRL:
 		break;
 	case LWALL:
+		_lwall.clear();
 		break;
 	case RWALL:
+		_rwall.clear();
 		break;
 	case ROAD:
 		_rd.clear();
@@ -50,17 +71,22 @@ void CollVisitor::setMode(ROADTAG _ref)
 
 void CollVisitor::pushLR(osg::ref_ptr<LogicRoad> refLR)
 {
-	switch (refLR->getTag())
+	if (refLR->getTag() != _mode)
+	{
+		return;
+	}
+
+	switch (_mode)
 	{
 	case MIDQUAD:
 		break;
 	case CTRL:
 		break;
 	case LWALL:
-		_wall.push_back(dynamic_cast<Solid*>(refLR.get()));
+		_lwall.push_back(dynamic_cast<Solid*>(refLR.get()));
 		break;
 	case RWALL:
-		_wall.push_back(dynamic_cast<Solid*>(refLR.get()));
+		_rwall.push_back(dynamic_cast<Solid*>(refLR.get()));
 		break;
 	case ROAD:
 		_rd.push_back(dynamic_cast<Solid*>(refLR.get()));
@@ -80,17 +106,7 @@ void CollVisitor::apply(osg::Group& node)
 
 	if (refLR)
 	{
-		if (!_useMode)
-		{
-			pushLR(refLR);
-		}
-		else if (_useMode)
-		{
-			if (refLR->getTag() == _mode)
-			{
-				pushLR(refLR);
-			}
-		}
+		pushLR(refLR);
 	}
 
 	if (refCar)

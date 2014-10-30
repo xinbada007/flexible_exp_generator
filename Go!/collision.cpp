@@ -439,7 +439,7 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 
 void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 {
-	const CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
+	const CollVisitor *refCV = CollVisitor::instance();
 	const Car *refC = dynamic_cast<Car*>(node);
 	if (refCV && refC)
 	{

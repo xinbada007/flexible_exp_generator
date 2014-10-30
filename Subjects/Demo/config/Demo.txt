@@ -29,8 +29,8 @@ CarVisible:	1	#1 = Visible	0 = Invisible
 CarReset:	0	#0 = disable	1 = auto	2 = manual
 
 [RoadSettings]
-RoadLanes:	1000
-RoadPic:	../Resources/texture/grass.jpg 16
+RoadLanes:	3
+RoadPic:	../Resources/texture/grass.jpg
 TextureWidth:	2
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
@@ -40,7 +40,7 @@ RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/5
 Method:	0	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	2000
-RoadVisible:	0	#1 = Visible	0 = Invisible
+RoadVisible:	1	#1 = Visible	0 = Invisible
 
 WallHeight:	0
 WallPic:	../Resources/texture/wall1024-2.jpg

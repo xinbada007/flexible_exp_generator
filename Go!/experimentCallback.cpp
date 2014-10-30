@@ -99,7 +99,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
 	if (!_cVisitor)
 	{
-		_cVisitor = dynamic_cast<CollVisitor*>(this->getUserData());
+		_cVisitor = CollVisitor::instance();
 	}
 	if (_cVisitor && _cVisitor->getCar() && !_carState)
 	{

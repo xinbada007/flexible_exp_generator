@@ -118,9 +118,17 @@ int main(int argc, char** argv)
 			road.back()->accept(*rv);
 			road.back()->accept(*tv);
 		}
+		CollVisitor *cv = CollVisitor::instance();
+		cv->setMode(ROADTAG::ROAD);
+		road.back()->accept(*cv);
+		cv->setMode(ROADTAG::RWALL);
+		road.back()->accept(*cv);
+		cv->setMode(ROADTAG::LWALL);
+		road.back()->accept(*cv);
 
 		//Build Car & Render Car && Obtain carMatrix
 		car.push_back(obtainCar(readConfig.back()));
+		cv->setCar(car.back());
 		if (car.back()->getVehicle()->_visibility)
 		{
 			rv->reset();
@@ -133,15 +141,11 @@ int main(int argc, char** argv)
 		root.push_back(new osg::Group());
 		root.back()->addChild(road.back().get());
 		root.back()->addChild(carMatrix.back().get());
-		osg::ref_ptr<CollVisitor> cv = new CollVisitor;
-		root.back()->accept(*cv);
 
 		//Collision detect && Trace Car
 		colldetect.push_back(new Collision);
-		colldetect.back()->setUserData(cv.get());
 		car.back()->addUpdateCallback(colldetect.back().get());
 		roadSwitcher.push_back(new RoadSwitcher);
-		roadSwitcher.back()->setUserData(cv.get());
 		road.back()->addUpdateCallback(roadSwitcher.back().get());
 
 		//Debug Node
@@ -169,7 +173,6 @@ int main(int argc, char** argv)
 
 		//ExperimentControl
 		expcontroller.push_back(new ExperimentCallback(readConfig.back()));
-		expcontroller.back()->setUserData(cv.get());
 		expcontroller.back()->setHUDCamera(mViewer.back()->getHUDCamera());
 		expcontroller.back()->setMultiViewer(mViewer.back().get());
 		root.back()->addEventCallback(expcontroller.back().get());
@@ -187,9 +190,7 @@ int main(int argc, char** argv)
 		++curRep;
 	}
 
-// 	//Sound&Music
-// 	osg::ref_ptr<osgAudio::SoundRoot> sound_root = new osgAudio::SoundRoot;
-// 	root->addChild(sound_root);
+	//Sound&Music
 	osg::ref_ptr<MusicPlayer> musicplayer = new MusicPlayer;
 
 	//Ready to Run

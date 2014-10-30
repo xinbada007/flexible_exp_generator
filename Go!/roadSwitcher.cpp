@@ -17,7 +17,7 @@ RoadSwitcher::~RoadSwitcher()
 
 void RoadSwitcher::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-	const CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
+	const CollVisitor *refCV = CollVisitor::instance();
 
 	if (refCV)
 	{
