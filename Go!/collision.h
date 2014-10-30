@@ -28,5 +28,6 @@ private:
 
 	solidList _wall;
 	quadList _wall_reduced;
+	solidList _obsList;
 };
 

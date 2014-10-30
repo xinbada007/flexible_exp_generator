@@ -14,7 +14,7 @@ public:
 	virtual ~CollVisitor();
 
 	virtual void reset();
-	inline void setMode(ROADTAG _ref) { _mode = _ref; _useMode = true; };
+	void setMode(ROADTAG _ref);
 	inline ROADTAG getMode() { return _mode; };
 	inline bool ifUseMode() { return _useMode; };
 	inline void disableMode() { _useMode = false; };

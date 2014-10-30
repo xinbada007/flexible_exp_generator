@@ -11,6 +11,8 @@
 #include "math.h"
 
 typedef std::vector<std::string> stringList;
+struct  Nurbs;
+typedef std::vector<osg::ref_ptr<Nurbs>> nurbsList;
 
 typedef struct Experiment :public osg::Referenced
 {
@@ -33,6 +35,7 @@ typedef struct Experiment :public osg::Referenced
 		_obsShape = 1;
 		_imgOBS = NULL;
 		_imgAnisotropy = 1.0f;
+		_numObsinArray = 100;
 
 		_offset = 0.0f;
 
@@ -61,6 +64,9 @@ typedef struct Experiment :public osg::Referenced
 	std::string _obsPic;
 	osg::ref_ptr<osg::Image> _imgOBS;
 	double _imgAnisotropy;
+	stringList _obsArray;
+	unsigned _numObsinArray;
+	nurbsList _nurbs;
 
 	double _offset;
 
@@ -112,8 +118,6 @@ typedef struct Nurbs:public osg::Referenced
 protected:
 	virtual ~Nurbs(){ std::cout << "Deconstruct Nurbs" << std::endl; };
 }Nurbs;
-
-typedef std::vector<osg::ref_ptr<Nurbs>> nurbsList;
 
 typedef struct RoadSet:public osg::Referenced
 {
@@ -356,7 +360,7 @@ private:
 	Nurbs * readNurbs();
 	void scaleCtrlPoints();
 	void alignCtrlPoints(Nurbs *refNurbs);
-	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB);
+	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double width = 0.0f);
 	void updateNurbs();
 	
 	osg::ref_ptr<Nurbs> _nurbs;

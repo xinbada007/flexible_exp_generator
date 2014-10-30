@@ -31,16 +31,16 @@ CarReset:	0	#0 = disable	1 = auto	2 = manual
 [RoadSettings]
 RoadLanes:	1000
 RoadPic:	../Resources/texture/grass.jpg 16
-TextureWidth:	1
+TextureWidth:	2
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
 #RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
 
-Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
+Method:	0	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	2000
-RoadVisible:	1	#1 = Visible	0 = Invisible
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	0
 WallPic:	../Resources/texture/wall1024-2.jpg
@@ -75,6 +75,7 @@ OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
 OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
 OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Pic:	../Resources/texture/tio.jpg
+OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
 
 ##==Text Setting=========================
 #Textime:	0

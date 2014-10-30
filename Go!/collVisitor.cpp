@@ -18,7 +18,34 @@ CollVisitor::~CollVisitor()
 
 void CollVisitor::reset()
 {
+	_obs.clear();
+	_rd.clear();
+	_wall.clear();
+	_mode = ROAD;
+	_useMode = false;
+}
 
+void CollVisitor::setMode(ROADTAG _ref)
+{
+	switch (_ref)
+	{
+	case MIDQUAD:
+		break;
+	case CTRL:
+		break;
+	case LWALL:
+		break;
+	case RWALL:
+		break;
+	case ROAD:
+		_rd.clear();
+		break;
+	case OBS:
+		_obs.clear();
+		break;
+	default:
+		break;
+	}
 }
 
 void CollVisitor::pushLR(osg::ref_ptr<LogicRoad> refLR)

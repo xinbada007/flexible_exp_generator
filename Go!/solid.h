@@ -51,6 +51,9 @@ public:
 	inline void setMaxAnisotropy(double ref){ _maxAnisotropy = ref; };
 	inline double getMaxAnisotropy() const { return _maxAnisotropy; };
 
+	inline void setSolidType(unsigned ref){ _solidType = ref; };
+	inline unsigned getSolidType() const { return _solidType; };
+
 	Plane * getAbstract() const;
 
 	void addPlanetoList(Plane *refPL);
@@ -134,6 +137,15 @@ public:
 		double _refuseR;
 	}absoluteTerritory;
 
+	enum solidType
+	{
+		UNDEFINED,
+		ROADBODY,
+		WALLBODY,
+		OBSBODY,
+		COINBODY
+	}solidType;
+
 protected:
 	~Solid();
 	osg::ref_ptr<osg::Vec2Array> _texCoord;
@@ -159,4 +171,6 @@ private:
 	bool _texMode;
 
 	double _maxAnisotropy;
+
+	unsigned _solidType;
 };

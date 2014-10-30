@@ -14,13 +14,16 @@
 #include <osgAudio/SoundManager.h>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL)
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
+_obsListDrawn(false)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+	createObstacles();
 
 //	osg::ref_ptr<osgAudio::FileStream> sample = NULL;
 	osg::ref_ptr<osgAudio::Sample> sample = NULL;
@@ -57,12 +60,50 @@ ExperimentCallback::~ExperimentCallback()
 	}
 }
 
+void ExperimentCallback::createObstacles()
+{
+	if (_expSetting->_nurbs.empty())
+	{
+		return;
+	}
+
+	osg::ref_ptr<osg::Vec3dArray> centerList = new osg::Vec3dArray;
+	nurbsList::const_iterator i = _expSetting->_nurbs.cbegin();
+	while (i != _expSetting->_nurbs.cend())
+	{
+		
+		osg::Vec3dArray::const_iterator start = (*i)->_path->begin();
+		osg::Vec3dArray::const_iterator end = (*i)->_path->end();
+		while (start != end)
+		{
+			centerList->push_back(*start);
+			start++;
+		}
+		i++;
+	}
+
+
+	osg::Vec3dArray::const_iterator centerBegin = centerList->begin();
+	osg::Vec3dArray::const_iterator centerEnd = centerList->end();
+	while (centerBegin != centerEnd)
+	{
+		osg::ref_ptr<Obstacle> obs = new Obstacle;
+		obs->createBox(*centerBegin, _expSetting->_obsSize);
+		_obstacleList.push_back(obs);
+		_obstacleList.back()->setSolidType(Solid::solidType::COINBODY);
+		centerBegin++;
+	}
+}
+
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-	const CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
-	if (refCV && refCV->getCar() && !_carState)
+	if (!_cVisitor)
 	{
-		_carState = refCV->getCar()->getCarState();
+		_cVisitor = dynamic_cast<CollVisitor*>(this->getUserData());
+	}
+	if (_cVisitor && _cVisitor->getCar() && !_carState)
+	{
+		_carState = _cVisitor->getCar()->getCarState();
 	}
 	if (!_root)
 	{
@@ -118,7 +159,8 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			deviationCheck();
 			showText();
 			dynamicChange();
-			createObstacle();
+			showObstacle();
+			dealCollision();
 			break;
 		default:
 			break;
@@ -126,6 +168,32 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	}
 
 	traverse(node, nv);
+}
+
+void ExperimentCallback::dealCollision()
+{
+	const solidList *obsList = _carState->getObsList();
+	if (!obsList)
+	{
+		return;
+	}
+
+	_carState->_collide = true;
+	solidList::const_iterator i = obsList->cbegin();
+	solidList::const_iterator END = obsList->cend();
+
+	while (i != END)
+	{
+		if ((*i)->getSolidType() == Solid::solidType::COINBODY)
+		{
+			_carState->_collide = false;
+			_road->removeChild(*i);
+			_cVisitor->setMode(OBS);
+			_road->accept(*_cVisitor);
+		}
+
+		++i;
+	}
 }
 
 void ExperimentCallback::deviationCheck()
@@ -255,11 +323,41 @@ void ExperimentCallback::dynamicChange()
 	}
 }
 
-void ExperimentCallback::createObstacle()
+void ExperimentCallback::showObstacle()
 {
-	if (_obstacle->empty())
+	if (_obstacle->empty() && _obstacleList.empty())
 	{
 		return;
+	}
+	if (!_obsListDrawn && !_obstacleList.empty())
+	{
+		_obsListDrawn = true;
+
+		std::vector<osg::ref_ptr<Obstacle>>::const_iterator i = _obstacleList.cbegin();
+		osg::ref_ptr<RenderVistor> rv = new RenderVistor;
+		osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
+
+		while (i != _obstacleList.cend())
+		{
+			osg::ref_ptr<Obstacle> obs = *i;
+
+			rv->reset();
+			rv->setBeginMode(GL_QUADS);
+			obs->accept(*rv);
+			_road->addChild(obs);
+
+			obs->setImage(_expSetting->_imgOBS);
+			obs->setMaxAnisotropy(_expSetting->_imgAnisotropy);
+			obs->accept(*tv);
+
+			if (_cVisitor)
+			{
+				_cVisitor->setMode(OBS);
+				_road->accept(*_cVisitor);
+			}
+
+			i++;
+		}
 	}
 
 	const int &ob_size = _expSetting->_obstaclesTime->size();
@@ -320,6 +418,7 @@ void ExperimentCallback::createObstacle()
 			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
 			center = center * osg::Matrix::translate(X_AXIS * *posOffset);
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
+			obs->setSolidType(Solid::solidType::OBSBODY);
 			switch (_expSetting->_obsShape)
 			{
 			case 0:
@@ -346,11 +445,10 @@ void ExperimentCallback::createObstacle()
 			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
 			obs->accept(*tv);
 			//visitor
-			CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
-			if (refCV)
+			if (_cVisitor)
 			{
-				refCV->setMode(OBS);
-				_road->accept(*refCV);
+				_cVisitor->setMode(OBS);
+				_road->accept(*_cVisitor);
 			}
 		}
 	}

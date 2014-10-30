@@ -66,6 +66,8 @@ typedef struct CarState:public osg::Referenced
 		_replay = false;
 
 		_detailedDisplay = false;
+
+		_obsList = NULL;
 	};
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
@@ -139,6 +141,8 @@ typedef struct CarState:public osg::Referenced
 	inline void updateLastO(osg::Vec3d ref) { _lastO = ref; };
 	inline void setReplayText(std::string ref) { if (_replay) _replayText = ref; };
 	inline const std::string & getReplayText() const { return _replayText; };
+	inline void setObsList(solidList *list){ _obsList = list; };
+	inline solidList * getObsList() const { return _obsList; };
 private:
 	~CarState(){ std::cout << "Deconstruct CarState" << std::endl; };
 	mutable double _D_Speed;
@@ -152,6 +156,8 @@ private:
 	mutable double _lastTimeR;
 
 	std::string _replayText;
+
+	solidList *_obsList;
 }CarState;
 
 class Car:public EulerPoly

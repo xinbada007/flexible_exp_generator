@@ -331,7 +331,7 @@ void ReadConfig::initializeAfterReadTrial()
 		scaleCtrlPoints();
 		Nurbs *prve = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());
 		alignCtrlPoints(prve);
-		_roads->_nurbsMethod == 1 ? updateNurbs() : updateNurbs(new NurbsCurve);
+		_roads->_nurbsMethod == 1 ? updateNurbs() : updateNurbs(new NurbsCurve, _roads->_density,_roads->_width);
 		_roads->_nurbs.push_back(_nurbs.release());
 	}
 	//load the pic as texture
@@ -366,7 +366,7 @@ void ReadConfig::initializeAfterReadTrial()
 //		osg::notify(osg::WARN) << "Unable to load Dynamic texture file. Exiting." << std::endl;
 		_experiment->_imgDynamic = NULL;
 	}
-
+	//Initialize Obstacles
 	const unsigned &numObs = _experiment->_obstaclesTime->size();
 	const double defaultDistance = 200.0f;
 	const int defaultPos = 0;
@@ -390,6 +390,18 @@ void ReadConfig::initializeAfterReadTrial()
 	if (!_experiment->_imgOBS.valid())
 	{
 		_experiment->_imgOBS = NULL;
+	}
+	i = _experiment->_obsArray.cbegin();
+	while (i != _experiment->_obsArray.cend())
+	{
+		_filename = *i++;
+		_nurbs = new Nurbs;
+		readNurbs();
+//		scaleCtrlPoints();
+		Nurbs *prve = (_experiment->_nurbs.empty() ? NULL : _experiment->_nurbs.back());
+		alignCtrlPoints(prve);
+		updateNurbs(new NurbsCurve,_experiment->_numObsinArray);
+		_experiment->_nurbs.push_back(_nurbs.release());
 	}
 
 	_experiment->_offset = _roads->_width;
@@ -1061,6 +1073,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSSIZE("OBS-SIZE");
 		const string OBSSHAPE("OBS-SHAPE");
 		const string OBSPIC("OBS-PIC");
+		const string OBSARRAY("OBS-ARRAY");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
 		const string DEVIATIONSIREN("DEVIATION-SIREN");
@@ -1253,6 +1266,29 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == OBSARRAY)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAY.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				while (!config.empty())
+				{
+					std::string txtOBS;
+					std::size_t found_to = config.find_first_of(" ");
+					if (found_to != config.npos)
+					{
+						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtOBS));
+					}
+					else
+					{
+						txtOBS = config;
+						config.clear();
+					}
+					_experiment->_obsArray.push_back(txtOBS);
+					config.erase(config.begin(), config.begin() + found_to);
+					config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				}
+				continue;
+			}
 			else if (title == DEVIATION)
 			{
 				config.erase(config.begin(), config.begin() + DEVIATION.size());
@@ -1423,21 +1459,18 @@ void ReadConfig::alignCtrlPoints(Nurbs *refNurbs)
 	}
 }
 
-void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB)
+void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double width /* = 0.0f */)
 {
-	if (_roads)
+	refNB->setKnotVector(_nurbs->_knotVector);
+	refNB->setDegree(_nurbs->_order - 1);
+	refNB->setNumPath(density);
+
+	refNB->setCtrlPoints(_nurbs->_ctrlPoints);
+	refNB->update();
+	_nurbs->_path = refNB->getPath();
+
+	if (width)
 	{
-		const unsigned density = _roads->_density;
-
-		refNB->setKnotVector(_nurbs->_knotVector);
-		refNB->setDegree(_nurbs->_order - 1);
-		refNB->setNumPath(density);
-
-		refNB->setCtrlPoints(_nurbs->_ctrlPoints);
-		refNB->update();
-		_nurbs->_path = refNB->getPath();
-
-		const double width = _roads->_width;
 		const double halfW = width * 0.5f;
 
 		_nurbs->_ctrl_left = project_Line(_nurbs->_ctrlPoints, halfW);

@@ -7,6 +7,9 @@
 #include "car.h"
 #include "readConfig.h"
 #include "mulitViewer.h"
+#include "obstacle.h"
+
+class CollVisitor;
 
 class ExperimentCallback :
 	public osg::NodeCallback
@@ -20,12 +23,17 @@ public:
 private:
 	const Experiment *_expSetting;
 	CarState *_carState;
+	CollVisitor *_cVisitor;
+
 	double _expTime;
 	osg::ref_ptr<osg::UIntArray> _dynamic;
 	bool _dynamicUpdated;
 	bool _deviationWarn;
 	bool _deviationLeft;
 	double _thisMomentDynamic;
+
+	std::vector<osg::ref_ptr<Obstacle>> _obstacleList;
+	bool _obsListDrawn;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
 
@@ -37,9 +45,13 @@ private:
 	osg::ref_ptr<osg::Group> _root;
 	osg::ref_ptr<osg::Switch> _road;
 	osg::ref_ptr<MulitViewer> _mv;
+
 	void dynamicChange();
 	void showText();
-	void createObstacle();
+	void showObstacle();
 	void deviationCheck();
+
+	void createObstacles();
+	void dealCollision();
 };
 

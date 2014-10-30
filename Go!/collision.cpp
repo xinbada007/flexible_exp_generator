@@ -469,18 +469,18 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		}
 
 		//collision against Obstacle detection
-		solidList listObs;
-		listObs = listObsCollsion(refC, refCV->getObstacle());
-		if (!listObs.empty())
+		_obsList = listObsCollsion(refC, refCV->getObstacle());
+		refC->getCarState()->setObsList(NULL);
+		if (!_obsList.empty())
 		{
-			refC->getCarState()->_collide = true;
+//			refC->getCarState()->_collide = true;
+			refC->getCarState()->setObsList(&_obsList);
 		}
 
-		if (listObs.empty() && listWall.empty())
+		if (_obsList.empty() && listWall.empty())
 		{
-			refC->getCarState()->_collide = false;
-		}
-		
+//			refC->getCarState()->_collide = false;
+		}		
 	}
 	
 	traverse(node, nv);

@@ -159,7 +159,10 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 
 		//Add Road
 		osg::ref_ptr<LogicRoad> newR = universalLogicRoad(j, ROAD);
+
 		newR->setMaxAnisotropy(_roadSet->_imgRoadAnisotropy);
+		newR->setSolidType(Solid::solidType::ROADBODY);
+
 		sw->addChild(addLogRoadtoList(newR.get()));	
 		_roadList.push_back(newR.get());
 
@@ -177,12 +180,18 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 		if (buildWall)
 		{
 			osg::ref_ptr<LogicRoad> lWall = universalLogicRoad(j, LWALL);
+
 			lWall->setMaxAnisotropy(_roadSet->_imgWallAnisotropy);
+			lWall->setSolidType(Solid::solidType::WALLBODY);
+
 			sw->addChild(addLogRoadtoList(lWall.get()));
 			_lWallList.push_back(lWall.get());
 
 			osg::ref_ptr<LogicRoad> rWall = universalLogicRoad(j, RWALL);
+
 			rWall->setMaxAnisotropy(_roadSet->_imgWallAnisotropy);
+			rWall->setSolidType(Solid::solidType::WALLBODY);
+
 			sw->addChild(addLogRoadtoList(rWall.get()));
 			_rWallList.push_back(rWall.get());
 		}
