@@ -195,7 +195,6 @@ bool Collision::ifObsCollide(const Car *refC, const Solid *obs)
 		center.z() = 0.0f;
 		if (ifPoint_IN_Polygon(center, planeMove, refC->getPlane()->getLoop()->getPlaneEQU()))
 			return true;
-		return false;
 	}
 
 	while (j != planeMove->end())

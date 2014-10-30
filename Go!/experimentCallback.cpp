@@ -15,7 +15,7 @@
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
-_obsListDrawn(false)
+_coin(NULL), _obsListDrawn(false)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
@@ -36,6 +36,18 @@ _obsListDrawn(false)
 		osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
 		sample = NULL;
 	}
+
+	_coinSample = NULL;
+	try
+	{
+		_coinSample = new osgAudio::Sample("../Resources/sound/smw_coin.wav");
+	}
+	catch (std::exception &e)
+	{
+		osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
+		_coinSample = NULL;
+	}
+
 	if (sample)
 	{
 		_siren = osgAudio::SoundManager::instance()->findSoundState("GOsiren");
@@ -50,6 +62,21 @@ _obsListDrawn(false)
 			osgAudio::SoundManager::instance()->addSoundState(_siren);
 		}
 	}
+	if (_coinSample)
+	{
+		_coin = osgAudio::SoundManager::instance()->findSoundState("Gocoin");
+		if (!_coin)
+		{
+			_coin = new osgAudio::SoundState("Gocoin");
+			_coin->allocateSource(20);
+			_coin->setSample(_coinSample.get());
+			_coin->setAmbient(true);
+			_coin->setPlay(false);
+			_coin->setLooping(false);
+			_coin->setStopMethod(osgAudio::Stopped);
+			osgAudio::SoundManager::instance()->addSoundState(_coin);
+		}
+	}
 }
 
 ExperimentCallback::~ExperimentCallback()
@@ -57,6 +84,10 @@ ExperimentCallback::~ExperimentCallback()
 	if (_siren)
 	{
 		_siren.release();
+	}
+	if (_coin)
+	{
+		_coin.release();
 	}
 }
 
@@ -88,7 +119,7 @@ void ExperimentCallback::createObstacles()
 	while (centerBegin != centerEnd)
 	{
 		osg::ref_ptr<Obstacle> obs = new Obstacle;
-		obs->createBox(*centerBegin, _expSetting->_obsSize);
+		obs->createBox(*centerBegin, _expSetting->_obsSize*_expSetting->_obsArraySize);
 		_obstacleList.push_back(obs);
 		_obstacleList.back()->setSolidType(Solid::solidType::COINBODY);
 		centerBegin++;
@@ -186,7 +217,13 @@ void ExperimentCallback::dealCollision()
 	{
 		if ((*i)->getSolidType() == Solid::solidType::COINBODY)
 		{
+			if (_coin)
+			{
+				_coin->setSample(_coinSample.get());
+				_coin->setPlay(true);
+			}
 			_carState->_collide = false;
+			++_carState->_pointsEarned;
 			_road->removeChild(*i);
 			_cVisitor->setMode(OBS);
 			_road->accept(*_cVisitor);
@@ -346,7 +383,7 @@ void ExperimentCallback::showObstacle()
 			obs->accept(*rv);
 			_road->addChild(obs);
 
-			obs->setImage(_expSetting->_imgOBS);
+			obs->setImage(_expSetting->_imgObsArray);
 			obs->setMaxAnisotropy(_expSetting->_imgAnisotropy);
 			obs->accept(*tv);
 

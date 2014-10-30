@@ -55,6 +55,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._radiusL);
 	_outMoment.push_back(&_recS._dynamic);
 	_outMoment.push_back(&_recS._usrHit);
+	_outMoment.push_back(&_recS._pointsEarned);
 	_outMoment.push_back(&_recS._replay);
 
 	_outMoment.push_back(&_recS._PERIOD);
@@ -439,6 +440,9 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, radiusL, nDigit);
 	_recS._radiusL = tempd + _recS._TAB;
 
+	_gcvt_s(tempd, size_tempd, carState->_pointsEarned, nDigit);
+	_recS._pointsEarned = tempd + _recS._TAB;
+
 	_detailed = carState->_detailedDisplay;
 
 	if (carState->_replay)
@@ -491,6 +495,9 @@ void Recorder::copyandSetHUDText()
 // 				lesscontent += temp;
 // 				lesscontent.push_back('\t');
 // 				break;
+			case Recorder::TypeofText::SCORE:
+				lesscontent += temp;
+				lesscontent.push_back('\t');
 			default:
 				break;
 			}
@@ -597,6 +604,16 @@ void Recorder::setStatusLess(const std::string &txt)
 // 		}
 // 	}
 
+	//5. Score
+	text += (i == txt.cend()) ? "" : "\n\nSCORE:  ";
+	while (*i != '\t' && i != txt.cend())
+	{
+		text.push_back(*i);
+		i++;
+	}
+	(*i == '\t') ? ++i : i;
+
+
 	_statusText->setText(text);
 	_statusText->update();
 }
@@ -679,6 +696,11 @@ void Recorder::setStatus(const std::string &content)
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Hit: ";
+				break;
+			case Recorder::TypeofText::SCORE:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "Score: ";
 				break;
 			default:
 				text.push_back(' ');

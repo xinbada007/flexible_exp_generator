@@ -31,6 +31,7 @@ typedef struct CarState:public osg::Referenced
 
 		_collide = false;
 		_userHit = -1;
+		_pointsEarned = 0;
 
 		_updated = false;
 
@@ -100,6 +101,7 @@ typedef struct CarState:public osg::Referenced
 
 	bool _collide;
 	int _userHit;
+	unsigned _pointsEarned;
 
 	bool _updated;
 

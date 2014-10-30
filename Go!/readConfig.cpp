@@ -328,7 +328,7 @@ void ReadConfig::initializeAfterReadTrial()
 		_filename = *i++;
 		_nurbs = new Nurbs;
 		readNurbs();
-		scaleCtrlPoints();
+//		scaleCtrlPoints();
 		Nurbs *prve = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());
 		alignCtrlPoints(prve);
 		_roads->_nurbsMethod == 1 ? updateNurbs() : updateNurbs(new NurbsCurve, _roads->_density,_roads->_width);
@@ -387,6 +387,7 @@ void ReadConfig::initializeAfterReadTrial()
 		osg::notify(osg::WARN) << "Obstacles PosOffset Resized" << std::endl;
 	}
 	_experiment->_imgOBS = osgDB::readImageFile(_experiment->_obsPic);
+	_experiment->_imgObsArray = osgDB::readImageFile(_experiment->_obsArrayPic);
 	if (!_experiment->_imgOBS.valid())
 	{
 		_experiment->_imgOBS = NULL;
@@ -1074,6 +1075,8 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSSHAPE("OBS-SHAPE");
 		const string OBSPIC("OBS-PIC");
 		const string OBSARRAY("OBS-ARRAY");
+		const string OBSARRAYSIZE("OBS-ARRAY-SIZE");
+		static const string OBSARRAYPIC("OBS-ARRAY-PIC");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
 		const string DEVIATIONSIREN("DEVIATION-SIREN");
@@ -1248,7 +1251,7 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				if (!config.empty())
 				{
-					std::size_t found_to = config.find_first_of(" ");
+					std::size_t found_to = config.find_first_of(SPACE);
 					if (found_to != config.npos)
 					{
 						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_experiment->_obsPic));
@@ -1286,6 +1289,25 @@ void ReadConfig::readTrial(ifstream &in)
 					_experiment->_obsArray.push_back(txtOBS);
 					config.erase(config.begin(), config.begin() + found_to);
 					config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				}
+				continue;
+			}
+			else if (title == OBSARRAYSIZE)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYSIZE.size());
+				if (!config.empty())
+				{
+					_experiment->_obsArraySize = stod(config);
+				}
+				continue;
+			}
+			else if (title == OBSARRAYPIC)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYPIC.size());
+				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				if (!config.empty())
+				{
+					_experiment->_obsArrayPic = config;
 				}
 				continue;
 			}
@@ -1371,6 +1393,7 @@ Nurbs * ReadConfig::readNurbs()
 	const string CTRLPOINT = "CTRLPOINTS";
 	const string KNOTS = "KNOTS";
 	const string ORDERS = "orders";
+	const string SCALE = "SCALE";
 	string flag;
 	while (!filein.eof())
 	{
@@ -1384,7 +1407,7 @@ Nurbs * ReadConfig::readNurbs()
 				if (isletter(config.front()))
 				{
 					title = getTillFirstSpaceandToUpper(config);
-					continue;;
+					continue;
 				}
 
 				double x, y, z(0.0f);
@@ -1403,7 +1426,7 @@ Nurbs * ReadConfig::readNurbs()
 				if (isletter(*config.begin()))
 				{
 					title = getTillFirstSpaceandToUpper(config);
-					continue;;
+					continue;
 				}
 				std::vector<double> knot;
 				while (!config.empty())
@@ -1420,9 +1443,38 @@ Nurbs * ReadConfig::readNurbs()
 				}
 			}
 		}
+
+		while (title == SCALE && !filein.eof())
+		{
+			byPassSpace(filein, config);
+			if (!config.empty())
+			{
+				if (isletter((config.front())))
+				{
+					title = getTillFirstSpaceandToUpper(config);
+					continue;
+				}
+				osg::ref_ptr<osg::DoubleArray> s = new osg::DoubleArray;
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					s->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				if (s->empty()) continue;
+				if (s->getNumElements() == osg::Vec3d::num_components)
+				{
+					_nurbs->_scale.x() = s->at(0);
+					_nurbs->_scale.y() = s->at(1);
+					_nurbs->_scale.z() = s->at(2);
+				}
+			}
+		}
 	}
 
 	_nurbs->_order = _nurbs->_knotVector->size() - _nurbs->_ctrlPoints->size();
+	arrayByMatrix(_nurbs->_ctrlPoints, osg::Matrix::scale(_nurbs->_scale));
+
 	filein.close();
 	return _nurbs.get();
 }

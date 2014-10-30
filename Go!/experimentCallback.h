@@ -36,6 +36,8 @@ private:
 	bool _obsListDrawn;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
+	osg::ref_ptr<osgAudio::SoundState> _coin;
+	osg::ref_ptr<osgAudio::Sample> _coinSample;
 
 	osg::ref_ptr<osg::IntArray> _obstacle;
 

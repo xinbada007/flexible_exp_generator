@@ -32,8 +32,11 @@ typedef struct Experiment :public osg::Referenced
 		_obstacleRange = new osg::DoubleArray;
 		_obstaclePos = new osg::IntArray;
 		_obsPosOffset = new osg::DoubleArray;
+		_obsSize.set(1.0f, 1.0f, 1.0f);
+		_obsArraySize = 0.25f;
 		_obsShape = 1;
 		_imgOBS = NULL;
+		_imgObsArray = NULL;
 		_imgAnisotropy = 1.0f;
 		_numObsinArray = 100;
 
@@ -60,6 +63,9 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::IntArray> _obstaclePos;
 	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;
 	osg::Vec3d _obsSize;
+	double _obsArraySize;
+	std::string _obsArrayPic;
+	osg::ref_ptr<osg::Image> _imgObsArray;
 	int _obsShape;
 	std::string _obsPic;
 	osg::ref_ptr<osg::Image> _imgOBS;
@@ -97,6 +103,8 @@ typedef struct Nurbs:public osg::Referenced
 		_radiusR = new osg::DoubleArray;
 		_radiusL = new osg::DoubleArray;
 
+		_scale.set(1.0f, 1.0f, 1.0f);
+
 		_order = 0;
 	};
 	osg::ref_ptr <osg::Vec3dArray> _path;
@@ -112,6 +120,8 @@ typedef struct Nurbs:public osg::Referenced
 	osg::ref_ptr<osg::DoubleArray> _radius;
 	osg::ref_ptr<osg::DoubleArray> _radiusR;
 	osg::ref_ptr<osg::DoubleArray> _radiusL;
+
+	osg::Vec3d _scale;
 
 	unsigned _order;
 
