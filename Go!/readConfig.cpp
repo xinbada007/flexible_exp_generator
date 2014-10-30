@@ -870,14 +870,23 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + ROADPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				std::size_t found_to = config.find_first_of(" ");
-				if (found_to != config.npos)
-				{
-					std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_roads->_texture));
-				}
-				config.erase(config.begin(), config.begin() + found_to);
 				if (!config.empty())
 				{
-					_roads->_imgRoadAnisotropy = stoi(config);
+					std::size_t found_to = config.find_first_of(" ");
+					if (found_to != config.npos)
+					{
+						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_roads->_texture));
+						config.erase(config.begin(), config.begin() + found_to);
+					}
+					else
+					{
+						_roads->_texture = config;
+						config.clear();
+					}
+				}
+				if (!config.empty())
+				{
+					_roads->_imgRoadAnisotropy = stod(config);
 				}
 				continue;
 			}
@@ -953,14 +962,23 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + WALLPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				std::size_t found_to = config.find_first_of(" ");
-				if (found_to != config.npos)
-				{
-					std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_roads->_textureWall));
-				}
-				config.erase(config.begin(), config.begin() + found_to);
 				if (!config.empty())
 				{
-					_roads->_imgWallAnisotropy = stoi(config);
+					std::size_t found_to = config.find_first_of(" ");
+					if (found_to != config.npos)
+					{
+						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_roads->_textureWall));
+						config.erase(config.begin(), config.begin() + found_to);
+					}
+					else
+					{
+						_roads->_textureWall = config;
+						config.clear();
+					}
+				}
+				if (!config.empty())
+				{
+					_roads->_imgWallAnisotropy = stod(config);
 				}
 				continue;
 			}
@@ -1215,15 +1233,23 @@ void ReadConfig::readTrial(ifstream &in)
 			{
 				config.erase(config.begin(), config.begin() + OBSPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
-				std::size_t found_to = config.find_first_of(" ");
-				if (found_to != config.npos)
-				{
-					std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_experiment->_obsPic));
-				}
-				config.erase(config.begin(), config.begin() + found_to);
 				if (!config.empty())
 				{
-					_experiment->_imgAnisotropy = stoi(config);
+					std::size_t found_to = config.find_first_of(" ");
+					if (found_to != config.npos)
+					{
+						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_experiment->_obsPic));
+						config.erase(config.begin(), config.begin() + found_to);
+					}
+					else
+					{
+						_experiment->_obsPic = config;
+						config.clear();
+					}
+				}
+				if (!config.empty())
+				{
+					_experiment->_imgAnisotropy = stod(config);
 				}
 				continue;
 			}
