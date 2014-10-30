@@ -18,7 +18,7 @@ MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 Acceleration:	1
 DynamicSensitiveLevel:	25	#could be float number like 1.2532564766578
 CarSpeed:	100
-SpeedIncr:	1
+SpeedIncr:	100
 CarWheel:	42.5
 WheelAccl:	0	#720	#180	#0	#normally do not apply this
 CarWidth:	1.7
@@ -29,7 +29,7 @@ CarVisible:	1	#1 = Visible	0 = Invisible
 CarReset:	0	#0 = disable	1 = auto	2 = manual
 
 [RoadSettings]
-RoadLanes:	3
+RoadLanes:	1000
 RoadPic:	../Resources/texture/grass.jpg
 TextureWidth:	2
 
@@ -40,9 +40,9 @@ RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/5
 Method:	0	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	2000
-RoadVisible:	1	#1 = Visible	0 = Invisible
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
-WallHeight:	0
+WallHeight:	1.0
 WallPic:	../Resources/texture/wall1024-2.jpg
 ScaleVector:	520,520,520	#DO NOT mess around with this
 
@@ -66,7 +66,7 @@ Deviation-Warn: DEVIATION TOO HIGH
 Deviation-Siren:	../Resources/sound/warnpullup.mp3
 
 ##==Obstacle Setting=====================
-Obstacle:	1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle:	#1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1
 Obstacle-Range:	0 0	200 200	400 400 600 600 800 800	1000 1000
 Obstacle-Range:	1200 1200	1400 1400	1600 1600	1800 1800	2000 2000
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center

@@ -391,7 +391,7 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 
 		if (list.size() != carArray->size() || curList.size() != carArray->size())
 		{
-			std::cout << "Hello" << std::endl;
+			osg::notify(osg::WARN) << "Failed to detect collision" << std::endl;
 		}
 	}
 
