@@ -17,5 +17,7 @@ private:
 	void texture(Solid *refS);
 	bool texCoord(Solid *refS);
 	osg::ref_ptr<osg::StateSet> createTex2DStateSet(osg::ref_ptr<osg::Image> image);
+
+	double _maxAnsiotropy;
 };
 

@@ -13,7 +13,8 @@
 #include <osg/Notify>
 
 TextureVisitor::TextureVisitor():
-osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
+_maxAnsiotropy(1.0f)
 {
 }
 
@@ -23,7 +24,7 @@ TextureVisitor::~TextureVisitor()
 
 void TextureVisitor::reset()
 {
-
+	_maxAnsiotropy = 1.0f;
 }
 
 void TextureVisitor::apply(osg::Group &refNode)
@@ -95,6 +96,7 @@ bool TextureVisitor::texCoord(Solid *refS)
 
 void TextureVisitor::texture(Solid *refS)
 {
+	_maxAnsiotropy = refS->getMaxAnisotropy();
 	osg::ref_ptr<osg::Image> image = refS->getImageTexture();
 	osg::ref_ptr<osg::StateSet> ss = createTex2DStateSet(image.release());
 
@@ -111,6 +113,7 @@ osg::ref_ptr<osg::StateSet> TextureVisitor::createTex2DStateSet(osg::ref_ptr<osg
 
 	tex->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
 	tex->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+	tex->setMaxAnisotropy(_maxAnsiotropy);
 	
 	osg::TexEnv *decalTexEnv = new osg::TexEnv();
 	decalTexEnv->setMode(osg::TexEnv::DECAL);

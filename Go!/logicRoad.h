@@ -102,6 +102,6 @@ private:
 	//Raw information for logicRoad
 	std::string _roadTxt;
 	double _width;
-	unsigned _density;
+	int _density;
 };
 

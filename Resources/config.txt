@@ -30,7 +30,7 @@ CarReset:	0	#0 = disable	1 = auto	2 = manual
 
 [RoadSettings]
 RoadLanes:	1000
-RoadPic:	../Resources/texture/grass.jpg
+RoadPic:	../Resources/texture/grass.jpg 16
 TextureWidth:	1
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
@@ -43,7 +43,7 @@ Density:	2000
 RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	0
-WallPic:	../Resources/texture/wall1024-2.jpg
+WallPic:	../Resources/texture/wall1024-2.jpg 8
 ScaleVector:	520,520,520	#DO NOT mess around with this
 
 [Subjects]
@@ -74,7 +74,7 @@ OBS-Position-Offset:	-2 2	-20 -24	0 4 16 20 -16 -20 24 20
 OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
 OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
 OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
-OBS-Pic:	../Resources/texture/tio.jpg;
+OBS-Pic:	../Resources/texture/tio.jpg 4;
 
 ##==Text Setting=========================
 #Textime:	0

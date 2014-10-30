@@ -335,7 +335,6 @@ void ExperimentCallback::createObstacle()
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;
 			}
-
 			//render
 			osg::ref_ptr<RenderVistor> rv = new RenderVistor;
 			rv->setBeginMode(GL_QUADS);
@@ -343,6 +342,7 @@ void ExperimentCallback::createObstacle()
 			_road->addChild(obs);
 			//texture      
 			obs->setImage(_expSetting->_imgOBS);
+			obs->setMaxAnisotropy(_expSetting->_imgAnisotropy);
 			osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
 			obs->accept(*tv);
 			//visitor

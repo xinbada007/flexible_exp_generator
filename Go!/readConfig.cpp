@@ -869,7 +869,16 @@ void ReadConfig::readTrial(ifstream &in)
 			{
 				config.erase(config.begin(), config.begin() + ROADPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
-				_roads->_texture = config;
+				std::size_t found_to = config.find_first_of(" ");
+				if (found_to != config.npos)
+				{
+					std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_roads->_texture));
+				}
+				config.erase(config.begin(), config.begin() + found_to);
+				if (!config.empty())
+				{
+					_roads->_imgRoadAnisotropy = stoi(config);
+				}
 				continue;
 			}
 			else if (title == TEXTUREWIDTH)
@@ -943,7 +952,16 @@ void ReadConfig::readTrial(ifstream &in)
 			{
 				config.erase(config.begin(), config.begin() + WALLPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
-				_roads->_textureWall = config;
+				std::size_t found_to = config.find_first_of(" ");
+				if (found_to != config.npos)
+				{
+					std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_roads->_textureWall));
+				}
+				config.erase(config.begin(), config.begin() + found_to);
+				if (!config.empty())
+				{
+					_roads->_imgWallAnisotropy = stoi(config);
+				}
 				continue;
 			}
 			else if (title == METHOD)
@@ -1197,9 +1215,15 @@ void ReadConfig::readTrial(ifstream &in)
 			{
 				config.erase(config.begin(), config.begin() + OBSPIC.size());
 				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found_to = config.find_first_of(" ");
+				if (found_to != config.npos)
+				{
+					std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_experiment->_obsPic));
+				}
+				config.erase(config.begin(), config.begin() + found_to);
 				if (!config.empty())
 				{
-					_experiment->_obsPic = config;
+					_experiment->_imgAnisotropy = stoi(config);
 				}
 				continue;
 			}

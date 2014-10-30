@@ -219,6 +219,8 @@ void MulitViewer::createBackgroundView()
 
 	osg::ref_ptr<osg::Texture2D> background = new osg::Texture2D;
 	background->setImage(image);
+	background->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR_MIPMAP_LINEAR);
+	background->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
 	osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(osg::Vec3d(0.0f, 0.0f, 0.0f),
 		osg::Vec3d(1.0f, 0.0f, 0.0f), osg::Vec3d(0.0f, 1.0f, 0.0f));
 	quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, background);

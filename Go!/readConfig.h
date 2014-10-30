@@ -32,6 +32,7 @@ typedef struct Experiment :public osg::Referenced
 		_obsPosOffset = new osg::DoubleArray;
 		_obsShape = 1;
 		_imgOBS = NULL;
+		_imgAnisotropy = 1.0f;
 
 		_offset = 0.0f;
 
@@ -59,6 +60,7 @@ typedef struct Experiment :public osg::Referenced
 	int _obsShape;
 	std::string _obsPic;
 	osg::ref_ptr<osg::Image> _imgOBS;
+	double _imgAnisotropy;
 
 	double _offset;
 
@@ -128,7 +130,9 @@ typedef struct RoadSet:public osg::Referenced
 
 		_textureWidth = 8.0f;
 		_imgRoad = NULL;
+		_imgRoadAnisotropy = 1.0f;
 		_imgWall = NULL;
+		_imgWallAnisotropy = 1.0f;
 
 		_nurbsMethod = 1;
 
@@ -147,9 +151,12 @@ typedef struct RoadSet:public osg::Referenced
 	std::string _texture;
 	double _textureWidth;
 	osg::ref_ptr<osg::Image> _imgRoad;
+	double _imgRoadAnisotropy;
 	
 	std::string _textureWall;
 	osg::ref_ptr<osg::Image> _imgWall;
+	double _imgWallAnisotropy;
+
 	stringList _roadTxt;
 	nurbsList _nurbs;
 

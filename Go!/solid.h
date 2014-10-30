@@ -48,6 +48,9 @@ public:
 	inline void setTexMode(bool mode){ _texMode = mode; };
 	inline bool getTexMode() const { return _texMode; };
 
+	inline void setMaxAnisotropy(double ref){ _maxAnisotropy = ref; };
+	inline double getMaxAnisotropy() const { return _maxAnisotropy; };
+
 	Plane * getAbstract() const;
 
 	void addPlanetoList(Plane *refPL);
@@ -154,4 +157,6 @@ private:
 	unsigned _index;
 
 	bool _texMode;
+
+	double _maxAnisotropy;
 };
