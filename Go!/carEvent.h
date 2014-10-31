@@ -41,3 +41,11 @@ private:
 	osg::ref_ptr<osg::UIntArray> _buttons;
 };
 
+class dirtyVisitor :
+	public osg::NodeVisitor
+{
+public:
+	dirtyVisitor() :osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN){};
+	virtual ~dirtyVisitor(){};
+	void apply(osg::Geode &geo);
+};

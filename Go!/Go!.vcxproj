@@ -95,6 +95,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnmPath.h" />
     <ClInclude Include="cameraEvent.h" />
     <ClInclude Include="car.h" />
     <ClInclude Include="carEvent.h" />
@@ -130,6 +131,7 @@
     <ClInclude Include="textureVisitor.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AnmPath.cpp" />
     <ClCompile Include="cameraEvent.cpp" />
     <ClCompile Include="car.cpp" />
     <ClCompile Include="carEvent.cpp" />

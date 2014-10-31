@@ -404,6 +404,7 @@ void ReadConfig::initializeAfterReadTrial()
 		updateNurbs(new NurbsCurve,_experiment->_numObsinArray);
 		_experiment->_nurbs.push_back(_nurbs.release());
 	}
+	_experiment->_speed = _vehicle->_speed*frameRate;
 
 	_experiment->_offset = _roads->_width;
 	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
@@ -1078,6 +1079,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSARRAYSIZE("OBS-ARRAY-SIZE");
 		static const string OBSARRAYPIC("OBS-ARRAY-PIC");
 		static const string OBSARRAYNUM("OBS-ARRAY-NUM");
+		static const string OBSARRAYMODE("OBS-ARRAY-MODE");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
 		const string DEVIATIONSIREN("DEVIATION-SIREN");
@@ -1318,6 +1320,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_numObsinArray = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OBSARRAYMODE)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYMODE.size());
+				if (!config.empty())
+				{
+					_experiment->_animationMode = stoi(config) == 0 ? true : false;
 				}
 				continue;
 			}

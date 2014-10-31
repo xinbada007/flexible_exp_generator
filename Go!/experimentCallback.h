@@ -2,6 +2,8 @@
 #include <osg/NodeCallback>
 #include <osg/Camera>
 #include <osgText/Text>
+#include <osg/AnimationPath>
+
 #include <osgAudio/SoundState.h>
 
 #include "car.h"
@@ -47,6 +49,11 @@ private:
 	osg::ref_ptr<osg::Group> _root;
 	osg::ref_ptr<osg::Switch> _road;
 	osg::ref_ptr<MulitViewer> _mv;
+
+	osg::ref_ptr<osg::AnimationPathCallback> _anmCallback;
+	osg::ref_ptr<osg::Vec3dArray> _centerList;
+	double _timeBuffer;
+	double _timeLastRecored;
 
 	void dynamicChange();
 	void showText();

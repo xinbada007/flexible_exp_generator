@@ -39,6 +39,8 @@ typedef struct Experiment :public osg::Referenced
 		_imgObsArray = NULL;
 		_imgAnisotropy = 1.0f;
 		_numObsinArray = 100;
+		_animationMode = false;
+		_speed = 60.0f / 3.6f;
 
 		_offset = 0.0f;
 
@@ -73,6 +75,8 @@ typedef struct Experiment :public osg::Referenced
 	stringList _obsArray;
 	unsigned _numObsinArray;
 	nurbsList _nurbs;
+	bool _animationMode;
+	double _speed;
 
 	double _offset;
 

@@ -2,11 +2,14 @@
 #include "obstacle.h"
 #include "halfedge.h"
 #include "points.h"
+#include "renderVistor.h"
+#include "textureVisitor.h"
+
 #include <algorithm>
 
 Obstacle::Obstacle()
 {
-	_tag = OBS;
+	_tag = ROADTAG::OBS;
 }
 
 Obstacle::Obstacle(const Obstacle &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
@@ -136,6 +139,13 @@ void Obstacle::createCylinder(const osg::Vec3d &center, const double &radius, co
 	this->absoluteTerritory._refuseR = 0.0f;
 
 	genTextureNoZ();
+
+	RenderVistor rv;
+	rv.setBeginMode(GL_QUADS);
+	this->accept(rv);
+
+	TextureVisitor tv;
+	this->accept(tv);
 }
 
 void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
@@ -171,6 +181,13 @@ void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 	this->absoluteTerritory._refuseR = 0.0f;
 
 	genBoxTexture();
+
+	RenderVistor rv;
+	rv.setBeginMode(GL_QUADS);
+	this->accept(rv);
+
+	TextureVisitor tv;
+	this->accept(tv);
 }
 
 void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
@@ -290,6 +307,13 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 	this->absoluteTerritory._refuseR = R;
 
 	genTextureNoZ(true);
+
+	RenderVistor rv;
+	rv.setBeginMode(GL_QUADS);
+	this->accept(rv);
+
+	TextureVisitor tv;
+	this->accept(tv);
 }
 
 void Obstacle::sweep(osg::ref_ptr<osg::Vec3dArray> swArray)

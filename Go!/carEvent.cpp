@@ -448,6 +448,11 @@ void CarEvent::applyCarMovement()
 	arrayByMatrix(_carState->_carArray, _moment);
 
 	_mTransform->setMatrix(_carState->_state);
+	if (_carState->_state != osg::Matrix::identity())
+	{
+		dirtyVisitor dv;
+		_mTransform->accept(dv);
+	}
 
 	//Initialize
 	_moment.makeIdentity();
@@ -535,5 +540,17 @@ void CarEvent::applyCarMovement()
 	if (NANTEST)
 	{
 		osg::notify(osg::WARN) << "NAN FOUND!!!" << std::endl;
+	}
+}
+
+void dirtyVisitor::apply(osg::Geode &geo)
+{
+	const osg::Geode::DrawableList &drawList = geo.getDrawableList();
+	osg::Geode::DrawableList::const_iterator i = drawList.cbegin();
+	while (i != drawList.cend())
+	{
+		(*i)->dirtyBound();
+		(*i)->dirtyDisplayList();
+		++i;
 	}
 }

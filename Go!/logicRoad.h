@@ -7,6 +7,7 @@ class NurbsCurve;
 
 typedef enum ROADTAG
 {
+	RT_UNSPECIFIED,
 	MIDQUAD,
 	CTRL,
 	LWALL, RWALL,

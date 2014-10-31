@@ -75,10 +75,11 @@ OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
 OBS-Shape:	3	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Pic:	../Resources/texture/tio.jpg
 
-OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
-OBS-Array-Num:	200;
+OBS-Array:	../Resources/1.txt;#../Resources/roads/exproads/50/150/33.txt;
+OBS-Array-Num:	20000;
 OBS-Array-Size:	0.5;
 OBS-Array-Pic:	../Resources/texture/tio.jpg
+OBS-Array-Mode:	0	# 0 = Animation	1 = Obs
 
 ##==Text Setting=========================
 #Textime:	0

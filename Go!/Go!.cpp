@@ -89,6 +89,11 @@ int main(int argc, char** argv)
 	std::vector<osg::ref_ptr<MulitViewer>> mViewer;
 	std::vector<osg::ref_ptr<Recorder>> recorder;
 	std::vector<osg::ref_ptr<ExperimentCallback>> expcontroller;
+	
+	//TEST
+	std::vector<osg::ref_ptr<osg::AnimationPathCallback>> anmCallback;
+	std::vector<osg::ref_ptr<osg::AnimationPath>> anmPath;
+	//TEST
 
 	while (curRep <= totalRep)
 	{
@@ -178,6 +183,7 @@ int main(int argc, char** argv)
 		root.back()->addEventCallback(expcontroller.back().get());
 
 		root.back()->setDataVariance(osg::Object::DYNAMIC);
+
 		osgUtil::Optimizer optimizer;
 //	 	optimizer.optimize(root, osgUtil::Optimizer::SHARE_DUPLICATE_STATE|osgUtil::Optimizer::OPTIMIZE_TEXTURE_SETTINGS|
 //	 		osgUtil::Optimizer::INDEX_MESH|osgUtil::Optimizer::VERTEX_PRETRANSFORM|osgUtil::Optimizer::VERTEX_POSTTRANSFORM);
