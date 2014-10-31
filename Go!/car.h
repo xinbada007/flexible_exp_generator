@@ -118,8 +118,8 @@ typedef struct CarState:public osg::Referenced
 
 	inline void cacluateSpeedandAngle() const
 	{ 
-		_D_Speed = _speed * frameRate *3.6f;
-		_D_Angle = _angle * frameRate / TO_RADDIAN;
+		_D_Speed = _speed * 3.6f;
+		_D_Angle = _angle / TO_RADDIAN;
 
 		if (_lastTimeR != _timeReference)
 		{

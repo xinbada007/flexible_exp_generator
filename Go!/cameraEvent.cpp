@@ -103,40 +103,40 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			switch (ea.getKey())
 			{
 			case osgGA::GUIEventAdapter::KEY_Up:
-				_eyeRotation.makeRotate(_rotationInterval / frameRate, _eye_X_Axis);
+				_eyeRotation.makeRotate(_rotationInterval / frameRate::instance()->getRealfRate(), _eye_X_Axis);
 				break;
 			case osgGA::GUIEventAdapter::KEY_Down:
-				_eyeRotation.makeRotate(-_rotationInterval / frameRate, _eye_X_Axis);
+				_eyeRotation.makeRotate(-_rotationInterval / frameRate::instance()->getRealfRate(), _eye_X_Axis);
 				break;
 			case osgGA::GUIEventAdapter::KEY_Left:
-				_eyeRotation.makeRotate(_rotationInterval / frameRate, _eye_Z_Axis);
+				_eyeRotation.makeRotate(_rotationInterval / frameRate::instance()->getRealfRate(), _eye_Z_Axis);
 				break;
 			case osgGA::GUIEventAdapter::KEY_Right:
-				_eyeRotation.makeRotate(-_rotationInterval / frameRate, _eye_Z_Axis);
+				_eyeRotation.makeRotate(-_rotationInterval / frameRate::instance()->getRealfRate(), _eye_Z_Axis);
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Up:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Z_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Z_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Down:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Z_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Z_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Left:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_X_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_X_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Right:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_X_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_X_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Add:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Z_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Z_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Subtract:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Z_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Z_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_Page_Up:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Y_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Y_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_Page_Down:
-				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Y_Axis * (_offsetInterval / frameRate));
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(-_eye_Y_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
 			case osgGA::GUIEventAdapter::KEY_KP_Enter:
 				_reset = true;

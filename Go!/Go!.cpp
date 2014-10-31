@@ -189,7 +189,7 @@ int main(int argc, char** argv)
 //	 		osgUtil::Optimizer::INDEX_MESH|osgUtil::Optimizer::VERTEX_PRETRANSFORM|osgUtil::Optimizer::VERTEX_POSTTRANSFORM);
 		optimizer.optimize(root.back().get());
 
-		mViewer.back()->setRunMaxFrameRate(frameRate);
+		mViewer.back()->setRunMaxFrameRate(frameRate::instance()->getDesignfRate());
 		osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
 		mViewer.back()->setThreadingModel(th);
 

@@ -25,8 +25,6 @@ const double eps = 1e-8;
 const double eps_10 = 10 * eps;
 const double eps_100 = 100 * eps;
 const double eps_1000 = 1000 * eps;
-const double frameRate = 60.0;
-const double frameTime = 1 / frameRate;
 
 extern double z_deepest;
 
@@ -83,4 +81,21 @@ struct uniqueTest
 	}
 private:
 	const T _uni;
+};
+
+class frameRate:
+	public osg::Referenced
+{
+public:
+	static frameRate *instance();
+	double getDesignfRate() const { return _designfRate; };
+	void setRealfRate(double rate) { _realfRate = rate;};
+	double getRealfRate() const { return _realfRate; };
+//	void setFramerate(double rate){ _fRate = rate; };
+//	double getFramerate() const { return _fRate; };
+private:
+	frameRate() :_designfRate(60.0f), _realfRate(60.0f) {};
+	~frameRate(){};
+	const double _designfRate;
+	double _realfRate;
 };

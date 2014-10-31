@@ -31,42 +31,46 @@ void CarEvent::checkRotationLimit()
 	{
 		return;
 	}
-
-	const double ROTATIONACCL = abs(_carState->_angle - _lastAngle)*frameRate;
+	double &angle = _carState->_angle;
+	const double ROTATIONACCL = abs(angle - _lastAngle) * frameRate::instance()->getRealfRate();
 	if (ROTATIONACCL > MAX_ROTATIONACCL)
 	{
-		if (_carState->_angle * _lastAngle <= 0)
+		if (angle * _lastAngle <= 0)
 		{
 			if (_lastAngle >= 0)
 			{
-				_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
-				_leftTurn = (_carState->_angle > 0);
+				angle = _lastAngle - MAX_ROTATIONACCL / frameRate::instance()->getRealfRate();
+				_leftTurn = (angle > 0);
 			}
 			if (_lastAngle < 0)
 			{
-				_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
-				_leftTurn = (_carState->_angle > 0);
+				angle = _lastAngle + MAX_ROTATIONACCL / frameRate::instance()->getRealfRate();
+				_leftTurn = (angle > 0);
 			}
 		}
-		if (_carState->_angle * _lastAngle > 0)
+		if (angle * _lastAngle > 0)
 		{
-			if (_carState->_angle >= _lastAngle)
+			if (angle >= _lastAngle)
 			{
-				_carState->_angle = _lastAngle + MAX_ROTATIONACCL / frameRate;
+				angle = _lastAngle + MAX_ROTATIONACCL / frameRate::instance()->getRealfRate();
 			}
 			else
 			{
-				_carState->_angle = _lastAngle - MAX_ROTATIONACCL / frameRate;
+				angle = _lastAngle - MAX_ROTATIONACCL / frameRate::instance()->getRealfRate();
 			}
 		}
 	}
-	_lastAngle = _carState->_angle;
+	_lastAngle = angle;
 }
 
 void CarEvent::calculateCarMovement()
 {
 	//Limit the speed under MAX
-	_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? _vehicle->_speed*(_carState->_speed > 0 ? 1 : -1) : _carState->_speed;
+	const double dr_rate = frameRate::instance()->getDesignfRate() / frameRate::instance()->getRealfRate();
+
+	_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? 
+		(_vehicle->_speed*(abs(_carState->_speed) / _carState->_speed)) : _carState->_speed;
+
 	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
 
 	//set rotation direction and limit
@@ -82,13 +86,13 @@ void CarEvent::calculateCarMovement()
 	{
 		osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
 		osg::Matrix rotation = osg::Matrix::translate(-origin);
-		rotation *= osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
+		rotation *= osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate::instance()->getRealfRate()), Z_AXIS);
 		rotation *= osg::Matrix::translate(origin);
 
 		_moment *= rotation;
 
 		_carState->_direction = _carState->_direction * 
-			osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate), Z_AXIS);
+			osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate::instance()->getRealfRate()), Z_AXIS);
 	}
 	else
 	{
@@ -99,12 +103,12 @@ void CarEvent::calculateCarMovement()
 		_carState->_direction = _carState->_direction * osg::Matrix::rotate(qt);
 	}
 	_carState->_direction.normalize();
-//	_carState->_angle = 0.0f;
+//	_ANGLE = 0.0f;
 
-	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed);
+	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed / frameRate::instance()->getRealfRate());
 
 	//apply the shift vector
-	_carState->_shiftD = (_carState->_speed == 0) ? osg::Vec3d(0.0f,0.0f,0.0f) : _carState->_shiftD;
+	_carState->_shiftD = (_carState->_speed == 0) ? osg::Vec3d(0.0f, 0.0f, 0.0f) : _carState->_shiftD;
 	_moment *= osg::Matrix::translate(_carState->_shiftD);
 
 	//apply reset matrix;
@@ -136,7 +140,7 @@ void CarEvent::autoNavigation()
 	const bool SAMEDIRECTION = (DOTPRODUCT >= 0);
 	const bool LEFT = (CROSSPRODUCT >= 0);
 	const bool TURN = SAMEDIRECTION ? !LEFT : LEFT;
-	double headingError = abs(SINANGLE) * abs(_carState->_speed*frameRate);
+	double headingError = abs(SINANGLE) * abs(_carState->_speed);
 	headingError = (headingError > 1.0f * TO_RADDIAN) ? (headingError - 1.0f * TO_RADDIAN) : 0.0f;
 
 	double roadDistance(0.0f);
@@ -160,11 +164,11 @@ void CarEvent::autoNavigation()
 		if (ANGLE / TO_RADDIAN >= 1.0f)
 		{
 			angle_1d = ANGLE;
-			angle_1d /= (roadDistance / (_carState->_speed * frameRate));
+			angle_1d /= (roadDistance / (_carState->_speed));
 			angle_1d = abs(angle_1d);
 			break;
 		}
-		if (roadDistance >= abs(_carState->_speed) * frameRate)
+		if (roadDistance >= abs(_carState->_speed))
 		{
 			break;
 		}
@@ -222,7 +226,7 @@ void CarEvent::shiftVehicle()
 	osg::Vec3d r = origin - _carState->_O;
 
 	double R = r.length();
-	R *= sin(abs(_carState->_angle) * 1.0f / frameRate);
+	R *= sin(abs(_carState->_angle) * 1.0f / frameRate::instance()->getRealfRate());
 	R *= _vehicle->_dynamicSensitive;
 
 	_carState->_shiftD *= R;
@@ -396,7 +400,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 			if (_carState->_collide)
 			{
-				const double MAXSPEED(1.0f / frameRate);
+				const double MAXSPEED(1.0f / frameRate::instance()->getDesignfRate());
 				int sign = (_carState->_speed > 0) ? 1 : -1;
 				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
 				_carState->_collide = false;

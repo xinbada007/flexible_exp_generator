@@ -9,6 +9,7 @@
 #include <osgDB/ReadFile>
 #include <osg/ShapeDrawable>
 #include <osg/MatrixTransform>
+#include <osg/PositionAttitudeTransform>
 
 #include <osgAudio/SoundManager.h>
 
@@ -121,11 +122,6 @@ void ExperimentCallback::createObstacles()
 		double time(0.0f);
 		while (cB != cE)
 		{
-			if (time >= _timeBuffer)
-			{
-				break;
-			}
-
 			double delta(0.0f);
 			if (cB != _centerList->begin())
 			{
@@ -136,7 +132,6 @@ void ExperimentCallback::createObstacles()
 			anmPath->insert(time, osg::AnimationPath::ControlPoint(*cB));
 			++cB;
 		}
-		_centerList->erase(_centerList->begin(), cB);
 
 		if (!_anmCallback)
 		{
@@ -235,55 +230,69 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			dynamicChange();
 			showObstacle();
 			dealCollision();
-			if ((_carState->getRSpeed() / 3.6f) > 0 && (_carState->_timeReference - _timeLastRecored) >= _timeBuffer)
+			if (_carState->getRSpeed() <= 0)
 			{
 				if (_anmCallback)
 				{
-					anmPath = _anmCallback->getAnimationPath();
-					if (anmPath && !anmPath->empty())
-					{
-						anmPath->clear();
-						osg::Vec3dArray::iterator cB = _centerList->begin();
-						osg::Vec3dArray::const_iterator cE = _centerList->end();
-						double time(_carState->_timeReference);
-						while (cB != cE)
-						{
-							if (time - _carState->_timeReference >= _timeBuffer)
-							{
-								break;
-							}
-							_timeLastRecored = _carState->_timeReference;
-							double delta(0.0f);
-							if (cB != _centerList->begin())
-							{
-								delta = ((*cB) - *(cB - 1)).length();
-								delta /= (_carState->getRSpeed() / 3.6f);
-								double test = (*cB - *(cB - 1)).length() / delta;
-								osg::notify(osg::WARN) << test*3.6f << std::endl;
-								if (test > _carState->getRSpeed())
-								{
-									getchar();
-								}
-							}
-							time += delta;
-							anmPath->insert(time, osg::AnimationPath::ControlPoint(*cB));
-							++cB;
-						}
-						
-						_centerList->erase(_centerList->begin(), cB);
-					}
+					_anmCallback->setPause(true);
 				}
-				_anmCallback->setAnimationPath(anmPath);
-				_anmCallback->setPause(false);
 			}
 			else
 			{
-				anmPath = _anmCallback->getAnimationPath();
-				anmPath->clear();
-				anmPath->insert(_carState->_timeReference, osg::AnimationPath::ControlPoint(_centerList->front()));
-				_anmCallback->setAnimationPath(anmPath);
-				_anmCallback->setPause(false);
+				if (_anmCallback)
+				{
+					_anmCallback->setPause(false);
+				}
 			}
+// 			if ((_carState->getRSpeed() / 3.6f) > 0 && (_carState->_timeReference - _timeLastRecored) >= _timeBuffer)
+// 			{
+// 				if (_anmCallback)
+// 				{
+// 					anmPath = _anmCallback->getAnimationPath();
+// 					if (anmPath && !anmPath->empty())
+// 					{
+// 						anmPath->clear();
+// 						osg::Vec3dArray::iterator cB = _centerList->begin();
+// 						osg::Vec3dArray::const_iterator cE = _centerList->end();
+// 						double time(_carState->_timeReference);
+// 						while (cB != cE)
+// 						{
+// 							if (time - _carState->_timeReference >= _timeBuffer)
+// 							{
+// 								break;
+// 							}
+// 							_timeLastRecored = _carState->_timeReference;
+// 							double delta(0.0f);
+// 							if (cB != _centerList->begin())
+// 							{
+// 								delta = ((*cB) - *(cB - 1)).length();
+// 								delta /= (_carState->getRSpeed() / 3.6f);
+// 								double test = (*cB - *(cB - 1)).length() / delta;
+// 								osg::notify(osg::WARN) << test*3.6f << std::endl;
+// 								if (test > _carState->getRSpeed())
+// 								{
+// 									getchar();
+// 								}
+// 							}
+// 							time += delta;
+// 							anmPath->insert(time, osg::AnimationPath::ControlPoint(*cB));
+// 							++cB;
+// 						}
+// 						
+// 						_centerList->erase(_centerList->begin(), cB);
+// 					}
+// 				}
+// 				_anmCallback->setAnimationPath(anmPath);
+// 				_anmCallback->setPause(false);
+// 			}
+// 			else
+// 			{
+// 				anmPath = _anmCallback->getAnimationPath();
+// 				anmPath->clear();
+// 				anmPath->insert(_carState->_timeReference, osg::AnimationPath::ControlPoint(_centerList->front()));
+// 				_anmCallback->setAnimationPath(anmPath);
+// 				_anmCallback->setPause(false);
+// 			}
 			break;
 		default:
 			break;
@@ -472,10 +481,14 @@ void ExperimentCallback::showObstacle()
 			osg::ref_ptr<Obstacle> obs = *i;
 			if (_anmCallback)
 			{
-				osg::ref_ptr<osg::MatrixTransform> mTransform = new osg::MatrixTransform;
-				mTransform->addChild(obs);
-				mTransform->setUpdateCallback(_anmCallback);
-				_road->addChild(mTransform);
+				osg::ref_ptr<osg::PositionAttitudeTransform> paTransform = new osg::PositionAttitudeTransform;
+				paTransform->addChild(obs);
+				paTransform->setUpdateCallback(_anmCallback);
+				_road->addChild(paTransform);
+// 				osg::ref_ptr<osg::MatrixTransform> mTransform = new osg::MatrixTransform;
+// 				mTransform->addChild(obs);
+// 				mTransform->setUpdateCallback(_anmCallback);
+// 				_road->addChild(mTransform);
 			}
 			else
 			{

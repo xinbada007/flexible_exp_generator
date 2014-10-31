@@ -187,15 +187,15 @@ protected:
 
 typedef struct Vehicle:public osg::Referenced
 {
-	Vehicle() :_MAXSPEED(280 / 3.6f / frameRate)
+	Vehicle() :_MAXSPEED(280 / 3.6f / frameRate::instance()->getDesignfRate())
 	{
 		_width = 1.7;
 		_length = 4.7;
 		_height = 0.15;
 
-		_speed = 60 / 3.6f / frameRate;
-		_speedincr = 20 / 3.6f / frameRate;
-		_rotate = 42.5*TO_RADDIAN;
+		_speed = 60 / 3.6f;
+		_speedincr = 20 / 3.6f;
+		_rotate = 42.5 * TO_RADDIAN;
 		_rotationAccl = _rotate;
 		_acceleration = 1;
 		_dynamicSensitive = 1.0f;
@@ -211,8 +211,8 @@ typedef struct Vehicle:public osg::Referenced
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
 	}
-	void increaseMaxSpeed() { _speed += _speedincr; _speed = (_speed > _MAXSPEED) ? _MAXSPEED : _speed; };
-	void decreaseMaxSpeed() { _speed -= _speedincr; _speed = (_speed > 0) ? _speed : 0; };
+	void increaseMaxSpeed() {_speed += _speedincr; _speed = (_speed > _MAXSPEED) ? _MAXSPEED : _speed;};
+	void decreaseMaxSpeed() {_speed -= _speedincr; _speed = (_speed > 0) ? _speed : 0;};
 
 	osg::ref_ptr<osg::Vec3dArray> _V;
 	osg::Vec3d _O;
@@ -374,8 +374,8 @@ private:
 	Nurbs * readNurbs();
 	void scaleCtrlPoints();
 	void alignCtrlPoints(Nurbs *refNurbs);
-	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double width = 0.0f);
-	void updateNurbs();
+	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double &width = 0.0f);
+	void updateNurbs(const unsigned &density,const double &width);
 	
 	osg::ref_ptr<Nurbs> _nurbs;
 	osg::ref_ptr<Vehicle> _vehicle;

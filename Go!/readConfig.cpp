@@ -315,9 +315,7 @@ void ReadConfig::initializeAfterReadTrial()
 
 	//convert speed from KM/H to M/S
 	_vehicle->_speed /= 3.6f;
-	_vehicle->_speed /= frameRate;
 	_vehicle->_speedincr /= 3.6f;
-	_vehicle->_speedincr /= frameRate;
 
 	//Initialize Roads
 	_roads->_width = _roads->_roadLane * _roads->_laneWidth;
@@ -331,7 +329,7 @@ void ReadConfig::initializeAfterReadTrial()
 //		scaleCtrlPoints();
 		Nurbs *prve = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());
 		alignCtrlPoints(prve);
-		_roads->_nurbsMethod == 1 ? updateNurbs() : updateNurbs(new NurbsCurve, _roads->_density,_roads->_width);
+		_roads->_nurbsMethod == 1 ? updateNurbs(_roads->_density,_roads->_width) : updateNurbs(new NurbsCurve, _roads->_density,_roads->_width);
 		_roads->_nurbs.push_back(_nurbs.release());
 	}
 	//load the pic as texture
@@ -401,10 +399,10 @@ void ReadConfig::initializeAfterReadTrial()
 //		scaleCtrlPoints();
 		Nurbs *prve = (_experiment->_nurbs.empty() ? NULL : _experiment->_nurbs.back());
 		alignCtrlPoints(prve);
-		updateNurbs(new NurbsCurve,_experiment->_numObsinArray);
+		updateNurbs(new NurbsCurve, _experiment->_numObsinArray, 0);
 		_experiment->_nurbs.push_back(_nurbs.release());
 	}
-	_experiment->_speed = _vehicle->_speed*frameRate;
+	_experiment->_speed = _vehicle->_speed;
 
 	_experiment->_offset = _roads->_width;
 	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
@@ -1532,7 +1530,7 @@ void ReadConfig::alignCtrlPoints(Nurbs *refNurbs)
 	}
 }
 
-void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double width /* = 0.0f */)
+void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double &width /* = 0.0f */)
 {
 	refNB->setKnotVector(_nurbs->_knotVector);
 	refNB->setDegree(_nurbs->_order - 1);
@@ -1573,14 +1571,13 @@ void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &den
 	}
 }
 
-void ReadConfig::updateNurbs()
+void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 {
 	if (!_roads)
 	{
 		return;
 	}
 
-	const double width = _roads->_width;
 	const double halfW = width * 0.5f;
 	_nurbs->_ctrl_left = project_Line(_nurbs->_ctrlPoints, halfW);
 	_nurbs->_ctrl_right = project_Line(_nurbs->_ctrlPoints, -halfW);
@@ -1623,14 +1620,14 @@ void ReadConfig::updateNurbs()
 	double *curvature = (double*)calloc(dim, sizeof(double));
 	double radius;
 	int jstat, jstatR, jstatL;
-	const double density = ((double)(_roads->_density) / (double)(numKnots - order - degree)) + 0.5f;
+	const double denS = ((double)(density) / (double)(numKnots - order - degree)) + 0.5f;
 	for (unsigned int i = degree; i < numKnots - order;i++)
 	{
 		int leftknot = i;
 		const double left = knots[i];
 		const double right = knots[i + 1];
-		const double step = (right - left) / density;
-		for (int j = 0; j < density; j++)
+		const double step = (right - left) / denS;
+		for (int j = 0; j < denS; j++)
 		{
 			double k = left + step*j;
 			if (k > right) k = right;

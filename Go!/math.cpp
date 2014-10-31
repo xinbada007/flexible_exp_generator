@@ -498,3 +498,9 @@ double asinR(double product)
 	product = (abs(product) > 1.0f) ? sign : product;
 	return asin(product);
 }
+
+frameRate * frameRate::instance()
+{
+	static osg::ref_ptr<frameRate> fm = new frameRate;
+	return fm.get();
+}
