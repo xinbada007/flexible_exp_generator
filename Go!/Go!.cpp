@@ -185,7 +185,7 @@ int main(int argc, char** argv)
 		root.back()->setDataVariance(osg::Object::DYNAMIC);
 
 		osgUtil::Optimizer optimizer;
-//	 	optimizer.optimize(root, osgUtil::Optimizer::SHARE_DUPLICATE_STATE|osgUtil::Optimizer::OPTIMIZE_TEXTURE_SETTINGS|
+//	 	optimizer.optimize(root.back().get(), osgUtil::Optimizer::SHARE_DUPLICATE_STATE|osgUtil::Optimizer::OPTIMIZE_TEXTURE_SETTINGS|
 //	 		osgUtil::Optimizer::INDEX_MESH|osgUtil::Optimizer::VERTEX_PRETRANSFORM|osgUtil::Optimizer::VERTEX_POSTTRANSFORM);
 		optimizer.optimize(root.back().get());
 

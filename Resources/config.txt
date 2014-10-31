@@ -18,7 +18,7 @@ MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 Acceleration:	1
 DynamicSensitiveLevel:	25	#could be float number like 1.2532564766578
 CarSpeed:	50
-SpeedIncr:	50
+SpeedIncr:	10
 CarWheel:	42.5
 WheelAccl:	0	#720	#180	#0	#normally do not apply this
 CarWidth:	1.7
@@ -29,8 +29,8 @@ CarVisible:	1	#1 = Visible	0 = Invisible
 CarReset:	0	#0 = disable	1 = auto	2 = manual
 
 [RoadSettings]
-RoadLanes:	250
-RoadPic:	../Resources/texture/grass.jpg
+RoadLanes:	1000
+RoadPic:	../Resources/texture/grasstexture.jpg 16
 TextureWidth:	2
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
@@ -42,7 +42,7 @@ Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 Density:	2000
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
-WallHeight:	1.0
+WallHeight:	0.0
 WallPic:	../Resources/texture/wall1024-2.jpg
 
 [Subjects]
@@ -75,11 +75,11 @@ OBS-Size:	1.0	1.0	1.0	#Length X Width X Height
 OBS-Shape:	3	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Pic:	../Resources/texture/tio.jpg
 
-OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
-OBS-Array-Num:	5000;
+#OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
+OBS-Array-Num:	120;
 OBS-Array-Size:	0.5;
 OBS-Array-Pic:	../Resources/texture/tio.jpg
-OBS-Array-Mode:	0	# 0 = Animation	1 = Obs
+OBS-Array-Mode:	1	# 0 = Animation	1 = Obs
 
 ##==Text Setting=========================
 #Textime:	0

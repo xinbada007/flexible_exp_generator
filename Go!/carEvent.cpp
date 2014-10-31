@@ -103,7 +103,7 @@ void CarEvent::calculateCarMovement()
 		_carState->_direction = _carState->_direction * osg::Matrix::rotate(qt);
 	}
 	_carState->_direction.normalize();
-//	_ANGLE = 0.0f;
+//	_carState->_angle = 0.0f;
 
 	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed / frameRate::instance()->getRealfRate());
 
@@ -355,7 +355,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 			else if (key == osgGA::GUIEventAdapter::KEY_W || key == osgGA::GUIEventAdapter::KEY_S)
 			{
-				int sign = (key == osgGA::GUIEventAdapter::KEY_W) ? 1 : -1;
+				double sign = (key == osgGA::GUIEventAdapter::KEY_W) ? 1 : -1;
 //				_carState->_speed += _vehicle->_speed*sign*_carState->_speed_incr;
 				sign *= sign > 0 ? 1 : 2.5;
 				_carState->_speed += sign*_vehicle->_speedincr;
@@ -400,7 +400,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 			if (_carState->_collide)
 			{
-				const double MAXSPEED(1.0f / frameRate::instance()->getDesignfRate());
+				const double MAXSPEED(1.0f);
 				int sign = (_carState->_speed > 0) ? 1 : -1;
 				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
 				_carState->_collide = false;

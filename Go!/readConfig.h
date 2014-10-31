@@ -187,7 +187,7 @@ protected:
 
 typedef struct Vehicle:public osg::Referenced
 {
-	Vehicle() :_MAXSPEED(280 / 3.6f / frameRate::instance()->getDesignfRate())
+	Vehicle() :_MAXSPEED(280 / 3.6f)
 	{
 		_width = 1.7;
 		_length = 4.7;

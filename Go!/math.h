@@ -91,8 +91,6 @@ public:
 	double getDesignfRate() const { return _designfRate; };
 	void setRealfRate(double rate) { _realfRate = rate;};
 	double getRealfRate() const { return _realfRate; };
-//	void setFramerate(double rate){ _fRate = rate; };
-//	double getFramerate() const { return _fRate; };
 private:
 	frameRate() :_designfRate(60.0f), _realfRate(60.0f) {};
 	~frameRate(){};
