@@ -1077,6 +1077,7 @@ void ReadConfig::readTrial(ifstream &in)
 		const string OBSARRAY("OBS-ARRAY");
 		const string OBSARRAYSIZE("OBS-ARRAY-SIZE");
 		static const string OBSARRAYPIC("OBS-ARRAY-PIC");
+		static const string OBSARRAYNUM("OBS-ARRAY-NUM");
 		const string DEVIATION("DEVIATION");
 		const string DEVIATIONWARN("DEVIATION-WARN");
 		const string DEVIATIONSIREN("DEVIATION-SIREN");
@@ -1308,6 +1309,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_obsArrayPic = config;
+				}
+				continue;
+			}
+			else if (title == OBSARRAYNUM)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYNUM.size());
+				if (!config.empty())
+				{
+					_experiment->_numObsinArray = stoi(config);
 				}
 				continue;
 			}

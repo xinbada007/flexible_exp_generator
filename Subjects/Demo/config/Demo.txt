@@ -17,7 +17,7 @@ MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 [CarSettings]
 Acceleration:	1
 DynamicSensitiveLevel:	25	#could be float number like 1.2532564766578
-CarSpeed:	100
+CarSpeed:	50
 SpeedIncr:	100
 CarWheel:	42.5
 WheelAccl:	0	#720	#180	#0	#normally do not apply this
@@ -76,6 +76,7 @@ OBS-Shape:	3	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Pic:	../Resources/texture/tio.jpg
 
 OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
+OBS-Array-Num:	200;
 OBS-Array-Size:	0.5;
 OBS-Array-Pic:	../Resources/texture/tio.jpg
 
