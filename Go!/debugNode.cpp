@@ -145,40 +145,40 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
 	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
-
-	const CollVisitor *refCV = dynamic_cast<CollVisitor*>(this->getUserData());
-	if (refCV)
+	if (!_carState)
 	{
-		CarState *carState = refCV->getCar()->getCarState();
-		if (carState->_updated)
-		{
-			std::vector<osg::ref_ptr<osg::Vec3dArray>>::iterator i = _carDebugArray.begin();
+		osg::notify(osg::WARN) << "Cannot find car failed to debug" << std::endl;
+		return;
+	}
+	
+	if (_carState->_updated)
+	{
+		std::vector<osg::ref_ptr<osg::Vec3dArray>>::iterator i = _carDebugArray.begin();
 
-			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
-			(*i)->push_back(carState->_O); (*i)->push_back(carState->_O_Project);
-			i++;
+		(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
+		(*i)->push_back(_carState->_O); (*i)->push_back(_carState->_O_Project);
+		i++;
 
-			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
-			osg::Vec3d midFront = carState->_frontWheel->front()*0.5f + carState->_frontWheel->back()*0.5f;
-			midFront -= carState->_O;
-			osg::Vec3d navi = carState->_midLine->front() - carState->_midLine->back();
-			navi *= (midFront.length() / navi.length());
-			navi += carState->_O;
-			(*i)->push_back(carState->_O); (*i)->push_back(navi);
-			i++;
+		(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
+		osg::Vec3d midFront = _carState->_frontWheel->front()*0.5f + _carState->_frontWheel->back()*0.5f;
+		midFront -= _carState->_O;
+		osg::Vec3d navi = _carState->_midLine->front() - _carState->_midLine->back();
+		navi *= (midFront.length() / navi.length());
+		navi += _carState->_O;
+		(*i)->push_back(_carState->_O); (*i)->push_back(navi);
+		i++;
 
-			(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
-			osg::Vec3d carD = carState->_direction;
-			carD *= (midFront.length()) / (carD.length());
-			carD += carState->_O;
-			(*i)->push_back(carState->_O); (*i)->push_back(carD);
-			i++;
+		(i == _carDebugArray.end()) ? (_carDebugArray.push_back(new osg::Vec3dArray), i = _carDebugArray.end() - 1) : (*i)->clear();
+		osg::Vec3d carD = _carState->_direction;
+		carD *= (midFront.length()) / (carD.length());
+		carD += _carState->_O;
+		(*i)->push_back(_carState->_O); (*i)->push_back(carD);
+		i++;
 
-			setDeepth(_carDebugArray);
-			addCarDebugger();
+		setDeepth(_carDebugArray);
+		addCarDebugger();
 
-			carState->_updated = false;
-		}
+		_carState->_updated = false;
 	}
 
 	_root = dynamic_cast<osg::Group*>(node);

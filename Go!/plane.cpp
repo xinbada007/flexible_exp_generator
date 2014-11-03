@@ -318,3 +318,13 @@ bool Plane::reverse_iterator::isValid()
 		return false;
 	return true;
 }
+
+void Plane::multiplyMatrix(const osg::Matrixd &m)
+{
+	Loop *l = _startLoop;
+	while (l)
+	{
+		l->multiplyMatrix(m);
+		l = l->getNext();
+	}
+}

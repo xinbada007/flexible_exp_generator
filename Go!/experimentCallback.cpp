@@ -93,72 +93,107 @@ ExperimentCallback::~ExperimentCallback()
 
 void ExperimentCallback::createObstacles()
 {
-	if (_expSetting->_nurbs.empty())
+	if (_expSetting->_nurbs.empty() && _expSetting->_obstaclePos->empty())
 	{
 		return;
 	}
 
-	_centerList = new osg::Vec3dArray;
-	nurbsList::const_iterator i = _expSetting->_nurbs.cbegin();
-	while (i != _expSetting->_nurbs.cend())
+	if (!_expSetting->_obstaclePos->empty())
 	{
-		
-		osg::Vec3dArray::const_iterator start = (*i)->_path->begin();
-		osg::Vec3dArray::const_iterator end = (*i)->_path->end();
-		while (start != end)
+		osg::IntArray::const_iterator pos = _expSetting->_obstaclePos->begin();
+		osg::IntArray::const_iterator posEND = _expSetting->_obstaclePos->end();
+		while (pos != posEND)
 		{
-			_centerList->push_back(*start);
-			start++;
-		}
-		i++;
-	}
-
-	if (_expSetting->_animationMode)
-	{
-		osg::ref_ptr<osg::AnimationPath> anmPath = new osg::AnimationPath;
-		anmPath->setLoopMode(osg::AnimationPath::NO_LOOPING);
-		osg::Vec3dArray::iterator cB = _centerList->begin();
-		osg::Vec3dArray::const_iterator cE = _centerList->end();
-		double time(0.0f);
-		while (cB != cE)
-		{
-			double delta(0.0f);
-			if (cB != _centerList->begin())
-			{
-				delta = ((*cB) - *(cB - 1)).length();
-				delta /= _expSetting->_speed;
-			}
-			time += delta;
-			anmPath->insert(time, osg::AnimationPath::ControlPoint(*cB));
-			++cB;
-		}
-
-		if (!_anmCallback)
-		{
-			_anmCallback = new osg::AnimationPathCallback;
-		}
-
-		_anmCallback->setAnimationPath(anmPath.release());
-
-		osg::ref_ptr<Obstacle> obs = new Obstacle;
-		obs->setSolidType(Solid::solidType::UNDEFINED);
-		obs->setImage(_expSetting->_imgObsArray);
-		obs->createBox(osg::Vec3d(0.0f, 0.0f, 0.0f), _expSetting->_obsSize*_expSetting->_obsArraySize);
-		_obstacleList.push_back(obs);
-	}
-
-	else
-	{
-		osg::Vec3dArray::const_iterator centerBegin = _centerList->begin();
-		osg::Vec3dArray::const_iterator centerEnd = _centerList->end();
-		while (centerBegin != centerEnd)
-		{
+			const osg::Vec3d &center = H_POINT;
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
-			obs->setSolidType(Solid::solidType::COINBODY);
-			obs->setImage(_expSetting->_imgObsArray);
-			obs->createBox(*centerBegin, _expSetting->_obsSize*_expSetting->_obsArraySize);
+			obs->setSolidType(Solid::solidType::OBSBODY);
+			obs->setImage(_expSetting->_imgOBS);
+			switch (_expSetting->_obsShape)
+			{
+			case 0:
+				obs->createBox(center, _expSetting->_obsSize);
+				break;
+			case 1:
+				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
+				break;
+			case 3:
+				obs->createSphere(center, _expSetting->_obsSize.x());
+				break;
+			default:
+				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
+				break;
+			}
+
+			obs->setSolidType(Solid::solidType::UNDEFINED);
 			_obstacleList.push_back(obs);
-			centerBegin++;
+			++pos;
+		}
+	}
+
+	if (!_expSetting->_nurbs.empty())
+	{
+		_centerList = new osg::Vec3dArray;
+		nurbsList::const_iterator i = _expSetting->_nurbs.cbegin();
+		while (i != _expSetting->_nurbs.cend())
+		{
+
+			osg::Vec3dArray::const_iterator start = (*i)->_path->begin();
+			osg::Vec3dArray::const_iterator end = (*i)->_path->end();
+			while (start != end)
+			{
+				_centerList->push_back(*start);
+				start++;
+			}
+			i++;
+		}
+
+		if (_expSetting->_animationMode)
+		{
+			osg::ref_ptr<osg::AnimationPath> anmPath = new osg::AnimationPath;
+			anmPath->setLoopMode(osg::AnimationPath::NO_LOOPING);
+			osg::Vec3dArray::iterator cB = _centerList->begin();
+			osg::Vec3dArray::const_iterator cE = _centerList->end();
+			double time(0.0f);
+			while (cB != cE)
+			{
+				double delta(0.0f);
+				if (cB != _centerList->begin())
+				{
+					delta = ((*cB) - *(cB - 1)).length();
+					delta /= _expSetting->_speed;
+				}
+				time += delta;
+				anmPath->insert(time, osg::AnimationPath::ControlPoint(*cB));
+				++cB;
+			}
+
+			if (!_anmCallback)
+			{
+				_anmCallback = new osg::AnimationPathCallback;
+			}
+
+			_anmCallback->setAnimationPath(anmPath.release());
+
+			osg::ref_ptr<Obstacle> obs = new Obstacle;
+			obs->setSolidType(Solid::solidType::UNDEFINED);
+			obs->setImage(_expSetting->_imgObsArray);
+			obs->createBox(osg::Vec3d(0.0f, 0.0f, 0.0f), _expSetting->_obsSize*_expSetting->_obsArraySize);
+			_obstacleList.push_back(obs);
+		}
+
+		else
+		{
+			osg::Vec3dArray::const_iterator centerBegin = _centerList->begin();
+			osg::Vec3dArray::const_iterator centerEnd = _centerList->end();
+			while (centerBegin != centerEnd)
+			{
+				osg::ref_ptr<Obstacle> obs = new Obstacle;
+				obs->setSolidType(Solid::solidType::COINBODY);
+				obs->setImage(_expSetting->_imgObsArray);
+				obs->createBox(*centerBegin, _expSetting->_obsSize*_expSetting->_obsArraySize);
+				_obstacleList.push_back(obs);
+				centerBegin++;
+			}
 		}
 	}
 }
@@ -169,9 +204,10 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	{
 		_cVisitor = CollVisitor::instance();
 	}
-	if (_cVisitor && _cVisitor->getCar() && !_carState)
+	if (!_carState)
 	{
-		_carState = _cVisitor->getCar()->getCarState();
+		osg::notify(osg::WARN) << "Cannot find Car failed to control experiment" << std::endl;
+		return;
 	}
 	if (!_root)
 	{
@@ -243,6 +279,22 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	traverse(node, nv);
 }
 
+void ExperimentCallback::removeNodefromRoad(osg::Node *n)
+{
+	if (n->getNumParents() > 1)
+	{
+		osg::notify(osg::WARN) << "cannot remove this node because it has multiple parents" << std::endl;
+		return;
+	}
+
+	if (!_road->removeChild(n))
+	{
+		removeNodefromRoad(n->getParent(0));
+	}
+
+	return;
+}
+
 void ExperimentCallback::dealCollision()
 {
 	const solidList *obsList = _carState->getObsList();
@@ -266,7 +318,7 @@ void ExperimentCallback::dealCollision()
 			}
 			_carState->_collide = false;
 			++_carState->_pointsEarned;
-			_road->removeChild(*i);
+			removeNodefromRoad(*i);
 			_cVisitor->setMode(OBS);
 			_road->accept(*_cVisitor);
 		}
@@ -420,21 +472,16 @@ void ExperimentCallback::showObstacle()
 		while (i != _obstacleList.cend())
 		{
 			osg::ref_ptr<Obstacle> obs = *i;
-			if (_anmCallback)
+			osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
+			mT->addChild(obs);
+			_road->addChild(mT);
+
+			if (_anmCallback && (i - _obstacleList.cbegin() >= _expSetting->_obstaclePos->size()))
 			{
-				osg::ref_ptr<osg::PositionAttitudeTransform> paTransform = new osg::PositionAttitudeTransform;
-				paTransform->addChild(obs);
-				paTransform->setUpdateCallback(_anmCallback);
-				_road->addChild(paTransform);
-// 				osg::ref_ptr<osg::MatrixTransform> mTransform = new osg::MatrixTransform;
-// 				mTransform->addChild(obs);
-// 				mTransform->setUpdateCallback(_anmCallback);
-// 				_road->addChild(mTransform);
+				mT->setUpdateCallback(_anmCallback);
+				_road->addChild(mT);
 			}
-			else
-			{
-				_road->addChild(obs);
-			}
+
 			i++;
 		}
 		if (_cVisitor)
@@ -501,26 +548,11 @@ void ExperimentCallback::showObstacle()
 			osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
 			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
 			center = center * osg::Matrix::translate(X_AXIS * *posOffset);
-			osg::ref_ptr<Obstacle> obs = new Obstacle;
+			osg::ref_ptr<Obstacle> obs = _obstacleList.at(offset);
+			const osg::Vec3d &OC = H_POINT;
+			osg::Matrixd m = osg::Matrix::translate(center - OC);
+			obs->multiplyMatrix(m);
 			obs->setSolidType(Solid::solidType::OBSBODY);
-			obs->setImage(_expSetting->_imgOBS);
-			switch (_expSetting->_obsShape)
-			{
-			case 0:
-				obs->createBox(center, _expSetting->_obsSize);
-				break;
-			case 1:
-				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
-				break;
-			case 3:
-				obs->createSphere(center, _expSetting->_obsSize.x());
-				break;
-			default:
-				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
-				break;
-			}
-			_road->addChild(obs);
-
 			//visitor
 			if (_cVisitor)
 			{

@@ -265,3 +265,21 @@ void Loop::setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding
 	_homeP->getHomeS()->setTexMode(true);
 	setTexCoordArray(unit, array, binding);
 }
+
+void Loop::multiplyMatrix(const osg::Matrixd &m)
+{
+	HalfEdge *he = _startHE;
+	const HalfEdge * const start = _startHE;
+	do 
+	{
+		osg::Vec3 p = he->getPoint()->getPoint();
+		p = p * m;
+		he->getPoint()->setPoint(p);
+		he = he->getNext();
+	} while (he != start);
+
+	draw();
+
+	dirtyBound();
+	dirtyDisplayList();	
+}

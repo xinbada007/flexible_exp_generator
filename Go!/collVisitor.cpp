@@ -5,8 +5,7 @@
 #include "edge.h"
 
 CollVisitor::CollVisitor():
-osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
-_car(NULL), _mode(ROAD)
+osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _mode(ROAD)
 {
 }
 
@@ -23,7 +22,6 @@ void CollVisitor::reset()
 	_lwall.clear();
 	_rwall.clear();
 	_mode = ROAD;
-	_car = NULL;
 }
 
 CollVisitor *CollVisitor::instance()
@@ -107,12 +105,6 @@ void CollVisitor::apply(osg::Group& node)
 	if (refLR)
 	{
 		pushLR(refLR);
-	}
-
-	if (refCar)
-	{
-		osg::notify(osg::NOTICE) << "caught\t" << node.className() << std::endl;
-		_car = refCar.get();
 	}
 
 	traverse(node);

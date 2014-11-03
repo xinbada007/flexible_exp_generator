@@ -3,6 +3,7 @@ class Solid;
 class Loop;
 
 #include <osg/geode>
+#include <osg/Matrix>
 
 class Plane: public osg::Geode
 {
@@ -139,6 +140,8 @@ public:
 	inline unsigned getIndex() const { return _index; };
 
 	bool isValid() const;
+
+	void multiplyMatrix(const osg::Matrixd &m);
 
 	void traverse();
 private:

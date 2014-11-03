@@ -1,0 +1,88 @@
+#only comma, colon, space, and semicolon are allowed to use
+#folder path MUST NOT contain SPACE
+
+TrialConfig
+
+[ScreenSettings]
+#Num of Screent starts from 0
+Hdistance:	2.55	#5.44	#0.6
+Vdistance:	1.5	#1.25
+screen:		0
+aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		42.175	#Disable when RealWorld is enabled
+RealWorld:	0:	42.175 , 65.217 , 42.391
+background:	../Resources/texture/A0005332_LARGE.jpg
+MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
+
+[CarSettings]
+Acceleration:	0
+DynamicSensitiveLevel:	20	#could be float number like 1.2532564766578
+CarSpeed:	50
+SpeedIncr:	1
+CarWheel:	42.5
+WheelAccl:	0	#720	#180	#0	#normally do not apply this
+CarWidth:	1.7
+CarHeight:	0.15
+CarLength:	4.7
+CarPic:		../Resources/texture/car.png
+CarVisible:	0	#1=Visible	0=Invisible
+CarReset:	0	#0 = disable	1 = auto	2 = manual
+
+[RoadSettings]
+RoadLanes:	250
+TextureWidth:	2
+
+#RoadTxt is disabled when Roads in Subjects Section is enabled
+RoadTxt:	../Resources/roads/Line.txt;
+Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
+Density:	5000
+RoadVisible:	0	#1 = Visible	0 = Invisible
+
+WallHeight:	0
+
+[Subjects]
+Name:	demo
+Age:	
+Gender: 	
+Driving:		#how many years since driving
+
+RandomRoads:	0
+TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Name
+
+[Experiment]
+##==Starting Condition===================
+Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
+Lane-Offset:	0	#Negtive = L	Positive = R
+
+##==Deviation Warn Setting===============
+Deviation:	0	#Units:	Metres
+Deviation-Warn: DEVIATION TOO HIGH
+Deviation-BaseLine:	0	#1 = R	#-1 = L	#0 = Middle
+Deviation-Siren:	../Resources/sound/Industrial Alarm.wav
+
+##==Obstacle Setting=====================
+Obstacle:	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle-Range:	200 200	400 400 600 600 800 800	1000 1000
+Obstacle-Range:	1200 1200	1400 1400	1600 1600	1800 1800	2000 2000
+Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
+OBS-Position-Offset:	-20 -24	0 4 16 20 -16 -20 24 20 
+OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
+OBS-Size:	1.0	2.0	1.0	#Length X Width X Height
+OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Pic:	../Resources/texture/red.jpg;
+
+##==Text Setting=========================
+#Textime:	0
+#Period:	10
+##==must line by line====================
+#Text:	Please Change Lane
+
+##==Dynamic Setting======================
+#Dynamic-Change: 1	20	25
+#Dynamic-Change-Condition:	1	0	#black for 10 seconds
+
+[CameraSettings]
+#this is the camera's position realtively to the original point of vehicle
+#shouldn't mess around with this, set as 0 to let program to define
+Offset:		0	#system decide
+EyeTracker:	0	#normally do not apply

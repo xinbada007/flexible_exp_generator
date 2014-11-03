@@ -6,6 +6,8 @@
 #include "halfedge.h"
 #include "loop.h"
 
+#include <osg/MatrixTransform>
+
 Solid::Solid():
 _next(NULL), _prev(NULL), _updated(false), _numPoints(0), _numPlanes(0),
 _startPlane(NULL), _startE(NULL), _startP(NULL), _texCoord(NULL), _imgTexture(NULL),
@@ -322,4 +324,32 @@ void Solid::caclCCW() const
 
 	_ccw = outside;
 	_ccwupdated = true;
+}
+
+void Solid::multiplyMatrix(const osg::Matrixd &m)
+{
+	osg::MatrixTransform *mt = dynamic_cast<osg::MatrixTransform*>(this->getParent(0));
+	if (mt)
+	{
+		mt->setMatrix(m);
+
+		Points *p = _startP;
+		while (p)
+		{
+			p->setPoint(p->getPoint() * m);
+			p = p->getNext();
+		}
+	}
+
+	else
+	{
+		Plane *pl = _startPlane;
+		while (pl)
+		{
+			pl->multiplyMatrix(m);
+			pl = pl->getNext();
+		}
+	}
+
+	absoluteTerritory.center = absoluteTerritory.center * m;
 }

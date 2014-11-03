@@ -18,6 +18,7 @@ const osg::Vec3d X_AXIS(1.0f, 0.0f, 0.0f);
 const osg::Vec3d Y_AXIS(0.0f, 1.0f, 0.0f);
 const osg::Vec3d Z_AXIS(0.0f, 0.0f, 1.0f);
 const osg::Vec3d O_POINT(0.0f, 0.0f, 0.0f);
+const osg::Vec3d H_POINT(0.0f, 0.0f, 100.0f);
 
 const osg::Vec3d UP_DIR = Y_AXIS;
 

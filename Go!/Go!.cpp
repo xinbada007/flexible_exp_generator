@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 // 		std::cout << ("Require at least 1 input\n") << std::endl;
 // 		return 0;
 // 	}
-//	totalRep = 2;
+	totalRep = 2;
 
 	extern bool init_joystick();
 	init_joystick();
@@ -90,11 +90,6 @@ int main(int argc, char** argv)
 	std::vector<osg::ref_ptr<Recorder>> recorder;
 	std::vector<osg::ref_ptr<ExperimentCallback>> expcontroller;
 	
-	//TEST
-	std::vector<osg::ref_ptr<osg::AnimationPathCallback>> anmCallback;
-	std::vector<osg::ref_ptr<osg::AnimationPath>> anmPath;
-	//TEST
-
 	while (curRep <= totalRep)
 	{
 		//obtain filename
@@ -133,7 +128,6 @@ int main(int argc, char** argv)
 
 		//Build Car & Render Car && Obtain carMatrix
 		car.push_back(obtainCar(readConfig.back()));
-		cv->setCar(car.back());
 		if (car.back()->getVehicle()->_visibility)
 		{
 			rv->reset();
@@ -151,13 +145,8 @@ int main(int argc, char** argv)
 		colldetect.push_back(new Collision);
 		car.back()->addUpdateCallback(colldetect.back().get());
 		roadSwitcher.push_back(new RoadSwitcher);
+		roadSwitcher.back()->setCarState(car.back()->getCarState());
 		road.back()->addUpdateCallback(roadSwitcher.back().get());
-
-		//Debug Node
-// 		osg::ref_ptr<DebugNode> debugger = new DebugNode;
-// 		debugger->setUserData(cv.get());
-// 		root.back()->addEventCallback(debugger.get());
-// 		root.back()->addChild(readConfig.back()->measuer());
 
 		//Camera event callback
 		camMatrix.push_back(obtainCamMatrix(readConfig.back(), car.back().get()));
@@ -178,6 +167,7 @@ int main(int argc, char** argv)
 
 		//ExperimentControl
 		expcontroller.push_back(new ExperimentCallback(readConfig.back()));
+		expcontroller.back()->setCarState(car.back()->getCarState());
 		expcontroller.back()->setHUDCamera(mViewer.back()->getHUDCamera());
 		expcontroller.back()->setMultiViewer(mViewer.back().get());
 		root.back()->addEventCallback(expcontroller.back().get());
@@ -253,3 +243,10 @@ int main(int argc, char** argv)
 	//exit the main function
 	return 0;
 }
+
+
+//Debug Node
+// 		osg::ref_ptr<DebugNode> debugger = new DebugNode;
+// 		debugger->setUserData(cv.get());
+// 		root.back()->addEventCallback(debugger.get());
+// 		root.back()->addChild(readConfig.back()->measuer());

@@ -12,7 +12,7 @@ public:
 	RoadSwitcher();
 	virtual ~RoadSwitcher();
 	void operator()(osg::Node* node, osg::NodeVisitor* nv);
-
+	void setCarState(CarState *cars) { _carState = cars; };
 private:
 	CarState *_carState;
 };

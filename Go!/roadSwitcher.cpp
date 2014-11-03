@@ -17,11 +17,10 @@ RoadSwitcher::~RoadSwitcher()
 
 void RoadSwitcher::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-	const CollVisitor *refCV = CollVisitor::instance();
-
-	if (refCV)
+	if (!_carState)
 	{
-		_carState = refCV->getCar()->getCarState();
+		osg::notify(osg::WARN) << "Cannot find Car failed to switch Road" << std::endl;
+		return;
 	}
 	if (_carState)
 	{

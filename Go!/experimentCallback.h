@@ -22,6 +22,7 @@ public:
 	void operator()(osg::Node* node, osg::NodeVisitor* nv);
 	void setHUDCamera(osg::Camera *cam);
 	inline void setMultiViewer(MulitViewer *mv) { _mv = mv; };
+	inline void setCarState(CarState *cars) { _carState = cars; };
 private:
 	const Experiment *_expSetting;
 	CarState *_carState;
@@ -62,5 +63,7 @@ private:
 
 	void createObstacles();
 	void dealCollision();
+
+	void removeNodefromRoad(osg::Node *n);
 };
 

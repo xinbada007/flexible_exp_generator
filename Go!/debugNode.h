@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "road.h"
+struct CarState;
 
 class Solid;
 
@@ -20,8 +21,11 @@ public:
 	virtual ~DebugNode();
 
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
+	void setCarState(CarState *carS){ _carState = carS; };
 
 private:
+	CarState *_carState;
+
 	osg::ref_ptr<osg::Group> _root;
 
 	osg::ref_ptr<osg::Switch> _carDebugSwitch;

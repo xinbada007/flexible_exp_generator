@@ -48,6 +48,8 @@ public:
 
 	void setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding binding = osg::Array::BIND_UNDEFINED);
 
+	void multiplyMatrix(const osg::Matrixd &m);
+
 private:
 	void forwardInsertHE(HalfEdge *he1, HalfEdge *he2);
 	HalfEdge *_startHE;
