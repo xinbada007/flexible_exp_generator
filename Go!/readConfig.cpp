@@ -505,13 +505,13 @@ void ReadConfig::readTrial(ifstream &in)
 		string config;
 
 		//Set Subjects' Name
-		const string NAME = "NAME";
-		const string AGE = "AGE";
-		const string GENDER = "GENDER";
-		const string DRIVING = "DRIVING";
-		const string RROAD = "RANDOMROADS";
-		const string SUBROADS = "ROADS";
-		const string TRIALNAME = "TRIALNAME";
+		static const string NAME = "NAME";
+		static const string AGE = "AGE";
+		static const string GENDER = "GENDER";
+		static const string DRIVING = "DRIVING";
+		static const string RROAD = "RANDOMROADS";
+		static const string SUBROADS = "ROADS";
+		static const string TRIALNAME = "TRIALNAME";
 		while (flag == SUBJECTS && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -610,16 +610,16 @@ void ReadConfig::readTrial(ifstream &in)
 		}
 
 		//Set Screen
-		const string SCR = "SCREEN";
-		const string ASPECT = "ASPECT";
-		const string REALWORD = "REALWORLD";
-		const string BGPIC = "BACKGROUND";
-		const string HDISTANCE = "HDISTANCE";
-		const string VDISTANCE = "VDISTANCE";
-		const string VOFFSET = "VOFFSET";
-		const string FOVY = "FOVY";
-		const string DISTOR = "DISTORTION";
-		const string FXAA = "MULTISAMPLES";
+		static const string SCR = "SCREEN";
+		static const string ASPECT = "ASPECT";
+		static const string REALWORD = "REALWORLD";
+		static const string BGPIC = "BACKGROUND";
+		static const string HDISTANCE = "HDISTANCE";
+		static const string VDISTANCE = "VDISTANCE";
+		static const string VOFFSET = "VOFFSET";
+		static const string FOVY = "FOVY";
+		static const string DISTOR = "DISTORTION";
+		static const string FXAA = "MULTISAMPLES";
 		while (flag == SCREEN && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -722,19 +722,19 @@ void ReadConfig::readTrial(ifstream &in)
 		}
 
 		//Set Vehicle
-		const string ACCEL = "ACCELERATION";
-		const string CARSPEED = "CARSPEED";
-		const string CARWHEEL = "CARWHEEL";
-		const string CARPIC = "CARPIC";
-		const string CARWIDTH = "CARWIDTH";
-		const string CARHEIGHT = "CARHEIGHT";
-		const string CARLENGTH = "CARLENGTH";
-		const string WHEELACCL = "WHEELACCL";
-		const string SPEEDINCR = "SPEEDINCR";
-		const string DYNAMICSENSITIVE = "DYNAMICSENSITIVELEVEL";
-		const string STARTDELAY = "STARTDELAY";
-		const string CARVISIBLE = "CARVISIBLE";
-		const string CARRESET = "CARRESET";
+		static const string ACCEL = "ACCELERATION";
+		static const string CARSPEED = "CARSPEED";
+		static const string CARWHEEL = "CARWHEEL";
+		static const string CARPIC = "CARPIC";
+		static const string CARWIDTH = "CARWIDTH";
+		static const string CARHEIGHT = "CARHEIGHT";
+		static const string CARLENGTH = "CARLENGTH";
+		static const string WHEELACCL = "WHEELACCL";
+		static const string SPEEDINCR = "SPEEDINCR";
+		static const string DYNAMICSENSITIVE = "DYNAMICSENSITIVELEVEL";
+		static const string STARTDELAY = "STARTDELAY";
+		static const string CARVISIBLE = "CARVISIBLE";
+		static const string CARRESET = "CARRESET";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -854,16 +854,17 @@ void ReadConfig::readTrial(ifstream &in)
 		}
 
 		//Setting Road
-		const string ROADPIC = "ROADPIC";
-		const string TEXTUREWIDTH = "TEXTUREWIDTH";
-		const string ROADTXT = "ROADTXT";
-		const string ROADDT = "DENSITY";
-		const string WALLH = "WALLHEIGHT";
-		const string ROADLANE = "ROADLANES";
-		const string WALLPIC = "WALLPIC";
-		const string SCALE = "SCALEVECTOR";
-		const string METHOD = "METHOD";
-		const string ROADVISIBLE = "ROADVISIBLE";
+		static const string ROADPIC = "ROADPIC";
+		static const string TEXTUREWIDTH = "TEXTUREWIDTH";
+		static const string ROADTXT = "ROADTXT";
+		static const string ROADDT = "DENSITY";
+		static const string WALLH = "WALLHEIGHT";
+		static const string ROADLANE = "ROADLANES";
+		static const string WALLPIC = "WALLPIC";
+		static const string SCALE = "SCALEVECTOR";
+		static const string METHOD = "METHOD";
+		static const string ROADVISIBLE = "ROADVISIBLE";
+		static const string ROADLENGTH = "ROADLENGTH";
 		while (flag == ROAD && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1003,6 +1004,15 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == ROADLENGTH)
+			{
+				config.erase(config.begin(), config.begin() + ROADLENGTH.size());
+				if (!config.empty())
+				{
+					_roads->_length = stod(config);
+				}
+				continue;
+			}
 			else if (title == ROADVISIBLE)
 			{
 				config.erase(config.begin(), config.begin() + ROADVISIBLE.size());
@@ -1019,8 +1029,8 @@ void ReadConfig::readTrial(ifstream &in)
 		}
 
 		//Setting Camera
-		const string CAM_OFFSET("OFFSET");
-		const string CAM_EYE_TRACKER("EYETRACKER");
+		static const string CAM_OFFSET("OFFSET");
+		static const string CAM_EYE_TRACKER("EYETRACKER");
 		while (flag == CAMERA && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1058,30 +1068,30 @@ void ReadConfig::readTrial(ifstream &in)
 		}
 
 		//set Experiment
-		const string STARTLANE("START-LANE");
-		const string LANEOFFSET("LANE-OFFSET");
-		const string TEXTIME("TEXTIME");
-		const string PERIOD("PERIOD");
-		const string TEXT("TEXT");
-		const string DYNAMICHANGE("DYNAMIC-CHANGE");
-		const string DYNAMICCHANGECONDITION("DYNAMIC-CHANGE-CONDITION");
-		const string DYNAMICCHANGEPIC("DYNAMIC-CHANGE-PIC");
-		const string OBSTACLE("OBSTACLE");
-		const string OBSTACLERANGE("OBSTACLE-RANGE");
-		const string OBSTACLEPOSITION("OBSTACLE-POSITION");
-		const string OBSPOSOFFSET("OBS-POSITION-OFFSET");
-		const string OBSSIZE("OBS-SIZE");
-		const string OBSSHAPE("OBS-SHAPE");
-		const string OBSPIC("OBS-PIC");
-		const string OBSARRAY("OBS-ARRAY");
-		const string OBSARRAYSIZE("OBS-ARRAY-SIZE");
+		static const string STARTLANE("START-LANE");
+		static const string LANEOFFSET("LANE-OFFSET");
+		static const string TEXTIME("TEXTIME");
+		static const string PERIOD("PERIOD");
+		static const string TEXT("TEXT");
+		static const string DYNAMICHANGE("DYNAMIC-CHANGE");
+		static const string DYNAMICCHANGECONDITION("DYNAMIC-CHANGE-CONDITION");
+		static const string DYNAMICCHANGEPIC("DYNAMIC-CHANGE-PIC");
+		static const string OBSTACLE("OBSTACLE");
+		static const string OBSTACLERANGE("OBSTACLE-RANGE");
+		static const string OBSTACLEPOSITION("OBSTACLE-POSITION");
+		static const string OBSPOSOFFSET("OBS-POSITION-OFFSET");
+		static const string OBSSIZE("OBS-SIZE");
+		static const string OBSSHAPE("OBS-SHAPE");
+		static const string OBSPIC("OBS-PIC");
+		static const string OBSARRAY("OBS-ARRAY");
+		static const string OBSARRAYSIZE("OBS-ARRAY-SIZE");
 		static const string OBSARRAYPIC("OBS-ARRAY-PIC");
 		static const string OBSARRAYNUM("OBS-ARRAY-NUM");
 		static const string OBSARRAYMODE("OBS-ARRAY-MODE");
-		const string DEVIATION("DEVIATION");
-		const string DEVIATIONWARN("DEVIATION-WARN");
-		const string DEVIATIONSIREN("DEVIATION-SIREN");
-		const string DEVIATIONBASELINE("DEVIATION-BASELINE");
+		static const string DEVIATION("DEVIATION");
+		static const string DEVIATIONWARN("DEVIATION-WARN");
+		static const string DEVIATIONSIREN("DEVIATION-SIREN");
+		static const string DEVIATIONBASELINE("DEVIATION-BASELINE");
 		while (flag == EXPERIMENT && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1492,6 +1502,51 @@ Nurbs * ReadConfig::readNurbs()
 	}
 
 	_nurbs->_order = _nurbs->_knotVector->size() - _nurbs->_ctrlPoints->size();
+
+	if (_roads->_length > 0)
+	{
+		const unsigned &numPoints = _nurbs->_ctrlPoints->getNumElements();
+		const unsigned &order = _nurbs->_order;
+		const unsigned &numKnots = _nurbs->_knotVector->getNumElements();
+		double *knots = (double*)malloc(numKnots*sizeof(double));
+		for (int i = 0; i < numKnots; i++)
+		{
+			knots[i] = _nurbs->_knotVector->at(i);
+		}
+		const unsigned dim = _nurbs->_ctrlPoints->front().num_components;
+		double *ctrlpts = (double*)malloc(numPoints*dim*sizeof(double));
+		for (unsigned int i = 0; i < numPoints; i++)
+		{
+			int v = 0;
+			for (int j = (i*dim); j < (i + 1)*dim; j++)
+			{
+				ctrlpts[j] = _nurbs->_ctrlPoints->at(i)._v[v];
+				++v;
+			}
+		}
+		const unsigned kind = 1;
+		SISLCurve *sc = newCurve(numPoints, order, knots, ctrlpts, kind, dim, 1);
+
+		double length(0.0f);
+		int jstat(-1);
+		s1240(sc, eps_1000, &length, &jstat);
+		if (!jstat)
+		{
+			const double L = _roads->_length / length;
+			_nurbs->_scale.x() = L;
+			_nurbs->_scale.y() = L;
+			_nurbs->_scale.z() = L;
+		}
+
+		freeCurve(sc);
+		delete knots;
+		delete ctrlpts;
+
+		sc = NULL;
+		knots = NULL;
+		ctrlpts = NULL;
+	}
+
 	arrayByMatrix(_nurbs->_ctrlPoints, osg::Matrix::scale(_nurbs->_scale));
 
 	filein.close();

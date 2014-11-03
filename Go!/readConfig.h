@@ -140,6 +140,7 @@ typedef struct RoadSet:public osg::Referenced
 	{
 		_roadLane = 2;
 		_width = _laneWidth * _roadLane;
+		_length = 0.0f;
 
 		_wallHeight = 0.50f;
 		_density = 1000;
@@ -160,6 +161,7 @@ typedef struct RoadSet:public osg::Referenced
 	const double _laneWidth;	//laneWidth = 3.75 Meters
 	int _roadLane;
 	double _width;
+	double _length;
 	double _wallHeight;
 
 	unsigned _density;
