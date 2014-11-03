@@ -57,21 +57,21 @@ int main(int argc, char** argv)
 	int curRep(1);
 	int totalRep(1);
 	bool replyM(false);
-// 	if (argc >= 3)
-// 	{
-// 		totalRep = stoi((argv[1]));
-// 		if (!totalRep)
-// 		{
-// 			totalRep = 1;
-// 			replyM = true;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		std::cout << ("Require at least 1 input\n") << std::endl;
-// 		return 0;
-// 	}
-	totalRep = 2;
+	if (argc >= 3)
+	{
+		totalRep = stoi((argv[1]));
+		if (!totalRep)
+		{
+			totalRep = 1;
+			replyM = true;
+		}
+	}
+	else
+	{
+		std::cout << ("Require at least 1 input\n") << std::endl;
+		return 0;
+	}
+//	totalRep = 2;
 
 	extern bool init_joystick();
 	init_joystick();
@@ -93,8 +93,8 @@ int main(int argc, char** argv)
 	while (curRep <= totalRep)
 	{
 		//obtain filename
-//		string configFile = argv[1 + curRep];
-		string configFile = "..\\Resources\\config.txt";
+		string configFile = argv[1 + curRep];
+//		string configFile = "..\\Resources\\config.txt";
 		string replayFile;
 		if (replyM)
 		{
