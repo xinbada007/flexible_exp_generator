@@ -50,6 +50,8 @@ typedef struct CarState:public osg::Referenced
 		//from right-bottom to left-bottom under counter-clockwise
 		_carArray = new osg::Vec3dArray;
 		_lastCarArray = new osg::Vec3dArray;
+		
+		_distancetoObsBody = new osg::DoubleArray;
 
 		_OQuad = NULL;
 
@@ -145,6 +147,7 @@ typedef struct CarState:public osg::Referenced
 	inline const std::string & getReplayText() const { return _replayText; };
 	inline void setObsList(solidList list){ _obsList = list; };
 	inline solidList getObsList() const { return _obsList; };
+	inline osg::ref_ptr<osg::DoubleArray> getDistancetoObsBody() const { return _distancetoObsBody; };
 private:
 	~CarState(){ std::cout << "Deconstruct CarState" << std::endl; };
 	mutable double _D_Speed;
@@ -160,6 +163,7 @@ private:
 	std::string _replayText;
 
 	solidList _obsList;
+	osg::ref_ptr<osg::DoubleArray> _distancetoObsBody;
 }CarState;
 
 class Car:public EulerPoly

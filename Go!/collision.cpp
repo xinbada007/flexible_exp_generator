@@ -219,14 +219,14 @@ bool Collision::ifObsCollide(const Car *refC, const Solid *obs)
 	return false;
 }
 
-bool Collision::detectObsDistance(const Car *refC, const Solid *obs)
+bool Collision::detectObsDistance(const Car *refC, const Solid *obs, double *distance)
 {
 	const double &R1 = refC->absoluteTerritory._detectR;
 	const double &R2 = obs->absoluteTerritory._detectR;
 	if (R1 && R2)
 	{
-		const double distance = (obs->absoluteTerritory.center - refC->absoluteTerritory.center).length();
-		if (distance < R1 + R2)
+		*distance = (obs->absoluteTerritory.center - refC->absoluteTerritory.center).length();
+		if (*distance < R1 + R2)
 		{
 			return true;
 		}
@@ -255,17 +255,40 @@ bool Collision::detectObsDistance(const Car *refC, const Solid *obs)
 solidList Collision::listObsCollsion(const Car *refC, const solidList obs)
 {
 	solidList list;
+	osg::ref_ptr<osg::DoubleArray> distanceObsBody = refC->getCarState()->getDistancetoObsBody();
 
 	if (refC && !obs.empty())
 	{
 		solidList::const_iterator i = obs.cbegin();
 		while (i != obs.cend())
 		{
-			if (detectObsDistance(refC, *i))
+			double distance(0.0f);
+			const bool veryclose = detectObsDistance(refC, *i, &distance);
+			if (veryclose)
 			{
 				if (ifObsCollide(refC, *i))
 				{
+					distance = 0.0f;
 					list.push_back(*i);
+				}
+			}
+			if ((*i)->getSolidType() == Solid::solidType::OBSBODY)
+			{
+				const unsigned &which = i - obs.cbegin();
+				const osg::Vec3d &carO = refC->getCarState()->_O;
+				const osg::Vec3d &cartoOBS = carO - (*i)->absoluteTerritory.center;
+				const osg::Vec3d &carD = refC->getCarState()->_direction;
+				if ((cartoOBS^carD).z() < 0)
+				{
+					distance = -distance;
+				}
+				if (distanceObsBody->size() < which + 1)
+				{
+					distanceObsBody->resize(which + 1, distance);
+				}
+				else
+				{
+					distanceObsBody->at(which) = distance;
 				}
 			}
 			i++;

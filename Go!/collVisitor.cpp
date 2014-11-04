@@ -7,6 +7,7 @@
 CollVisitor::CollVisitor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _mode(ROAD)
 {
+
 }
 
 

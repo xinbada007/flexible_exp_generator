@@ -56,6 +56,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._dynamic);
 	_outMoment.push_back(&_recS._usrHit);
 	_outMoment.push_back(&_recS._pointsEarned);
+	_outMoment.push_back(&_recS._distanceObsBody);
 	_outMoment.push_back(&_recS._replay);
 
 	_outMoment.push_back(&_recS._PERIOD);
@@ -444,6 +445,19 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, carState->_pointsEarned, nDigit);
 	_recS._pointsEarned = tempd + _recS._TAB;
 
+	osg::ref_ptr<osg::DoubleArray> toOBS = carState->getDistancetoObsBody();
+	osg::DoubleArray::const_iterator begin_toOBS = toOBS->begin();
+	osg::DoubleArray::const_iterator end_toOBS = toOBS->end();
+	std::string dtoobs;
+	while (begin_toOBS != end_toOBS)
+	{
+		_gcvt_s(tempd, size_tempd, *begin_toOBS, nDigit);
+		dtoobs += tempd;
+		dtoobs += ",";
+		++begin_toOBS;
+	}
+	_recS._distanceObsBody = dtoobs + _recS._TAB;
+	
 	_detailed = carState->_detailedDisplay;
 
 	if (carState->_replay)
@@ -460,52 +474,56 @@ void Recorder::copyandSetHUDText()
 	std::string lesscontent;
 	while (i != _outMoment.cend())
 	{
-		const unsigned seq(i - _outMoment.cbegin());
 		_txtRecorder += **i;
-		if (isNumber(**i))
+		const unsigned seq(i - _outMoment.cbegin());
+		if (i - _outMoment.cbegin() < TypeofText::TOOBSBODY)
 		{
-			float number = (stof(**i));
-			int i_number = number;
-			char temp[20];
-			unsigned temp_size = sizeof(temp);
-			if (!(number - i_number))
+			if (isNumber(**i))
 			{
-				sprintf_s(temp, temp_size, "%d", i_number);
-			}
-			else
-			{
-				sprintf_s(temp, temp_size, "%.2f", number);
-			}
-			content += temp;
-			content.push_back('\t');
-			switch (seq)
-			{
-			case Recorder::TypeofText::TIME:
-				lesscontent += temp;
-				lesscontent.push_back('\t');
-				break;
-// 			case Recorder::TypeofText::CUSTOMD:
+				std::size_t sz;
+				float number = stof(**i, &sz);
+				int i_number = number;
+				char temp[20];
+				unsigned temp_size = sizeof(temp);
+				if (!(number - i_number))
+				{
+					sprintf_s(temp, temp_size, "%d", i_number);
+				}
+				else
+				{
+					sprintf_s(temp, temp_size, "%.2f", number);
+				}
+				content += temp;
+				content.push_back('\t');
+				switch (seq)
+				{
+				case Recorder::TypeofText::TIME:
+					lesscontent += temp;
+					lesscontent.push_back('\t');
+					break;
+//	 			case Recorder::TypeofText::CUSTOMD:
 // 				lesscontent += temp;
 // 				lesscontent.push_back('\t');
 // 				break;
-			case Recorder::TypeofText::SPEED:
-				lesscontent += temp;
-				lesscontent.push_back('\t');
-				break;
+				case Recorder::TypeofText::SPEED:
+					lesscontent += temp;
+					lesscontent.push_back('\t');
+					break;
 // 			case Recorder::TypeofText::USRHIT:
 // 				lesscontent += temp;
 // 				lesscontent.push_back('\t');
 // 				break;
-			case Recorder::TypeofText::SCORE:
-				lesscontent += temp;
-				lesscontent.push_back('\t');
-			default:
-				break;
+				case Recorder::TypeofText::SCORE:
+					lesscontent += temp;
+					lesscontent.push_back('\t');
+				default:
+					break;
+				}
 			}
-		}
-		else
-		{
-			content += **i;
+			else
+			{
+				content += **i;
+			}
 		}
 		i++;
 	}
@@ -527,26 +545,30 @@ void Recorder::setHUDText()
 
 	while (i != _outMoment.cend())
 	{
-		if (isNumber(**i))
+		if ((i - _outMoment.cbegin()) < TypeofText::TOOBSBODY)
 		{
-			float number = (stof(**i));
-			int i_number = number;
-			char temp[20];
-			unsigned temp_size = sizeof(temp);
-			if (!(number - i_number))
+			if (isNumber(**i))
 			{
-				sprintf_s(temp, temp_size, "%d", i_number);
+				std::size_t sz;
+				float number = stof(**i, &sz);
+				int i_number = number;
+				char temp[20];
+				unsigned temp_size = sizeof(temp);
+				if (!(number - i_number))
+				{
+					sprintf_s(temp, temp_size, "%d", i_number);
+				}
+				else
+				{
+					sprintf_s(temp, temp_size, "%.2f", number);
+				}
+				content += temp;
+				content.push_back('\t');
 			}
 			else
 			{
-				sprintf_s(temp, temp_size, "%.2f", number);
+				content += **i;
 			}
-			content += temp;
-			content.push_back('\t');
-		}
-		else
-		{
-			content += **i;
 		}
 		i++;
 	}
