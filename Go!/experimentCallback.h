@@ -22,10 +22,10 @@ public:
 	void operator()(osg::Node* node, osg::NodeVisitor* nv);
 	void setHUDCamera(osg::Camera *cam);
 	inline void setMultiViewer(MulitViewer *mv) { _mv = mv; };
-	inline void setCarState(CarState *cars) { _carState = cars; };
+	inline void setCar(Car *car) { _car = car;};
 private:
 	const Experiment *_expSetting;
-	CarState *_carState;
+	Car *_car;
 	CollVisitor *_cVisitor;
 
 	double _expTime;

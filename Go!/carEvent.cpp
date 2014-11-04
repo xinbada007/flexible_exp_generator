@@ -203,10 +203,19 @@ void CarEvent::makeResetMatrix()
 	qt.makeRotate(carD, roadD);
 
 	_reset.makeIdentity();
-	_reset *= osg::Matrix::translate(_carState->_O_Project - _carState->_O);
-	_reset *= osg::Matrix::translate(-_carState->_O_Project);
+	osg::Vec3d MO = _carState->_O_Project;
+	if (_vehicle->_resetMode != 0)
+	{
+		MO = _carState->_lastCarArray->back();
+		const osg::Vec3d MD = (_carState->_O_Project - _carState->_lastCarArray->back());
+		const double ratio = _vehicle->_width / MD.length();
+		MO = MO * osg::Matrix::translate(MD*ratio);
+	}
+
+	_reset *= osg::Matrix::translate(MO - _carState->_O);
+	_reset *= osg::Matrix::translate(-MO);
 	_reset *= osg::Matrix::rotate(qt);
-	_reset *= osg::Matrix::translate(_carState->_O_Project);
+	_reset *= osg::Matrix::translate(MO);
 }
 
 void CarEvent::shiftVehicle()
@@ -491,12 +500,32 @@ void CarEvent::applyCarMovement()
 		_carState->_distancefromBase = distherwithsign - _vehicle->_baseline;
 		_carState->_dither = distherwithsign;
 
-		_carState->_midLine->clear();
-		copy(navigationEdge->begin(), navigationEdge->end(), std::back_inserter(*_carState->_midLine));
+		if (!_carState->_midLine->size())
+		{
+			copy(navigationEdge->begin(), navigationEdge->end(), std::back_inserter(*_carState->_midLine));
+		}
+		else
+		{
+			copy(navigationEdge->begin(), navigationEdge->end(), _carState->_midLine->begin());
+		}		
 
 		_carState->_updated = true;
 	}
-
+	quadList::const_iterator quadI = _carState->_currentQuad.cbegin();
+	unsigned notFound(0);
+	while (quadI != _carState->_currentQuad.cend())
+	{
+		if (!(*quadI))
+		{
+			++notFound;
+			break;
+		}
+		++quadI;
+	}
+	if (!notFound)
+	{
+		copy(_carState->_carArray->begin(),_carState->_carArray->end(),_carState->_lastCarArray->begin());
+	}
 
 	//isNAN Test
 	bool NANTEST(true);

@@ -167,7 +167,7 @@ int main(int argc, char** argv)
 
 		//ExperimentControl
 		expcontroller.push_back(new ExperimentCallback(readConfig.back()));
-		expcontroller.back()->setCarState(car.back()->getCarState());
+		expcontroller.back()->setCar(car.back().get());
 		expcontroller.back()->setHUDCamera(mViewer.back()->getHUDCamera());
 		expcontroller.back()->setMultiViewer(mViewer.back().get());
 		root.back()->addEventCallback(expcontroller.back().get());

@@ -13,7 +13,7 @@
 
 #include <osgAudio/SoundManager.h>
 
-ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_carState(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
+ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f)
 {
@@ -204,7 +204,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	{
 		_cVisitor = CollVisitor::instance();
 	}
-	if (!_carState)
+	if (!_car)
 	{
 		osg::notify(osg::WARN) << "Cannot find Car failed to control experiment" << std::endl;
 		return;
@@ -223,10 +223,10 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
 	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
-
-	if (_carState && ea)
+	CarState *carState = _car->getCarState();
+	if (carState && ea)
 	{
-		Plane::reverse_across_iterator start = *_carState->_OQuad;
+		Plane::reverse_across_iterator start = *carState->_OQuad;
 		if (*start)
 		{
 			const int future = (int)((*start)->getHomeS()->getNumGeometry()*0.01f) + 1;
@@ -240,27 +240,27 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			}
 		}
 		
-		quadList::const_iterator i = _carState->_currentQuad.cbegin();
+		quadList::const_iterator i = carState->_currentQuad.cbegin();
 		unsigned notFound(0);
-		while(i != _carState->_currentQuad.cend())
+		while (i != carState->_currentQuad.cend())
 		{
 			if (!(*i)) notFound++;
 			i++;
 		}
-		if (notFound == _carState->_currentQuad.size() && _carState->_reset == 1)
+		if (notFound == carState->_currentQuad.size() && _car->getVehicle()->_carReset == 1)
 		{
-			_carState->_reset = true;
+			carState->_reset = true;
 		}
 		else
 		{
-			_carState->_reset = false;
+			carState->_reset = false;
 		}
 
 		osg::ref_ptr<osg::AnimationPath> anmPath = NULL;
 		switch (ea->getEventType())
 		{
 		case::osgGA::GUIEventAdapter::FRAME:
-			_expTime = _carState->_timeReference;
+			_expTime = carState->_timeReference;
 			deviationCheck();
 			showText();
 			dynamicChange();
@@ -268,7 +268,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			dealCollision();
 			if (_anmCallback)
 			{
-				_anmCallback->setPause(!_carState->getRSpeed() ? true : false);
+				_anmCallback->setPause(!carState->getRSpeed() ? true : false);
 			}
 			break;
 		default:
@@ -297,15 +297,17 @@ void ExperimentCallback::removeNodefromRoad(osg::Node *n)
 
 void ExperimentCallback::dealCollision()
 {
-	const solidList *obsList = _carState->getObsList();
-	if (!obsList)
+	CarState *carstate = _car->getCarState();
+	const solidList &obsList = carstate->getObsList();
+	const quadList &wallList = carstate->_collisionQuad;
+	if (!obsList.size() && !wallList.size())
 	{
 		return;
 	}
 
-	_carState->_collide = true;
-	solidList::const_iterator i = obsList->cbegin();
-	solidList::const_iterator END = obsList->cend();
+	carstate->_collide = true;
+	solidList::const_iterator i = obsList.cbegin();
+	solidList::const_iterator END = obsList.cend();
 
 	while (i != END)
 	{
@@ -316,15 +318,15 @@ void ExperimentCallback::dealCollision()
 				_coin->setSample(_coinSample.get());
 				_coin->setPlay(true);
 			}
-			_carState->_collide = false;
-			++_carState->_pointsEarned;
+			carstate->_collide = false;
+			++carstate->_pointsEarned;
 			removeNodefromRoad(*i);
 			_cVisitor->setMode(OBS);
 			_road->accept(*_cVisitor);
 		}
 		else if ((*i)->getSolidType() == Solid::solidType::UNDEFINED)
 		{
-			_carState->_collide = false;
+			carstate->_collide = false;
 		}
 
 		++i;
@@ -338,8 +340,9 @@ void ExperimentCallback::deviationCheck()
 		return;
 	}
 
-	_deviationWarn = (abs(_carState->_distancefromBase) > _expSetting->_deviation) ? true : false;
-	_deviationLeft = _carState->_distancefromBase < 0;
+	CarState *carState = _car->getCarState();
+	_deviationWarn = (abs(carState->_distancefromBase) > _expSetting->_deviation) ? true : false;
+	_deviationLeft = carState->_distancefromBase < 0;
 	if (_siren)
 	{
 		if (_siren->isPlaying() != _deviationWarn)
@@ -352,9 +355,10 @@ void ExperimentCallback::deviationCheck()
 void ExperimentCallback::showText()
 {
 	//First display Warn Information
+	CarState *carState = _car->getCarState();
 	const std::string *warnshow(NULL);
 	std::string deviationDisplay;
-	if (_deviationWarn && ((_carState->_frameStamp / 20) % 2))
+	if (_deviationWarn && ((carState->_frameStamp / 20) % 2))
 	{
 		deviationDisplay = _expSetting->_deviationWarn;
 // 		if (_deviationLeft)
@@ -423,6 +427,7 @@ void ExperimentCallback::showText()
 
 void ExperimentCallback::dynamicChange()
 {
+	CarState *carState = _car->getCarState();
 	if (!_dynamic->empty())
 	{
 		osg::UIntArray::iterator i = _dynamic->end() - 1;
@@ -430,7 +435,7 @@ void ExperimentCallback::dynamicChange()
 		{
 			if (_expTime > *i)
 			{
-				_carState->_dynamic = !_carState->_dynamic;
+				carState->_dynamic = !carState->_dynamic;
 				_dynamicUpdated = true;
 				_thisMomentDynamic = _expTime;
 				_dynamic->erase(i);
@@ -523,7 +528,8 @@ void ExperimentCallback::showObstacle()
 
 	if (hit)
 	{
-		Plane::reverse_across_iterator curO = *_carState->_OQuad;
+		CarState *carState = _car->getCarState();
+		Plane::reverse_across_iterator curO = *carState->_OQuad;
 		if (*curO)
 		{
 			const int offset = obsTi - _expSetting->_obstaclesTime->begin();

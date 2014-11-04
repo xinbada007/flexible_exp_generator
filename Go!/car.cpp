@@ -57,6 +57,8 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 		_carState->_carArray->back().z() = 0.0f;
 	}
 	_carState->_carArray->push_back(_carState->_O);
+	_carState->_lastCarArray->resize(_carState->_carArray->size());
+	copy(_carState->_carArray->begin(), _carState->_carArray->end(), _carState->_lastCarArray->begin());
 
 	if (refRC->getSaveState())
 	{

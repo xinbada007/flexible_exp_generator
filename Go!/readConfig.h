@@ -209,6 +209,7 @@ typedef struct Vehicle:public osg::Referenced
 		_visibility = true;
 
 		_carReset = 0;
+		_resetMode = 0;
 
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
@@ -239,6 +240,7 @@ typedef struct Vehicle:public osg::Referenced
 	bool _visibility;
 
 	int _carReset;
+	int _resetMode;
 
 protected:
 	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };

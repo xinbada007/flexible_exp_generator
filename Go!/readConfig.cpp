@@ -735,6 +735,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string STARTDELAY = "STARTDELAY";
 		static const string CARVISIBLE = "CARVISIBLE";
 		static const string CARRESET = "CARRESET";
+		static const string RESETMODE = "RESETMODE";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -844,6 +845,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_vehicle->_carReset = stoi(config);
+				}
+				continue;
+			}
+			else if (title == RESETMODE)
+			{
+				config.erase(config.begin(), config.begin() + RESETMODE.size());
+				if (!config.empty())
+				{
+					_vehicle->_resetMode = stoi(config);
 				}
 				continue;
 			}

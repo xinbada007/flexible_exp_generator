@@ -443,43 +443,39 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 	if (refCV && refC)
 	{
 		_wall = refCV->getWall();
-		const solidList road = refCV->getRoad();
+		const solidList &road = refCV->getRoad();
 
-		quadList listRoad;
-		listRoad = listRoadQuad(refC, road);
+		const quadList &listRoad = listRoadQuad(refC, road);
 		
 		{
 			unsigned size_list = refC->getCarState()->_carArray->size();
-			refC->getCarState()->_lastQuad.clear();
-			refC->getCarState()->_currentQuad.clear();
-			std::copy(listRoad.cbegin(), listRoad.cbegin() + size_list, std::back_inserter(refC->getCarState()->_lastQuad));
-			std::copy(listRoad.cbegin() + size_list, listRoad.cend(), std::back_inserter(refC->getCarState()->_currentQuad));
+			if (!refC->getCarState()->_lastQuad.size())
+			{
+				std::copy(listRoad.cbegin(), listRoad.cbegin() + size_list, std::back_inserter(refC->getCarState()->_lastQuad));
+			}
+			else
+			{
+				std::copy(listRoad.cbegin(), listRoad.cbegin() + size_list, refC->getCarState()->_lastQuad.begin());
+			}
+			if (!refC->getCarState()->_currentQuad.size())
+			{
+				std::copy(listRoad.cbegin() + size_list, listRoad.cend(), std::back_inserter(refC->getCarState()->_currentQuad));
+			}
+			else
+			{
+				std::copy(listRoad.cbegin() + size_list, listRoad.cend(), refC->getCarState()->_currentQuad.begin());
+			}
+			
+			
 			//setup the quad for origin point of the car
 			refC->getCarState()->_OQuad = listRoad.back();
 		}
 
 		//collision against Wall detect
-		quadList listWall;
-		listWall = listCollsion(refC, _wall_reduced);
-		if (!listWall.empty())
-		{
-			refC->getCarState()->_collisionQuad = listWall;
-			refC->getCarState()->_collide = true;
-		}
+		refC->getCarState()->_collisionQuad = listCollsion(refC, _wall_reduced);;
 
 		//collision against Obstacle detection
-		_obsList = listObsCollsion(refC, refCV->getObstacle());
-		refC->getCarState()->setObsList(NULL);
-		if (!_obsList.empty())
-		{
-//			refC->getCarState()->_collide = true;
-			refC->getCarState()->setObsList(&_obsList);
-		}
-
-		if (_obsList.empty() && listWall.empty())
-		{
-//			refC->getCarState()->_collide = false;
-		}		
+		refC->getCarState()->setObsList(listObsCollsion(refC, refCV->getObstacle()));
 	}
 	
 	traverse(node, nv);

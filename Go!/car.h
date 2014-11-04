@@ -49,6 +49,7 @@ typedef struct CarState:public osg::Referenced
 
 		//from right-bottom to left-bottom under counter-clockwise
 		_carArray = new osg::Vec3dArray;
+		_lastCarArray = new osg::Vec3dArray;
 
 		_OQuad = NULL;
 
@@ -67,8 +68,6 @@ typedef struct CarState:public osg::Referenced
 		_replay = false;
 
 		_detailedDisplay = false;
-
-		_obsList = NULL;
 	};
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
@@ -81,6 +80,7 @@ typedef struct CarState:public osg::Referenced
 	osg::ref_ptr<osg::Vec3dArray> _frontWheel;
 
 	osg::ref_ptr<osg::Vec3dArray> _carArray;
+	osg::ref_ptr<osg::Vec3dArray> _lastCarArray;
 	
 	quadList _lastQuad;
 	quadList _currentQuad;
@@ -143,8 +143,8 @@ typedef struct CarState:public osg::Referenced
 	inline void updateLastO(osg::Vec3d ref) { _lastO = ref; };
 	inline void setReplayText(std::string ref) { if (_replay) _replayText = ref; };
 	inline const std::string & getReplayText() const { return _replayText; };
-	inline void setObsList(solidList *list){ _obsList = list; };
-	inline solidList * getObsList() const { return _obsList; };
+	inline void setObsList(solidList list){ _obsList = list; };
+	inline solidList getObsList() const { return _obsList; };
 private:
 	~CarState(){ std::cout << "Deconstruct CarState" << std::endl; };
 	mutable double _D_Speed;
@@ -159,7 +159,7 @@ private:
 
 	std::string _replayText;
 
-	solidList *_obsList;
+	solidList _obsList;
 }CarState;
 
 class Car:public EulerPoly
