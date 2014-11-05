@@ -247,8 +247,8 @@ bool Recorder::output()
 				if ((*begin_obslist)->getSolidType() == Solid::solidType::OBSBODY)
 				{
 					const osg::Vec3d &center = (*begin_obslist)->absoluteTerritory.center;
-					const unsigned index = begin_obslist - obsList.cbegin();
-					_itoa_s(index, temp, size_tempd);
+					const unsigned index = begin_obslist - obsList.cbegin() + 1;
+					_itoa_s(index, temp, size_temp);
 					obsBody += temp;
 					obsBody += "\t";
 					_gcvt_s(tempd, size_tempd, center.x(), numDigit);
