@@ -222,6 +222,53 @@ bool Recorder::output()
 		}
 	}
 
+	//record all the OBSBODY
+	{
+		const std::string filename = _rc->getSubjects()->getRecPath() + "\\obsList.txt";
+		ofstream wout(filename);
+		if (!wout)
+		{
+			osg::notify(osg::FATAL) << "cannot create roads file" << std::endl;
+		}
+		else
+		{
+			const solidList &obsList = CollVisitor::instance()->getObstacle();
+			solidList::const_iterator begin_obslist = obsList.cbegin();
+			solidList::const_iterator end_obslist = obsList.cend();
+			std::string obsBody;
+			char tempd[20];
+			const unsigned size_tempd(sizeof(tempd));
+			const unsigned numDigit(6);
+			char temp[10];
+			const unsigned size_temp = sizeof(temp);
+
+			while (begin_obslist != end_obslist)
+			{
+				if ((*begin_obslist)->getSolidType() == Solid::solidType::OBSBODY)
+				{
+					const osg::Vec3d &center = (*begin_obslist)->absoluteTerritory.center;
+					const unsigned index = begin_obslist - obsList.cbegin();
+					_itoa_s(index, temp, size_tempd);
+					obsBody += temp;
+					obsBody += "\t";
+					_gcvt_s(tempd, size_tempd, center.x(), numDigit);
+					obsBody += tempd;
+					obsBody += "\t";
+					_gcvt_s(tempd, size_tempd, center.y(), numDigit);
+					obsBody += tempd;
+					obsBody += "\t";
+					_gcvt_s(tempd, size_tempd, center.z(), numDigit);
+					obsBody += tempd;
+					obsBody += "\t";
+					obsBody += "\n";
+				}
+				++begin_obslist++;
+			}
+
+			wout << obsBody << std::endl;
+		}
+	}
+
 	_reced = true;
 	return true;
 }

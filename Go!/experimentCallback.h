@@ -36,13 +36,12 @@ private:
 	double _thisMomentDynamic;
 
 	std::vector<osg::ref_ptr<Obstacle>> _obstacleList;
+	std::vector<osg::ref_ptr<Obstacle>> _collisionOBSList;
 	bool _obsListDrawn;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
 	osg::ref_ptr<osgAudio::SoundState> _coin;
 	osg::ref_ptr<osgAudio::Sample> _coinSample;
-
-	osg::ref_ptr<osg::IntArray> _obstacle;
 
 	osg::Camera *_cameraHUD;
 	osg::ref_ptr<osgText::Text> _textHUD;

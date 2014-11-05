@@ -18,7 +18,6 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTi
 _coin(NULL), _obsListDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
-	_obstacle = new osg::IntArray(_expSetting->_obstaclesTime->begin(), _expSetting->_obstaclesTime->end());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
@@ -107,6 +106,7 @@ void ExperimentCallback::createObstacles()
 			const osg::Vec3d &center = H_POINT;
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
 			obs->setSolidType(Solid::solidType::OBSBODY);
+			obs->setTag(ROADTAG::RT_UNSPECIFIED);
 			obs->setImage(_expSetting->_imgOBS);
 			switch (_expSetting->_obsShape)
 			{
@@ -123,9 +123,8 @@ void ExperimentCallback::createObstacles()
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;
 			}
-
-			obs->setSolidType(Solid::solidType::UNDEFINED);
 			_obstacleList.push_back(obs);
+			_collisionOBSList.push_back(obs);
 			++pos;
 		}
 	}
@@ -175,7 +174,8 @@ void ExperimentCallback::createObstacles()
 			_anmCallback->setAnimationPath(anmPath.release());
 
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
-			obs->setSolidType(Solid::solidType::UNDEFINED);
+			obs->setSolidType(Solid::solidType::SD_ANIMATION);
+			obs->setTag(ROADTAG::RT_UNSPECIFIED);
 			obs->setImage(_expSetting->_imgObsArray);
 			obs->createBox(osg::Vec3d(0.0f, 0.0f, 0.0f), _expSetting->_obsSize*_expSetting->_obsArraySize);
 			_obstacleList.push_back(obs);
@@ -189,6 +189,7 @@ void ExperimentCallback::createObstacles()
 			{
 				osg::ref_ptr<Obstacle> obs = new Obstacle;
 				obs->setSolidType(Solid::solidType::COINBODY);
+				obs->setTag(ROADTAG::OBS);
 				obs->setImage(_expSetting->_imgObsArray);
 				obs->createBox(*centerBegin, _expSetting->_obsSize*_expSetting->_obsArraySize);
 				_obstacleList.push_back(obs);
@@ -324,11 +325,6 @@ void ExperimentCallback::dealCollision()
 			_cVisitor->setMode(OBS);
 			_road->accept(*_cVisitor);
 		}
-		else if ((*i)->getSolidType() == Solid::solidType::UNDEFINED)
-		{
-			carstate->_collide = false;
-		}
-
 		++i;
 	}
 }
@@ -465,10 +461,11 @@ void ExperimentCallback::dynamicChange()
 
 void ExperimentCallback::showObstacle()
 {
-	if (_obstacle->empty() && _obstacleList.empty())
+	if (_expSetting->_obstaclesTime->empty() && _obstacleList.empty())
 	{
 		return;
 	}
+
 	if (!_obsListDrawn && !_obstacleList.empty())
 	{
 		_obsListDrawn = true;
@@ -481,7 +478,7 @@ void ExperimentCallback::showObstacle()
 			mT->addChild(obs);
 			_road->addChild(mT);
 
-			if (_anmCallback && (i - _obstacleList.cbegin() >= _expSetting->_obstaclePos->size()))
+			if (_anmCallback && ((*i)->getSolidType() == Solid::solidType::SD_ANIMATION))
 			{
 				mT->setUpdateCallback(_anmCallback);
 				_road->addChild(mT);
@@ -511,60 +508,67 @@ void ExperimentCallback::showObstacle()
 		return;
 	}
 
-	bool hit(false);
-	osg::IntArray::iterator obsi = _obstacle->begin();
 	osg::UIntArray::iterator obsTi = _expSetting->_obstaclesTime->begin();
+	bool hit(false);
 	while (obsTi != _expSetting->_obstaclesTime->end())
 	{
-		if (_expTime > *obsTi && *obsi != -1)
+		if (_expTime > *obsTi)
 		{
-			hit = true;
-			*obsi = -1;
-			break;
+			CarState *carState = _car->getCarState();
+			Plane::reverse_across_iterator curO = *carState->_OQuad;
+			if (*curO)
+			{
+				const int offset = obsTi - _expSetting->_obstaclesTime->begin();
+				osg::DoubleArray::iterator requiedDistance = _expSetting->_obstacleRange->begin() + offset;
+				double distance(0.0f);
+				osg::ref_ptr<osg::Vec3dArray> navi = (*curO)->getLoop()->getNavigationEdge();
+				osg::Vec3d mid = navi->front() - navi->back();
+				while (distance < *requiedDistance)
+				{
+					curO++;
+					if (!(*curO))
+					{
+						break;
+					}
+					navi = (*curO)->getLoop()->getNavigationEdge();
+					mid = navi->front() - navi->back();
+					distance += mid.length();
+				}
+
+				osg::IntArray::iterator pos = _expSetting->_obstaclePos->begin() + offset;
+				osg::DoubleArray::iterator posOffset = _expSetting->_obsPosOffset->begin() + offset;
+				osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
+				center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
+				center = center * osg::Matrix::translate(X_AXIS * *posOffset);
+				std::vector<osg::ref_ptr<Obstacle>>::iterator posOBS = _collisionOBSList.begin() + offset;
+				osg::ref_ptr<Obstacle> obs = *posOBS;
+				const osg::Vec3d &OC = H_POINT;
+				osg::Matrixd m = osg::Matrix::translate(center - OC);
+				obs->multiplyMatrix(m);
+				obs->setSolidType(Solid::solidType::OBSBODY);
+				obs->setTag(ROADTAG::OBS);
+
+				_expSetting->_obstaclesTime->erase(obsTi);
+				_expSetting->_obstacleRange->erase(requiedDistance);
+				_expSetting->_obstaclePos->erase(pos);
+				_expSetting->_obsPosOffset->erase(posOffset);
+				_collisionOBSList.erase(posOBS);
+				hit = true;
+
+				continue;
+			}
 		}
-		obsTi++;
-		obsi++;
+
+		++obsTi;
 	}
 
 	if (hit)
 	{
-		CarState *carState = _car->getCarState();
-		Plane::reverse_across_iterator curO = *carState->_OQuad;
-		if (*curO)
+		//visitor
+		if (_cVisitor)
 		{
-			const int offset = obsTi - _expSetting->_obstaclesTime->begin();
-			osg::DoubleArray::iterator requiedDistance = _expSetting->_obstacleRange->begin() + offset;
-			double distance(0.0f);
-			osg::ref_ptr<osg::Vec3dArray> navi = (*curO)->getLoop()->getNavigationEdge();
-			osg::Vec3d mid = navi->front() - navi->back();
-			while (distance < *requiedDistance)
-			{
-				curO++;
-				if (!(*curO))
-				{
-					break;
-				}
-				navi = (*curO)->getLoop()->getNavigationEdge();
-				mid = navi->front() - navi->back();
-				distance += mid.length();
-			}
-
-			osg::IntArray::iterator pos = _expSetting->_obstaclePos->begin() + offset;
-			osg::DoubleArray::iterator posOffset = _expSetting->_obsPosOffset->begin() + offset;
-			osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
-			center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
-			center = center * osg::Matrix::translate(X_AXIS * *posOffset);
-			osg::ref_ptr<Obstacle> obs = _obstacleList.at(offset);
-			const osg::Vec3d &OC = H_POINT;
-			osg::Matrixd m = osg::Matrix::translate(center - OC);
-			obs->multiplyMatrix(m);
-			obs->setSolidType(Solid::solidType::OBSBODY);
-			//visitor
-			if (_cVisitor)
-			{
-				_cVisitor->setMode(OBS);
-				_road->accept(*_cVisitor);
-			}
+			_cVisitor->setMode(OBS);
+			_road->accept(*_cVisitor);
 		}
 	}
 }

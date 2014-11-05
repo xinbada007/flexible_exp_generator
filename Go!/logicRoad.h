@@ -60,6 +60,7 @@ public:
 		}
 	};
 	inline ROADTAG getTag() const { return _tag; };
+	inline void setTag(ROADTAG ref) { _tag = ref; };
 	inline void setEFlag(osg::ref_ptr<edgeFlag> ref) { _eFlag = ref; };
 
 	inline void setRawInformation(RoadSet *refRS,int i, ROADTAG refTag)

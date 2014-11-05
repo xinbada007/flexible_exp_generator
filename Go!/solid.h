@@ -142,7 +142,8 @@ public:
 
 	enum solidType
 	{
-		UNDEFINED,
+		SD_UNDEFINED,
+		SD_ANIMATION,
 		ROADBODY,
 		WALLBODY,
 		OBSBODY,
