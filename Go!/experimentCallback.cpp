@@ -73,6 +73,7 @@ _coin(NULL), _obsListDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeB
 			_coin->setPlay(false);
 			_coin->setLooping(false);
 			_coin->setStopMethod(osgAudio::Stopped);
+			_coin->setGain(2.00);
 			osgAudio::SoundManager::instance()->addSoundState(_coin);
 		}
 	}
@@ -317,6 +318,7 @@ void ExperimentCallback::dealCollision()
 			if (_coin)
 			{
 				_coin->setSample(_coinSample.get());
+				_coin->setGain(2.00);
 				_coin->setPlay(true);
 			}
 			carstate->_collide = false;
