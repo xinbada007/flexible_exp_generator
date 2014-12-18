@@ -60,6 +60,8 @@ bool isNumber(const std::string &ref);
 double acosR(double product);
 double asinR(double product);
 
+double uniqueRand(const int &num,const int &lower,const int &upper);
+
 struct searchIndex
 {
 	searchIndex(unsigned ref) :_index(ref){};

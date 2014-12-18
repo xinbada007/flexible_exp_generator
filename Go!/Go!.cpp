@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <osg/Point>
 
 using namespace std;
 
@@ -243,6 +244,7 @@ int main(int argc, char** argv)
 	//exit the main function
 	return 0;
 }
+
 
 
 //Debug Node

@@ -353,3 +353,46 @@ void Solid::multiplyMatrix(const osg::Matrixd &m)
 
 	absoluteTerritory.center = absoluteTerritory.center * m;
 }
+
+void Solid::createGLPOINTS(const osg::Vec3d &p)
+{
+	this->solidType = GL_POINTS_BODY;
+
+	osg::ref_ptr<osg::Geode> GLP = new osg::Geode;
+	
+	osg::ref_ptr<osg::Geometry> GLgeomtry = new osg::Geometry;
+	osg::ref_ptr<osg::Vec3dArray> v = new osg::Vec3dArray;
+	v->push_back(p);
+	GLgeomtry->setVertexArray(v.release());
+	osg::ref_ptr<osg::Vec4dArray> color = new osg::Vec4dArray;
+	color->push_back(osg::Vec4d(1.0f,1.0f,1.0f,1.0f));
+	GLgeomtry->setColorArray(color.release());
+	GLgeomtry->setColorBinding(osg::Geometry::BIND_OVERALL);
+	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, 1));
+	osg::BoundingBox bbox(-.1f, -.1f, -.1f, .1f, .1f, .1f);
+	GLgeomtry->setInitialBound(bbox);
+	
+	GLP->addDrawable(GLgeomtry.release());
+	this->addChild(GLP.release());
+}
+
+void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
+{
+	this->solidType = GL_POINTS_BODY;
+
+	osg::ref_ptr<osg::Geode> GLP = new osg::Geode;
+
+	osg::ref_ptr<osg::Geometry> GLgeomtry = new osg::Geometry;
+	GLgeomtry->setVertexArray(p);
+	osg::ref_ptr<osg::Vec4dArray> color = new osg::Vec4dArray;
+	color->push_back(osg::Vec4d(1.0f, 1.0f, 1.0f, 1.0f));
+	GLgeomtry->setColorArray(color.release());
+	GLgeomtry->setColorBinding(osg::Geometry::BIND_OVERALL);
+	
+	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, GLgeomtry->getVertexArray()->getNumElements()));
+
+	GLgeomtry->setDataVariance(osg::Object::DYNAMIC);
+
+	GLP->addDrawable(GLgeomtry.release());
+	this->addChild(GLP.release());
+}

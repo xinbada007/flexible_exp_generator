@@ -316,6 +316,16 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 	this->accept(tv);
 }
 
+void Obstacle::createPOINTS(const osg::Vec3d p)
+{
+	this->createGLPOINTS(p);
+}
+
+void Obstacle::createPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
+{
+	this->createGLPOINTS(p);
+}
+
 void Obstacle::sweep(osg::ref_ptr<osg::Vec3dArray> swArray)
 {
 	Solid *refS = dynamic_cast<Solid*> (this);

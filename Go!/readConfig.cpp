@@ -325,7 +325,7 @@ void ReadConfig::initializeAfterReadTrial()
 	{
 		_filename = *i++;
 		_nurbs = new Nurbs;
-		readNurbs();
+		readNurbs(_roads->_length);
 //		scaleCtrlPoints();
 		Nurbs *prve = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());
 		alignCtrlPoints(prve);
@@ -395,10 +395,9 @@ void ReadConfig::initializeAfterReadTrial()
 	{
 		_filename = *i++;
 		_nurbs = new Nurbs;
-		readNurbs();
-//		scaleCtrlPoints();
+		readNurbs(_experiment->_obsLength);
 		Nurbs *prve = (_experiment->_nurbs.empty() ? NULL : _experiment->_nurbs.back());
-		alignCtrlPoints(prve);
+		alignCtrlPoints(prve,_experiment->_alignment);
 		updateNurbs(new NurbsCurve, _experiment->_numObsinArray, 0);
 		_experiment->_nurbs.push_back(_nurbs.release());
 	}
@@ -1098,6 +1097,8 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSARRAYPIC("OBS-ARRAY-PIC");
 		static const string OBSARRAYNUM("OBS-ARRAY-NUM");
 		static const string OBSARRAYMODE("OBS-ARRAY-MODE");
+		static const string OBSLENGTH("OBS-LENGTH");
+		static const string OBSALIGNMENT("OBS-ALIGNMENT");
 		static const string DEVIATION("DEVIATION");
 		static const string DEVIATIONWARN("DEVIATION-WARN");
 		static const string DEVIATIONSIREN("DEVIATION-SIREN");
@@ -1347,6 +1348,25 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_animationMode = stoi(config) == 0 ? true : false;
+					_experiment->_GLPOINTSMODE = stoi(config) == 2 ? true : false;
+				}
+				continue;
+			}
+			else if (title == OBSLENGTH)
+			{
+				config.erase(config.begin(), config.begin() + OBSLENGTH.size());
+				if (!config.empty())
+				{
+					_experiment->_obsLength = stod(config);
+				}
+				continue;
+			}
+			else if (title == OBSALIGNMENT)
+			{
+				config.erase(config.begin(), config.begin() + OBSALIGNMENT.size());
+				if (!config.empty())
+				{
+					_experiment->_alignment = stod(config);
 				}
 				continue;
 			}
@@ -1409,7 +1429,7 @@ void ReadConfig::readTrial(ifstream &in)
 	return;
 }
 
-Nurbs * ReadConfig::readNurbs()
+Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 {
 	ifstream filein(_filename.c_str());
 	if (!filein)
@@ -1513,7 +1533,7 @@ Nurbs * ReadConfig::readNurbs()
 
 	_nurbs->_order = _nurbs->_knotVector->size() - _nurbs->_ctrlPoints->size();
 
-	if (_roads->_length > 0)
+	if (customLength > 0)
 	{
 		const unsigned &numPoints = _nurbs->_ctrlPoints->getNumElements();
 		const unsigned &order = _nurbs->_order;
@@ -1542,7 +1562,7 @@ Nurbs * ReadConfig::readNurbs()
 		s1240(sc, eps_1000, &length, &jstat);
 		if (!jstat)
 		{
-			const double L = _roads->_length / length;
+			const double L = customLength / length;
 			_nurbs->_scale.x() = L;
 			_nurbs->_scale.y() = L;
 			_nurbs->_scale.z() = L;
@@ -1557,7 +1577,10 @@ Nurbs * ReadConfig::readNurbs()
 		ctrlpts = NULL;
 	}
 
+	const osg::Vec3d P1 = _nurbs->_ctrlPoints->front();
 	arrayByMatrix(_nurbs->_ctrlPoints, osg::Matrix::scale(_nurbs->_scale));
+	const osg::Vec3d P2 = _nurbs->_ctrlPoints->front();
+	arrayByMatrix(_nurbs->_ctrlPoints, osg::Matrix::translate(P1 - P2));
 
 	filein.close();
 	return _nurbs.get();
@@ -1571,27 +1594,40 @@ void ReadConfig::scaleCtrlPoints()
 	}
 }
 
-void ReadConfig::alignCtrlPoints(Nurbs *refNurbs)
+void ReadConfig::alignCtrlPoints(Nurbs *refNurbs, const double &offset /* = 0.0f */)
 {
 	if (_nurbs)
 	{
-		osg::Vec3d p = _alignPoint;
-		osg::Vec3d direction = UP_DIR;
-		if (refNurbs)
+		if (offset == 0.0f)
 		{
-			p = *(refNurbs->_ctrlPoints->rbegin());
-			direction = *(refNurbs->_ctrlPoints->rbegin()) - *(refNurbs->_ctrlPoints->rbegin()+1);
+			osg::Vec3d p = _alignPoint;
+			osg::Vec3d direction = UP_DIR;
+			if (refNurbs)
+			{
+				p = *(refNurbs->_ctrlPoints->rbegin());
+				direction = *(refNurbs->_ctrlPoints->rbegin()) - *(refNurbs->_ctrlPoints->rbegin() + 1);
+			}
+			osg::Vec3d v = *(_nurbs->_ctrlPoints->begin() + 1) - *(_nurbs->_ctrlPoints->begin());
+			osg::Vec3d m = *(_nurbs->_ctrlPoints->begin());
+
+			osg::Matrix align = osg::Matrix::translate(-m) * osg::Matrix::rotate(v, direction) * osg::Matrix::translate(m);
+			align = align * osg::Matrix::translate(p - m);
+
+			//add a minor offset between ctrlpoints
+			align = align * osg::Matrix::translate(direction*eps_100);
+
+			arrayByMatrix(_nurbs->_ctrlPoints, align);
 		}
-		osg::Vec3d v = *(_nurbs->_ctrlPoints->begin() + 1) - *(_nurbs->_ctrlPoints->begin());
-		osg::Vec3d m = *(_nurbs->_ctrlPoints->begin());
 
-		osg::Matrix align = osg::Matrix::translate(-m) * osg::Matrix::rotate(v, direction) * osg::Matrix::translate(m);
-		align = align * osg::Matrix::translate(p - m);
-
-		//add a minor offset between ctrlpoints
-		align = align * osg::Matrix::translate(direction*eps_100);
-
-		arrayByMatrix(_nurbs->_ctrlPoints, align);
+		else
+		{
+			if (refNurbs)
+			{
+				osg::ref_ptr<osg::Vec3dArray> newV = new osg::Vec3dArray;
+				newV = project_Line(refNurbs->_ctrlPoints, offset);
+				_nurbs->_ctrlPoints = newV;
+			}
+		}
 	}
 }
 

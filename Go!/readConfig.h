@@ -40,6 +40,9 @@ typedef struct Experiment :public osg::Referenced
 		_imgAnisotropy = 1.0f;
 		_numObsinArray = 100;
 		_animationMode = false;
+		_GLPOINTSMODE = false;
+		_obsLength = 50.0f;
+		_alignment = 0.0f;
 		_speed = 60.0f / 3.6f;
 
 		_offset = 0.0f;
@@ -76,6 +79,9 @@ typedef struct Experiment :public osg::Referenced
 	unsigned _numObsinArray;
 	nurbsList _nurbs;
 	bool _animationMode;
+	bool _GLPOINTSMODE;
+	double _obsLength;
+	double _alignment;
 	double _speed;
 
 	double _offset;
@@ -375,9 +381,9 @@ private:
 	void readTrial(std::ifstream &filein);
 	void readReply(std::ifstream &filein);
 	void initializeAfterReadTrial();
-	Nurbs * readNurbs();
+	Nurbs * readNurbs(const double &customLength = 0.0f);
 	void scaleCtrlPoints();
-	void alignCtrlPoints(Nurbs *refNurbs);
+	void alignCtrlPoints(Nurbs *refNurbs, const double &offset = 0.0f);
 	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double &width = 0.0f);
 	void updateNurbs(const unsigned &density,const double &width);
 	

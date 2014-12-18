@@ -499,6 +499,18 @@ double asinR(double product)
 	return asin(product);
 }
 
+double uniqueRand(const int &num, const int &lower, const int &upper)
+{
+	srand(unsigned (time(NULL)));
+	std::vector<int> a(upper - lower + 1, 0);
+	std::vector<int> b(upper - lower + 1, 0);
+
+	for (int i = 0; i < upper - lower; i++)
+	{
+		b[i] = lower + i;
+	}
+}
+
 frameRate * frameRate::instance()
 {
 	static osg::ref_ptr<frameRate> fm = new frameRate;
