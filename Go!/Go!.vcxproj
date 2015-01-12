@@ -118,6 +118,7 @@
     <ClInclude Include="pickHandler.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="points.h" />
+    <ClInclude Include="randutil.h" />
     <ClInclude Include="readConfig.h" />
     <ClInclude Include="recorder.h" />
     <ClInclude Include="renderVistor.h" />
@@ -154,6 +155,7 @@
     <ClCompile Include="pickHandler.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="points.cpp" />
+    <ClCompile Include="randutil.cpp" />
     <ClCompile Include="readConfig.cpp" />
     <ClCompile Include="recorder.cpp" />
     <ClCompile Include="renderVistor.cpp" />

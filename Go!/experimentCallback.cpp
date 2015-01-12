@@ -15,18 +15,19 @@
 #include <osgAudio/SoundManager.h>
 #include <iterator>
 
-int debug(0); osg::ref_ptr<osg::Vec3dArray> debug_array;
-
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
-_coin(NULL), _obsListDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f)
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
+_coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f)
 {
+	_opticFlowPoints = new Obstacle;
+
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
 	_geodeHUD->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
 	createObstacles();
+	createOpticFlow();
 
 //	osg::ref_ptr<osgAudio::FileStream> sample = NULL;
 	osg::ref_ptr<osgAudio::Sample> sample = NULL;
@@ -101,6 +102,8 @@ void ExperimentCallback::createObstacles()
 	{
 		return;
 	}
+
+	_obsListDrawn = false;
 
 	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
 	osg::ref_ptr<osg::Point> psize = new osg::Point(10.0f);
@@ -222,6 +225,75 @@ void ExperimentCallback::createObstacles()
 	}
 }
 
+void ExperimentCallback::createOpticFlow()
+{
+	if (!_expSetting->_opticFlow)
+	{
+		return;
+	}
+
+	_opticFlowDrawn = false;
+
+	osg::ref_ptr<osg::Vec3dArray> points = new osg::Vec3dArray;
+
+	std::vector<double> xv, yv, zv;
+	int i(0);
+	do 
+	{
+		yv.push_back(i*_expSetting->_depthDensity);
+		++i;
+	} while (yv.back() < _roadLength);
+
+	double x, y, z;
+	for (i = 0; i < yv.size(); i++)
+	{
+		y = yv.at(i);
+		for (int j = 0; j < _expSetting->_opticFlowHDensity; j++)
+		{
+			double temp = drand();
+			temp = -0.5f * _expSetting->_opticFlowHeight + temp * _expSetting->_opticFlowHeight;
+			zv.push_back(temp);
+		}
+		for (int j = 0; j < _expSetting->_opticFlowWDensity; j++)
+		{
+			x = drand();
+			x = -0.5f * _expSetting->_opticFlowWidth + x * _expSetting->_opticFlowWidth;
+			
+			const int index = j % zv.size();
+			z = zv.at(index);
+
+			points->push_back(osg::Vec3(x, y, z));
+		}
+	}
+
+	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+	osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
+	ss->setAttribute(psize);
+	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+
+	_opticFlowPoints->setStateSet(ss);
+
+	_opticFlowPoints->createPOINTS(points);
+	_opticFlowPoints->setStateSet(ss);
+	_opticFlowPoints->setSolidType(Solid::solidType::GL_POINTS_BODY);
+	_opticFlowPoints->setTag(ROADTAG::RT_UNSPECIFIED);
+}
+
+void ExperimentCallback::showOpticFlow()
+{
+	if (!_expSetting->_opticFlow)
+	{
+		return;
+	}
+
+	if (!_opticFlowDrawn && _opticFlowPoints && _opticFlowPoints->getNumChildren())
+	{
+		_road->addChild(_opticFlowPoints);
+		_opticFlowDrawn = true;
+	}
+}
+
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
 	if (!_cVisitor)
@@ -289,6 +361,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			showText();
 			dynamicChange();
 			showObstacle();
+			showOpticFlow();
 			dealCollision();
 			if (_anmCallback)
 			{
@@ -485,168 +558,6 @@ void ExperimentCallback::dynamicChange()
 
 void ExperimentCallback::showObstacle()
 {
-
-	////////////////////TEST
-	if (!debug)
-	{
-		static osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-		static osg::ref_ptr<osg::Point> psize = new osg::Point(10.0f);
-		ss->setAttribute(psize);
-		ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-		ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-
-		static osg::ref_ptr<Obstacle> obs = new Obstacle;
-
-		static osg::ref_ptr<osg::Vec3dArray> points = new osg::Vec3dArray;
-
-//		if (!_obsListDrawn)
-		{
-			srand((unsigned)time(NULL));
-			osg::ref_ptr<osg::DoubleArray> x1Vector = new osg::DoubleArray;
-			osg::ref_ptr<osg::DoubleArray> x2Vector = new osg::DoubleArray;
-			double x, y, z;
-
-			int a[30000], b[30000];
-			memset(a, -1, sizeof(a));
-			memset(b, -1, sizeof(b));
-			char tempd[20];
-			const unsigned size_tempd = sizeof(tempd);
-			const unsigned numDigit = 4;
-
-			while (x1Vector->size() != 10000 || x2Vector->size() != 10000)
-			{
-				if (x1Vector->size() != 10000)
-				{
-					const double &x1 = -1 + ((double)rand() / (double)(RAND_MAX / 2));
-					int multi = numDigit;
-					int test = 0;
-					double x1_t = abs(x1);
-					if (x1_t > 1)
-					{
-						x1_t -= 1;
-					}
-
-					test = x1_t * 10000;
-					if (x1 > 0)
-					{
-						test += 10000;
-					}
-					else if (x1 < 0)
-					{
-						test += 20000;
-					}
-					if (a[test] == -1)
-					{
-						a[test] = 1;
-						x1Vector->push_back(x1);
-					}
-				}
-
-				if (x2Vector->size() != 10000)
-				{
-					const double &x2 = -1 + ((double)rand() / (double)(RAND_MAX / 2));
-					int multi = numDigit;
-					int test = 0;
-					double x2_t = abs(x2);
-					if (x2_t > 1)
-					{
-						x2_t -= 1;
-					}
-
-					test = x2_t * 10000;
-					if (x2 > 0)
-					{
-						test += 10000;
-					}
-					else if (x2 < 0)
-					{
-						test += 20000;
-					}
-					if (b[test] == -1)
-					{
-						b[test] = 1;
-						x2Vector->push_back(x2);
-					}
-				}
-			}
-
-			for (int i = 0; i != x1Vector->size(); ++i)
-			{
-				const double &x1 = x1Vector->at(i);
-				const double &x2 = x2Vector->at(i);
-
-				const double M = x1*x1 + x2*x2;
-				const double N = sqrtf(1 - x1*x1 - x2*x2);
-				if (M < 1)
-				{
-					x = 2 * x1*N;
-					y = 2 * x2*N;
-					z = 1 - 2 * M;
-				}
-				points->push_back(osg::Vec3d(x, y, z));
-			}
-
-			double newR = 20;
-			arrayByMatrix(points, osg::Matrix::scale(newR, newR, newR));
-
-			obs->createPOINTS(points);
-			obs->setStateSet(ss);
-			obs->setSolidType(Solid::solidType::GL_POINTS_BODY);
-			obs->setTag(ROADTAG::RT_UNSPECIFIED);
-
-			osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
-			mT->addChild(obs);
-			_road->addChild(mT);
-
-			debug = 1;
-		}
-// 			else
-// 			{
-// 				srand((unsigned)time(NULL));
-// 				int a[10000];
-// 				memset(a, -1, sizeof(a));
-// 				std::vector<int> pos;
-// 				double x, y, z;
-// 				bool produced(false);
-// 				while (pos.size() < 2000)
-// 				{
-// 					const int &index = rand() % 10000;
-// 					if (a[index] == -1)
-// 					{
-// 						a[index] = index;
-// 						pos.push_back(index);
-// 
-// 						produced = false;
-// 						while (!produced)
-// 						{
-// 							const double &x1 = -1 + ((double)rand() / (double)(RAND_MAX / 2));
-// 							const double &x2 = -1 + ((double)rand() / (double)(RAND_MAX / 2));
-// 							const double M = x1*x1 + x2*x2;
-// 							const double N = sqrtf(1 - x1*x1 - x2*x2);
-// 							if (M < 1)
-// 							{
-// 								x = 2 * x1*N;
-// 								y = 2 * x2*N;
-// 								z = 1 - 2 * M;
-// 								osg::Vec3d tempC(x, y, z);
-// 								tempC = tempC * osg::Matrix::scale(4, 4, 4);
-// 								points->at(index) = tempC;
-// 								produced = true;
-// 							}
-// 						}
-// 					}
-// 				}
-// 
-// 				osg::Geometry *gm = obs->getChild(0)->asGeode()->getDrawable(0)->asGeometry();
-// 
-// //				gm->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, gm->getVertexArray()->getNumElements()));
-// 				gm->dirtyBound();
-// 				gm->dirtyDisplayList();
-//			}
-	
-	}
-	////////////////////TEST
-
 	if (_expSetting->_obstaclesTime->empty() && _obstacleList.empty())
 	{
 		return;

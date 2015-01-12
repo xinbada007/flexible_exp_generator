@@ -11,7 +11,7 @@ screen:		0
 aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
 fovy:		30	#Disable when RealWorld is enabled
 RealWorld:	0:	42.175 , 65.217 , 42.391
-#background:	../Resources/texture/A0005332_LARGE.jpg
+background:	../Resources/texture/A0005332_LARGE.jpg
 MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
@@ -32,20 +32,21 @@ ResetMode:	1	#0 = center	1 = nearest
 [RoadSettings]
 RoadLanes:	100
 RoadLength:	1666.6	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-RoadPic:	../Resources/texture/green.png 16
-TextureWidth:	4
+RoadPic:	#../Resources/texture/road4096-2.png 16
+TextureWidth:	2	#10.75
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
+#RoadTxt:	../Resources/roads/exproads/50/200/40.txt;#../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
 #RoadTxt:	../Resources/speed/100/16.txt;../Resources/speed/100/20.txt;../Resources/speed/100/24.txt;
+RoadTxt:	../Resources/roads/l.txt;
 
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
-Density:	50
-RoadVisible:	1	#1 = Visible	0 = Invisible
+Density:	2000
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
-WallHeight:	0
-#WallPic:	../Resources/texture/wall1024-2.jpg
+WallHeight:	1
+WallPic:	../Resources/texture/wall1024-2.jpg
 
 [Subjects]
 Name:	Demo
@@ -67,23 +68,26 @@ Deviation-Warn: DEVIATION TOO HIGH
 Deviation-Siren:	../Resources/sound/warnpullup.mp3
 
 ##==Obstacle Setting=====================
-Obstacle:	1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1
-Obstacle-Range:	10 10	200 200	400 400 600 600 800 800	1000 1000
-Obstacle-Range:	1200 1200	1400 1400	1600 1600	1800 1800	2000 2000
+#Obstacle:	1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle-Range:	10 10	140 140	270 270 400 400 530 530	660 660
+Obstacle-Range:	790 790	920 920	1050 1050	1180 1180	1310 1310	1440 1440	1570 1570
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-2 2	-20 -24	0 4 16 20 -16 -20 24 20 
-OBS-Position-Offset:	-2 2	-12 -8	8 12	-25 -21	-4 0	#Negtive = L	Positive = R
-OBS-Size:	.5	2	1	#Length X Width X Height
+OBS-Position-Offset:	-2 2	-30 -34	30 34	-2 2	-40 -44	-2 2
+OBS-Position-Offset:	40 44	-2 2	-24 -28	-2 2	24 28	-10 -14	24 28	#Negtive = L	Positive = R
+OBS-Size:	0.5	2.0	1.0	#Length X Width X Height
 OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
-OBS-Pic:	../Resources/texture/red.jpg
+OBS-Pic:	../Resources/texture/red.jpg;
 
-OBS-Array:	#../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;
-OBS-Length:	300;
-OBS-Alignment:	2;
-OBS-Array-Num:	100;
-OBS-Array-Size:	0.1;
-#OBS-Array-Pic:	../Resources/texture/tio.jpg
-OBS-Array-Mode:	2	# 0 = Animation	1 = Obs	2 = GLPOINTS
+OpticFlow:	1	#1 = Enable	0= Disable
+DepthDensity:	1.0	#every x meters
+OpticFlow-Width:	100	250
+OpticFlow-Height:	40	100
+
+#OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
+OBS-Array-Num:	50;
+OBS-Array-Size:	0.5;
+OBS-Array-Pic:	../Resources/texture/tio.jpg
+OBS-Array-Mode:	1	# 0 = Animation	1 = Obs
 
 ##==Text Setting=========================
 #Textime:	0
@@ -101,4 +105,4 @@ OBS-Array-Mode:	2	# 0 = Animation	1 = Obs	2 = GLPOINTS
 Offset:		0	#system decide
 EyeTracker:	0	#normally do not apply
 
-#Roads:	../Resources/1.txt;
+#Roads:	../Resources/roads/l.txt;

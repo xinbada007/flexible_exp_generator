@@ -39,6 +39,9 @@ private:
 	std::vector<osg::ref_ptr<Obstacle>> _collisionOBSList;
 	bool _obsListDrawn;
 
+	osg::ref_ptr<Obstacle> _opticFlowPoints;
+	bool _opticFlowDrawn;
+
 	osg::ref_ptr<osgAudio::SoundState> _siren;
 	osg::ref_ptr<osgAudio::SoundState> _coin;
 	osg::ref_ptr<osgAudio::Sample> _coinSample;
@@ -49,6 +52,7 @@ private:
 	osg::ref_ptr<osg::Group> _root;
 	osg::ref_ptr<osg::Switch> _road;
 	osg::ref_ptr<MulitViewer> _mv;
+	const double _roadLength;
 
 	osg::ref_ptr<osg::AnimationPathCallback> _anmCallback;
 	osg::ref_ptr<osg::Vec3dArray> _centerList;
@@ -58,9 +62,11 @@ private:
 	void dynamicChange();
 	void showText();
 	void showObstacle();
+	void showOpticFlow();
 	void deviationCheck();
 
 	void createObstacles();
+	void createOpticFlow();
 	void dealCollision();
 
 	void removeNodefromRoad(osg::Node *n);
