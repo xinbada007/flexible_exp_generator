@@ -304,13 +304,17 @@ void ExperimentCallback::showOpticFlow()
 	if (_opticFlowDrawn)
 	{
 		double y = _car->getCarState()->_O.y();
-		const int CURR = y / _expSetting->_depthDensity;
+		const unsigned CURR = y / _expSetting->_depthDensity;
 
 		y += _expSetting->_opticFlowRange;
-		const int NEXT = y / _expSetting->_depthDensity + 0.5f;
+		const unsigned NEXT = y / _expSetting->_depthDensity + 0.5f;
 
-		const int TOTL = _opticFlowPoints->getNumChildren();
-		for (int i = 0; i < std::min(CURR,TOTL); i++)
+		y -= 2 * _expSetting->_opticFlowRange;
+		y = std::max(2 * _expSetting->_opticFlowRange, 0);
+		const unsigned PREV = y / _expSetting->_depthDensity;
+
+		const unsigned TOTL = _opticFlowPoints->getNumChildren();
+		for (unsigned i = 0; i < std::min(PREV, TOTL);i++)
 		{
 			osg::Node *node = _opticFlowPoints->getChild(i);
 			if (node)
@@ -322,7 +326,7 @@ void ExperimentCallback::showOpticFlow()
 			}
 		}
 
-		for (int i = CURR; i < std::min(NEXT,TOTL);i++)
+		for (unsigned i = PREV; i < std::min(NEXT, TOTL); i++)
 		{
 			osg::Node *node = _opticFlowPoints->getChild(i);
 			if (node)
@@ -334,7 +338,7 @@ void ExperimentCallback::showOpticFlow()
 			}
 		}
 
-		for (int i = NEXT; i < TOTL;i++)
+		for (unsigned i = NEXT; i < TOTL; i++)
 		{
 			osg::Node *node = _opticFlowPoints->getChild(i);
 			if (node)
