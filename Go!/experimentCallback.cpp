@@ -303,15 +303,14 @@ void ExperimentCallback::showOpticFlow()
 
 	if (_opticFlowDrawn)
 	{
-		double y = _car->getCarState()->_O.y();
-		const unsigned CURR = y / _expSetting->_depthDensity;
+		const double y = _car->getCarState()->_O.y();
 
-		y += _expSetting->_opticFlowRange;
-		const unsigned NEXT = y / _expSetting->_depthDensity + 0.5f;
+		double nextY = y + _expSetting->_opticFlowRange;
+		const unsigned NEXT = nextY / _expSetting->_depthDensity;
 
-		y -= 2 * _expSetting->_opticFlowRange;
-		y = std::fmax(y, 0.0f);
-		const unsigned PREV = y / _expSetting->_depthDensity;
+		double prevY = y - _expSetting->_opticFlowRange;
+		prevY = std::fmax(prevY, 0.0f);
+		const unsigned PREV = prevY / _expSetting->_depthDensity;
 
 		const unsigned TOTL = _opticFlowPoints->getNumChildren();
 		for (unsigned i = 0; i < std::min(PREV, TOTL);i++)
