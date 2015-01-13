@@ -310,7 +310,7 @@ void ExperimentCallback::showOpticFlow()
 		const unsigned NEXT = y / _expSetting->_depthDensity + 0.5f;
 
 		y -= 2 * _expSetting->_opticFlowRange;
-		y = std::max(2 * _expSetting->_opticFlowRange, 0);
+		y = std::fmax(y, 0.0f);
 		const unsigned PREV = y / _expSetting->_depthDensity;
 
 		const unsigned TOTL = _opticFlowPoints->getNumChildren();
