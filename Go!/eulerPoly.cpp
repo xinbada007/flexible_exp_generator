@@ -19,7 +19,7 @@ Solid(copy, copyop), _ccwupdated(copy._ccwupdated)
 
 EulerPoly::~EulerPoly()
 {
-	std::cout << "Deconstruct EulerPoly" << std::endl;
+	osg::notify(osg::DEBUG_INFO) << "Deconstruct EulerPoly" << std::endl;
 }
 
 void EulerPoly::mvfs(osg::Vec3d ref)

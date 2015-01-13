@@ -28,7 +28,7 @@ _maxAnisotropy(copy._maxAnisotropy), _solidType(copy._solidType)
 
 Solid::~Solid()
 {
-	osg::notify(osg::NOTICE) << "deleting Solid...\t" << std::endl;
+	osg::notify(osg::DEBUG_INFO) << "deleting Solid...\t" << std::endl;
 	Edge *refE = _startE;
 	if (refE)
 	{

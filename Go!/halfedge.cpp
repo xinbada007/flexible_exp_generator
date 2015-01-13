@@ -17,7 +17,7 @@ _next(this), _prev(this), _homeE(NULL), _startP(newP), _homeL(NULL)
 
 HalfEdge::~HalfEdge()
 {
-	//osg::notify(osg::NOTICE) << "deleting HE..." << std::endl;
+	osg::notify(osg::DEBUG_INFO) << "deleting HE..." << std::endl;
 }
 
 bool HalfEdge::isValid() const

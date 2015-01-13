@@ -25,7 +25,7 @@ _index(copy._index)
 
 Plane::~Plane()
 {
-//	osg::notify(osg::NOTICE) << "deleting Plane..." << std::endl;
+	osg::notify(osg::DEBUG_INFO) << "deleting Plane..." << std::endl;
 }
 
 void Plane::addLooptoList(Loop *refL)

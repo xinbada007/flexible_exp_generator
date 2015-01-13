@@ -11,7 +11,7 @@ _p(newP), _homeHE(NULL), _next(NULL), _prev(NULL), _index(0)
 
 Points::~Points()
 {
-	//osg::notify(osg::NOTICE) << "deleting Points..." << std::endl;
+	osg::notify(osg::DEBUG_INFO) << "deleting Points..." << std::endl;
 }
 
 bool Points::isEqual(osg::Vec3d ref) const

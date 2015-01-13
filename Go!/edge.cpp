@@ -12,7 +12,7 @@ _next(NULL), _prev(NULL), _he1(NULL), _he2(NULL), _eFlag(NULL)
 
 Edge::~Edge()
 {
-	//osg::notify(osg::NOTICE) << "deleting Edge..." << std::endl;
+	osg::notify(osg::DEBUG_INFO) << "deleting Edge..." << std::endl;
 // 	delete _eFlag;
 // 	_eFlag = NULL;
 }

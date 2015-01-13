@@ -23,7 +23,7 @@ _switch(copy.getSwitch()), _numHE(copy._numHE)
 
 Loop::~Loop()
 {
-	//osg::notify(osg::NOTICE) << "deleting Loop..." << std::endl;
+	osg::notify(osg::DEBUG_INFO) << "deleting Loop..." << std::endl;
 }
 
 void Loop::draw()
