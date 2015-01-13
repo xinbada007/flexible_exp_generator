@@ -1104,6 +1104,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSALIGNMENT("OBS-ALIGNMENT");
 
 		static const string OPTICFLOW("OPTICFLOW");
+		static const string OPTICFLOWRANGE("OPTICFLOW-VISIBLE");
 		static const string DEPTHDENSITY("DEPTHDENSITY");
 		static const string OPTICFLOWWIDTH("OPTICFLOW-WIDTH");
 		static const string OPTICFLOWHEIGHT("OPTICFLOW-HEIGHT");
@@ -1389,6 +1390,15 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == OPTICFLOWRANGE)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWRANGE.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowRange = stoi(config);
+				}
+				continue;
+			}
 			else if (title == DEPTHDENSITY)
 			{
 				config.erase(config.begin(), config.begin() + DEPTHDENSITY.size());
@@ -1411,7 +1421,7 @@ void ReadConfig::readTrial(ifstream &in)
 				if (width->getNumElements() == 2)
 				{
 					_experiment->_opticFlowWidth = width->front();
-					_experiment->_opticFlowWDensity = width->back();
+					_experiment->_opticFlowWDensity = int(width->back());
 				}
 				continue;
 			}
@@ -1428,7 +1438,7 @@ void ReadConfig::readTrial(ifstream &in)
 				if (temp->getNumElements() == 2)
 				{
 					_experiment->_opticFlowHeight = temp->front();
-					_experiment->_opticFlowHDensity = temp->back();
+					_experiment->_opticFlowHDensity = int(temp->back());
 				}
 				continue;
 			}

@@ -79,6 +79,7 @@ OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Pic:	../Resources/texture/red.jpg;
 
 OpticFlow:	1	#1 = Enable	0= Disable
+OpticFlow-Visible:	100	#only visible within 100 meters
 DepthDensity:	1.0	#every x meters
 OpticFlow-Width:	100	250
 OpticFlow-Height:	40	100

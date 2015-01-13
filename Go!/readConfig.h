@@ -46,6 +46,7 @@ typedef struct Experiment :public osg::Referenced
 		_speed = 60.0f / 3.6f;
 
 		_opticFlow = false;
+		_opticFlowRange = 100;
 		_depthDensity = 1.0f;
 		_opticFlowWidth = 100;
 		_opticFlowWDensity = 250;
@@ -92,11 +93,12 @@ typedef struct Experiment :public osg::Referenced
 	double _speed;
 
 	bool _opticFlow;
+	int _opticFlowRange;
 	double _depthDensity;
 	double _opticFlowWidth;
-	double _opticFlowWDensity;
+	int _opticFlowWDensity;
 	double _opticFlowHeight;
-	double _opticFlowHDensity;
+	int _opticFlowHDensity;
 
 	double _offset;
 

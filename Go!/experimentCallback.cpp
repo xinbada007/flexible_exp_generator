@@ -248,6 +248,7 @@ void ExperimentCallback::createOpticFlow()
 	for (i = 0; i < yv.size(); i++)
 	{
 		y = yv.at(i);
+
 		for (int j = 0; j < _expSetting->_opticFlowHDensity; j++)
 		{
 			double temp = drand();
@@ -264,6 +265,17 @@ void ExperimentCallback::createOpticFlow()
 
 			points->push_back(osg::Vec3(x, y, z));
 		}
+
+		if (!points->empty())
+		{
+			osg::ref_ptr<Obstacle> temp = new Obstacle;
+			temp->createPOINTS(points);
+			temp->setSolidType(Solid::solidType::GL_POINTS_BODY);
+			temp->setTag(ROADTAG::RT_UNSPECIFIED);
+
+			_opticFlowPoints->addChild(temp);
+			points->clear();
+		}
 	}
 
 	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
@@ -273,11 +285,6 @@ void ExperimentCallback::createOpticFlow()
 	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
 	_opticFlowPoints->setStateSet(ss);
-
-	_opticFlowPoints->createPOINTS(points);
-	_opticFlowPoints->setStateSet(ss);
-	_opticFlowPoints->setSolidType(Solid::solidType::GL_POINTS_BODY);
-	_opticFlowPoints->setTag(ROADTAG::RT_UNSPECIFIED);
 }
 
 void ExperimentCallback::showOpticFlow()
@@ -289,10 +296,58 @@ void ExperimentCallback::showOpticFlow()
 
 	if (!_opticFlowDrawn && _opticFlowPoints && _opticFlowPoints->getNumChildren())
 	{
-		_road->addChild(_opticFlowPoints);
 		_opticFlowDrawn = true;
+
+		_road->addChild(_opticFlowPoints);
+	}
+
+	if (_opticFlowDrawn)
+	{
+		double y = _car->getCarState()->_O.y();
+		const int CURR = y / _expSetting->_depthDensity;
+
+		y += _expSetting->_opticFlowRange;
+		const int NEXT = y / _expSetting->_depthDensity + 0.5f;
+
+		const int TOTL = _opticFlowPoints->getNumChildren();
+		for (int i = 0; i < std::min(CURR,TOTL); i++)
+		{
+			osg::Node *node = _opticFlowPoints->getChild(i);
+			if (node)
+			{
+				if (node->asSwitch())
+				{
+					node->asSwitch()->setAllChildrenOff();
+				}
+			}
+		}
+
+		for (int i = CURR; i < std::min(NEXT,TOTL);i++)
+		{
+			osg::Node *node = _opticFlowPoints->getChild(i);
+			if (node)
+			{
+				if (node->asSwitch())
+				{
+					node->asSwitch()->setAllChildrenOn();
+				}
+			}
+		}
+
+		for (int i = NEXT; i < TOTL;i++)
+		{
+			osg::Node *node = _opticFlowPoints->getChild(i);
+			if (node)
+			{
+				if (node->asSwitch())
+				{
+					node->asSwitch()->setAllChildrenOff();
+				}
+			}
+		}
 	}
 }
+
 
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {

@@ -378,12 +378,14 @@ void Solid::createGLPOINTS(const osg::Vec3d &p)
 
 void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
 {
+	osg::ref_ptr<osg::Vec3dArray> vertex = new osg::Vec3dArray(p->begin(), p->end());
+
 	this->solidType = GL_POINTS_BODY;
 
 	osg::ref_ptr<osg::Geode> GLP = new osg::Geode;
 
 	osg::ref_ptr<osg::Geometry> GLgeomtry = new osg::Geometry;
-	GLgeomtry->setVertexArray(p);
+	GLgeomtry->setVertexArray(vertex);
 	osg::ref_ptr<osg::Vec4dArray> color = new osg::Vec4dArray;
 	color->push_back(osg::Vec4d(1.0f, 1.0f, 1.0f, 1.0f));
 	GLgeomtry->setColorArray(color.release());
