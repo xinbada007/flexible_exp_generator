@@ -1093,6 +1093,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSPOSOFFSET("OBS-POSITION-OFFSET");
 		static const string OBSSIZE("OBS-SIZE");
 		static const string OBSSHAPE("OBS-SHAPE");
+		static const string OBSVISIBLE("OBS-VISIBLE");
 		static const string OBSPIC("OBS-PIC");
 
 		static const string OBSARRAY("OBS-ARRAY");
@@ -1274,6 +1275,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_obsShape = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OBSVISIBLE)
+			{
+				config.erase(config.begin(), config.begin() + OBSVISIBLE.size());
+				if (!config.empty())
+				{
+					_experiment->_obsVisible = stod(config);
 				}
 				continue;
 			}

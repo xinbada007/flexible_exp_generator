@@ -453,7 +453,7 @@ void ExperimentCallback::removeNodefromRoad(osg::Node *n)
 void ExperimentCallback::dealCollision()
 {
 	CarState *carstate = _car->getCarState();
-	const solidList &obsList = carstate->getObsList();
+	const obstacleList &obsList = carstate->getObsList();
 	const quadList &wallList = carstate->_collisionQuad;
 	if (!obsList.size() && !wallList.size())
 	{
@@ -461,8 +461,8 @@ void ExperimentCallback::dealCollision()
 	}
 
 	carstate->_collide = true;
-	solidList::const_iterator i = obsList.cbegin();
-	solidList::const_iterator END = obsList.cend();
+	obstacleList::const_iterator i = obsList.cbegin();
+	obstacleList::const_iterator END = obsList.cend();
 
 	while (i != END)
 	{
@@ -646,6 +646,25 @@ void ExperimentCallback::showObstacle()
 			_cVisitor->setMode(OBS);
 			_road->accept(*_cVisitor);
 		}
+	}
+
+	//Visible
+	const obstacleList &obsList = _cVisitor->getObstacle();
+	obstacleList::const_iterator obs_begin = obsList.cbegin();
+	obstacleList::const_iterator obs_end = obsList.cend();
+	while (obs_begin != obs_end)
+	{
+		const osg::Vec3d &v = (*obs_begin)->getDistancetoCar();
+		const double YD = abs(v * UP_DIR);
+		if (YD <= _expSetting->_obsVisible)
+		{
+			(*obs_begin)->setAllChildrenOn();
+		}
+		else
+		{
+			(*obs_begin)->setAllChildrenOff();
+		}
+		++obs_begin;
 	}
 
 	const int &ob_size = _expSetting->_obstaclesTime->size();

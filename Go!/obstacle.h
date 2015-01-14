@@ -16,6 +16,9 @@ public:
 	void createPOINTS(osg::ref_ptr<osg::Vec3dArray> p);
 	inline void setImage(osg::ref_ptr<osg::Image> img) { _imgTexture = img; };
 
+	inline osg::Vec3d getDistancetoCar() { return _distanceVector; };
+	inline void setDistancetoCar(const osg::Vec3d &ref) const { _distanceVector = ref; };
+
 private:
 	virtual ~Obstacle();
 	void sweep(const double height);
@@ -23,5 +26,7 @@ private:
 	void genBoxTexture();
 	void genTextureNoZ(const bool perGmtry = false);
 //	void genUnifiedTexture();
+
+	mutable osg::Vec3d _distanceVector;
 };
 

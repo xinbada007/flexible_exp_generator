@@ -13,7 +13,7 @@ Obstacle::Obstacle()
 }
 
 Obstacle::Obstacle(const Obstacle &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
-LogicRoad(copy,copyop)
+LogicRoad(copy, copyop)
 {
 
 }

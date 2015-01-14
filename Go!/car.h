@@ -1,12 +1,15 @@
 #pragma once
 #include "eulerPoly.h"
 #include "readConfig.h"
-#include <osg/BoundingBox>
+#include "obstacle.h"
 
+#include <osg/BoundingBox>
 #include <vector>
 
 typedef std::vector<Plane*> quadList;
 typedef std::vector<Solid*> solidList;
+typedef std::vector<Obstacle*> obstacleList;
+
 
 typedef struct CarState:public osg::Referenced
 {
@@ -145,8 +148,8 @@ typedef struct CarState:public osg::Referenced
 	inline void updateLastO(osg::Vec3d ref) { _lastO = ref; };
 	inline void setReplayText(std::string ref) { if (_replay) _replayText = ref; };
 	inline const std::string & getReplayText() const { return _replayText; };
-	inline void setObsList(solidList list){ _obsList = list; };
-	inline solidList getObsList() const { return _obsList; };
+	inline void setObsList(obstacleList list){ _obsList = list; };
+	inline obstacleList getObsList() const { return _obsList; };
 	inline osg::ref_ptr<osg::DoubleArray> getDistancetoObsBody() const { return _distancetoObsBody; };
 private:
 	~CarState(){ std::cout << "Deconstruct CarState" << std::endl; };
@@ -162,7 +165,7 @@ private:
 
 	std::string _replayText;
 
-	solidList _obsList;
+	obstacleList _obsList;
 	osg::ref_ptr<osg::DoubleArray> _distancetoObsBody;
 }CarState;
 

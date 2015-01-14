@@ -35,6 +35,7 @@ typedef struct Experiment :public osg::Referenced
 		_obsSize.set(1.0f, 1.0f, 1.0f);
 		_obsArraySize = 0.25f;
 		_obsShape = 1;
+		_obsVisible = 300.0f;
 		_imgOBS = NULL;
 		_imgObsArray = NULL;
 		_imgAnisotropy = 1.0f;
@@ -80,6 +81,7 @@ typedef struct Experiment :public osg::Referenced
 	std::string _obsArrayPic;
 	osg::ref_ptr<osg::Image> _imgObsArray;
 	int _obsShape;
+	double _obsVisible;
 	std::string _obsPic;
 	osg::ref_ptr<osg::Image> _imgOBS;
 	double _imgAnisotropy;

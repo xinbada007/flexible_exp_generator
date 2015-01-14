@@ -169,7 +169,7 @@ quadList Collision::listCollsion(const Car *refC, const quadList obs)
 	return list;
 }
 
-bool Collision::ifObsCollide(const Car *refC, const Solid *obs)
+bool Collision::ifObsCollide(const Car *refC, const Obstacle *obs)
 {
 	//attention! last element of carArray is the original point of car
 	//which should be removed when doing collision detection
@@ -219,13 +219,15 @@ bool Collision::ifObsCollide(const Car *refC, const Solid *obs)
 	return false;
 }
 
-bool Collision::detectObsDistance(const Car *refC, const Solid *obs, double *distance)
+bool Collision::detectObsDistance(const Car *refC, const Obstacle *obs, double *distance)
 {
 	const double &R1 = refC->absoluteTerritory._detectR;
 	const double &R2 = obs->absoluteTerritory._detectR;
 	if (R1 && R2)
 	{
-		*distance = (obs->absoluteTerritory.center - refC->absoluteTerritory.center).length();
+		osg::Vec3d v = (obs->absoluteTerritory.center - refC->absoluteTerritory.center);
+		*distance = v.length();
+		obs->setDistancetoCar(v);
 		if (*distance < R1 + R2)
 		{
 			return true;
@@ -252,18 +254,19 @@ bool Collision::detectObsDistance(const Car *refC, const Solid *obs, double *dis
 	return false;
 }
 
-solidList Collision::listObsCollsion(const Car *refC, const solidList obs)
+obstacleList Collision::listObsCollsion(const Car *refC, const obstacleList obs)
 {
-	solidList list;
+	obstacleList list;
 	osg::ref_ptr<osg::DoubleArray> distanceObsBody = refC->getCarState()->getDistancetoObsBody();
 
 	if (refC && !obs.empty())
 	{
-		solidList::const_iterator i = obs.cbegin();
+		obstacleList::const_iterator i = obs.cbegin();
 		while (i != obs.cend())
 		{
 			double distance(0.0f);
 			const bool veryclose = detectObsDistance(refC, *i, &distance);
+			
 			if (veryclose)
 			{
 				if (ifObsCollide(refC, *i))

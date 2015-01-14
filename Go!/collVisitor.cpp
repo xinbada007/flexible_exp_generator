@@ -3,6 +3,7 @@
 #include "logicRoad.h"
 #include "car.h"
 #include "edge.h"
+#include "obstacle.h"
 
 CollVisitor::CollVisitor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _mode(ROAD)
@@ -91,7 +92,7 @@ void CollVisitor::pushLR(osg::ref_ptr<LogicRoad> refLR)
 		_rd.push_back(dynamic_cast<Solid*>(refLR.get()));
 		break;
 	case OBS:
-		_obs.push_back(dynamic_cast<Solid*>(refLR.get()));
+		_obs.push_back(dynamic_cast<Obstacle*>(refLR.get()));
 		break;
 	default:
 		break;

@@ -232,9 +232,9 @@ bool Recorder::output()
 		}
 		else
 		{
-			const solidList &obsList = CollVisitor::instance()->getObstacle();
-			solidList::const_iterator begin_obslist = obsList.cbegin();
-			solidList::const_iterator end_obslist = obsList.cend();
+			const obstacleList &obsList = CollVisitor::instance()->getObstacle();
+			obstacleList::const_iterator begin_obslist = obsList.cbegin();
+			obstacleList::const_iterator end_obslist = obsList.cend();
 			std::string obsBody;
 			char tempd[20];
 			const unsigned size_tempd(sizeof(tempd));

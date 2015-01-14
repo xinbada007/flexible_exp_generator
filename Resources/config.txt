@@ -68,7 +68,7 @@ Deviation-Warn: DEVIATION TOO HIGH
 Deviation-Siren:	../Resources/sound/warnpullup.mp3
 
 ##==Obstacle Setting=====================
-#Obstacle:	1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle:	1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
 Obstacle-Range:	10 10	140 140	270 270 400 400 530 530	660 660
 Obstacle-Range:	790 790	920 920	1050 1050	1180 1180	1310 1310	1440 1440	1570 1570
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
@@ -76,13 +76,14 @@ OBS-Position-Offset:	-2 2	-30 -34	30 34	-2 2	-40 -44	-2 2
 OBS-Position-Offset:	40 44	-2 2	-24 -28	-2 2	24 28	-10 -14	24 28	#Negtive = L	Positive = R
 OBS-Size:	0.5	2.0	1.0	#Length X Width X Height
 OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Visible:	300
 OBS-Pic:	../Resources/texture/red.jpg;
 
-OpticFlow:	1	#1 = Enable	0= Disable
-OpticFlow-Visible:	100	#only visible within 100 meters
-DepthDensity:	1.0	#every x meters
-OpticFlow-Width:	100	250
-OpticFlow-Height:	40	100
+OpticFlow:	0	#1 = Enable	0= Disable
+OpticFlow-Visible:	2	#only visible within 100 meters
+DepthDensity:	.5	#every x meters
+OpticFlow-Width:	250	1000
+OpticFlow-Height:	40	1000
 
 #OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
 OBS-Array-Num:	50;
