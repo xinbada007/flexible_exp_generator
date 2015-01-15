@@ -354,18 +354,18 @@ void Solid::multiplyMatrix(const osg::Matrixd &m)
 	absoluteTerritory.center = absoluteTerritory.center * m;
 }
 
-void Solid::createGLPOINTS(const osg::Vec3d &p)
+void Solid::createGLPOINTS(const osg::Vec3 &p)
 {
 	this->solidType = GL_POINTS_BODY;
 
 	osg::ref_ptr<osg::Geode> GLP = new osg::Geode;
 	
 	osg::ref_ptr<osg::Geometry> GLgeomtry = new osg::Geometry;
-	osg::ref_ptr<osg::Vec3dArray> v = new osg::Vec3dArray;
+	osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array;
 	v->push_back(p);
 	GLgeomtry->setVertexArray(v.release());
-	osg::ref_ptr<osg::Vec4dArray> color = new osg::Vec4dArray;
-	color->push_back(osg::Vec4d(1.0f,1.0f,1.0f,1.0f));
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+	color->push_back(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
 	GLgeomtry->setColorArray(color.release());
 	GLgeomtry->setColorBinding(osg::Geometry::BIND_OVERALL);
 	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, 1));
@@ -376,9 +376,9 @@ void Solid::createGLPOINTS(const osg::Vec3d &p)
 	this->addChild(GLP.release());
 }
 
-void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
+void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3Array> p)
 {
-	osg::ref_ptr<osg::Vec3dArray> vertex = new osg::Vec3dArray(p->begin(), p->end());
+	osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array(p->begin(), p->end());
 
 	this->solidType = GL_POINTS_BODY;
 
@@ -386,12 +386,12 @@ void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
 
 	osg::ref_ptr<osg::Geometry> GLgeomtry = new osg::Geometry;
 	GLgeomtry->setVertexArray(vertex);
-	osg::ref_ptr<osg::Vec4dArray> color = new osg::Vec4dArray;
-	color->push_back(osg::Vec4d(1.0f, 1.0f, 1.0f, 1.0f));
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+	color->push_back(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	GLgeomtry->setColorArray(color.release());
 	GLgeomtry->setColorBinding(osg::Geometry::BIND_OVERALL);
 	
-	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, GLgeomtry->getVertexArray()->getNumElements()));
+	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, vertex->getNumElements()));
 
 	GLgeomtry->setDataVariance(osg::Object::DYNAMIC);
 

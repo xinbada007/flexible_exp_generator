@@ -234,7 +234,7 @@ void ExperimentCallback::createOpticFlow()
 
 	_opticFlowDrawn = false;
 
-	osg::ref_ptr<osg::Vec3dArray> points = new osg::Vec3dArray;
+	osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array;
 
 	std::vector<double> xv, yv, zv;
 	int i(0);
@@ -245,39 +245,53 @@ void ExperimentCallback::createOpticFlow()
 	} while (yv.back() < _roadLength);
 
 	double x, y, z;
+	std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>, unsigned> ver;
+	std::vector<osg::ref_ptr<osg::Vec3Array>> verOrder;
 	for (i = 0; i < yv.size(); i++)
 	{
 		y = yv.at(i);
 
-		for (int j = 0; j < _expSetting->_opticFlowHDensity; j++)
+		unsigned versions(0);
+		while (versions < 20)
 		{
-			double temp = drand();
-			temp = -0.5f * _expSetting->_opticFlowHeight + temp * _expSetting->_opticFlowHeight;
-			zv.push_back(temp);
-		}
-		for (int j = 0; j < _expSetting->_opticFlowWDensity; j++)
-		{
-			x = drand();
-			x = -0.5f * _expSetting->_opticFlowWidth + x * _expSetting->_opticFlowWidth;
-			
-			const int index = j % zv.size();
-			z = zv.at(index);
+			for (int j = 0; j < _expSetting->_opticFlowHDensity; j++)
+			{
+				double temp = drand();
+				temp = -0.5f * _expSetting->_opticFlowHeight + temp * _expSetting->_opticFlowHeight;
+				zv.push_back(temp);
+			}
+			for (int j = 0; j < _expSetting->_opticFlowWDensity; j++)
+			{
+				x = drand();
+				x = -0.5f * _expSetting->_opticFlowWidth + x * _expSetting->_opticFlowWidth;
 
-			points->push_back(osg::Vec3(x, y, z));
-		}
+				const int index = j % zv.size();
+				z = zv.at(index);
 
-		if (!points->empty())
-		{
-			osg::ref_ptr<Obstacle> temp = new Obstacle;
-			temp->createPOINTS(points);
-			temp->setSolidType(Solid::solidType::GL_POINTS_BODY);
-			temp->setTag(ROADTAG::RT_UNSPECIFIED);
+				points->push_back(osg::Vec3f(x, y, z));
+			}
 
-			_opticFlowPoints->addChild(temp);
-			points->clear();
+			if (!points->empty())
+			{
+				if (!versions)
+				{
+					osg::ref_ptr<Obstacle> temp = new Obstacle;
+					temp->createPOINTS(points);
+					temp->setSolidType(Solid::solidType::GL_POINTS_BODY);
+					temp->setTag(ROADTAG::RT_UNSPECIFIED);
+
+					_opticFlowPoints->addChild(temp);
+				}
+
+				verOrder.push_back(new osg::Vec3Array(points->begin(), points->end()));
+				points->clear();
+			}
+			++versions;
 		}
+		ver = std::make_pair(verOrder, 1);
+		verOrder.clear();
+		_opticFlowVersions.push_back(ver);
 	}
-
 	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
 	osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
 	ss->setAttribute(psize);
@@ -315,42 +329,65 @@ void ExperimentCallback::showOpticFlow()
 		const unsigned TOTL = _opticFlowPoints->getNumChildren();
 		for (unsigned i = 0; i < std::min(PREV, TOTL);i++)
 		{
-			osg::Node *node = _opticFlowPoints->getChild(i);
-			if (node)
+			Obstacle *obs = dynamic_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			if (obs)
 			{
-				if (node->asSwitch())
-				{
-					node->asSwitch()->setAllChildrenOff();
-				}
+				obs->asSwitch()->setAllChildrenOff();
+				obs->setFrameCounts(0);
 			}
 		}
 
 		for (unsigned i = PREV; i < std::min(NEXT, TOTL); i++)
 		{
-			osg::Node *node = _opticFlowPoints->getChild(i);
-			if (node)
+			Obstacle *obs = dynamic_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			if (obs)
 			{
-				if (node->asSwitch())
-				{
-					node->asSwitch()->setAllChildrenOn();
-				}
+				obs->asSwitch()->setAllChildrenOn();
+				obs->setFrameCounts(obs->getFrameCounts()+1);
+				dynamicFlow(obs, i);
 			}
 		}
 
 		for (unsigned i = NEXT; i < TOTL; i++)
 		{
-			osg::Node *node = _opticFlowPoints->getChild(i);
-			if (node)
+			Obstacle *obs = dynamic_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			if (obs)
 			{
-				if (node->asSwitch())
-				{
-					node->asSwitch()->setAllChildrenOff();
-				}
+				obs->asSwitch()->setAllChildrenOff();
+				obs->setFrameCounts(0);
 			}
 		}
 	}
 }
 
+void ExperimentCallback::dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned depth)
+{
+	if (obs->getFrameCounts() >= 7)
+	{
+		obs->setFrameCounts(0);
+		osg::Geode *geode = obs->getChild(0)->asGeode();
+		if (geode)
+		{
+			osg::Geometry *gmtry = geode->getDrawable(0)->asGeometry();
+			if (gmtry)
+			{
+				if (gmtry->getPrimitiveSet(0))
+				{
+					unsigned &order = _opticFlowVersions.at(depth).second;
+					osg::ref_ptr<osg::Vec3Array> points = _opticFlowVersions.at(depth).first.at(order);
+
+					++order;
+					order %= _opticFlowVersions.at(depth).first.size();
+
+					gmtry->setVertexArray(points);
+					gmtry->setPrimitiveSet(0, new osg::DrawArrays(GL_POINTS, 0, points->getNumElements()));
+					gmtry->dirtyBound();
+					gmtry->dirtyDisplayList();
+				}
+			}
+		}
+	}
+}
 
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {

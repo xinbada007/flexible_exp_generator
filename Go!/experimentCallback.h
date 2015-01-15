@@ -40,6 +40,7 @@ private:
 	bool _obsListDrawn;
 
 	osg::ref_ptr<Obstacle> _opticFlowPoints;
+	std::vector<std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>,unsigned>> _opticFlowVersions;
 	bool _opticFlowDrawn;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
@@ -63,6 +64,7 @@ private:
 	void showText();
 	void showObstacle();
 	void showOpticFlow();
+	void dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned depth);
 	void deviationCheck();
 
 	void createObstacles();
