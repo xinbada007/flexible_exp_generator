@@ -53,6 +53,8 @@ typedef struct Experiment :public osg::Referenced
 		_opticFlowWDensity = 250;
 		_opticFlowHeight = 40;
 		_opticFlowHDensity = 100;
+		_opticFlowFrameCounts = 0;
+		_opticFlowVersions = 0;
 
 		_offset = 0.0f;
 
@@ -101,6 +103,8 @@ typedef struct Experiment :public osg::Referenced
 	int _opticFlowWDensity;
 	double _opticFlowHeight;
 	int _opticFlowHDensity;
+	unsigned int _opticFlowFrameCounts;
+	unsigned int _opticFlowVersions;
 
 	double _offset;
 

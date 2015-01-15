@@ -1109,6 +1109,8 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string DEPTHDENSITY("DEPTHDENSITY");
 		static const string OPTICFLOWWIDTH("OPTICFLOW-WIDTH");
 		static const string OPTICFLOWHEIGHT("OPTICFLOW-HEIGHT");
+		static const string OPTICFLOWFRAMECOUNTS("OPTICFLOW-FRAMECOUNTS");
+		static const string OPTICFLOWVERSIONS("OPTICFLOW-VERSIONS");
 
 		static const string DEVIATION("DEVIATION");
 		static const string DEVIATIONWARN("DEVIATION-WARN");
@@ -1406,6 +1408,24 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_opticFlowRange = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OPTICFLOWFRAMECOUNTS)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWFRAMECOUNTS.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowFrameCounts = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OPTICFLOWVERSIONS)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWVERSIONS.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowVersions = stoi(config);
 				}
 				continue;
 			}

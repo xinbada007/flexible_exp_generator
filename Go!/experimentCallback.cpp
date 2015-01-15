@@ -252,21 +252,39 @@ void ExperimentCallback::createOpticFlow()
 		y = yv.at(i);
 
 		unsigned versions(0);
-		while (versions < 20)
+		do
 		{
-			for (int j = 0; j < _expSetting->_opticFlowHDensity; j++)
+			for (int j = 0; j < _expSetting->_opticFlowWDensity; j++)
 			{
-				double temp = drand();
-				temp = -0.5f * _expSetting->_opticFlowHeight + temp * _expSetting->_opticFlowHeight;
-				zv.push_back(temp);
+				randreseed();
+				const int which = randbiased(0.5f);
+				z = randrange(_expSetting->_opticFlowHeight);
+				if (which)
+				{
+					z += drand();
+				}
+				else
+				{
+					z = -z;
+					z -= drand();
+				}
+				zv.push_back(z);
 			}
 			for (int j = 0; j < _expSetting->_opticFlowWDensity; j++)
 			{
-				x = drand();
-				x = -0.5f * _expSetting->_opticFlowWidth + x * _expSetting->_opticFlowWidth;
-
-				const int index = j % zv.size();
-				z = zv.at(index);
+				randreseed();
+				const int which = randbiased(0.5f);
+				x = randrange(_expSetting->_opticFlowWidth);
+				if (which)
+				{
+					x += drand();
+				}
+				else
+				{
+					x = -x;
+					x -= drand();
+				}
+				z = zv.at(j);
 
 				points->push_back(osg::Vec3f(x, y, z));
 			}
@@ -286,8 +304,7 @@ void ExperimentCallback::createOpticFlow()
 				verOrder.push_back(new osg::Vec3Array(points->begin(), points->end()));
 				points->clear();
 			}
-			++versions;
-		}
+		} while (++versions < _expSetting->_opticFlowVersions);
 		ver = std::make_pair(verOrder, 1);
 		verOrder.clear();
 		_opticFlowVersions.push_back(ver);
@@ -362,7 +379,12 @@ void ExperimentCallback::showOpticFlow()
 
 void ExperimentCallback::dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned depth)
 {
-	if (obs->getFrameCounts() >= 7)
+	if (!_expSetting->_opticFlowFrameCounts)
+	{
+		return;
+	}
+
+	if (obs->getFrameCounts() >= _expSetting->_opticFlowFrameCounts)
 	{
 		obs->setFrameCounts(0);
 		osg::Geode *geode = obs->getChild(0)->asGeode();
