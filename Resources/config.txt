@@ -84,7 +84,7 @@ OBS-Pic:	../Resources/texture/red.jpg;
 OpticFlow:	1	#1 = Enable	0= Disable
 OpticFlow-Visible:	210	#only visible within 100 meters
 OpticFlow-FrameCounts:	7	
-OpticFlow-Versions:	2
+OpticFlow-Versions:	10
 DepthDensity:	1	#only accept int!!!
 OpticFlow-Width:	400
 OpticFlow-Height:	10

@@ -330,12 +330,12 @@ void ExperimentCallback::createOpticFlow()
 
 					_opticFlowPoints->addChild(temp);
 				}
-
+				
 				verOrder.push_back(new osg::Vec3Array(points->begin(), points->end()));
 				points->clear();
 			}
 		} while (++versions < _expSetting->_opticFlowVersions);
-		ver = std::make_pair(verOrder, 1);
+		ver = std::make_pair(verOrder, 0);
 		verOrder.clear();
 		_opticFlowVersions.push_back(ver);
 	}
@@ -362,18 +362,19 @@ void ExperimentCallback::showOpticFlow()
 		_road->addChild(_opticFlowPoints);
 	}
 
-	if (_opticFlowDrawn && _expSetting->_depthDensity && _expSetting->_opticFlowRange)
+	if (_opticFlowDrawn)
 	{
-		const double y = _car->getCarState()->_O.y();
+		const double &y = _car->getCarState()->_O.y();
+
+		const unsigned &TOTL = _opticFlowPoints->getNumChildren();
 
 		double nextY = y + _expSetting->_opticFlowRange;
-		const unsigned NEXT = nextY / _expSetting->_depthDensity;
+		const unsigned NEXT = (_expSetting->_depthDensity && _expSetting->_opticFlowRange) ? nextY / _expSetting->_depthDensity : TOTL;
 
 		double prevY = y - _expSetting->_opticFlowRange;
 		prevY = std::fmax(prevY, 0.0f);
-		const unsigned PREV = prevY / _expSetting->_depthDensity;
+		const unsigned PREV = (_expSetting->_depthDensity) ? prevY / _expSetting->_depthDensity : 0;
 
-		const unsigned TOTL = _opticFlowPoints->getNumChildren();
 		for (unsigned i = 0; i < std::min(PREV, TOTL);i++)
 		{
 			Obstacle *obs = dynamic_cast<Obstacle*>(_opticFlowPoints->getChild(i));
