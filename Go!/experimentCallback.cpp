@@ -249,25 +249,24 @@ void ExperimentCallback::createOpticFlow()
 
 	for (i = 0; i < yv.size(); i++)
 	{
-		for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
-		{
-			if (!_expSetting->_depthDensity)
-			{
-				y = 0.0f;
-			}
-			else
-			{
-				unsigned int temp = randreseed();
-				y = randrange(_expSetting->_depthDensity);
-				y += drand();
-				y += yv.at(i);
-			}
-			ya.push_back(y);
-		}
-
 		unsigned versions(0);
 		do
 		{
+			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
+			{
+				if (!_expSetting->_depthDensity)
+				{
+					y = 0.0f;
+				}
+				else
+				{
+					unsigned int temp = randreseed();
+					y = randrange(_expSetting->_depthDensity);
+					y += drand();
+					y += yv.at(i);
+				}
+				ya.push_back(y);
+			}
 			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 			{
 				if (!_expSetting->_opticFlowHeight)

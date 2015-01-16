@@ -34,7 +34,7 @@ ResetMode:	1	#0 = center	1 = nearest
 [RoadSettings]
 RoadLanes:	100
 RoadLength:	1666.6	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-RoadPic:	../Resources/texture/road4096-2.png 16
+RoadPic:	#../Resources/texture/road4096-2.png 16
 TextureWidth:	2	#10.75
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
@@ -45,7 +45,7 @@ RoadTxt:	../Resources/roads/l.txt;
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	1000
-RoadVisible:	1	#1 = Visible	0 = Invisible
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	1
 WallPic:	../Resources/texture/wall1024-2.jpg
@@ -82,9 +82,9 @@ OBS-Visible:	0
 OBS-Pic:	../Resources/texture/red.jpg;
 
 OpticFlow:	1	#1 = Enable	0= Disable
-OpticFlow-Visible:	0	#only visible within 100 meters
-OpticFlow-FrameCounts:	0	
-OpticFlow-Versions:	0
+OpticFlow-Visible:	210	#only visible within 100 meters
+OpticFlow-FrameCounts:	7	
+OpticFlow-Versions:	2
 DepthDensity:	1	#only accept int!!!
 OpticFlow-Width:	400
 OpticFlow-Height:	10
