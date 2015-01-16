@@ -292,12 +292,15 @@ void ReadConfig::initializeAfterReadTrial()
 		_screens->_aspect = (double)(sum_width) / (double)(min_height);
 	}
 
-	_screens->_imgBg = osgDB::readImageFile(_screens->_background);
-	if (!_screens->_imgBg.valid())
+	if (osgDB::fileExists(_screens->_background))
 	{
-		osg::notify(osg::WARN) << "Unable to load Background texture file. Exiting." << std::endl;
-		_screens->_imgBg = NULL;
-	}
+		_screens->_imgBg = osgDB::readImageFile(_screens->_background);
+		if (!_screens->_imgBg.valid())
+		{
+			osg::notify(osg::WARN) << "Unable to load Background texture file. Exiting." << std::endl;
+			_screens->_imgBg = NULL;
+		}
+	}	
 
 	//Initialize Vehicle
 	const double halfW = _vehicle->_width * 0.5f;
@@ -333,17 +336,23 @@ void ReadConfig::initializeAfterReadTrial()
 		_roads->_nurbs.push_back(_nurbs.release());
 	}
 	//load the pic as texture
-	_roads->_imgRoad = osgDB::readImageFile(_roads->_texture);
-	_roads->_imgWall = osgDB::readImageFile(_roads->_textureWall);
-	if (!_roads->_imgRoad.valid())
+	if (osgDB::fileExists(_roads->_texture))
 	{
-		osg::notify(osg::WARN) << "Unable to load Road texture file. Exiting." << std::endl;
-		_roads->_imgRoad = NULL;
+		_roads->_imgRoad = osgDB::readImageFile(_roads->_texture);
+		if (!_roads->_imgRoad.valid())
+		{
+			osg::notify(osg::WARN) << "Unable to load Road texture file. Exiting." << std::endl;
+			_roads->_imgRoad = NULL;
+		}
 	}
-	if (!_roads->_imgWall.valid())
+	if (osgDB::fileExists(_roads->_textureWall))
 	{
-		osg::notify(osg::WARN) << "Unable to load Wall texture file. Exiting." << std::endl;
-		_roads->_imgWall = NULL;
+		_roads->_imgWall = osgDB::readImageFile(_roads->_textureWall);
+		if (!_roads->_imgWall.valid())
+		{
+			osg::notify(osg::WARN) << "Unable to load Wall texture file. Exiting." << std::endl;
+			_roads->_imgWall = NULL;
+		}
 	}
 
 	//Initialize Camera
@@ -358,11 +367,14 @@ void ReadConfig::initializeAfterReadTrial()
 	}
 
 	//Initialize Experiment
-	_experiment->_imgDynamic = osgDB::readImageFile(_experiment->_dynamicPic);
-	if (!_experiment->_imgDynamic.valid())
+	if (osgDB::fileExists(_experiment->_dynamicPic))
 	{
-//		osg::notify(osg::WARN) << "Unable to load Dynamic texture file. Exiting." << std::endl;
-		_experiment->_imgDynamic = NULL;
+		_experiment->_imgDynamic = osgDB::readImageFile(_experiment->_dynamicPic);
+		if (!_experiment->_imgDynamic.valid())
+		{
+			//		osg::notify(osg::WARN) << "Unable to load Dynamic texture file. Exiting." << std::endl;
+			_experiment->_imgDynamic = NULL;
+		}
 	}
 	//Initialize Obstacles
 	const unsigned &numObs = _experiment->_obstaclesTime->size();
