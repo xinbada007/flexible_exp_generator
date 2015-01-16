@@ -1109,6 +1109,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string DEPTHDENSITY("DEPTHDENSITY");
 		static const string OPTICFLOWWIDTH("OPTICFLOW-WIDTH");
 		static const string OPTICFLOWHEIGHT("OPTICFLOW-HEIGHT");
+		static const string OPTICFLOWDENSITY("OPTICFLOW-DENSITY");
 		static const string OPTICFLOWFRAMECOUNTS("OPTICFLOW-FRAMECOUNTS");
 		static const string OPTICFLOWVERSIONS("OPTICFLOW-VERSIONS");
 
@@ -1434,41 +1435,34 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + DEPTHDENSITY.size());
 				if (!config.empty())
 				{
-					_experiment->_depthDensity = stod(config);
+					_experiment->_depthDensity = stoi(config);
 				}
 				continue;
 			}
 			else if (title == OPTICFLOWWIDTH)
 			{
 				config.erase(config.begin(), config.begin() + OPTICFLOWWIDTH.size());
-				osg::ref_ptr<osg::DoubleArray> width = new osg::DoubleArray;
-				while (!config.empty())
+				if (!config.empty())
 				{
-					std::string::size_type sz;
-					width->push_back(stod(config, &sz));
-					config.erase(config.begin(), config.begin() + sz);
-				}
-				if (width->getNumElements() == 2)
-				{
-					_experiment->_opticFlowWidth = width->front();
-					_experiment->_opticFlowWDensity = int(width->back());
+					_experiment->_opticFlowWidth = stoi(config);
 				}
 				continue;
 			}
 			else if (title == OPTICFLOWHEIGHT)
 			{
 				config.erase(config.begin(), config.begin() + OPTICFLOWHEIGHT.size());
-				osg::ref_ptr<osg::DoubleArray> temp = new osg::DoubleArray;
-				while (!config.empty())
+				if (!config.empty())
 				{
-					std::string::size_type sz;
-					temp->push_back(stod(config, &sz));
-					config.erase(config.begin(), config.begin() + sz);
+					_experiment->_opticFlowHeight = stoi(config);
 				}
-				if (temp->getNumElements() == 2)
+				continue;
+			}
+			else if (title == OPTICFLOWDENSITY)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWDENSITY.size());
+				if (!config.empty())
 				{
-					_experiment->_opticFlowHeight = temp->front();
-					_experiment->_opticFlowHDensity = int(temp->back());
+					_experiment->_opticFlowDensity = stoi(config);
 				}
 				continue;
 			}

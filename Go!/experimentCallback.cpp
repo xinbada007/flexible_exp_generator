@@ -242,50 +242,74 @@ void ExperimentCallback::createOpticFlow()
 	{
 		yv.push_back(i*_expSetting->_depthDensity);
 		++i;
-	} while (yv.back() < _roadLength);
+	} while (yv.back() < _roadLength && _expSetting->_depthDensity);
 
 	double x, y, z;
 	std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>, unsigned> ver;
 	std::vector<osg::ref_ptr<osg::Vec3Array>> verOrder;
 	for (i = 0; i < yv.size(); i++)
 	{
-		y = yv.at(i);
+		if (!_expSetting->_depthDensity)
+		{
+			y = 0.0f;
+		}
+		else
+		{
+			randreseed();
+			y = randrange(_expSetting->_depthDensity);
+			y += drand();
+			y += yv.at(i);
+		}
 
 		unsigned versions(0);
 		do
 		{
-			for (int j = 0; j < _expSetting->_opticFlowWDensity; j++)
+			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 			{
-				randreseed();
-				const int which = randbiased(0.5f);
-				z = randrange(_expSetting->_opticFlowHeight);
-				if (which)
+				if (!_expSetting->_opticFlowHeight)
 				{
-					z += drand();
+					z = 0.0f;
 				}
 				else
 				{
-					z = -z;
-					z -= drand();
+					randreseed();
+					const int which = randbiased(0.5f);
+					z = randrange(_expSetting->_opticFlowHeight);
+					if (which)
+					{
+						z += drand();
+					}
+					else
+					{
+						z = -z;
+						z -= drand();
+					}
 				}
 				zv.push_back(z);
 			}
-			for (int j = 0; j < _expSetting->_opticFlowWDensity; j++)
+			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 			{
-				randreseed();
-				const int which = randbiased(0.5f);
-				x = randrange(_expSetting->_opticFlowWidth);
-				if (which)
+				if (!_expSetting->_opticFlowWidth)
 				{
-					x += drand();
+					x = 0.0f;
 				}
 				else
 				{
-					x = -x;
-					x -= drand();
+					randreseed();
+					const int which = randbiased(0.5f);
+					x = randrange(_expSetting->_opticFlowWidth);
+					if (which)
+					{
+						x += drand();
+					}
+					else
+					{
+						x = -x;
+						x -= drand();
+					}
 				}
-				z = zv.at(j);
 
+				z = zv.at(j);
 				points->push_back(osg::Vec3f(x, y, z));
 			}
 
@@ -332,7 +356,7 @@ void ExperimentCallback::showOpticFlow()
 		_road->addChild(_opticFlowPoints);
 	}
 
-	if (_opticFlowDrawn)
+	if (_opticFlowDrawn && _expSetting->_depthDensity && _expSetting->_opticFlowRange)
 	{
 		const double y = _car->getCarState()->_O.y();
 

@@ -83,9 +83,10 @@ OpticFlow:	1	#1 = Enable	0= Disable
 OpticFlow-Visible:	100	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
-DepthDensity:	0.5	#every x meters
-OpticFlow-Width:	250	500
-OpticFlow-Height:	30	500
+DepthDensity:	1	#only accept int!!!
+OpticFlow-Width:	200	500
+OpticFlow-Height:	10	500
+OpticFlow-Density:	200
 
 #OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
 OBS-Array-Num:	50;
