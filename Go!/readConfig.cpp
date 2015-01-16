@@ -619,6 +619,8 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string FOVY = "FOVY";
 		static const string DISTOR = "DISTORTION";
 		static const string FXAA = "MULTISAMPLES";
+		static const string ZNEAR = "ZNEAR";
+		static const string ZFAR = "ZFAR";
 		while (flag == SCREEN && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -638,6 +640,24 @@ void ReadConfig::readTrial(ifstream &in)
 			{
 				config.erase(config.begin(), config.begin() + ASPECT.size());
 				_screens->_aspect = stod(config);
+				continue;
+			}
+			else if (title == ZNEAR)
+			{
+				config.erase(config.begin(), config.begin() + ZNEAR.size());
+				if (!config.empty())
+				{
+					_screens->_zNear = stod(config);
+				}
+				continue;
+			}
+			else if (title == ZFAR)
+			{
+				config.erase(config.begin(), config.begin() + ZFAR.size());
+				if (!config.empty())
+				{
+					_screens->_zFar = stod(config);
+				}
 				continue;
 			}
 			else if (title == REALWORD)

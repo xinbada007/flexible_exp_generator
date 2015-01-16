@@ -277,6 +277,8 @@ typedef struct Screens:public osg::Referenced
 {
 	Screens()
 	{
+		_zNear = 0.0f;
+		_zFar = 0.0f;
 		_aspect = 0.0f;
 		_fovy = 30.0f;
 		_horDistance = .6f;
@@ -289,7 +291,9 @@ typedef struct Screens:public osg::Referenced
 		_realworld = new osg::DoubleArray;
 		_imgBg = NULL;
 	}
-
+	
+	double _zNear;
+	double _zFar;
 	double _aspect;
 	double _fovy;
 	double _horDistance;

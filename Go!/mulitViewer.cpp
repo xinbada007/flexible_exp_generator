@@ -58,7 +58,15 @@ osgViewer::View * MulitViewer::createPowerWall()
 	double fovy = (_screens->_realworld->empty()) ? _screens->_fovy : _screens->_realworld->front();
 
 	osg::ref_ptr<osgViewer::View> view = new osgViewer::View;
-	view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, .1f, 1000.0f);
+	if (_screens->_zNear && _screens->_zFar)
+	{
+		view->getCamera()->setComputeNearFarMode(osgUtil::CullVisitor::DO_NOT_COMPUTE_NEAR_FAR);
+		view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, _screens->_zNear, _screens->_zFar);
+	}
+	else
+	{
+		view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, .1f, 1000.0f);
+	}
 	view->getCamera()->setClearColor(osg::Vec4(135.0f / 255.0f, 206.f / 255.f, 250.f / 255.f, 1.0f));
 
 	osg::GraphicsContext::WindowingSystemInterface *wsi;

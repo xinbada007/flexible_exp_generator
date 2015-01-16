@@ -5,15 +5,14 @@
 #include "obstacle.h"
 
 #include <osg/Switch>
-#include <osgGA/EventVisitor>
-#include <osgDB/ReadFile>
-#include <osg/ShapeDrawable>
 #include <osg/MatrixTransform>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
 
 #include <osgAudio/SoundManager.h>
+
 #include <iterator>
+#include <fstream>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
@@ -236,7 +235,7 @@ void ExperimentCallback::createOpticFlow()
 
 	osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array;
 
-	std::vector<double> xv, yv, zv;
+	std::vector<float> ya, yv, zv;
 	int i(0);
 	do 
 	{
@@ -244,21 +243,26 @@ void ExperimentCallback::createOpticFlow()
 		++i;
 	} while (yv.back() < _roadLength && _expSetting->_depthDensity);
 
-	double x, y, z;
+	float x, y, z;
 	std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>, unsigned> ver;
 	std::vector<osg::ref_ptr<osg::Vec3Array>> verOrder;
+
 	for (i = 0; i < yv.size(); i++)
 	{
-		if (!_expSetting->_depthDensity)
+		for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 		{
-			y = 0.0f;
-		}
-		else
-		{
-			randreseed();
-			y = randrange(_expSetting->_depthDensity);
-			y += drand();
-			y += yv.at(i);
+			if (!_expSetting->_depthDensity)
+			{
+				y = 0.0f;
+			}
+			else
+			{
+				unsigned int temp = randreseed();
+				y = randrange(_expSetting->_depthDensity);
+				y += drand();
+				y += yv.at(i);
+			}
+			ya.push_back(y);
 		}
 
 		unsigned versions(0);
@@ -310,8 +314,11 @@ void ExperimentCallback::createOpticFlow()
 				}
 
 				z = zv.at(j);
+				y = ya.at(j);
 				points->push_back(osg::Vec3f(x, y, z));
 			}
+			zv.clear();
+			ya.clear();
 
 			if (!points->empty())
 			{
@@ -732,22 +739,25 @@ void ExperimentCallback::showObstacle()
 	}
 
 	//Visible
-	const obstacleList &obsList = _cVisitor->getObstacle();
-	obstacleList::const_iterator obs_begin = obsList.cbegin();
-	obstacleList::const_iterator obs_end = obsList.cend();
-	while (obs_begin != obs_end)
+	if (_expSetting->_obsVisible)
 	{
-		const osg::Vec3d &v = (*obs_begin)->getDistancetoCar();
-		const double YD = abs(v * UP_DIR);
-		if (YD <= _expSetting->_obsVisible)
+		const obstacleList &obsList = _cVisitor->getObstacle();
+		obstacleList::const_iterator obs_begin = obsList.cbegin();
+		obstacleList::const_iterator obs_end = obsList.cend();
+		while (obs_begin != obs_end)
 		{
-			(*obs_begin)->setAllChildrenOn();
+			const osg::Vec3d &v = (*obs_begin)->getDistancetoCar();
+			const double YD = abs(v * UP_DIR);
+			if (YD <= _expSetting->_obsVisible)
+			{
+				(*obs_begin)->setAllChildrenOn();
+			}
+			else
+			{
+				(*obs_begin)->setAllChildrenOff();
+			}
+			++obs_begin;
 		}
-		else
-		{
-			(*obs_begin)->setAllChildrenOff();
-		}
-		++obs_begin;
 	}
 
 	const int &ob_size = _expSetting->_obstaclesTime->size();
