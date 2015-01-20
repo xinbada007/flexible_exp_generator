@@ -33,7 +33,7 @@ ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
 RoadLanes:	100
-RoadLength:	1666.6	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+RoadLength:	100	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
 RoadPic:	#../Resources/texture/road4096-2.png 16
 TextureWidth:	2	#10.75
 
@@ -44,7 +44,7 @@ RoadTxt:	../Resources/roads/l.txt;
 
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
-Density:	1000
+Density:	100
 RoadVisible:	0	#1 = Visible	0 = Invisible
 
 WallHeight:	1
@@ -70,8 +70,8 @@ Deviation-Warn: DEVIATION TOO HIGH
 Deviation-Siren:	../Resources/sound/warnpullup.mp3
 
 ##==Obstacle Setting=====================
-Obstacle:	1 1	1 1	1 1 	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
-Obstacle-Range:	10 10	140 140	270 270 400 400 530 530	660 660
+Obstacle:	1 1	1 1	1 1 	#1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle-Range:	7 7	140 140	270 270 400 400 530 530	660 660
 Obstacle-Range:	790 790	920 920	1050 1050	1180 1180	1310 1310	1440 1440	1570 1570
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	-2 2	-30 -34	30 34	-2 2	-40 -44	-2 2

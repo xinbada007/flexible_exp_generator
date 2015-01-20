@@ -787,10 +787,13 @@ void ExperimentCallback::showObstacle()
 			{
 				const int offset = obsTi - _expSetting->_obstaclesTime->begin();
 				osg::DoubleArray::iterator requiedDistance = _expSetting->_obstacleRange->begin() + offset;
-				double distance(0.0f);
+				double reDistance(*requiedDistance);
 				osg::ref_ptr<osg::Vec3dArray> navi = (*curO)->getLoop()->getNavigationEdge();
 				osg::Vec3d mid = navi->front() - navi->back();
-				while (distance < *requiedDistance)
+				double alreadyDistance((carState->_O_Project - navi->back()).length());
+				double distance(mid.length() - alreadyDistance);
+				reDistance -= distance;
+				while (reDistance > 0)
 				{
 					curO++;
 					if (!(*curO))
@@ -799,12 +802,14 @@ void ExperimentCallback::showObstacle()
 					}
 					navi = (*curO)->getLoop()->getNavigationEdge();
 					mid = navi->front() - navi->back();
-					distance += mid.length();
+					reDistance -= mid.length();
 				}
 
 				osg::IntArray::iterator pos = _expSetting->_obstaclePos->begin() + offset;
 				osg::DoubleArray::iterator posOffset = _expSetting->_obsPosOffset->begin() + offset;
-				osg::Vec3d center = (navi->front() + navi->back()) * 0.5f;
+				const double distanceRatio = std::fmin((mid.length() + reDistance) / mid.length(), 1.0f);
+				osg::Vec3d center = navi->front()*distanceRatio + navi->back()*(1 - distanceRatio);
+				
 				center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
 				center = center * osg::Matrix::translate(X_AXIS * *posOffset);
 				std::vector<osg::ref_ptr<Obstacle>>::iterator posOBS = _collisionOBSList.begin() + offset;
