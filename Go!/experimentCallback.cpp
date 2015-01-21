@@ -415,7 +415,7 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned 
 		return;
 	}
 
-	if (obs->getFrameCounts() >= _expSetting->_opticFlowFrameCounts)
+	if (obs->getFrameCounts() > _expSetting->_opticFlowFrameCounts)
 	{
 		obs->setFrameCounts(0);
 		osg::Geode *geode = obs->getChild(0)->asGeode();
