@@ -173,6 +173,9 @@ int main(int argc, char** argv)
 		expcontroller.back()->setMultiViewer(mViewer.back().get());
 		root.back()->addEventCallback(expcontroller.back().get());
 
+		//Measure
+		root.back()->addChild(readConfig.back()->measuer());
+
 		root.back()->setDataVariance(osg::Object::DYNAMIC);
 
 		osgUtil::Optimizer optimizer;

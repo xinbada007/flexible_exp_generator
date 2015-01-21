@@ -33,7 +33,7 @@ ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
 RoadLanes:	100
-RoadLength:	100	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+RoadLength:	1667	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
 RoadPic:	#../Resources/texture/road4096-2.png 16
 TextureWidth:	2	#10.75
 
@@ -82,12 +82,12 @@ OBS-Visible:	0
 OBS-Pic:	../Resources/texture/red.jpg;
 
 OpticFlow:	1	#1 = Enable	0= Disable
-OpticFlow-Visible:	210	#only visible within 100 meters
-OpticFlow-FrameCounts:	7	
-OpticFlow-Versions:	10
+OpticFlow-Visible:	200	#only visible within 100 meters
+OpticFlow-FrameCounts:	0	
+OpticFlow-Versions:	200
 DepthDensity:	1	#only accept int!!!
-OpticFlow-Width:	400
-OpticFlow-Height:	10
+OpticFlow-Width:	800
+OpticFlow-Height:	200
 OpticFlow-Density:	500
 
 #OBS-Array:	../Resources/roads/exproads/50/150/33.txt;

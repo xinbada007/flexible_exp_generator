@@ -1950,7 +1950,7 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 osg::Geode* ReadConfig::measuer()
 {
 	osg::Vec3d vector;
-	vector.z() =  _camset->_offset->at(2)*1.2;
+	vector.z() =  _camset->_offset->at(2)*1.2 + 20.0f;
 	vector.x() = 0.0f;
 	vector.y() = 0.0f;
 	//vector.y() += 2.65f;
