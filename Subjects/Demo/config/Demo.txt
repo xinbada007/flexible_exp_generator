@@ -91,11 +91,11 @@ OpticFlow-Width:	800
 OpticFlow-Height:	200
 OpticFlow-Density:	500
 
-OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
-OBS-Array-Num:	50;
+OBS-Array:	../Resources/roads/lc.txt;
+OBS-Array-Num:	500;
 OBS-Array-Size:	0.5;
 OBS-Array-Pic:	../Resources/texture/tio.jpg
-OBS-Array-Mode:	1	# 0 = Animation	1 = Obs
+OBS-Array-Mode:	0	# 0 = Animation	1 = Obs
 
 ##==Text Setting=========================
 #Textime:	0

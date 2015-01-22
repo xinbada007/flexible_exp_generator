@@ -166,6 +166,7 @@ void ExperimentCallback::createObstacles()
 			osg::Vec3dArray::iterator cB = _centerList->begin();
 			osg::Vec3dArray::const_iterator cE = _centerList->end();
 			double time(0.0f);
+			double theta(0.0f);
 			while (cB != cE)
 			{
 				double delta(0.0f);
@@ -175,7 +176,16 @@ void ExperimentCallback::createObstacles()
 					delta /= _expSetting->_speed;
 				}
 				time += delta;
-				anmPath->insert(time, osg::AnimationPath::ControlPoint(*cB));
+				if (cB != _centerList->end())
+				{
+					const osg::Vec3d &dir = *(cB + 1) - *cB;
+					const double costheta = (dir * UP_DIR) / (dir.length()*UP_DIR.length());
+					const int sign = ((UP_DIR^dir).length() > 0) ? 1 : -1;
+					theta = acos(costheta) * sign;
+				}
+				osg::Quat rotationQ;
+				rotationQ.makeRotate(theta, Z_AXIS);
+				anmPath->insert(time, osg::AnimationPath::ControlPoint(*cB, rotationQ));
 				++cB;
 			}
 
