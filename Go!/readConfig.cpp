@@ -1667,7 +1667,7 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 		const unsigned &order = _nurbs->_order;
 		const unsigned &numKnots = _nurbs->_knotVector->getNumElements();
 		double *knots = (double*)malloc(numKnots*sizeof(double));
-		for (int i = 0; i < numKnots; i++)
+		for (unsigned i = 0; i < numKnots; i++)
 		{
 			knots[i] = _nurbs->_knotVector->at(i);
 		}
@@ -1676,7 +1676,7 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 		for (unsigned int i = 0; i < numPoints; i++)
 		{
 			int v = 0;
-			for (int j = (i*dim); j < (i + 1)*dim; j++)
+			for (unsigned j = (i*dim); j < (i + 1)*dim; j++)
 			{
 				ctrlpts[j] = _nurbs->_ctrlPoints->at(i)._v[v];
 				++v;
@@ -1817,7 +1817,7 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 	
 	const unsigned &numKnots = _nurbs->_knotVector->getNumElements();
 	double *knots = (double*)malloc(numKnots*sizeof(double));
-	for (int i = 0; i < numKnots; i++)
+	for (unsigned i = 0; i < numKnots; i++)
 	{
 		knots[i] = _nurbs->_knotVector->at(i);
 	}
@@ -1830,7 +1830,7 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 	for (unsigned int i = 0; i < numPoints;i++)
 	{
 		int v = 0;
-		for (int j = (i*dim); j < (i+1)*dim;j++)
+		for (unsigned j = (i*dim); j < (i+1)*dim;j++)
 		{
 			ctrlpts[j] = _nurbs->_ctrlPoints->at(i)._v[v];
 			ctrlptsL[j] = _nurbs->_ctrl_left->at(i)._v[v];
