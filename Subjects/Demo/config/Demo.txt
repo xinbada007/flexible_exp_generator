@@ -34,7 +34,7 @@ ResetMode:	1	#0 = center	1 = nearest
 [RoadSettings]
 RoadLanes:	100
 RoadLength:	1667	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-RoadPic:	#../Resources/texture/road4096-2.png 16
+RoadPic:	../Resources/texture/road4096-2.png 16
 TextureWidth:	2	#10.75
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
@@ -45,7 +45,7 @@ RoadTxt:	../Resources/roads/l.txt;
 Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
 
 Density:	100
-RoadVisible:	0	#1 = Visible	0 = Invisible
+RoadVisible:	1	#1 = Visible	0 = Invisible
 
 WallHeight:	1
 WallPic:	../Resources/texture/wall1024-2.jpg
@@ -79,18 +79,19 @@ OBS-Position-Offset:	40 44	-2 2	-24 -28	-2 2	24 28	-10 -14	24 28	#Negtive = L	Po
 OBS-Size:	0.5	2.0	1.0	#Length X Width X Height
 OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Visible:	0
+OBS-Collision:	1 0	# 0 =disapper	1 = collision
 OBS-Pic:	../Resources/texture/red.jpg;
 
 OpticFlow:	1	#1 = Enable	0= Disable
 OpticFlow-Visible:	200	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
-OpticFlow-Versions:	200
+OpticFlow-Versions:	0
 DepthDensity:	1	#only accept int!!!
 OpticFlow-Width:	800
 OpticFlow-Height:	200
 OpticFlow-Density:	500
 
-#OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
+OBS-Array:	../Resources/roads/exproads/50/150/33.txt;
 OBS-Array-Num:	50;
 OBS-Array-Size:	0.5;
 OBS-Array-Pic:	../Resources/texture/tio.jpg

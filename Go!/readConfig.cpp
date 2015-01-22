@@ -378,23 +378,93 @@ void ReadConfig::initializeAfterReadTrial()
 	}
 	//Initialize Obstacles
 	const unsigned &numObs = _experiment->_obstaclesTime->size();
-	const double defaultDistance = 200.0f;
-	const int defaultPos = 0;
-	const double defaultOffset = 0.0f;
 	if (_experiment->_obstacleRange->size() != numObs)
 	{
-		_experiment->_obstacleRange->resize(numObs,defaultDistance);
-		osg::notify(osg::WARN) << "Obstacles Range Resized" << std::endl;
+		const unsigned numRange = _experiment->_obstacleRange->getNumElements();
+		_experiment->_obstacleRange->resize(numObs);
+		if (numObs > numRange)
+		{
+			osg::DoubleArray::const_iterator assign_start = _experiment->_obstacleRange->begin();
+			osg::DoubleArray::const_iterator assign_end = assign_start + numRange;
+			osg::DoubleArray::iterator i = _experiment->_obstacleRange->begin() + numRange;
+			while (i != _experiment->_obstacleRange->end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = _experiment->_obstacleRange->begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+		osg::notify(osg::NOTICE) << "Obstacles Range Resized" << std::endl;
 	}
 	if (_experiment->_obstaclePos->size() != numObs)
 	{
-		_experiment->_obstaclePos->resize(numObs, defaultPos);
-		osg::notify(osg::WARN) << "Obstacles Position Resized" << std::endl;
+		const unsigned numPos = _experiment->_obstaclePos->getNumElements();
+		_experiment->_obstaclePos->resize(numObs);
+		if (numObs > numPos)
+		{
+			osg::IntArray::const_iterator assign_start = _experiment->_obstaclePos->begin();
+			osg::IntArray::const_iterator assign_end = assign_start + numPos;
+			osg::IntArray::iterator i = _experiment->_obstaclePos->begin() + numPos;
+			while (i != _experiment->_obstaclePos->end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = _experiment->_obstaclePos->begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+		osg::notify(osg::NOTICE) << "Obstacles Position Resized" << std::endl;
 	}
 	if (_experiment->_obsPosOffset->size() != numObs)
 	{
-		_experiment->_obsPosOffset->resize(numObs, defaultOffset);
-		osg::notify(osg::WARN) << "Obstacles PosOffset Resized" << std::endl;
+		const unsigned numOffset = _experiment->_obsPosOffset->getNumElements();
+		_experiment->_obsPosOffset->resize(numObs);
+		if (numObs > numOffset)
+		{
+			osg::DoubleArray::const_iterator assign_start = _experiment->_obsPosOffset->begin();
+			osg::DoubleArray::const_iterator assign_end = assign_start + numOffset;
+			osg::DoubleArray::iterator i = _experiment->_obsPosOffset->begin() + numOffset;
+			while (i != _experiment->_obsPosOffset->end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = _experiment->_obsPosOffset->begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+		osg::notify(osg::NOTICE) << "Obstacles PosOffset Resized" << std::endl;
+	}
+	if (_experiment->_obsCollision->getNumElements() != numObs)
+	{
+		const unsigned numCollision = _experiment->_obsCollision->getNumElements();
+		_experiment->_obsCollision->resize(numObs);
+		if (numObs > numCollision)
+		{
+			osg::UIntArray::const_iterator assign_start = _experiment->_obsCollision->begin();
+			osg::UIntArray::const_iterator assign_end = assign_start + numCollision;
+			osg::UIntArray::iterator i = _experiment->_obsCollision->begin() + numCollision;
+			while (i != _experiment->_obsCollision->end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = _experiment->_obsCollision->begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+		osg::notify(osg::NOTICE) << "Obstacles Collision Detection Resized" << std::endl;
 	}
 	_experiment->_imgOBS = osgDB::readImageFile(_experiment->_obsPic);
 	_experiment->_imgObsArray = osgDB::readImageFile(_experiment->_obsArrayPic);
@@ -1127,6 +1197,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSSHAPE("OBS-SHAPE");
 		static const string OBSVISIBLE("OBS-VISIBLE");
 		static const string OBSPIC("OBS-PIC");
+		static const string OBSCOLLISION("OBS-COLLISION");
 
 		static const string OBSARRAY("OBS-ARRAY");
 		static const string OBSARRAYSIZE("OBS-ARRAY-SIZE");
@@ -1284,6 +1355,17 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					std::string::size_type sz;
 					_experiment->_obsPosOffset->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == OBSCOLLISION)
+			{
+				config.erase(config.begin(), config.begin() + OBSCOLLISION.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obsCollision->push_back(stoi(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;

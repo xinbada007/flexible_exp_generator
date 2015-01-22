@@ -97,7 +97,7 @@ ExperimentCallback::~ExperimentCallback()
 
 void ExperimentCallback::createObstacles()
 {
-	if (_expSetting->_nurbs.empty() && _expSetting->_obstaclePos->empty())
+	if (_expSetting->_nurbs.empty() && _expSetting->_obstaclesTime->empty())
 	{
 		return;
 	}
@@ -110,15 +110,15 @@ void ExperimentCallback::createObstacles()
 	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
-	if (!_expSetting->_obstaclePos->empty())
+	if (!_expSetting->_obstaclesTime->empty())
 	{
-		osg::IntArray::const_iterator pos = _expSetting->_obstaclePos->begin();
-		osg::IntArray::const_iterator posEND = _expSetting->_obstaclePos->end();
+		osg::UIntArray::const_iterator pos = _expSetting->_obstaclesTime->begin();
+		osg::UIntArray::const_iterator posEND = _expSetting->_obstaclesTime->end();
 		while (pos != posEND)
 		{
 			const osg::Vec3d &center = H_POINT;
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
-			obs->setSolidType(Solid::solidType::OBSBODY);
+			obs->setSolidType(Solid::solidType::SD_UNDEFINED);
 			obs->setTag(ROADTAG::RT_UNSPECIFIED);
 			obs->setImage(_expSetting->_imgOBS);
 			switch (_expSetting->_obsShape)
@@ -547,28 +547,39 @@ void ExperimentCallback::dealCollision()
 	const quadList &wallList = carstate->_collisionQuad;
 	if (!obsList.size() && !wallList.size())
 	{
+		carstate->_collide = false;
 		return;
 	}
+	if (wallList.size())
+	{
+		carstate->_collide = true;
+	}
 
-	carstate->_collide = true;
 	obstacleList::const_iterator i = obsList.cbegin();
 	obstacleList::const_iterator END = obsList.cend();
 
 	while (i != END)
 	{
-		if ((*i)->getSolidType() == Solid::solidType::COINBODY)
+		const unsigned &obstype = (*i)->getSolidType();
+		switch (obstype)
 		{
+		case Solid::solidType::COINBODY:
 			if (_coin)
 			{
-				_coin->setSample(_coinSample.get());
-				_coin->setGain(2.00);
+				_coin->setSample(_coinSample);
+				_coin->setGain(2.00f);
 				_coin->setPlay(true);
 			}
-			carstate->_collide = false;
 			++carstate->_pointsEarned;
 			removeNodefromRoad(*i);
 			_cVisitor->setMode(OBS);
 			_road->accept(*_cVisitor);
+			break;
+		case Solid::solidType::OBSBODY:
+			carstate->_collide = true;
+			break;
+		default:
+			break;
 		}
 		++i;
 	}
@@ -817,13 +828,30 @@ void ExperimentCallback::showObstacle()
 				const osg::Vec3d &OC = H_POINT;
 				osg::Matrixd m = osg::Matrix::translate(center - OC);
 				obs->multiplyMatrix(m);
-				obs->setSolidType(Solid::solidType::OBSBODY);
-				obs->setTag(ROADTAG::OBS);
+
+				osg::UIntArray::iterator posCollision = _expSetting->_obsCollision->begin() + offset;
+				const unsigned flagCollision = *posCollision;
+				switch (flagCollision)
+				{
+				case 0:
+					obs->setSolidType(Solid::solidType::COINBODY);
+					obs->setTag(ROADTAG::OBS);
+					break;
+				case 1:
+					obs->setSolidType(Solid::solidType::OBSBODY);
+					obs->setTag(ROADTAG::OBS);
+					break;
+				default:
+					obs->setSolidType(Solid::solidType::OBSBODY);
+					obs->setTag(ROADTAG::OBS);
+					break;
+				}
 
 				_expSetting->_obstaclesTime->erase(obsTi);
 				_expSetting->_obstacleRange->erase(requiedDistance);
 				_expSetting->_obstaclePos->erase(pos);
 				_expSetting->_obsPosOffset->erase(posOffset);
+				_expSetting->_obsCollision->erase(posCollision);
 				_collisionOBSList.erase(posOBS);
 				hit = true;
 

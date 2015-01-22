@@ -412,7 +412,6 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				const double MAXSPEED(1.0f/3.6f);
 				int sign = (_carState->_speed > 0) ? -1 : 1;
 				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
-				_carState->_collide = false;
 			}
 			else
 			{
