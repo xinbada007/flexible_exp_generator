@@ -472,15 +472,16 @@ void ReadConfig::initializeAfterReadTrial()
 	{
 		_experiment->_imgOBS = NULL;
 	}
+	_alignPoint = osg::Vec3d(0.0f, 0.0f, 0.0f);
 	i = _experiment->_obsArray.cbegin();
 	while (i != _experiment->_obsArray.cend())
 	{
 		_filename = *i++;
 		_nurbs = new Nurbs;
-		readNurbs(_experiment->_obsLength);
+		readNurbs(_experiment->_obsArrayLength);
 		Nurbs *prve = (_experiment->_nurbs.empty() ? NULL : _experiment->_nurbs.back());
-		alignCtrlPoints(prve,_experiment->_alignment);
-		updateNurbs(new NurbsCurve, _experiment->_numObsinArray, 0);
+		alignCtrlPoints(prve,_experiment->_obsArrayOFFSET);
+		_experiment->_obsArrayNurbsMethod == 1 ? updateNurbs(_experiment->_numObsinArray, 0.0f) : updateNurbs(new NurbsCurve, _experiment->_numObsinArray, 0.0f);
 		_experiment->_nurbs.push_back(_nurbs.release());
 	}
 	_experiment->_speed = _vehicle->_speed;
@@ -1200,12 +1201,15 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSCOLLISION("OBS-COLLISION");
 
 		static const string OBSARRAY("OBS-ARRAY");
-		static const string OBSARRAYSIZE("OBS-ARRAY-SIZE");
-		static const string OBSARRAYPIC("OBS-ARRAY-PIC");
+		static const string OBSARRAYALIGNMENT("OBS-ARRAY-ALIGN");
+		static const string OBSARRAYLENGTH("OBS-ARRAY-LENGTH");
+		static const string OBSARRAYOFFSET("OBS-ARRAY-OFFSET");
 		static const string OBSARRAYNUM("OBS-ARRAY-NUM");
+		static const string OBSARRAYOBSSIZE("OBS-ARRAY-OBSSIZE");
+		static const string OBSARRAYPIC("OBS-ARRAY-PIC");
 		static const string OBSARRAYMODE("OBS-ARRAY-MODE");
-		static const string OBSLENGTH("OBS-LENGTH");
-		static const string OBSALIGNMENT("OBS-ALIGNMENT");
+		static const string OBSANIMELOOP("OBS-ANIME-LOOP");
+		static const string OBSNURBSMETHOD("OBS-ARRAY-NURBSMETHOD");
 
 		static const string OPTICFLOW("OPTICFLOW");
 		static const string OPTICFLOWRANGE("OPTICFLOW-VISIBLE");
@@ -1451,12 +1455,21 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-			else if (title == OBSARRAYSIZE)
+			else if (title == OBSARRAYOBSSIZE)
 			{
-				config.erase(config.begin(), config.begin() + OBSARRAYSIZE.size());
-				if (!config.empty())
+				config.erase(config.begin(), config.begin() + OBSARRAYOBSSIZE.size());
+				std::vector<double> temp;
+				while (!config.empty())
 				{
-					_experiment->_obsArraySize = stod(config);
+					std::string::size_type sz;
+					temp.push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				if (temp.size() >= 3)
+				{
+					_experiment->_obsArraySize.x() = temp.at(0);
+					_experiment->_obsArraySize.y() = temp.at(1);
+					_experiment->_obsArraySize.z() = temp.at(2);
 				}
 				continue;
 			}
@@ -1489,21 +1502,57 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-			else if (title == OBSLENGTH)
+			else if (title == OBSNURBSMETHOD)
 			{
-				config.erase(config.begin(), config.begin() + OBSLENGTH.size());
+				config.erase(config.begin(), config.begin() + OBSNURBSMETHOD.size());
 				if (!config.empty())
 				{
-					_experiment->_obsLength = stod(config);
+					_experiment->_obsArrayNurbsMethod = stoi(config);
 				}
 				continue;
 			}
-			else if (title == OBSALIGNMENT)
+			else if (title == OBSANIMELOOP)
 			{
-				config.erase(config.begin(), config.begin() + OBSALIGNMENT.size());
+				config.erase(config.begin(), config.begin() + OBSANIMELOOP.size());
 				if (!config.empty())
 				{
-					_experiment->_alignment = stod(config);
+					_experiment->_animationLoop = stoi(config) % 3;
+				}
+				continue;
+			}
+			else if (title == OBSARRAYOFFSET)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYOFFSET.size());
+				if (!config.empty())
+				{
+					_experiment->_obsArrayOFFSET = stod(config);
+				}
+				continue;
+			}
+			else if (title == OBSARRAYALIGNMENT)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYALIGNMENT.size());
+				std::vector<double> temp;
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					temp.push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				if (temp.size() >= osg::Vec3d::num_components)
+				{
+					_experiment->_obsArrayAlign.x() = temp.at(0);
+					_experiment->_obsArrayAlign.y() = temp.at(1);
+					_experiment->_obsArrayAlign.z() = temp.at(2);
+				}
+				continue;
+			}
+			else if (title == OBSARRAYLENGTH)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYLENGTH.size());
+				if (!config.empty())
+				{
+					_experiment->_obsArrayLength = stod(config);
 				}
 				continue;
 			}
@@ -1884,19 +1933,10 @@ void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &den
 
 void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 {
-	if (!_roads)
-	{
-		return;
-	}
-
-	const double halfW = width * 0.5f;
-	_nurbs->_ctrl_left = project_Line(_nurbs->_ctrlPoints, halfW);
-	_nurbs->_ctrl_right = project_Line(_nurbs->_ctrlPoints, -halfW);
-
 	const unsigned &numPoints = _nurbs->_ctrlPoints->getNumElements();
 	const unsigned &order = _nurbs->_order;
 	const unsigned degree = order - 1;
-	
+
 	const unsigned &numKnots = _nurbs->_knotVector->getNumElements();
 	double *knots = (double*)malloc(numKnots*sizeof(double));
 	for (unsigned i = 0; i < numKnots; i++)
@@ -1904,35 +1944,29 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 		knots[i] = _nurbs->_knotVector->at(i);
 	}
 
-	const unsigned dim = _nurbs->_ctrlPoints->front().num_components;
+	const unsigned &dim = _nurbs->_ctrlPoints->front().num_components;
 	double *ctrlpts = (double*)malloc(numPoints*dim*sizeof(double));
-	double *ctrlptsL = (double*)malloc(numPoints*dim*sizeof(double));
-	double *ctrlptsR = (double*)malloc(numPoints*dim*sizeof(double));
 
-	for (unsigned int i = 0; i < numPoints;i++)
+	for (unsigned i = 0; i < numPoints; i++)
 	{
 		int v = 0;
-		for (unsigned j = (i*dim); j < (i+1)*dim;j++)
+		for (unsigned j = (i*dim); j < (i + 1)*dim; j++)
 		{
 			ctrlpts[j] = _nurbs->_ctrlPoints->at(i)._v[v];
-			ctrlptsL[j] = _nurbs->_ctrl_left->at(i)._v[v];
-			ctrlptsR[j] = _nurbs->_ctrl_right->at(i)._v[v];
 			++v;
 		}
 	}
 
 	const unsigned kind = 1;
 	SISLCurve *sc = newCurve(numPoints, order, knots, ctrlpts, kind, dim, 1);
-	SISLCurve *scL = newCurve(numPoints, order, knots, ctrlptsL, kind, dim, 1);
-	SISLCurve *scR = newCurve(numPoints, order, knots, ctrlptsR, kind, dim, 1);
 
-	const int der(0);
+	const int der = 0;
 	double *derive = (double*)calloc((der + 1)*dim, sizeof(double));
 	double *curvature = (double*)calloc(dim, sizeof(double));
 	double radius;
-	int jstat, jstatR, jstatL;
+	int jstat;
 	const double denS = ((double)(density) / (double)(numKnots - order - degree)) + 0.5f;
-	for (unsigned int i = degree; i < numKnots - order;i++)
+	for (unsigned i = degree; i < numKnots - order; i++)
 	{
 		int leftknot = i;
 		const double left = knots[i];
@@ -1948,20 +1982,7 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 				_nurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
 				_nurbs->_radius->push_back(radius);
 			}
-			s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
-			if (!jstatR)
-			{
-				_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-				_nurbs->_radiusL->push_back(radius);
-			}
-			s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
-			if (!jstatL)
-			{
-				_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-				_nurbs->_radiusR->push_back(radius);
-			}
-
-			if (jstat || jstatR || jstatL)
+			else
 			{
 				osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
 				return;
@@ -1976,55 +1997,129 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 		_nurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
 		_nurbs->_radius->push_back(radius);
 	}
-	s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
-	if (!jstatR)
+	else
 	{
-		_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-		_nurbs->_radiusL->push_back(radius);
-	}
-	s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
-	if (!jstatL)
-	{
-		_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-		_nurbs->_radiusR->push_back(radius);
+		osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
+		return;
 	}
 
-	//Adjust "Left" and "Right"
-	osg::Vec3d left = *_nurbs->_ctrl_left->begin() - *_nurbs->_ctrl_right->begin();
-	osg::Vec3d right = *(_nurbs->_ctrl_right->begin() + 1) - *_nurbs->_ctrl_right->begin();
-	osg::Vec3d dir = right^left;
-	if (dir.z() < 0)
+
+	if (width)
 	{
-		osg::ref_ptr<osg::Vec3dArray> tmp = _nurbs->_ctrl_left;
-		_nurbs->_ctrl_left = _nurbs->_ctrl_right;
-		_nurbs->_ctrl_right = tmp;
+		const double halfW = width * 0.5f;
+		_nurbs->_ctrl_left = project_Line(_nurbs->_ctrlPoints, halfW);
+		_nurbs->_ctrl_right = project_Line(_nurbs->_ctrlPoints, -halfW);
 
-		tmp = _nurbs->_path_left;
-		_nurbs->_path_left = _nurbs->_path_right;
-		_nurbs->_path_right = tmp;
+		double *ctrlptsL = (double*)malloc(numPoints*dim*sizeof(double));
+		double *ctrlptsR = (double*)malloc(numPoints*dim*sizeof(double));
 
-		osg::ref_ptr<osg::DoubleArray> tmpR = _nurbs->_radiusL;
-		_nurbs->_radiusL = _nurbs->_radiusR;
-		_nurbs->_radiusR = tmpR;
+		for (unsigned int i = 0; i < numPoints; i++)
+		{
+			int v = 0;
+			for (unsigned j = (i*dim); j < (i + 1)*dim; j++)
+			{
+				ctrlptsL[j] = _nurbs->_ctrl_left->at(i)._v[v];
+				ctrlptsR[j] = _nurbs->_ctrl_right->at(i)._v[v];
+				++v;
+			}
+		}
+
+		SISLCurve *scL = newCurve(numPoints, order, knots, ctrlptsL, kind, dim, 1);
+		SISLCurve *scR = newCurve(numPoints, order, knots, ctrlptsR, kind, dim, 1);
+
+		double *derive = (double*)calloc((der + 1)*dim, sizeof(double));
+		double *curvature = (double*)calloc(dim, sizeof(double));
+		double radius;
+		int jstatR, jstatL;
+		const double denS = ((double)(density) / (double)(numKnots - order - degree)) + 0.5f;
+		for (unsigned int i = degree; i < numKnots - order; i++)
+		{
+			int leftknot = i;
+			const double left = knots[i];
+			const double right = knots[i + 1];
+			const double step = (right - left) / denS;
+			for (int j = 0; j < denS; j++)
+			{
+				double k = left + step*j;
+				if (k > right) k = right;
+				s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
+				if (!jstatR)
+				{
+					_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+					_nurbs->_radiusL->push_back(radius);
+				}
+				s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
+				if (!jstatL)
+				{
+					_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+					_nurbs->_radiusR->push_back(radius);
+				}
+				if (jstatR || jstatL)
+				{
+					osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
+					return;
+				}
+			}
+		}
+		int leftknot = numKnots - order - 1;
+		int k = knots[leftknot + 1];
+		s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
+		if (!jstatR)
+		{
+			_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			_nurbs->_radiusL->push_back(radius);
+		}
+		s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
+		if (!jstatL)
+		{
+			_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			_nurbs->_radiusR->push_back(radius);
+		}
+		if (jstatR || jstatL)
+		{
+			osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
+			return;
+		}
+
+		//Adjust "Left" and "Right"
+		osg::Vec3d left = *_nurbs->_ctrl_left->begin() - *_nurbs->_ctrl_right->begin();
+		osg::Vec3d right = *(_nurbs->_ctrl_right->begin() + 1) - *_nurbs->_ctrl_right->begin();
+		osg::Vec3d dir = right^left;
+		if (dir.z() < 0)
+		{
+			osg::ref_ptr<osg::Vec3dArray> tmp = _nurbs->_ctrl_left;
+			_nurbs->_ctrl_left = _nurbs->_ctrl_right;
+			_nurbs->_ctrl_right = tmp;
+
+			tmp = _nurbs->_path_left;
+			_nurbs->_path_left = _nurbs->_path_right;
+			_nurbs->_path_right = tmp;
+
+			osg::ref_ptr<osg::DoubleArray> tmpR = _nurbs->_radiusL;
+			_nurbs->_radiusL = _nurbs->_radiusR;
+			_nurbs->_radiusR = tmpR;
+		}
+
+		freeCurve(scL);
+		freeCurve(scR);
+		delete ctrlptsL;
+		delete ctrlptsR;
+
+		scL = NULL;
+		scR = NULL;
+		ctrlptsL = NULL;
+		ctrlptsR = NULL;
 	}
 
 	freeCurve(sc);
-	freeCurve(scL);
-	freeCurve(scR);
 	delete knots;
 	delete ctrlpts;
-	delete ctrlptsL;
-	delete ctrlptsR;
 	delete derive;
 	delete curvature;
 
 	sc = NULL;
-	scL = NULL;
-	scR = NULL;
 	knots = NULL;
 	ctrlpts = NULL;
-	ctrlptsL = NULL;
-	ctrlptsR = NULL;
 	derive = NULL;
 	curvature = NULL;
 }

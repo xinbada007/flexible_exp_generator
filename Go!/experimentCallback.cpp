@@ -162,7 +162,7 @@ void ExperimentCallback::createObstacles()
 		if (_expSetting->_animationMode)
 		{
 			osg::ref_ptr<osg::AnimationPath> anmPath = new osg::AnimationPath;
-			anmPath->setLoopMode(osg::AnimationPath::NO_LOOPING);
+			anmPath->setLoopMode((osg::AnimationPath::LoopMode)_expSetting->_animationLoop);
 			osg::Vec3dArray::iterator cB = _centerList->begin();
 			osg::Vec3dArray::const_iterator cE = _centerList->end();
 			double time(0.0f);
@@ -176,11 +176,11 @@ void ExperimentCallback::createObstacles()
 					delta /= _expSetting->_speed;
 				}
 				time += delta;
-				if (cB != _centerList->end())
+				if (cB + 1 != cE)
 				{
 					const osg::Vec3d &dir = *(cB + 1) - *cB;
 					const double costheta = (dir * UP_DIR) / (dir.length()*UP_DIR.length());
-					const int sign = ((UP_DIR^dir).length() > 0) ? 1 : -1;
+					const int sign = ((UP_DIR^dir).z() > 0) ? 1 : -1;
 					theta = acos(costheta) * sign;
 				}
 				osg::Quat rotationQ;
@@ -195,12 +195,13 @@ void ExperimentCallback::createObstacles()
 			}
 
 			_anmCallback->setAnimationPath(anmPath.release());
+			_anmCallback->setPause(true);
 
 			osg::ref_ptr<Obstacle> obs = new Obstacle;
 			obs->setSolidType(Solid::solidType::SD_ANIMATION);
 			obs->setTag(ROADTAG::RT_UNSPECIFIED);
 			obs->setImage(_expSetting->_imgObsArray);
-			obs->createBox(osg::Vec3d(0.0f, 0.0f, 0.0f), _expSetting->_obsSize*_expSetting->_obsArraySize);
+			obs->createBox(_expSetting->_obsArrayAlign, _expSetting->_obsArraySize);
 			_obstacleList.push_back(obs);
 		}
 
@@ -224,7 +225,7 @@ void ExperimentCallback::createObstacles()
 					obs->setSolidType(Solid::solidType::COINBODY);
 					obs->setTag(ROADTAG::OBS);
 					obs->setImage(_expSetting->_imgObsArray);
-					obs->createBox(*centerBegin, _expSetting->_obsSize*_expSetting->_obsArraySize);
+					obs->createBox(*centerBegin, _expSetting->_obsArraySize);
 				}
 
 				_obstacleList.push_back(obs);
@@ -501,18 +502,26 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			if (!(*i)) notFound++;
 			i++;
 		}
-		if (notFound == carState->_currentQuad.size() && _car->getVehicle()->_carReset == 1)
+		if (notFound == carState->_currentQuad.size() && _car->getVehicle()->_carReset == Vehicle::VEHICLE_RESET_TYPE::AUTO)
 		{
 			carState->_reset = true;
 		}
-		else
-		{
-			carState->_reset = false;
-		}
 
-		osg::ref_ptr<osg::AnimationPath> anmPath = NULL;
 		switch (ea->getEventType())
 		{
+		case::osgGA::GUIEventAdapter::KEYDOWN:
+			switch (ea->getKey())
+			{
+			case::osgGA::GUIEventAdapter::KEY_I:
+				if (_anmCallback)
+				{
+					_anmCallback->setPause(!_anmCallback->getPause());
+				}
+				break;
+			default:
+				break;
+			}
+			break;
 		case::osgGA::GUIEventAdapter::FRAME:
 			_expTime = carState->_timeReference;
 			deviationCheck();
@@ -521,10 +530,6 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			showObstacle();
 			showOpticFlow();
 			dealCollision();
-			if (_anmCallback)
-			{
-				_anmCallback->setPause(!carState->getRSpeed() ? true : false);
-			}
 			break;
 		default:
 			break;

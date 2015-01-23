@@ -34,17 +34,18 @@ typedef struct Experiment :public osg::Referenced
 		_obsPosOffset = new osg::DoubleArray;
 		_obsCollision = new osg::UIntArray;
 		_obsSize.set(1.0f, 1.0f, 1.0f);
-		_obsArraySize = 0.25f;
 		_obsShape = 1;
 		_obsVisible = 300.0f;
 		_imgOBS = NULL;
 		_imgObsArray = NULL;
 		_imgAnisotropy = 1.0f;
 		_numObsinArray = 100;
+		_obsArrayOFFSET = 0.0f;
 		_animationMode = false;
+		_animationLoop = NO_LOOPING;
+		_obsArrayNurbsMethod = 0;
 		_GLPOINTSMODE = false;
-		_obsLength = 50.0f;
-		_alignment = 0.0f;
+		_obsArrayLength = 0.0f;
 		_speed = 60.0f / 3.6f;
 
 		_opticFlow = false;
@@ -80,7 +81,7 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;
 	osg::ref_ptr<osg::UIntArray> _obsCollision;
 	osg::Vec3d _obsSize;
-	double _obsArraySize;
+	osg::Vec3d _obsArraySize;
 	std::string _obsArrayPic;
 	osg::ref_ptr<osg::Image> _imgObsArray;
 	int _obsShape;
@@ -88,13 +89,23 @@ typedef struct Experiment :public osg::Referenced
 	std::string _obsPic;
 	osg::ref_ptr<osg::Image> _imgOBS;
 	double _imgAnisotropy;
+
 	stringList _obsArray;
+	osg::Vec3d _obsArrayAlign;
+	double _obsArrayOFFSET;
 	unsigned _numObsinArray;
 	nurbsList _nurbs;
 	bool _animationMode;
+	int _animationLoop;
+	unsigned _obsArrayNurbsMethod;
+	enum ANIMELOOP
+	{
+		SWING,
+		LOOP,
+		NO_LOOPING
+	};
 	bool _GLPOINTSMODE;
-	double _obsLength;
-	double _alignment;
+	double _obsArrayLength;
 	double _speed;
 
 	bool _opticFlow;
@@ -236,7 +247,7 @@ typedef struct Vehicle:public osg::Referenced
 
 		_visibility = true;
 
-		_carReset = 0;
+		_carReset = DISABLE;
 		_resetMode = 0;
 
 		_V = new osg::Vec3dArray;
@@ -269,6 +280,11 @@ typedef struct Vehicle:public osg::Referenced
 
 	int _carReset;
 	int _resetMode;
+
+	enum VEHICLE_RESET_TYPE
+	{
+		DISABLE,AUTO,MANUAL
+	};
 
 protected:
 	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };

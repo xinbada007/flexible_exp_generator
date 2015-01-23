@@ -208,8 +208,12 @@ void CarEvent::makeResetMatrix()
 	{
 		MO = _carState->_lastCarArray->back();
 		const osg::Vec3d MD = (_carState->_O_Project - _carState->_lastCarArray->back());
-		const double ratio = _vehicle->_width / MD.length();
-		MO = MO * osg::Matrix::translate(MD*ratio);
+		const double &length = MD.length();
+		if (length)
+		{
+			const double ratio = _vehicle->_width / MD.length();
+			MO = MO * osg::Matrix::translate(MD*ratio);
+		}
 	}
 
 	_reset *= osg::Matrix::translate(MO - _carState->_O);
@@ -314,7 +318,7 @@ bool CarEvent::Joystick()
 		}
 		else if (_buttons->at(6) == 1)
 		{
-			if (_carState->_O != _vehicle->_O && _vehicle->_carReset == 2)
+			if (_carState->_O != _vehicle->_O && _vehicle->_carReset == Vehicle::VEHICLE_RESET_TYPE::MANUAL)
 			{
 				_carState->_reset = true;
 			}
@@ -372,7 +376,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 			else if (key == osgGA::GUIEventAdapter::KEY_R)
 			{
-				if (_vehicle->_carReset == 2)
+				if (_vehicle->_carReset == Vehicle::VEHICLE_RESET_TYPE::MANUAL)
 				{
 					_carState->_reset = true;
 				}
