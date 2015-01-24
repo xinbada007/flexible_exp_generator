@@ -9,8 +9,8 @@ Hdistance:	0.6	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		30	#Disable when RealWorld is enabled
-zNear:	1
+fovy:		45	#Disable when RealWorld is enabled
+zNear:	0.1
 zFar:	200
 RealWorld:	0:	42.175 , 65.217 , 42.391
 background:	../Resources/texture/A0005332_LARGE.jpg
@@ -19,7 +19,7 @@ MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 [CarSettings]
 Acceleration:	1
 DynamicSensitiveLevel:	25	#could be float number like 1.2532564766578
-CarSpeed:	50
+CarSpeed:	55
 SpeedIncr:	10
 CarWheel:	42.5
 WheelAccl:	0	#720	#180	#0	#normally do not apply this
@@ -32,7 +32,7 @@ CarReset:	1	#0 = disable	1 = auto	2 = manual
 ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
-RoadLanes:	100
+RoadLanes:	1000
 RoadLength:	1667	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib and may work for OSGNurbs Lib
 RoadPic:	../Resources/texture/road4096-2.png 16
 TextureWidth:	2	#10.75
@@ -91,16 +91,16 @@ OpticFlow-Width:	800
 OpticFlow-Height:	200
 OpticFlow-Density:	500
 
-OBS-Array:	../Resources/roads/lc.txt;
-OBS-Array-NurbsMethod:	0;
-OBS-ARRAY-LENGTH:	50;
-OBS-ARRAY-OFFSET:	0;
+OBS-Array:	../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;
+OBS-Array-NurbsMethod:	1;
+OBS-ARRAY-LENGTH:	500;
+OBS-ARRAY-OFFSET:	12;
 OBS-Array-Align:	0 10 0;
-OBS-Array-Num:	1000;
+OBS-Array-Num:	500;
 OBS-Array-Pic:	../Resources/texture/tio.jpg
-OBS-Array-OBSSize:	1.5	4.5	1;
-OBS-Array-Mode:	0	# 0 = Animation	1 = Obs	2 = GLPOINTS
-OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
+OBS-Array-OBSSize:	0.5	0.5	0.5;
+OBS-Array-Mode:	2	# 0 = Animation	1 = Obs	2 = GLPOINTS
+OBS-Anime-LOOP:	2	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Text Setting=========================
 #Textime:	0

@@ -104,12 +104,6 @@ void ExperimentCallback::createObstacles()
 
 	_obsListDrawn = false;
 
-	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-	osg::ref_ptr<osg::Point> psize = new osg::Point(10.0f);
-	ss->setAttribute(psize);
-	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-
 	if (!_expSetting->_obstaclesTime->empty())
 	{
 		osg::UIntArray::const_iterator pos = _expSetting->_obstaclesTime->begin();
@@ -209,27 +203,40 @@ void ExperimentCallback::createObstacles()
 		{
 			osg::Vec3dArray::const_iterator centerBegin = _centerList->begin();
 			osg::Vec3dArray::const_iterator centerEnd = _centerList->end();
-			while (centerBegin != centerEnd)
+
+			if (_expSetting->_GLPOINTSMODE)
 			{
 				osg::ref_ptr<Obstacle> obs = new Obstacle;
+				osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+				osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
+				ss->setAttribute(psize);
+				ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+				ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
-				if (_expSetting->_GLPOINTSMODE)
+				osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+				color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+				obs->setPointsColorArray(color);
+
+				obs->createPOINTS(_centerList);
+				obs->setStateSet(ss);
+				obs->setSolidType(Solid::solidType::GL_POINTS_BODY);
+				obs->setTag(ROADTAG::RT_UNSPECIFIED);
+
+				_obstacleList.push_back(obs);
+			}
+			else
+			{
+				while (centerBegin != centerEnd)
 				{
-					obs->createPOINTS(*centerBegin);
-					obs->setStateSet(ss);
-					obs->setSolidType(Solid::solidType::GL_POINTS_BODY);
-					obs->setTag(ROADTAG::RT_UNSPECIFIED);
-				}
-				else
-				{
+					osg::ref_ptr<Obstacle> obs = new Obstacle;
 					obs->setSolidType(Solid::solidType::COINBODY);
 					obs->setTag(ROADTAG::OBS);
 					obs->setImage(_expSetting->_imgObsArray);
 					obs->createBox(*centerBegin, _expSetting->_obsArraySize);
-				}
 
-				_obstacleList.push_back(obs);
-				centerBegin++;
+					_obstacleList.push_back(obs);
+					centerBegin++;
+				}
 			}
 		}
 	}

@@ -12,8 +12,9 @@ public:
 	void createBox(osg::Vec3d center, osg::Vec3d radius);
 	void createCylinder(const osg::Vec3d &center, const double &radius, const double &height);
 	void createSphere(const osg::Vec3d &centre, const double &radius);
-	void createPOINTS(const osg::Vec3 p);
 	void createPOINTS(osg::ref_ptr<osg::Vec3Array> p);
+	void createPOINTS(osg::ref_ptr<osg::Vec3dArray> p);
+	inline void setPointsColorArray(osg::ref_ptr<osg::Vec4Array> color) { _pointsColorArray = color.release(); };
 	inline void setImage(osg::ref_ptr<osg::Image> img) { _imgTexture = img; };
 
 	inline osg::Vec3d getDistancetoCar() const { return _distanceVector; };

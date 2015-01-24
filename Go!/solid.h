@@ -155,8 +155,9 @@ protected:
 	~Solid();
 	osg::ref_ptr<osg::Vec2Array> _texCoord;
 	osg::ref_ptr<osg::Image> _imgTexture;
-	void createGLPOINTS(const osg::Vec3 &p);
 	void createGLPOINTS(osg::ref_ptr<osg::Vec3Array> p);
+	void createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p);
+	osg::ref_ptr<osg::Vec4Array> _pointsColorArray;
 
 private:
 	bool _updated;
