@@ -1828,8 +1828,8 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 		}
 
 		freeCurve(sc);
-		delete knots;
-		delete ctrlpts;
+		free(knots);
+		free(ctrlpts);
 
 		sc = NULL;
 		knots = NULL;
@@ -2102,8 +2102,8 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 
 		freeCurve(scL);
 		freeCurve(scR);
-		delete ctrlptsL;
-		delete ctrlptsR;
+		free(ctrlptsL);
+		free(ctrlptsR);
 
 		scL = NULL;
 		scR = NULL;
@@ -2112,10 +2112,10 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 	}
 
 	freeCurve(sc);
-	delete knots;
-	delete ctrlpts;
-	delete derive;
-	delete curvature;
+	free(knots);
+	free(ctrlpts);
+	free(derive);
+	free(curvature);
 
 	sc = NULL;
 	knots = NULL;

@@ -85,6 +85,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SISL_INCLUDE);$(FMOD_INCLUDE);$(OSG_AUDIO_INCLUDE);$(OSG_3RDPARTY_INCLUDE);$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SISL_LIB);$(FMOD_LIB);$(OSG_AUDIO_LIB);$(OSG_LIBRARY_PATH);$(OSG_3RDPARTY_LIB);$(LibraryPath)</LibraryPath>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -148,6 +149,7 @@
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
