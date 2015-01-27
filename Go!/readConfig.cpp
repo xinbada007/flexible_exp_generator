@@ -31,14 +31,14 @@ using namespace std;
 // }
 
 ReadConfig::ReadConfig(const std::string &filename):
-_filename(filename), _replay(false), _nurbs(NULL), _vehicle(NULL), _screens(NULL),
+_filename(filename), _replay(false), _vehicle(NULL), _screens(NULL),
 _roads(NULL), _camset(NULL), _subjects(NULL), _saveState(NULL), _dynamicState(NULL)
 {
 	assignConfig();
 }
 
 ReadConfig::ReadConfig(const std::string &config, const std::string &replay):
-_replay(true), _nurbs(NULL), _vehicle(NULL), _screens(NULL),_roads(NULL), 
+_replay(true), _vehicle(NULL), _screens(NULL),_roads(NULL), 
 _camset(NULL), _subjects(NULL), _saveState(NULL), _dynamicState(NULL)
 {
 	_filename = config;
@@ -327,13 +327,22 @@ void ReadConfig::initializeAfterReadTrial()
 	while (i != _roads->_roadTxt.cend())
 	{
 		_filename = *i++;
-		_nurbs = new Nurbs;
-		readNurbs(_roads->_length);
-//		scaleCtrlPoints();
-		Nurbs *prve = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());
-		alignCtrlPoints(prve);
-		_roads->_nurbsMethod == 1 ? updateNurbs(_roads->_density,_roads->_width) : updateNurbs(new NurbsCurve, _roads->_density,_roads->_width);
-		_roads->_nurbs.push_back(_nurbs.release());
+		osg::ref_ptr<Nurbs> thisNurbs = readNurbs(_roads->_length);
+		Nurbs *prveNurbs = (_roads->_nurbs.empty() ? NULL : _roads->_nurbs.back());
+		alignCtrlPoints(thisNurbs, prveNurbs);
+		_roads->_nurbsMethod == 1 ? updateNurbs(thisNurbs, _roads->_density,_roads->_width) : updateNurbs(thisNurbs, new NurbsCurve, _roads->_density, _roads->_width);
+		
+		if (_roads->_wallRoadWidth)
+		{
+			osg::ref_ptr<Nurbs> newNurbs = new Nurbs(*thisNurbs);
+			newNurbs->_path_left->clear();
+			newNurbs->_path_right->clear();
+			_roads->_nurbsMethod == 1 ? updateNurbs(newNurbs, _roads->_density, _roads->_wallRoadWidth) : updateNurbs(newNurbs, new NurbsCurve, _roads->_density, _roads->_wallRoadWidth);
+			thisNurbs->_wall_left = newNurbs->_path_left.release();
+			thisNurbs->_wall_right = newNurbs->_path_right.release();
+		}
+		
+		_roads->_nurbs.push_back(thisNurbs.release());
 	}
 	//load the pic as texture
 	if (osgDB::fileExists(_roads->_texture))
@@ -477,12 +486,11 @@ void ReadConfig::initializeAfterReadTrial()
 	while (i != _experiment->_obsArray.cend())
 	{
 		_filename = *i++;
-		_nurbs = new Nurbs;
-		readNurbs(_experiment->_obsArrayLength);
-		Nurbs *prve = (_experiment->_nurbs.empty() ? NULL : _experiment->_nurbs.back());
-		alignCtrlPoints(prve,_experiment->_obsArrayOFFSET);
-		_experiment->_obsArrayNurbsMethod == 1 ? updateNurbs(_experiment->_numObsinArray, 0.0f) : updateNurbs(new NurbsCurve, _experiment->_numObsinArray, 0.0f);
-		_experiment->_nurbs.push_back(_nurbs.release());
+		osg::ref_ptr<Nurbs> thisNurbs = readNurbs(_experiment->_obsArrayLength);
+		Nurbs *prveNurbs = (_experiment->_nurbs.empty() ? NULL : _experiment->_nurbs.back());
+		alignCtrlPoints(thisNurbs, prveNurbs,_experiment->_obsArrayOFFSET);
+		_experiment->_obsArrayNurbsMethod == 1 ? updateNurbs(thisNurbs, _experiment->_numObsinArray, 0.0f) : updateNurbs(thisNurbs, new NurbsCurve, _experiment->_numObsinArray, 0.0f);
+		_experiment->_nurbs.push_back(thisNurbs.release());
 	}
 	_experiment->_speed = _vehicle->_speed;
 
@@ -493,6 +501,75 @@ void ReadConfig::initializeAfterReadTrial()
 	arrayByMatrix(_vehicle->_V, m);
 	_vehicle->_O = _vehicle->_O * m;
 	_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
+
+	//Initialize Triggers
+	const unsigned &numTriggers = _experiment->_triggerTimer->getNumElements();
+	if (_experiment->_triggerEnable.size() != numTriggers)
+	{
+		const unsigned &numTriggerEnables = _experiment->_triggerEnable.size();
+		_experiment->_triggerEnable.resize(numTriggers);
+		if (numTriggers > numTriggerEnables)
+		{
+			std::vector<triggerEnablePair>::const_iterator assign_start = _experiment->_triggerEnable.cbegin();
+			std::vector<triggerEnablePair>::const_iterator assign_end = assign_start + numTriggerEnables;
+			std::vector<triggerEnablePair>::iterator i = _experiment->_triggerEnable.begin() + numTriggerEnables;
+			while (i != _experiment->_triggerEnable.end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = _experiment->_triggerEnable.begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+	}
+
+	//Initialize Text
+	const unsigned &numText = _experiment->_textTime->getNumElements();
+	if (_experiment->_textPeriod->getNumElements() != numText)
+	{
+		const unsigned &numTextPeriod = _experiment->_textPeriod->getNumElements();
+		_experiment->_textPeriod->resize(numText);
+		if (numText > numTextPeriod)
+		{
+			osg::DoubleArray::const_iterator assign_start = _experiment->_textPeriod->begin();
+			osg::DoubleArray::const_iterator assign_end = assign_start + numTextPeriod;
+			osg::DoubleArray::iterator i = _experiment->_textPeriod->begin() + numTextPeriod;
+			while (i != _experiment->_textPeriod->end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = _experiment->_textPeriod->begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+	}
+	if (_experiment->_textContent.size() != numText)
+	{
+		const unsigned &numTextContent = _experiment->_textContent.size();
+		_experiment->_textContent.resize(numText);
+		if (numText > numTextContent)
+		{
+			stringList::const_iterator assign_start = _experiment->_textContent.begin();
+			stringList::const_iterator assign_end = assign_start + numTextContent;
+			stringList::iterator i = _experiment->_textContent.begin() + numTextContent;
+			while (i != _experiment->_textContent.end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = _experiment->_textContent.begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+	}
 }
 
 bool ReadConfig::byPassSpace(ifstream &in, std::string &content)
@@ -977,6 +1054,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string METHOD = "METHOD";
 		static const string ROADVISIBLE = "ROADVISIBLE";
 		static const string ROADLENGTH = "ROADLENGTH";
+		static const string WALLROADWIDTH = "WALLROADWIDTH";
 		while (flag == ROAD && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1125,6 +1203,15 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == WALLROADWIDTH)
+			{
+				config.erase(config.begin(), config.begin() + WALLROADWIDTH.size());
+				if (!config.empty())
+				{
+					_roads->_wallRoadWidth = stod(config);
+				}
+				continue;
+			}
 			else if (title == ROADVISIBLE)
 			{
 				config.erase(config.begin(), config.begin() + ROADVISIBLE.size());
@@ -1219,6 +1306,9 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OPTICFLOWDENSITY("OPTICFLOW-DENSITY");
 		static const string OPTICFLOWFRAMECOUNTS("OPTICFLOW-FRAMECOUNTS");
 		static const string OPTICFLOWVERSIONS("OPTICFLOW-VERSIONS");
+
+		static const string	TRIGGER_ENABLE("TRIGGER-ENABLE");
+		static const string TRIGGER_TIME("TRIGGER-TIME");
 
 		static const string DEVIATION("DEVIATION");
 		static const string DEVIATIONWARN("DEVIATION-WARN");
@@ -1629,6 +1719,33 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == TRIGGER_ENABLE)
+			{
+				config.erase(config.begin(), config.begin() + TRIGGER_ENABLE.size());
+				unsigned numCom = 0;
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					std::pair<int, enum TRIGGER_COM> temp;
+					temp = std::make_pair(stoi(config, &sz), enum TRIGGER_COM(Experiment::TRIGGER_COM::ROAD + numCom));
+					++numCom;
+					numCom %= _experiment->_NUMTRIGGERCOM;
+					_experiment->_triggerEnable.push_back(temp);
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == TRIGGER_TIME)
+			{
+				config.erase(config.begin(), config.begin() + TRIGGER_TIME.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_triggerTimer->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
 			else if (title == DEVIATION)
 			{
 				config.erase(config.begin(), config.begin() + DEVIATION.size());
@@ -1688,7 +1805,7 @@ void ReadConfig::readTrial(ifstream &in)
 	return;
 }
 
-Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
+osg::ref_ptr<Nurbs> ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 {
 	ifstream filein(_filename.c_str());
 	if (!filein)
@@ -1708,6 +1825,7 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 		return NULL;
 	}
 
+	osg::ref_ptr<Nurbs> nurbs = new Nurbs;
 	const string CTRLPOINT = "CTRLPOINTS";
 	const string KNOTS = "KNOTS";
 	const string ORDERS = "orders";
@@ -1732,7 +1850,7 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 				std::string::size_type sz;
 				x = stod(config, &sz);
 				y = stod(config.substr(sz));
-				_nurbs->_ctrlPoints->push_back(osg::Vec3d(x, y, z));
+				nurbs->_ctrlPoints->push_back(osg::Vec3d(x, y, z));
 			}
 		}
 
@@ -1757,7 +1875,7 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 				if (knot.size() == 1) knot.push_back(1);
 				for (int i = 0; i < knot.back(); i++)
 				{
-					_nurbs->_knotVector->push_back(knot.front());
+					nurbs->_knotVector->push_back(knot.front());
 				}
 			}
 		}
@@ -1782,34 +1900,34 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 				if (s->empty()) continue;
 				if (s->getNumElements() == osg::Vec3d::num_components)
 				{
-					_nurbs->_scale.x() = s->at(0);
-					_nurbs->_scale.y() = s->at(1);
-					_nurbs->_scale.z() = s->at(2);
+					nurbs->_scale.x() = s->at(0);
+					nurbs->_scale.y() = s->at(1);
+					nurbs->_scale.z() = s->at(2);
 				}
 			}
 		}
 	}
 
-	_nurbs->_order = _nurbs->_knotVector->size() - _nurbs->_ctrlPoints->size();
+	nurbs->_order = nurbs->_knotVector->size() - nurbs->_ctrlPoints->size();
 
 	if (customLength > 0)
 	{
-		const unsigned &numPoints = _nurbs->_ctrlPoints->getNumElements();
-		const unsigned &order = _nurbs->_order;
-		const unsigned &numKnots = _nurbs->_knotVector->getNumElements();
+		const unsigned &numPoints = nurbs->_ctrlPoints->getNumElements();
+		const unsigned &order = nurbs->_order;
+		const unsigned &numKnots = nurbs->_knotVector->getNumElements();
 		double *knots = (double*)malloc(numKnots*sizeof(double));
 		for (unsigned i = 0; i < numKnots; i++)
 		{
-			knots[i] = _nurbs->_knotVector->at(i);
+			knots[i] = nurbs->_knotVector->at(i);
 		}
-		const unsigned dim = _nurbs->_ctrlPoints->front().num_components;
+		const unsigned dim = nurbs->_ctrlPoints->front().num_components;
 		double *ctrlpts = (double*)malloc(numPoints*dim*sizeof(double));
 		for (unsigned int i = 0; i < numPoints; i++)
 		{
 			int v = 0;
 			for (unsigned j = (i*dim); j < (i + 1)*dim; j++)
 			{
-				ctrlpts[j] = _nurbs->_ctrlPoints->at(i)._v[v];
+				ctrlpts[j] = nurbs->_ctrlPoints->at(i)._v[v];
 				++v;
 			}
 		}
@@ -1822,9 +1940,9 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 		if (!jstat)
 		{
 			const double L = customLength / length;
-			_nurbs->_scale.x() = L;
-			_nurbs->_scale.y() = L;
-			_nurbs->_scale.z() = L;
+			nurbs->_scale.x() = L;
+			nurbs->_scale.y() = L;
+			nurbs->_scale.z() = L;
 		}
 
 		freeCurve(sc);
@@ -1836,38 +1954,39 @@ Nurbs * ReadConfig::readNurbs(const double &customLength /*= 0.0f*/)
 		ctrlpts = NULL;
 	}
 
-	const osg::Vec3d P1 = _nurbs->_ctrlPoints->front();
-	arrayByMatrix(_nurbs->_ctrlPoints, osg::Matrix::scale(_nurbs->_scale));
-	const osg::Vec3d P2 = _nurbs->_ctrlPoints->front();
-	arrayByMatrix(_nurbs->_ctrlPoints, osg::Matrix::translate(P1 - P2));
+	const osg::Vec3d P1 = nurbs->_ctrlPoints->front();
+	arrayByMatrix(nurbs->_ctrlPoints, osg::Matrix::scale(nurbs->_scale));
+	const osg::Vec3d P2 = nurbs->_ctrlPoints->front();
+	arrayByMatrix(nurbs->_ctrlPoints, osg::Matrix::translate(P1 - P2));
 
 	filein.close();
-	return _nurbs.get();
+
+	return nurbs.release();
 }
 
-void ReadConfig::scaleCtrlPoints()
+void ReadConfig::scaleCtrlPoints(Nurbs *nurbs)
 {
-	if (_nurbs)
+	if (nurbs)
 	{
-		arrayByMatrix(_nurbs->_ctrlPoints, osg::Matrix::scale(_roads->_scale));
+		arrayByMatrix(nurbs->_ctrlPoints, osg::Matrix::scale(_roads->_scale));
 	}
 }
 
-void ReadConfig::alignCtrlPoints(Nurbs *refNurbs, const double &offset /* = 0.0f */)
+void ReadConfig::alignCtrlPoints(Nurbs *thisNurbs, Nurbs *prevNurbs,const double &offset /* = 0.0f */)
 {
-	if (_nurbs)
+	if (thisNurbs)
 	{
 		if (offset == 0.0f)
 		{
 			osg::Vec3d p = _alignPoint;
 			osg::Vec3d direction = UP_DIR;
-			if (refNurbs)
+			if (prevNurbs)
 			{
-				p = *(refNurbs->_ctrlPoints->rbegin());
-				direction = *(refNurbs->_ctrlPoints->rbegin()) - *(refNurbs->_ctrlPoints->rbegin() + 1);
+				p = *(prevNurbs->_ctrlPoints->rbegin());
+				direction = *(prevNurbs->_ctrlPoints->rbegin()) - *(prevNurbs->_ctrlPoints->rbegin() + 1);
 			}
-			osg::Vec3d v = *(_nurbs->_ctrlPoints->begin() + 1) - *(_nurbs->_ctrlPoints->begin());
-			osg::Vec3d m = *(_nurbs->_ctrlPoints->begin());
+			osg::Vec3d v = *(thisNurbs->_ctrlPoints->begin() + 1) - *(thisNurbs->_ctrlPoints->begin());
+			osg::Vec3d m = *(thisNurbs->_ctrlPoints->begin());
 
 			osg::Matrix align = osg::Matrix::translate(-m) * osg::Matrix::rotate(v, direction) * osg::Matrix::translate(m);
 			align = align * osg::Matrix::translate(p - m);
@@ -1875,76 +1994,77 @@ void ReadConfig::alignCtrlPoints(Nurbs *refNurbs, const double &offset /* = 0.0f
 			//add a minor offset between ctrlpoints
 			align = align * osg::Matrix::translate(direction*eps_100);
 
-			arrayByMatrix(_nurbs->_ctrlPoints, align);
+			arrayByMatrix(thisNurbs->_ctrlPoints, align);
 		}
 
 		else
 		{
-			if (refNurbs)
+			if (prevNurbs)
 			{
 				osg::ref_ptr<osg::Vec3dArray> newV = new osg::Vec3dArray;
-				newV = project_Line(refNurbs->_ctrlPoints, offset);
-				_nurbs->_ctrlPoints = newV;
+				newV = project_Line(prevNurbs->_ctrlPoints, offset);
+				thisNurbs->_ctrlPoints = newV;
 			}
 		}
 	}
 }
 
-void ReadConfig::updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double &width /* = 0.0f */)
+void ReadConfig::updateNurbs(Nurbs *thisNurbs, osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double &width /* = 0.0f */)
 {
-	refNB->setKnotVector(_nurbs->_knotVector);
-	refNB->setDegree(_nurbs->_order - 1);
+	if (!thisNurbs)
+	{
+		return;
+	}
+
+	refNB->setKnotVector(thisNurbs->_knotVector);
+	refNB->setDegree(thisNurbs->_order - 1);
 	refNB->setNumPath(density);
 
-	refNB->setCtrlPoints(_nurbs->_ctrlPoints);
+	refNB->setCtrlPoints(thisNurbs->_ctrlPoints);
 	refNB->update();
-	_nurbs->_path = refNB->getPath();
+	thisNurbs->_path = refNB->getPath();
 
 	if (width)
 	{
 		const double halfW = width * 0.5f;
-
-		_nurbs->_ctrl_left = project_Line(_nurbs->_ctrlPoints, halfW);
-		refNB->setCtrlPoints(_nurbs->_ctrl_left);
-		refNB->update();
-		_nurbs->_path_left = refNB->getPath();
-
-		_nurbs->_ctrl_right = project_Line(_nurbs->_ctrlPoints, -halfW);
-		refNB->setCtrlPoints(_nurbs->_ctrl_right);
-		refNB->update();
-		_nurbs->_path_right = refNB->getPath();
+		thisNurbs->_ctrl_left = project_Line(thisNurbs->_ctrlPoints, halfW);
+		thisNurbs->_ctrl_right = project_Line(thisNurbs->_ctrlPoints, -halfW);
 
 		//Adjust "Left" and "Right"
-		osg::Vec3d left = *_nurbs->_ctrl_left->begin() - *_nurbs->_ctrl_right->begin();
-		osg::Vec3d right = *(_nurbs->_ctrl_right->begin() + 1) - *_nurbs->_ctrl_right->begin();
+		osg::Vec3d left = *thisNurbs->_ctrl_left->begin() - *thisNurbs->_ctrl_right->begin();
+		osg::Vec3d right = *(thisNurbs->_ctrl_right->begin() + 1) - *thisNurbs->_ctrl_right->begin();
 		osg::Vec3d dir = right^left;
 		if (dir.z() < 0)
 		{
-			osg::ref_ptr<osg::Vec3dArray> tmp = _nurbs->_ctrl_left;
-			_nurbs->_ctrl_left = _nurbs->_ctrl_right;
-			_nurbs->_ctrl_right = tmp;
-
-			tmp = _nurbs->_path_left;
-			_nurbs->_path_left = _nurbs->_path_right;
-			_nurbs->_path_right = tmp;
+			osg::ref_ptr<osg::Vec3dArray> tmp = thisNurbs->_ctrl_left;
+			thisNurbs->_ctrl_left = thisNurbs->_ctrl_right;
+			thisNurbs->_ctrl_right = tmp;
 		}
+
+		refNB->setCtrlPoints(thisNurbs->_ctrl_left);
+		refNB->update();
+		thisNurbs->_path_left = refNB->getPath();
+
+		refNB->setCtrlPoints(thisNurbs->_ctrl_right);
+		refNB->update();
+		thisNurbs->_path_right = refNB->getPath();
 	}
 }
 
-void ReadConfig::updateNurbs(const unsigned &density,const double &width)
+void ReadConfig::updateNurbs(Nurbs *thisNurbs, const unsigned &density, const double &width)
 {
-	const unsigned &numPoints = _nurbs->_ctrlPoints->getNumElements();
-	const unsigned &order = _nurbs->_order;
+	const unsigned &numPoints = thisNurbs->_ctrlPoints->getNumElements();
+	const unsigned &order = thisNurbs->_order;
 	const unsigned degree = order - 1;
 
-	const unsigned &numKnots = _nurbs->_knotVector->getNumElements();
+	const unsigned &numKnots = thisNurbs->_knotVector->getNumElements();
 	double *knots = (double*)malloc(numKnots*sizeof(double));
 	for (unsigned i = 0; i < numKnots; i++)
 	{
-		knots[i] = _nurbs->_knotVector->at(i);
+		knots[i] = thisNurbs->_knotVector->at(i);
 	}
 
-	const unsigned &dim = _nurbs->_ctrlPoints->front().num_components;
+	const unsigned &dim = thisNurbs->_ctrlPoints->front().num_components;
 	double *ctrlpts = (double*)malloc(numPoints*dim*sizeof(double));
 
 	for (unsigned i = 0; i < numPoints; i++)
@@ -1952,7 +2072,7 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 		int v = 0;
 		for (unsigned j = (i*dim); j < (i + 1)*dim; j++)
 		{
-			ctrlpts[j] = _nurbs->_ctrlPoints->at(i)._v[v];
+			ctrlpts[j] = thisNurbs->_ctrlPoints->at(i)._v[v];
 			++v;
 		}
 	}
@@ -1979,8 +2099,8 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 			s1225(sc, der, k, &leftknot, derive, curvature, &radius, &jstat);
 			if (!jstat)
 			{
-				_nurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-				_nurbs->_radius->push_back(radius);
+				thisNurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+				thisNurbs->_radius->push_back(radius);
 			}
 			else
 			{
@@ -1994,8 +2114,8 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 	s1225(sc, der, k, &leftknot, derive, curvature, &radius, &jstat);
 	if (!jstat)
 	{
-		_nurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-		_nurbs->_radius->push_back(radius);
+		thisNurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+		thisNurbs->_radius->push_back(radius);
 	}
 	else
 	{
@@ -2007,8 +2127,19 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 	if (width)
 	{
 		const double halfW = width * 0.5f;
-		_nurbs->_ctrl_left = project_Line(_nurbs->_ctrlPoints, halfW);
-		_nurbs->_ctrl_right = project_Line(_nurbs->_ctrlPoints, -halfW);
+		thisNurbs->_ctrl_left = project_Line(thisNurbs->_ctrlPoints, halfW);
+		thisNurbs->_ctrl_right = project_Line(thisNurbs->_ctrlPoints, -halfW);
+
+		//Adjust "Left" and "Right"
+		osg::Vec3d left = *thisNurbs->_ctrl_left->begin() - *thisNurbs->_ctrl_right->begin();
+		osg::Vec3d right = *(thisNurbs->_ctrl_right->begin() + 1) - *thisNurbs->_ctrl_right->begin();
+		osg::Vec3d dir = right^left;
+		if (dir.z() < 0)
+		{
+			osg::ref_ptr<osg::Vec3dArray> tmp = thisNurbs->_ctrl_left;
+			thisNurbs->_ctrl_left = thisNurbs->_ctrl_right;
+			thisNurbs->_ctrl_right = tmp;
+		}
 
 		double *ctrlptsL = (double*)malloc(numPoints*dim*sizeof(double));
 		double *ctrlptsR = (double*)malloc(numPoints*dim*sizeof(double));
@@ -2018,8 +2149,8 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 			int v = 0;
 			for (unsigned j = (i*dim); j < (i + 1)*dim; j++)
 			{
-				ctrlptsL[j] = _nurbs->_ctrl_left->at(i)._v[v];
-				ctrlptsR[j] = _nurbs->_ctrl_right->at(i)._v[v];
+				ctrlptsL[j] = thisNurbs->_ctrl_left->at(i)._v[v];
+				ctrlptsR[j] = thisNurbs->_ctrl_right->at(i)._v[v];
 				++v;
 			}
 		}
@@ -2045,14 +2176,14 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 				s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
 				if (!jstatR)
 				{
-					_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-					_nurbs->_radiusL->push_back(radius);
+					thisNurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+					thisNurbs->_radiusL->push_back(radius);
 				}
 				s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
 				if (!jstatL)
 				{
-					_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-					_nurbs->_radiusR->push_back(radius);
+					thisNurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+					thisNurbs->_radiusR->push_back(radius);
 				}
 				if (jstatR || jstatL)
 				{
@@ -2066,38 +2197,19 @@ void ReadConfig::updateNurbs(const unsigned &density,const double &width)
 		s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
 		if (!jstatR)
 		{
-			_nurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-			_nurbs->_radiusL->push_back(radius);
+			thisNurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			thisNurbs->_radiusL->push_back(radius);
 		}
 		s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
 		if (!jstatL)
 		{
-			_nurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-			_nurbs->_radiusR->push_back(radius);
+			thisNurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
+			thisNurbs->_radiusR->push_back(radius);
 		}
 		if (jstatR || jstatL)
 		{
 			osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
 			return;
-		}
-
-		//Adjust "Left" and "Right"
-		osg::Vec3d left = *_nurbs->_ctrl_left->begin() - *_nurbs->_ctrl_right->begin();
-		osg::Vec3d right = *(_nurbs->_ctrl_right->begin() + 1) - *_nurbs->_ctrl_right->begin();
-		osg::Vec3d dir = right^left;
-		if (dir.z() < 0)
-		{
-			osg::ref_ptr<osg::Vec3dArray> tmp = _nurbs->_ctrl_left;
-			_nurbs->_ctrl_left = _nurbs->_ctrl_right;
-			_nurbs->_ctrl_right = tmp;
-
-			tmp = _nurbs->_path_left;
-			_nurbs->_path_left = _nurbs->_path_right;
-			_nurbs->_path_right = tmp;
-
-			osg::ref_ptr<osg::DoubleArray> tmpR = _nurbs->_radiusL;
-			_nurbs->_radiusL = _nurbs->_radiusR;
-			_nurbs->_radiusR = tmpR;
 		}
 
 		freeCurve(scL);

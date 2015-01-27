@@ -24,7 +24,7 @@ public:
 	inline void setMultiViewer(MulitViewer *mv) { _mv = mv; };
 	inline void setCar(Car *car) { _car = car;};
 private:
-	const Experiment *_expSetting;
+	Experiment *_expSetting;
 	Car *_car;
 	CollVisitor *_cVisitor;
 
@@ -70,6 +70,8 @@ private:
 	void createObstacles();
 	void createOpticFlow();
 	void dealCollision();
+
+	void trigger();
 
 	void removeNodefromRoad(osg::Node *n);
 };

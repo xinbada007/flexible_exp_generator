@@ -7,7 +7,7 @@ TrialConfig
 #Num of Screent starts from 0
 Hdistance:	0.6	#5.44	#0.6
 Vdistance:	1.5	#1.25
-screen:		1
+screen:		0
 aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
 fovy:		45	#Disable when RealWorld is enabled
 zNear:	0.1
@@ -32,10 +32,10 @@ CarReset:	1	#0 = disable	1 = auto	2 = manual
 ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
-RoadLanes:	1000
+RoadLanes:	100
 RoadLength:	1667	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib and may work for OSGNurbs Lib
 RoadPic:	../Resources/texture/road4096-2.png 16
-TextureWidth:	2	#10.75
+TextureWidth:	10.75	#10.75
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 #RoadTxt:	../Resources/roads/exproads/50/200/40.txt;#../Resources/1.txt;#../Resources/550.txt;#../Resources/roads/exproads/50/150/33.txt;#../Resources/speed/100/4.txt;#../Resources/speed/100/8.txt;../Resources/speed/100/12.txt;
@@ -48,6 +48,7 @@ Density:	1000	#guaranteed in OSGNurbs Lib but not guaranteed in SISL Lib(5% roun
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
 WallHeight:	1
+WallRoadWidth:	10.75
 WallPic:	../Resources/texture/wall1024-2.jpg
 
 [Subjects]
@@ -67,7 +68,7 @@ Lane-Offset:	0	#Negtive = L	Positive = R
 Deviation:	0	#Units:	Metres
 Deviation-BaseLine:	-1	#1 = R	#-1 = L	#0 = Middle
 Deviation-Warn: DEVIATION TOO HIGH
-Deviation-Siren:	../Resources/sound/warnpullup.mp3
+Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Obstacle Setting=====================
 #Obstacle:	1 1	1 1	1 1 	#1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
@@ -82,7 +83,7 @@ OBS-Visible:	0
 OBS-Collision:	1 0	# 0 =disapper	1 = collision
 OBS-Pic:	../Resources/texture/red.jpg;
 
-OpticFlow:	0	#1 = Enable	0= Disable
+OpticFlow:	1	#1 = Enable	0= Disable
 OpticFlow-Visible:	200	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
@@ -103,10 +104,15 @@ OBS-Array-Mode:	2	# 0 = Animation	1 = Obs	2 = GLPOINTS
 OBS-Anime-LOOP:	2	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Text Setting=========================
-#Textime:	0
-#Period:	10
-##==must line by line====================
-#Text:	Please Change Lane
+Text:	Please Change Lane	##==must line by line====================
+Textime:	5	10	15
+Period:		2
+
+##==Trigger Setting======================
+Trigger-Enable:	1	1	1	1	#road	#optic flow	#crash permits	#alert
+Trigger-Time:	30	0	30	5
+Trigger-Time:	-1	30	-1	10
+Trigger-Time:	-1	-1	-1	15
 
 ##==Dynamic Setting======================
 #Dynamic-Change: 20

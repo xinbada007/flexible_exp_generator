@@ -16,10 +16,9 @@
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
-_coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f)
+_coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
+_opticFlowPoints(NULL)
 {
-	_opticFlowPoints = new Obstacle;
-
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
 	_geodeHUD = new osg::Geode;
@@ -61,7 +60,9 @@ _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _
 			_siren->setSample(sample.release());
 			_siren->setAmbient(true);
 			_siren->setPlay(false);
-			_siren->setLooping(true);
+			_siren->setLooping(false);
+			_siren->setStopMethod(osgAudio::Stopped);
+			_siren->setGain(2.00);
 			osgAudio::SoundManager::instance()->addSoundState(_siren);
 		}
 	}
@@ -102,6 +103,7 @@ void ExperimentCallback::createObstacles()
 		return;
 	}
 
+	_opticFlowPoints = new Obstacle;
 	_obsListDrawn = false;
 
 	if (!_expSetting->_obstaclesTime->empty())
@@ -377,7 +379,7 @@ void ExperimentCallback::showOpticFlow()
 	{
 		_opticFlowDrawn = true;
 
-		_road->addChild(_opticFlowPoints);
+		_root->addChild(_opticFlowPoints);
 	}
 
 	if (_opticFlowDrawn)
@@ -537,6 +539,10 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			showObstacle();
 			showOpticFlow();
 			dealCollision();
+
+			//highest priority controller
+			//overwrite all
+			trigger();
 			break;
 		default:
 			break;
@@ -545,6 +551,88 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
 	traverse(node, nv);
 }
+
+void ExperimentCallback::trigger()
+{
+	if (!_expSetting->_triggerEnable.size())
+	{
+		return;
+	}
+
+	if (_expSetting->_triggerEnable.size() != _expSetting->_triggerTimer->size())
+	{
+		return;
+	}
+
+	std::vector<double>::iterator i = _expSetting->_triggerTimer->begin();
+	while (i != _expSetting->_triggerTimer->end() && !_expSetting->_triggerTimer->empty())
+	{
+		if (_expTime >= *i)
+		{
+			const unsigned pos = (i - _expSetting->_triggerTimer->begin());
+			const triggerEnablePair &pair = _expSetting->_triggerEnable.at(pos);
+			std::vector<triggerEnablePair>::const_iterator del = _expSetting->_triggerEnable.begin() + pos;
+			if (pair.first && (*i) >= 0.0f)
+			{
+				switch (pair.second)
+				{
+				case::Experiment::TRIGGER_COM::ROAD:
+					if (_road)
+					{
+						if (_road->getNewChildDefaultValue())
+						{
+							_road->setAllChildrenOff();
+						}
+						else
+						{
+							_road->setAllChildrenOn();
+						}
+					}
+					break;
+				case::Experiment::TRIGGER_COM::FLOW:
+					if (_opticFlowPoints)
+					{
+						if (_opticFlowPoints->getNewChildDefaultValue())
+						{
+							_opticFlowPoints->setAllChildrenOff();
+						}
+						else
+						{
+							_opticFlowPoints->setAllChildrenOn();
+						}
+					}
+					break;
+				case::Experiment::TRIGGER_COM::CRASHPERMIT:
+					if (_car)
+					{
+						_car->getCarState()->_crashPermit = !(_car->getCarState()->_crashPermit);
+					}
+					break;
+				case::Experiment::TRIGGER_COM::SOUNDALERT:
+					if (_siren)
+					{
+						_siren->setGain(2.00f);
+						_siren->setPlay(true);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			_expSetting->_triggerEnable.erase(del);
+			_expSetting->_triggerTimer->erase(i);
+			if (_expSetting->_triggerEnable.empty() || _expSetting->_triggerTimer->empty())
+			{
+				break;
+			}
+			i = _expSetting->_triggerTimer->begin();
+		}
+		++i;
+	}
+
+
+}
+
 
 void ExperimentCallback::removeNodefromRoad(osg::Node *n)
 {
@@ -907,11 +995,11 @@ void ExperimentCallback::setHUDCamera(osg::Camera *cam)
 	const double X = _cameraHUD->getViewport()->width();
 	const double Y = _cameraHUD->getViewport()->height();
 
-	osg::Vec3d position(0.5*X, 0.5*Y, 0.0f);
-	std::string font("fonts/arial.ttf");
+	osg::Vec3d position(0.5*X, 0.6*Y, 0.0f);
+	std::string font("fonts/Calibri.ttf");
 	_textHUD->setFont(font);
-	_textHUD->setFontResolution(28, 28);
-	_textHUD->setCharacterSize(28);
+	_textHUD->setFontResolution(64, 64);
+	_textHUD->setCharacterSize(64);
 	_textHUD->setPosition(position);
 	_textHUD->setAlignment(osgText::TextBase::CENTER_CENTER);
 	_textHUD->setDataVariance(osg::Object::DYNAMIC);

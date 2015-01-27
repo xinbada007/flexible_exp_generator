@@ -349,6 +349,17 @@ void switchRoad::apply(osg::Group &refNode)
 			_road = refRd->asSwitch();
 		}
 	}
+// 	else if (libName == "LogicRoad" && libClass == "LogicRoad")
+// 	{
+// 		LogicRoad *refLogRd = dynamic_cast<LogicRoad*>(&refNode);
+// 		if (refLogRd)
+// 		{
+// 			if (refLogRd->getTag() == ROADTAG::RWALL || refLogRd->getTag() == ROADTAG::LWALL)
+// 			{
+// 
+// 			}
+// 		}
+// 	}
 
 	traverse(refNode);
 }

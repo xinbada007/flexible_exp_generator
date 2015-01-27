@@ -68,6 +68,8 @@ public:
 	virtual void reset();
 	virtual void apply(osg::Group &refNode);
 	osg::Switch * getSwRoad() { return _road; };
+//	osg::Switch * getSwWall() { return _wall; };
 private:
 	osg::Switch *_road;
+//	osg::Switch *_wall;
 };

@@ -33,6 +33,7 @@ typedef struct CarState:public osg::Referenced
 		_dynamic = true; //acceleration mode
 
 		_collide = false;
+		_crashPermit = true;
 		_userHit = -1;
 		_pointsEarned = 0;
 
@@ -105,6 +106,7 @@ typedef struct CarState:public osg::Referenced
 	bool _dynamic;
 
 	bool _collide;
+	bool _crashPermit;
 	int _userHit;
 	unsigned _pointsEarned;
 

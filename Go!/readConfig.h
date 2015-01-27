@@ -13,10 +13,12 @@
 typedef std::vector<std::string> stringList;
 struct  Nurbs;
 typedef std::vector<osg::ref_ptr<Nurbs>> nurbsList;
+typedef std::pair<int, enum TRIGGER_COM> triggerEnablePair;
 
 typedef struct Experiment :public osg::Referenced
 {
-	Experiment()
+	Experiment():
+	_NUMTRIGGERCOM(4)
 	{
 		_startLane = 0;
 		_laneOffset = 0.0f;
@@ -56,6 +58,8 @@ typedef struct Experiment :public osg::Referenced
 		_opticFlowDensity = 100;
 		_opticFlowFrameCounts = 0;
 		_opticFlowVersions = 0;
+
+		_triggerTimer = new osg::DoubleArray;
 
 		_offset = 0.0f;
 
@@ -117,6 +121,17 @@ typedef struct Experiment :public osg::Referenced
 	unsigned int _opticFlowFrameCounts;
 	unsigned int _opticFlowVersions;
 
+	std::vector<triggerEnablePair> _triggerEnable;
+	osg::ref_ptr<osg::DoubleArray> _triggerTimer;
+	enum TRIGGER_COM
+	{
+		ROAD,
+		FLOW,
+		CRASHPERMIT,
+		SOUNDALERT
+	};
+	const unsigned _NUMTRIGGERCOM;
+
 	double _offset;
 
 	double _deviation;
@@ -136,6 +151,9 @@ typedef struct Nurbs:public osg::Referenced
 		_path_left = new osg::Vec3dArray;
 		_path_right = new osg::Vec3dArray;
 
+		_wall_left = _path_left;
+		_wall_right = _path_right;
+
 		_ctrl_left = new osg::Vec3dArray;
 		_ctrl_right = new osg::Vec3dArray;
 		_ctrlPoints = new osg::Vec3dArray;
@@ -150,14 +168,40 @@ typedef struct Nurbs:public osg::Referenced
 
 		_order = 0;
 	};
+	Nurbs(const Nurbs &copy)
+	{
+		_path = new osg::Vec3dArray(copy._path->begin(), copy._path->end());
+		_path_left = new osg::Vec3dArray(copy._path_left->begin(), copy._path_left->end());
+		_path_right = new osg::Vec3dArray(copy._path_right->begin(), copy._path_right->end());
+
+		_wall_left = new osg::Vec3dArray(copy._wall_left->begin(), copy._wall_left->end());
+		_wall_right = new osg::Vec3dArray(copy._wall_right->begin(), copy._wall_right->end());
+
+		_ctrl_left = new osg::Vec3dArray(copy._ctrl_left->begin(), copy._ctrl_left->end());
+		_ctrl_right = new osg::Vec3dArray(copy._ctrl_right->begin(), copy._ctrl_right->end());
+		_ctrlPoints = new osg::Vec3dArray(copy._ctrlPoints->begin(), copy._ctrlPoints->end());
+
+		_knotVector = new osg::DoubleArray(copy._knotVector->begin(), copy._knotVector->end());
+
+		_radius = new osg::DoubleArray(copy._radius->begin(), copy._radius->end());
+		_radiusL = new osg::DoubleArray(copy._radiusL->begin(), copy._radiusL->end());
+		_radiusR = new osg::DoubleArray(copy._radiusR->begin(), copy._radiusR->end());
+
+		_scale = copy._scale;
+
+		_order = copy._order;
+	};
 	osg::ref_ptr <osg::Vec3dArray> _path;
 	osg::ref_ptr <osg::Vec3dArray> _path_left;
 	osg::ref_ptr <osg::Vec3dArray> _path_right;
 
+	osg::ref_ptr<osg::Vec3dArray> _wall_left;
+	osg::ref_ptr<osg::Vec3dArray> _wall_right;
+
 	osg::ref_ptr<osg::Vec3dArray> _ctrl_left;
 	osg::ref_ptr<osg::Vec3dArray> _ctrl_right;
-
 	osg::ref_ptr <osg::Vec3dArray> _ctrlPoints;
+
 	osg::ref_ptr <osg::DoubleArray> _knotVector;
 
 	osg::ref_ptr<osg::DoubleArray> _radius;
@@ -182,6 +226,7 @@ typedef struct RoadSet:public osg::Referenced
 		_length = 0.0f;
 
 		_wallHeight = 0.50f;
+		_wallRoadWidth = 0.0f;
 		_density = 1000;
 
 		_scale.set(1.0f,1.0f,1.0f);
@@ -202,6 +247,7 @@ typedef struct RoadSet:public osg::Referenced
 	double _width;
 	double _length;
 	double _wallHeight;
+	double _wallRoadWidth;
 
 	unsigned _density;
 	
@@ -395,7 +441,6 @@ public:
 	ReadConfig(const std::string &filename);
 	ReadConfig(const std::string &config, const std::string &replay);
 
-	Nurbs * getNurbs() const { return _nurbs.get(); };
 	RoadSet * getRoadSet() const { return _roads.get(); };
 	Vehicle * getVehicle() const { return _vehicle.get(); };
 	Screens * getScreens() const { return _screens.get(); };
@@ -423,13 +468,13 @@ private:
 	void readTrial(std::ifstream &filein);
 	void readReply(std::ifstream &filein);
 	void initializeAfterReadTrial();
-	Nurbs * readNurbs(const double &customLength = 0.0f);
-	void scaleCtrlPoints();
-	void alignCtrlPoints(Nurbs *refNurbs, const double &offset = 0.0f);
-	void updateNurbs(osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double &width = 0.0f);
-	void updateNurbs(const unsigned &density,const double &width);
+
+	osg::ref_ptr<Nurbs> readNurbs(const double &customLength = 0.0f);
+	void scaleCtrlPoints(Nurbs *nurbs);
+	void alignCtrlPoints(Nurbs *thisNurbs, Nurbs *prevNurbs, const double &offset = 0.0f);
+	void updateNurbs(Nurbs *thisNurbs, osg::ref_ptr<NurbsCurve> refNB, const unsigned &density, const double &width = 0.0f);
+	void updateNurbs(Nurbs *thisNurbs, const unsigned &density, const double &width);
 	
-	osg::ref_ptr<Nurbs> _nurbs;
 	osg::ref_ptr<Vehicle> _vehicle;
 	osg::ref_ptr<Screens> _screens;
 	osg::ref_ptr<RoadSet> _roads;

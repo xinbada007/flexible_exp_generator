@@ -411,7 +411,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 		case osgGA::GUIEventAdapter::FRAME:
 
-			if (_carState->_collide)
+			if (_carState->_collide && _carState->_crashPermit)
 			{
 				const double MAXSPEED(1.0f/3.6f);
 				int sign = (_carState->_speed > 0) ? -1 : 1;

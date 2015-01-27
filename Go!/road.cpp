@@ -63,7 +63,8 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 
 	if (refTag == LWALL || refTag == RWALL)
 	{
-		path = (refTag == LWALL) ? refNurbs->_path_left : refNurbs->_path_right;
+		path = (refTag == LWALL) ? refNurbs->_wall_left : refNurbs->_wall_right;
+
 
 		//Flag the Edge for collision detect
 		{
