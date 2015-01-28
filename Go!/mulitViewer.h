@@ -24,10 +24,33 @@ public:
 
 	inline osgViewer::View * getMainView() const { return _mainView; };
 	inline osgViewer::View * getHuDView() const { return _HUDView; };
-	inline osg::Camera * getHUDCamera() const 
+
+	enum HUDPOS
 	{
-		if (_HUDView) return _HUDView->getCamera();
-		return NULL;
+		LEFT,
+		CENTRE,
+		RIGHT
+	};
+
+	inline osg::Camera * getHUDCamera(HUDPOS ref) const 
+	{
+		if (!_HUDView) return NULL;
+
+		switch (ref)
+		{
+		case::MulitViewer::LEFT:
+			return _HUDView->getSlave(0)._camera;
+			break;
+		case::MulitViewer::CENTRE:
+			return _HUDView->getSlave(_HUDView->getNumSlaves() / 2)._camera;
+			break;
+		case::MulitViewer::RIGHT:
+			return _HUDView->getSlave(_HUDView->getNumSlaves() - 1)._camera;
+			break;
+		default:
+			return NULL;
+			break;
+		}
 	}
 	inline osgViewer::View * getBGView() const { return _BGView; };
 	inline std::vector<osg::Camera*> getSlaveCamerasinMainView() const { return _slaveCamerasinMainView; };

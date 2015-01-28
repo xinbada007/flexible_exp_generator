@@ -163,13 +163,13 @@ int main(int argc, char** argv)
 
 		//Record Car
 		recorder.push_back(new Recorder(readConfig.back().get()));
-		recorder.back()->setHUDCamera(mViewer.back()->getHUDCamera());
+		recorder.back()->setHUDCamera(mViewer.back()->getHUDCamera(MulitViewer::LEFT));
 		car.back()->addUpdateCallback(recorder.back().get());
 
 		//ExperimentControl
 		expcontroller.push_back(new ExperimentCallback(readConfig.back()));
 		expcontroller.back()->setCar(car.back().get());
-		expcontroller.back()->setHUDCamera(mViewer.back()->getHUDCamera());
+		expcontroller.back()->setHUDCamera(mViewer.back()->getHUDCamera(MulitViewer::CENTRE));
 		expcontroller.back()->setMultiViewer(mViewer.back().get());
 		root.back()->addEventCallback(expcontroller.back().get());
 
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
 	while (i < totalRep)
 	{
 		MulitViewer *viewer = mViewer.at(i);
-		musicplayer->setHUDCamera(viewer->getHUDCamera());
+		musicplayer->setHUDCamera(viewer->getHUDCamera(MulitViewer::CENTRE));
 		viewer->getMainView()->addEventHandler(musicplayer);
 		viewer->run();
 

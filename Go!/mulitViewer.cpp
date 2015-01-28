@@ -188,23 +188,48 @@ osg::Camera * MulitViewer::createHUDCamerainWindow(osg::GraphicsContext *windows
 	return camera.release();
 }
 
+// void MulitViewer::createHUDView()
+// {
+// 	if (!_mainView && _HUDView)
+// 	{
+// 		return;
+// 	}
+// 	
+// 	_HUDView = new osgViewer::View;
+// 
+// 	osgViewer::Viewer::Windows windows;
+// 	this->getWindows(windows);
+// 	osg::Camera *camera = createHUDCamerainWindow(windows[0]);
+// 	// add special depth attribute
+// 	camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
+// 	camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::HUDDISPLAY);
+// 
+// 	_HUDView->setCamera(camera);
+// 	this->addView(_HUDView);
+// }
+
 void MulitViewer::createHUDView()
 {
 	if (!_mainView && _HUDView)
 	{
 		return;
 	}
-	
+
 	_HUDView = new osgViewer::View;
 
 	osgViewer::Viewer::Windows windows;
 	this->getWindows(windows);
-	osg::Camera *camera = createHUDCamerainWindow(windows[0]);
-	// add special depth attribute
-	camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
-	camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::HUDDISPLAY);
+	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+	ss->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
+	for (unsigned i = 0; i < windows.size(); i++)
+	{
+		osg::ref_ptr<osg::Camera> camera = createHUDCamerainWindow(windows[i]);
+		camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::HUDDISPLAY);
+		camera->setStateSet(ss);
 
-	_HUDView->setCamera(camera);
+		_HUDView->addSlave(camera.release(), false);
+	}
+
 	this->addView(_HUDView);
 }
 
