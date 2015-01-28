@@ -103,7 +103,6 @@ void ExperimentCallback::createObstacles()
 		return;
 	}
 
-	_opticFlowPoints = new Obstacle;
 	_obsListDrawn = false;
 
 	if (!_expSetting->_obstaclesTime->empty())
@@ -251,6 +250,7 @@ void ExperimentCallback::createOpticFlow()
 		return;
 	}
 
+	_opticFlowPoints = new Obstacle;
 	_opticFlowDrawn = false;
 
 	osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array;
