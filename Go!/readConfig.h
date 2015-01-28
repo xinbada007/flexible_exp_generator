@@ -18,8 +18,9 @@ typedef std::pair<int, enum TRIGGER_COM> triggerEnablePair;
 typedef struct Experiment :public osg::Referenced
 {
 	Experiment():
-	_NUMTRIGGERCOM(4)
+	_NUMTRIGGERCOM(5)
 	{
+		_timer = 0;
 		_startLane = 0;
 		_laneOffset = 0.0f;
 
@@ -66,6 +67,7 @@ typedef struct Experiment :public osg::Referenced
 		_deviation = 0.0f;
 		_deviationBaseline = 0.0f;
 	};
+	unsigned _timer;
 	int _startLane;
 	double _laneOffset;
 
@@ -128,7 +130,8 @@ typedef struct Experiment :public osg::Referenced
 		ROAD,
 		FLOW,
 		CRASHPERMIT,
-		SOUNDALERT
+		SOUNDALERT,
+		QUIT
 	};
 	const unsigned _NUMTRIGGERCOM;
 
@@ -243,7 +246,7 @@ typedef struct RoadSet:public osg::Referenced
 	}
 	
 	const double _laneWidth;	//laneWidth = 3.75 Meters
-	int _roadLane;
+	double _roadLane;
 	double _width;
 	double _length;
 	double _wallHeight;

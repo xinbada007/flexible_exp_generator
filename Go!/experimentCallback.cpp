@@ -532,7 +532,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			}
 			break;
 		case::osgGA::GUIEventAdapter::FRAME:
-			_expTime = carState->_timeReference;
+			_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*carState->_startTime), 0.0f);
 			deviationCheck();
 			showText();
 			dynamicChange();
@@ -613,6 +613,12 @@ void ExperimentCallback::trigger()
 					{
 						_siren->setGain(2.00f);
 						_siren->setPlay(true);
+					}
+					break;
+				case::Experiment::TRIGGER_COM::QUIT:
+					if (_mv)
+					{
+						_mv->setDone(true);
 					}
 					break;
 				default:

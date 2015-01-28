@@ -41,6 +41,7 @@ typedef struct CarState:public osg::Referenced
 
 		_frameStamp = 0;
 		_timeReference = 0.0f;
+		_startTime = INT_MAX;
 		_lastTimeR = 0.0f;
 
 		//mid-Line of current Road
@@ -114,6 +115,7 @@ typedef struct CarState:public osg::Referenced
 
 	unsigned _frameStamp;
 	double _timeReference;
+	double _startTime;
 
 	osg::Matrix _state;
 	osg::Matrix _moment;

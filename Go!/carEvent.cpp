@@ -312,6 +312,10 @@ bool CarEvent::Joystick()
 		{
 			if (_carState->_O == _vehicle->_O)
 			{
+				if (_carState->_startTime == INT_MAX)
+				{
+					_carState->_startTime = _carState->_timeReference;
+				}
 				_carState->_speed = _vehicle->_speed;
 				_speedLock = !_speedLock;
 			}
