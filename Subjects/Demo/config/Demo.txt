@@ -28,13 +28,13 @@ CarHeight:	0.15
 CarLength:	4.7
 CarPic:		../Resources/texture/car.png
 CarVisible:	0	#1=Visible	0=Invisible
-CarReset:	1	#0 = disable	1 = auto	2 = manual
+CarReset:	0	#0 = disable	1 = auto	2 = manual
 ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
-RoadLanes:	93
+RoadLanes:	100.368
 RoadLength:	1667	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-TextureWidth:	11.25
+TextureWidth:	9.18
 RoadPic:	../Resources/texture/road4096-0.png 16
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
@@ -44,7 +44,7 @@ Density:	1000
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
 WallHeight:	1
-WallRoadWidth:	11.25
+WallRoadWidth:	9.18
 WallPic:	../Resources/texture/wall1024-2.jpg 16
 
 [Subjects]
@@ -59,8 +59,8 @@ TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Na
 [Experiment]
 ##==Starting Condition===================
 Timer-Trigger:	1	#0 = use default	1 = use trigger
-Start-Lane:	-1	#1 = R	#-1 = L	#0 = Middle
-Lane-Offset:	84.375	#Negative = L	Positive = R
+Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
+Lane-Offset:	-1.875	#Negative = L	Positive = R
 
 ##==Deviation Warn Setting===============
 Deviation:	0	#Units:	Metres
@@ -104,15 +104,15 @@ OpticFlow-Height:	200
 OpticFlow-Density:	500
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	1	1	1	1	#road	#optic flow	#crash permits	#alert	#quit
-Trigger-Time:	30	0	30	15	45
-Trigger-Time:	-1	30	-1	35	-1
-Trigger-Time:	-1	-1	-1	-1	-1
+Trigger-Enable:	1	1	1	1	1	1	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Time:	15	0	15	5	0	30
+Trigger-Time:	-1	15	-1	20	15	-1
+Trigger-Time:	-1	-1	-1	-1	-1	-1
 
 ##==Text Setting=========================
 Text:	Please Change Lane	##==must line by line====================
-Textime:	15	35
-Period:		2
+Textime:	5	20
+Period:		2	2
 
 ##==Dynamic Setting======================
 #Dynamic-Change: 20

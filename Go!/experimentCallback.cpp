@@ -615,6 +615,20 @@ void ExperimentCallback::trigger()
 						_siren->setPlay(true);
 					}
 					break;
+				case::Experiment::TRIGGER_COM::NEAR_FAR_COMPUTE:
+					if (_mv)
+					{
+						osg::Camera *cam = _mv->getMainView()->getCamera();
+						if (cam->getComputeNearFarMode() == osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
+						{
+							cam->setComputeNearFarMode(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
+						}
+						else
+						{
+							cam->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+						}
+					}
+					break;
 				case::Experiment::TRIGGER_COM::QUIT:
 					if (_mv)
 					{
