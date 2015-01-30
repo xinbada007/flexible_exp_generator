@@ -360,7 +360,7 @@ void ExperimentCallback::createOpticFlow()
 		_opticFlowVersions.push_back(ver);
 	}
 	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-	osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
+	osg::ref_ptr<osg::Point> psize = new osg::Point(3.0f);
 	ss->setAttribute(psize);
 	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
