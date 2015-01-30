@@ -88,20 +88,20 @@ _music(NULL), _ifPlay(true), _cameraHUD(NULL)
 
 MusicPlayer::~MusicPlayer()
 {
-	if (!_fileMusic.empty())
-	{
-		MusicFileList::iterator i = _fileMusic.begin();
-		while (i != _fileMusic.end())
-		{
-			(*i).release();
-			i++;
-		}
-	}
-
-	if (_music)
-	{
-		_music.release();
-	}
+// 	if (!_fileMusic.empty())
+// 	{
+// 		MusicFileList::iterator i = _fileMusic.begin();
+// 		while (i != _fileMusic.end())
+// 		{
+// 			(*i).release();
+// 			i++;
+// 		}
+// 	}
+// 
+// 	if (_music)
+// 	{
+// 		_music.release();
+// 	}
 }
 
 bool MusicPlayer::joystick()

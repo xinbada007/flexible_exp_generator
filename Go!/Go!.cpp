@@ -216,11 +216,6 @@ int main(int argc, char** argv)
 		camMatrix.at(i) = NULL;
 		expcontroller.at(i) = NULL;
 
-		if (osg::Referenced::getDeleteHandler()) {
-			osg::Referenced::getDeleteHandler()->setNumFramesToRetainObjects(0);
-			osg::Referenced::getDeleteHandler()->flushAll();
-		}
-
 		osgAudio::SoundState *sound = osgAudio::SoundManager::instance()->findSoundState("GOsiren");
 		if (sound)
 		{

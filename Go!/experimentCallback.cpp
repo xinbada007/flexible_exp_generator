@@ -86,14 +86,14 @@ _opticFlowPoints(NULL)
 
 ExperimentCallback::~ExperimentCallback()
 {
-	if (_siren)
-	{
-		_siren.release();
-	}
-	if (_coin)
-	{
-		_coin.release();
-	}
+// 	if (_siren)
+// 	{
+// 		_siren.release();
+// 	}
+// 	if (_coin)
+// 	{
+// 		_coin.release();
+// 	}
 }
 
 void ExperimentCallback::createObstacles()
