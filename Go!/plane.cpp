@@ -90,21 +90,18 @@ bool Plane::isValid() const
 	return valid;
 }
 
-Plane::reverse_across_iterator::reverse_across_iterator(Plane *ref):
-_value(ref), _BACKWARD(0), _FORWARD(1)
+Plane::reverse_across_iterator::reverse_across_iterator(const reverse_across_iterator &ref) :
+_value(ref._value), _solid(ref._solid), _BACKWARD(ref._BACKWARD), _FORWARD(ref._FORWARD)
 {
 	_value = isValid() ? _value : NULL;
 	_solid = (_value) ? _value->getHomeS() : NULL;
 }
 
-Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator--()
+Plane::reverse_across_iterator::reverse_across_iterator(Plane *ref):
+_value(ref), _BACKWARD(0), _FORWARD(1)
 {
-	_value = isValid() ? _value->getNext() : NULL;
 	_value = isValid() ? _value : NULL;
-
-	across(_BACKWARD);
-
-	return *this;
+	_solid = (_value) ? _value->getHomeS() : NULL;
 }
 
 Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator++()
@@ -117,13 +114,6 @@ Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator++()
 	return *this;
 }
 
-Plane::reverse_across_iterator Plane::reverse_across_iterator::operator--(int)
-{
-	reverse_across_iterator ret(_value);
-	--(*this);
-	return ret;
-}
-
 Plane::reverse_across_iterator Plane::reverse_across_iterator::operator++(int)
 {
 	reverse_across_iterator ret(_value);
@@ -131,10 +121,126 @@ Plane::reverse_across_iterator Plane::reverse_across_iterator::operator++(int)
 	return ret;
 }
 
+Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator--()
+{
+	_value = isValid() ? _value->getNext() : NULL;
+	_value = isValid() ? _value : NULL;
+
+	across(_BACKWARD);
+
+	return *this;
+}
+
+Plane::reverse_across_iterator Plane::reverse_across_iterator::operator--(int)
+{
+	reverse_across_iterator ret(_value);
+	--(*this);
+	return ret;
+}
+
+bool Plane::reverse_across_iterator::operator==(const reverse_across_iterator &ref)
+{
+	return (_value == ref._value);
+}
+
+bool Plane::reverse_across_iterator::operator!=(const reverse_across_iterator &ref)
+{
+	return !(_value == ref._value);
+}
+
 Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator=(Plane *ref)
 {
 	_value = ref;
 	return (*this);
+}
+
+Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator=(const Plane::reverse_across_iterator &ref)
+{
+	_value = ref._value;
+	_solid = ref._solid;
+
+	return (*this);
+}
+
+Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator+=(int ref)
+{
+	Plane::reverse_across_iterator ret_prv = (*this);
+	for (int i = 0; i < ref; i++)
+	{
+		++(*this);
+		if (!this->isValid())
+		{
+			(*this) = ret_prv;
+			return (*this);
+		}
+		ret_prv = (*this);
+	}
+
+	return (*this);
+}
+
+Plane::reverse_across_iterator Plane::reverse_across_iterator::operator+(int ref)
+{
+	Plane::reverse_across_iterator ret = (*this);
+	Plane::reverse_across_iterator ret_prv = ret;
+	for (int i = 0; i < ref; i++)
+	{
+		++(ret);
+		if (!ret.isValid())
+		{
+			return ret_prv;
+		}
+		ret_prv = ret;
+	}
+
+	return ret;
+}
+
+Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator-=(int ref)
+{
+	Plane::reverse_across_iterator ret_prv = (*this);
+	for (int i = 0; i < ref; i++)
+	{
+		--(*this);
+		if (!this->isValid())
+		{
+			(*this) = ret_prv;
+			return (*this);
+		}
+		ret_prv = (*this);
+	}
+
+	return (*this);
+}
+
+Plane::reverse_across_iterator Plane::reverse_across_iterator::operator-(int ref)
+{
+	Plane::reverse_across_iterator ret = (*this);
+	Plane::reverse_across_iterator ret_prv = ret;
+	for (int i = 0; i < ref; i++)
+	{
+		--(ret);
+		if (!ret.isValid())
+		{
+			return ret_prv;
+		}
+		ret_prv = ret;
+	}
+
+	return ret;
+}
+
+void Plane::reverse_across_iterator::add(int ref)
+{
+	for (int i = 0; i < abs(ref); i++)
+	{
+		ref>0 ? ++(*this) : --(*this);
+		if (!this->isValid())
+		{
+			(*this) = NULL;
+			return;
+		}
+	}
 }
 
 Plane * Plane::reverse_across_iterator::operator*()
@@ -172,95 +278,6 @@ void Plane::reverse_across_iterator::across(unsigned flag)
 	}
 }
 
-Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator=(Plane::reverse_across_iterator &ref)
-{
-	_value = ref._value;
-	_solid = ref._solid;
-
-	return (*this);
-}
-
-Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator+=(int ref)
-{
-	Plane::reverse_across_iterator ret_prv = (*this);
-	for (int i = 0; i < ref;i++)
-	{
-		++(*this);
-		if (!this->isValid())
-		{
-			(*this) = ret_prv;
-			return (*this);
-		}
-		ret_prv = (*this);
-	}
-
-	return (*this);
-}
-
-void Plane::reverse_across_iterator::add(int ref)
-{
-	for (int i = 0; i < abs(ref);i++)
-	{
-		ref>0 ? ++(*this) : --(*this);
-		if (!this->isValid())
-		{
-			(*this) = NULL;
-			return;
-		}
-	}
-}
-
-Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator-=(int ref)
-{
-	Plane::reverse_across_iterator ret_prv = (*this);
-	for (int i = 0; i < ref;i++)
-	{
-		--(*this);
-		if (!this->isValid())
-		{
-			(*this) = ret_prv;
-			return (*this);
-		}
-		ret_prv = (*this);
-	}
-
-	return (*this);
-}
-
-Plane::reverse_across_iterator Plane::reverse_across_iterator::operator+(int ref)
-{
-	Plane::reverse_across_iterator ret = (*this);
-	Plane::reverse_across_iterator ret_prv = ret;
-	for (int i = 0; i < ref;i++)
-	{
-		++(ret);
-		if (!ret.isValid())
-		{
-			return ret_prv;
-		}
-		ret_prv = ret;
-	}
-
-	return ret;
-}
-
-Plane::reverse_across_iterator Plane::reverse_across_iterator::operator-(int ref)
-{
-	Plane::reverse_across_iterator ret = (*this);
-	Plane::reverse_across_iterator ret_prv = ret;
-	for (int i = 0; i < ref; i++)
-	{
-		--(ret);
-		if (!ret.isValid())
-		{
-			return ret_prv;
-		}
-		ret_prv = ret;
-	}
-
-	return ret;
-}
-
 Plane::reverse_iterator & Plane::reverse_iterator::operator--()
 {
 	_value = isValid() ? _value->getNext() : NULL;
@@ -281,14 +298,19 @@ Plane::reverse_iterator & Plane::reverse_iterator::operator=(Plane *ref)
 	return (*this);
 }
 
-Plane::reverse_iterator & Plane::reverse_iterator::operator=(reverse_iterator &ref)
+Plane::reverse_iterator & Plane::reverse_iterator::operator=(const reverse_iterator &ref)
 {
 	_value = ref._value;
 
 	return (*this);
 }
 
-bool Plane::reverse_iterator::operator!=(reverse_iterator &ref)
+bool Plane::reverse_iterator::operator==(const reverse_iterator &ref)
+{
+	return (_value == ref._value);
+}
+
+bool Plane::reverse_iterator::operator!=(const reverse_iterator &ref)
 {
 	return !(_value == ref._value);
 }

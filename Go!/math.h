@@ -56,13 +56,10 @@ bool ifPoint_IN_Polygon(Point refP, osg::ref_ptr<osg::Vec3dArray> refPoly, const
 
 bool isletter(const char c);
 
-bool isNumber(const char c);
-bool isNumber(const std::string &ref);
+bool isDouble(const std::string &ref, double *number);
 
 double acosR(double product);
 double asinR(double product);
-
-double uniqueRand(const int &num,const int &lower,const int &upper);
 
 struct searchIndex
 {

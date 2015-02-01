@@ -28,7 +28,7 @@ osg::ref_ptr<osg::Vec2Array> Road::universalTexture(const int i,const double siz
 	const double &std_distance = width;
 	const double repeat = size / width;
 	double tot_distance(0.0f);
-	while (j != midline->end())
+	while ((j + 1) != midline->end())
 	{
 		const osg::Vec3d mid = *(j + 1) - *(j);
 		const double cur_distance = mid.length();

@@ -525,10 +525,9 @@ void Recorder::copyandSetHUDText()
 		const unsigned seq(i - _outMoment.cbegin());
 		if (i - _outMoment.cbegin() < TypeofText::TOOBSBODY)
 		{
-			if (isNumber(**i))
+			double number(0.0f);
+			if (isDouble(**i, &number))
 			{
-				std::size_t sz;
-				float number = stof(**i, &sz);
 				int i_number = number;
 				char temp[20];
 				unsigned temp_size = sizeof(temp);
@@ -594,10 +593,9 @@ void Recorder::setHUDText()
 	{
 		if ((i - _outMoment.cbegin()) < TypeofText::TOOBSBODY)
 		{
-			if (isNumber(**i))
+			double number(0.0f);
+			if (isDouble(**i, &number))
 			{
-				std::size_t sz;
-				float number = stof(**i, &sz);
 				int i_number = number;
 				char temp[20];
 				unsigned temp_size = sizeof(temp);

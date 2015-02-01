@@ -535,52 +535,52 @@ void CarEvent::applyCarMovement()
 	}
 
 	//isNAN Test
-	bool NANTEST(true);
-	osg::Vec3dArray *testNAN = _carState->_backWheel;
-	osg::Vec3dArray::const_iterator i = testNAN->begin();
-	while (i != testNAN->end())
-	{
-		NANTEST = NANTEST && (*i).isNaN();
-		i++;
-	}
-
-	testNAN = _carState->_carArray;
-	i = testNAN->begin();
-	while (i != testNAN->end())
-	{
-		NANTEST = NANTEST && (*i).isNaN();
-		i++;
-	}
-
-	testNAN = _carState->_frontWheel;
-	i = testNAN->begin();
-	while (i != testNAN->end())
-	{
-		NANTEST = NANTEST && (*i).isNaN();
-		i++;
-	}
-
-	testNAN = _carState->_midLine;
-	i = testNAN->begin();
-	while (i != testNAN->end())
-	{
-		NANTEST = NANTEST && (*i).isNaN();
-		i++;
-	}
-
-	NANTEST = NANTEST && _carState->_heading.isNaN();
-	NANTEST = NANTEST && _carState->_direction.isNaN();
-	NANTEST = NANTEST && _carState->_directionLastFrame.isNaN();
-	NANTEST = NANTEST && _carState->_moment.isNaN();
-	NANTEST = NANTEST && _carState->_O.isNaN();
-	NANTEST = NANTEST && _carState->_O_Project.isNaN();
-	NANTEST = NANTEST && _carState->_heading.isNaN();
-	NANTEST = NANTEST && _carState->_state.isNaN();
-
-	if (NANTEST)
-	{
-		osg::notify(osg::WARN) << "NAN FOUND!!!" << std::endl;
-	}
+// 	bool NANTEST(true);
+// 	osg::Vec3dArray *testNAN = _carState->_backWheel;
+// 	osg::Vec3dArray::const_iterator i = testNAN->begin();
+// 	while (i != testNAN->end())
+// 	{
+// 		NANTEST = NANTEST && (*i).isNaN();
+// 		i++;
+// 	}
+// 
+// 	testNAN = _carState->_carArray;
+// 	i = testNAN->begin();
+// 	while (i != testNAN->end())
+// 	{
+// 		NANTEST = NANTEST && (*i).isNaN();
+// 		i++;
+// 	}
+// 
+// 	testNAN = _carState->_frontWheel;
+// 	i = testNAN->begin();
+// 	while (i != testNAN->end())
+// 	{
+// 		NANTEST = NANTEST && (*i).isNaN();
+// 		i++;
+// 	}
+// 
+// 	testNAN = _carState->_midLine;
+// 	i = testNAN->begin();
+// 	while (i != testNAN->end())
+// 	{
+// 		NANTEST = NANTEST && (*i).isNaN();
+// 		i++;
+// 	}
+// 
+// 	NANTEST = NANTEST && _carState->_heading.isNaN();
+// 	NANTEST = NANTEST && _carState->_direction.isNaN();
+// 	NANTEST = NANTEST && _carState->_directionLastFrame.isNaN();
+// 	NANTEST = NANTEST && _carState->_moment.isNaN();
+// 	NANTEST = NANTEST && _carState->_O.isNaN();
+// 	NANTEST = NANTEST && _carState->_O_Project.isNaN();
+// 	NANTEST = NANTEST && _carState->_heading.isNaN();
+// 	NANTEST = NANTEST && _carState->_state.isNaN();
+// 
+// 	if (NANTEST)
+// 	{
+// 		osg::notify(osg::WARN) << "NAN FOUND!!!" << std::endl;
+// 	}
 }
 
 void dirtyVisitor::apply(osg::Geode &geo)

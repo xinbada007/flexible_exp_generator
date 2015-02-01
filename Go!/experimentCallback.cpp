@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "experimentCallback.h"
 #include "collVisitor.h"
 #include "debugNode.h"
@@ -641,11 +641,13 @@ void ExperimentCallback::trigger()
 			}
 			_expSetting->_triggerEnable.erase(del);
 			_expSetting->_triggerTimer->erase(i);
-			if (_expSetting->_triggerEnable.empty() || _expSetting->_triggerTimer->empty())
+			if (_expSetting->_triggerTimer->empty())
 			{
 				break;
 			}
 			i = _expSetting->_triggerTimer->begin();
+			i += pos;
+			continue;
 		}
 		++i;
 	}
@@ -985,6 +987,12 @@ void ExperimentCallback::showObstacle()
 				_collisionOBSList.erase(posOBS);
 				hit = true;
 
+				if (_expSetting->_obstaclesTime->empty())
+				{
+					break;
+				}
+				obsTi = _expSetting->_obstaclesTime->begin();
+				obsTi += offset;
 				continue;
 			}
 		}

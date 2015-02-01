@@ -283,7 +283,7 @@ bool Solid::ifPointinSolid(const osg::Vec3d p) const
 		{
 			return false;
 		}
-		i++;
+		++i;
 	}
 
 	return true;

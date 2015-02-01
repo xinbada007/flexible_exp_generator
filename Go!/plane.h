@@ -13,10 +13,12 @@ public:
 	Plane(const Plane &copy, osg::CopyOp copyop = osg::CopyOp::SHALLOW_COPY);
 	~Plane();
 
-	struct iterator
+	struct iterator :
+		public std::iterator < std::input_iterator_tag, Plane >
 	{
 		iterator(){};
 		iterator(Plane *ref) :_value(ref){ _value = isValid() ? _value : NULL; };
+		iterator(const iterator &ref) :_value(ref._value){ _value = isValid() ? _value : NULL; };
 		~iterator(){};
 
 		iterator & operator++()
@@ -25,14 +27,6 @@ public:
 			_value = isValid() ? _value : NULL;
 			return *this;
 		}
-
-		iterator & operator--()
-		{
-			_value = isValid() ? _value->getPrev() : NULL;
-			_value = isValid() ? _value : NULL;
-			return *this;
-		}
-
 		iterator operator++(int)
 		{
 			iterator ret(_value);
@@ -40,6 +34,12 @@ public:
 			return ret;
 		}
 
+		iterator & operator--()
+		{
+			_value = isValid() ? _value->getPrev() : NULL;
+			_value = isValid() ? _value : NULL;
+			return *this;
+		}
 		iterator operator--(int)
 		{
 			iterator ret(_value);
@@ -47,9 +47,23 @@ public:
 			return ret;
 		}
 
+		bool operator==(const iterator &ref)
+		{
+			return (ref._value == _value);
+		}
+		bool operator!=(iterator &ref)
+		{
+			return !(ref._value == _value);
+		}
+
 		iterator & operator=(Plane *ref)
 		{
 			_value = ref;
+			return (*this);
+		}
+		iterator &operator=(const iterator &ref)
+		{
+			_value = ref._value;
 			return (*this);
 		}
 
@@ -57,6 +71,7 @@ public:
 		{
 			return _value;
 		}
+
 	private:
 		Plane *_value;
 		bool isValid()
@@ -66,53 +81,62 @@ public:
 			return true;
 		}
 	};
-	struct reverse_iterator
+
+	struct reverse_iterator :
+		public std::iterator < std::input_iterator_tag, Plane > 
 	{
 		reverse_iterator(){};
 		reverse_iterator(Plane *ref) :_value(ref){ _value = isValid() ? _value : NULL; };
+		reverse_iterator(const reverse_iterator &ref) :_value(ref._value){
+			_value = isValid() ? _value : NULL;
+		}
 		~reverse_iterator(){};
 
-		reverse_iterator & operator--();
 		reverse_iterator & operator++();
-		reverse_iterator & operator=(Plane *ref);
-		reverse_iterator & operator=(reverse_iterator &ref);
-		bool operator!=(reverse_iterator &ref);
-
-		reverse_iterator operator--(int);
 		reverse_iterator operator++(int);
+		reverse_iterator & operator--();
+		reverse_iterator operator--(int);
 
+		bool operator==(const reverse_iterator &ref);
+		bool operator!=(const reverse_iterator &ref);
+		
+		reverse_iterator & operator=(Plane *ref);
+		reverse_iterator & operator=(const reverse_iterator &ref);
+		
 		Plane * operator*();
 
 	private:
 		Plane *_value;
 		bool isValid();
 	};
+
 	struct reverse_across_iterator
 	{
-		reverse_across_iterator() :_BACKWARD(0), _FORWARD(1){};
+		reverse_across_iterator() :_BACKWARD(0), _FORWARD(1), _value(NULL), _solid(NULL) {};
+		reverse_across_iterator(const reverse_across_iterator &ref);
 		reverse_across_iterator(Plane *ref);
 		~reverse_across_iterator(){};
 
-		reverse_across_iterator & operator--();
 		reverse_across_iterator & operator++();
-		reverse_across_iterator & operator+=(int);
-		reverse_across_iterator & operator-=(int);
-		reverse_across_iterator & operator=(Plane *ref);
-		reverse_across_iterator & operator=(reverse_across_iterator &ref);
-
-		reverse_across_iterator operator+(int);
-		reverse_across_iterator operator-(int);
-		reverse_across_iterator operator--(int);
 		reverse_across_iterator operator++(int);
+		reverse_across_iterator & operator--();
+		reverse_across_iterator operator--(int);
 
+		bool operator==(const reverse_across_iterator &ref);
+		bool operator!=(const reverse_across_iterator &ref);
+
+		reverse_across_iterator & operator=(Plane *ref);
+		reverse_across_iterator & operator=(const reverse_across_iterator &ref);
+
+		reverse_across_iterator & operator+=(int);
+		reverse_across_iterator operator+(int);
+
+		reverse_across_iterator & operator-=(int);		
+		reverse_across_iterator operator-(int);
+		
 		void add(int);
 		
 		Plane * operator*();
-
-		bool operator!=(reverse_across_iterator &ref)
-		{
-			return !(_value == ref._value && _solid == ref._solid);
-		};
 
 	private:
 		Plane *_value;
@@ -123,6 +147,7 @@ public:
 		bool isValid();
 		void across(unsigned flag);
 	};
+
 	META_Node(BP, Plane);
 	inline Loop * getLoop() const { return _startLoop; };
 	inline void setLoop(Loop *ref) { _startLoop = ref; };

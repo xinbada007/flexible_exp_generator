@@ -77,8 +77,8 @@ bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane
 	//simpler method if has list
 	{
 		edgelist::const_iterator i = list.cbegin();
-		edgelist::const_iterator END = list.cend();
-		while (i != END)
+		edgelist::const_iterator listEND = list.cend();
+		while (i != listEND)
 		{
 			if ((*i)->getEdgeFlag()->_collsionEdge)
 			{
@@ -89,7 +89,7 @@ bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane
 				osg::ref_ptr<osg::Vec3dArray> rectObs = linetoRectangle(edge);
 
 				osg::Vec3dArray::const_iterator j = planeMove->begin();
-				osg::Vec3dArray::const_iterator END = planeMove->end();
+				osg::Vec3dArray::const_iterator planemoveEND = planeMove->end();
 				osg::ref_ptr<osg::Vec3dArray> lineMove = new osg::Vec3dArray;
 				lineMove->push_back(planeMove->front()); lineMove->push_back(planeMove->back());
 				do
@@ -105,9 +105,9 @@ bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane
 
 					lineMove->clear();
 					lineMove->push_back(*j); lineMove->push_back(*(++j));
-				} while (j != END);
+				} while ((j + 1) != planemoveEND);
 			}
-			i++;
+			++i;
 		}
 	}
 
@@ -136,7 +136,10 @@ Plane * Collision::ifCollide(const osg::ref_ptr<osg::Vec3dArray> planeMove, cons
 				unsigned collision_test_num(0);
 				while (collision_test_num < NUMOFPLANES && (*collision_i))
 				{
-					if (detectFinal(planeMove, *collision_i)) return *i;
+					if (detectFinal(planeMove, *collision_i))
+					{
+						return *i;
+					}
 					collision_i++;
 					collision_test_num++;
 				}
@@ -190,7 +193,7 @@ bool Collision::ifObsCollide(const Car *refC, const Obstacle *obs)
 			{
 				return true;
 			}
-			j++;
+			++j;
 		}
 		center.z() = 0.0f;
 		if (ifPoint_IN_Polygon(center, planeMove, refC->getPlane()->getLoop()->getPlaneEQU()))
@@ -201,7 +204,7 @@ bool Collision::ifObsCollide(const Car *refC, const Obstacle *obs)
 	{
 		if (obs->ifPointinSolid(*j))
 			return true;
-		j++;
+		++j;
 	}
 
 	Points *p = obs->getPoint();
@@ -294,7 +297,7 @@ obstacleList Collision::listObsCollsion(const Car *refC, const obstacleList obs)
 					distanceObsBody->at(which) = distance;
 				}
 			}
-			i++;
+			++i;
 		}
 	}
 
@@ -370,7 +373,6 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 				step = (!step) ? .05f * (*iQuad)->getHomeS()->getNumPlanes() : step;
 				Plane::reverse_across_iterator location = *iQuad;
 				Plane::reverse_across_iterator begin = location - step;
-				//Plane::reverse_across_iterator end = location + step;
 				Plane::reverse_across_iterator end = location; end.add(step);
 
 				loc = locateCar(begin, end, *iCar);
@@ -399,19 +401,6 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 				curList.push_back(loc);
 			}
 			++iCar;
-
-			
-// 			step = (!step) ? .05f * (*iQuad)->getHomeS()->getNumPlanes() : step;
-// 			Plane::reverse_across_iterator location = *iQuad;
-// 			Plane::reverse_across_iterator begin = location - step;
-// 			Plane::reverse_across_iterator end = location + step;
-// 
-// 			Plane *loc = locateCar(begin, end, *iCar);
-// 			Plane *pl = (loc) ? loc : *location;
-// 			list.push_back(pl);
-// 			curList.push_back(loc);
-// 			++iCar;
-// 			++iQuad;
 		}
 
 		if (list.size() != carArray->size() || curList.size() != carArray->size())
@@ -422,15 +411,15 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 
 	//reduce the size of possible wall that the car would collide
 	_wall_reduced.clear();
-	if (!list.empty())
+	if (!curList.empty())
 	{
-		quadList qList = list;
+		quadList qList = curList;
 		quadList::iterator listEnd = std::unique(qList.begin(), qList.end());
 		qList.erase(listEnd, qList.end());
 
 		quadList::const_iterator listBegin = qList.cbegin();
 		listEnd = qList.end();
-		while (listBegin != listEnd)
+		while ((listBegin != listEnd) && (*listBegin))
 		{
 			unsigned solidIndex = (*listBegin)->getHomeS()->getIndex();
 			unsigned planeIndex = (*listBegin)->getIndex();
@@ -444,13 +433,13 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 				while (obsBegin != obsEnd)
 				{
 					Plane::reverse_iterator reduced_begin = (*obsBegin)->getLastPlane();
-					Plane::reverse_iterator reduced_end = (*obsBegin)->getPlane();
+					Plane::reverse_iterator reduced_end = NULL;
 					Plane::reverse_iterator itPlane = std::find_if(reduced_begin, reduced_end, searchIndex(planeIndex));
 					if (itPlane != reduced_end) _wall_reduced.push_back(*itPlane);
-					obsBegin++;
+					++obsBegin;
 				}
 			}
-			listBegin++;
+			++listBegin;
 		}
 	}
 
@@ -498,7 +487,7 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		}
 
 		//collision against Wall detect
-		refC->getCarState()->_collisionQuad = listCollsion(refC, _wall_reduced);;
+		refC->getCarState()->_collisionQuad = listCollsion(refC, _wall_reduced);
 
 		//collision against Obstacle detection
 		refC->getCarState()->setObsList(listObsCollsion(refC, refCV->getObstacle()));

@@ -729,6 +729,8 @@ void ReadConfig::readTrial(ifstream &in)
 					if (found_to != config.npos)
 					{
 						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtRoad));
+						config.erase(config.begin(), config.begin() + found_to);
+						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 					}
 					else
 					{
@@ -736,8 +738,6 @@ void ReadConfig::readTrial(ifstream &in)
 						config.clear();
 					}
 					_subjects->_roads.push_back(txtRoad);
-					config.erase(config.begin(), config.begin() + found_to);
-					config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				}
 				continue;
 			}
@@ -1113,6 +1113,8 @@ void ReadConfig::readTrial(ifstream &in)
 					if (found_to != config.npos)
 					{
 						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtRoad));
+						config.erase(config.begin(), config.begin() + found_to);
+						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 					}
 					else
 					{
@@ -1120,8 +1122,6 @@ void ReadConfig::readTrial(ifstream &in)
 						config.clear();
 					}
 					_roads->_roadTxt.push_back(txtRoad);
-					config.erase(config.begin(), config.begin() + found_to);
-					config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				}
 				continue;
 			}
@@ -1543,6 +1543,8 @@ void ReadConfig::readTrial(ifstream &in)
 					if (found_to != config.npos)
 					{
 						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtOBS));
+						config.erase(config.begin(), config.begin() + found_to);
+						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 					}
 					else
 					{
@@ -1550,8 +1552,6 @@ void ReadConfig::readTrial(ifstream &in)
 						config.clear();
 					}
 					_experiment->_obsArray.push_back(txtOBS);
-					config.erase(config.begin(), config.begin() + found_to);
-					config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
 				}
 				continue;
 			}

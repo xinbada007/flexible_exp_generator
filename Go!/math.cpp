@@ -2,6 +2,7 @@
 #include "math.h"
 
 #include <algorithm>
+#include <sstream>
 
 extern double z_deepest = eps_1000;
 
@@ -472,16 +473,17 @@ bool isNumber(const char c)
 	return false;
 }
 
-bool isNumber(const std::string &ref)
+bool isDouble(const std::string &ref, double *number)
 {
-	try
+	std::stringstream ss;
+	ss << ref;
+	ss >> *number;
+	if (ss.fail())
 	{
-		stod(ref);
-	}
-	catch (std::invalid_argument&)
-	{
+		*number = 0.0f;
 		return false;
 	}
+
 	return true;
 }
 
@@ -497,18 +499,6 @@ double asinR(double product)
 	int sign = (product > 0) ? 1 : -1;
 	product = (abs(product) > 1.0f) ? sign : product;
 	return asin(product);
-}
-
-double uniqueRand(const int &num, const int &lower, const int &upper)
-{
-	srand(unsigned (time(NULL)));
-	std::vector<int> a(upper - lower + 1, 0);
-	std::vector<int> b(upper - lower + 1, 0);
-
-	for (int i = 0; i < upper - lower; i++)
-	{
-		b[i] = lower + i;
-	}
 }
 
 frameRate * frameRate::instance()
