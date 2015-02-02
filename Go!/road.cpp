@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "road.h"
 #include "edge.h"
+#include "collVisitor.h"
 
 Road::Road() :
 _LEFTWALL(1), _RIGHTWALL(-1), _roadSet(NULL)
@@ -233,6 +234,14 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 
 		i++;
 	}
+
+	CollVisitor *cv = CollVisitor::instance();
+	cv->setMode(ROADTAG::ROAD);
+	this->accept(*cv);
+	cv->setMode(ROADTAG::RWALL);
+	this->accept(*cv);
+	cv->setMode(ROADTAG::LWALL);
+	this->accept(*cv);
 }
 
 osg::Group * Road::addLogRoadtoList(LogicRoad *refLR)

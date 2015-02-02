@@ -417,12 +417,11 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 			if (_carState->_collide && _carState->_crashPermit)
 			{
-				unsigned obs = _carState->getObsList().empty() ? 0 : 1;
-				unsigned wall = _carState->_collisionQuad.empty() ? 0 : 1;
-				osg::notify(osg::NOTICE) << "COLLISION DETECTED" << std::endl;
-				osg::notify(osg::NOTICE) << "REASON:\t" << "obs:\t" << obs << "\t" << "wall:\t" << wall << std::endl;
-				osg::notify(osg::NOTICE) << "DETECTION:\t" << "Collision" << _carState->_collide << "\t" << "Crash Permit:\t" << _carState->_crashPermit << std::endl;
-				getchar();
+// 				unsigned obs = _carState->getObsList().empty() ? 0 : 1;
+// 				unsigned wall = _carState->_collisionQuad.empty() ? 0 : 1;
+// 				osg::notify(osg::DEBUG_INFO) << "COLLISION DETECTED" << std::endl;
+// 				osg::notify(osg::DEBUG_INFO) << "REASON:\t" << "obs:\t" << obs << "\t" << "wall:\t" << wall << std::endl;
+// 				osg::notify(osg::DEBUG_INFO) << "DETECTION:\t" << "Collision" << _carState->_collide << "\t" << "Crash Permit:\t" << _carState->_crashPermit << std::endl;
 
 				const double MAXSPEED(1.0f/3.6f);
 				int sign = (_carState->_speed > 0) ? -1 : 1;
