@@ -144,10 +144,25 @@ typedef struct Experiment :public osg::Referenced
 	std::string _deviationSiren;
 
 protected:
-	virtual ~Experiment(){ std::cout << "Deconstruct Experiment" << std::endl; };
+	virtual ~Experiment()
+	{
+		std::cout << "Deconstruct Experiment" << std::endl;
+		_textTime = NULL;
+		_textPeriod = NULL;
+		_dynamicChange = NULL;
+		_imgDynamic = NULL;
+		_obstaclesTime = NULL;
+		_obstacleRange = NULL;
+		_obstaclePos = NULL;
+		_obsPosOffset = NULL;
+		_obsCollision = NULL;
+		_imgObsArray = NULL;
+		_imgOBS = NULL;
+		_triggerTimer = NULL;
+	};
 }Experiment;
 
-typedef struct Nurbs:public osg::Referenced
+typedef struct Nurbs :public osg::Referenced
 {
 	Nurbs()
 	{
@@ -195,6 +210,32 @@ typedef struct Nurbs:public osg::Referenced
 
 		_order = copy._order;
 	};
+	Nurbs & operator=(const Nurbs & copy)
+	{
+		if (this != &copy)
+		{
+			_path = new osg::Vec3dArray(copy._path->begin(), copy._path->end());
+			_path_left = new osg::Vec3dArray(copy._path_left->begin(), copy._path_left->end());
+			_path_right = new osg::Vec3dArray(copy._path_right->begin(), copy._path_right->end());
+
+			_wall_left = new osg::Vec3dArray(copy._wall_left->begin(), copy._wall_left->end());
+			_wall_right = new osg::Vec3dArray(copy._wall_right->begin(), copy._wall_right->end());
+
+			_ctrl_left = new osg::Vec3dArray(copy._ctrl_left->begin(), copy._ctrl_left->end());
+			_ctrl_right = new osg::Vec3dArray(copy._ctrl_right->begin(), copy._ctrl_right->end());
+			_ctrlPoints = new osg::Vec3dArray(copy._ctrlPoints->begin(), copy._ctrlPoints->end());
+
+			_knotVector = new osg::DoubleArray(copy._knotVector->begin(), copy._knotVector->end());
+
+			_radius = new osg::DoubleArray(copy._radius->begin(), copy._radius->end());
+			_radiusL = new osg::DoubleArray(copy._radiusL->begin(), copy._radiusL->end());
+			_radiusR = new osg::DoubleArray(copy._radiusR->begin(), copy._radiusR->end());
+
+			_scale = copy._scale;
+
+			_order = copy._order;
+		}
+	}
 	osg::ref_ptr <osg::Vec3dArray> _path;
 	osg::ref_ptr <osg::Vec3dArray> _path_left;
 	osg::ref_ptr <osg::Vec3dArray> _path_right;
@@ -217,7 +258,26 @@ typedef struct Nurbs:public osg::Referenced
 	unsigned _order;
 
 protected:
-	virtual ~Nurbs(){ std::cout << "Deconstruct Nurbs" << std::endl; };
+	virtual ~Nurbs()
+	{
+		std::cout << "Deconstruct Nurbs" << std::endl; 
+		_path = NULL;
+		_path_left = NULL;
+		_path_right = NULL;
+
+		_wall_left = NULL;
+		_wall_right = NULL;
+
+		_ctrl_left = NULL;
+		_ctrl_right = NULL;
+		_ctrlPoints = NULL;
+
+		_knotVector = NULL;
+
+		_radius = NULL;
+		_radiusR = NULL;
+		_radiusL = NULL;
+	};
 }Nurbs;
 
 typedef struct RoadSet:public osg::Referenced
@@ -273,7 +333,13 @@ typedef struct RoadSet:public osg::Referenced
 	int _visible;
 
 protected:
-	virtual ~RoadSet(){ std::cout << "Deconstruct RoadSet" << std::endl; };
+	virtual ~RoadSet()
+	{ 
+		std::cout << "Deconstruct RoadSet" << std::endl; 
+
+		_imgRoad = NULL;
+		_imgWall = NULL;
+	};
 }RoadSet;
 
 typedef struct Vehicle:public osg::Referenced
@@ -337,7 +403,12 @@ typedef struct Vehicle:public osg::Referenced
 	};
 
 protected:
-	virtual ~Vehicle(){ std::cout << "Deconstruct Vehicle" << std::endl; };
+	virtual ~Vehicle()
+	{ 
+		std::cout << "Deconstruct Vehicle" << std::endl; 
+
+		_V = NULL;
+	};
 
 }Vehicle;
 
@@ -376,7 +447,14 @@ typedef struct Screens:public osg::Referenced
 	osg::ref_ptr<osg::Image> _imgBg;
 
 protected:
-	virtual ~Screens(){ std::cout << "Deconstruct Screens" << std::endl; };
+	virtual ~Screens()
+	{ 
+		std::cout << "Deconstruct Screens" << std::endl; 
+
+		_scrs = NULL;
+		_realworld = NULL;
+		_imgBg = NULL;
+	};
 }Screens;
 
 typedef struct CameraSet :public osg::Referenced
@@ -391,7 +469,12 @@ typedef struct CameraSet :public osg::Referenced
 	bool _eyeTracker;
 
 protected:
-	virtual ~CameraSet(){ std::cout << "Deconstruct CameraSet" << std::endl; };
+	virtual ~CameraSet()
+	{
+		std::cout << "Deconstruct CameraSet" << std::endl; 
+
+		_offset = NULL;
+	};
 }CameraSet;
 
 typedef struct Subjects:public osg::Referenced

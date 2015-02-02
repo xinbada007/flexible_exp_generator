@@ -10,6 +10,8 @@ class CollVisitor :
 	public osg::NodeVisitor
 {
 public:
+	virtual ~CollVisitor();
+
 	virtual void reset();
 	void setMode(ROADTAG _ref);
 	inline ROADTAG getMode() { return _mode; };
@@ -21,7 +23,6 @@ public:
 
 private:
 	CollVisitor();
-	virtual ~CollVisitor();
 	void pushLR(osg::ref_ptr<LogicRoad> refLR);
 
 	obstacleList _obs;

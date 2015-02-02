@@ -86,14 +86,50 @@ _opticFlowPoints(NULL)
 
 ExperimentCallback::~ExperimentCallback()
 {
-// 	if (_siren)
-// 	{
-// 		_siren.release();
-// 	}
-// 	if (_coin)
-// 	{
-// 		_coin.release();
-// 	}
+	_expSetting = NULL;
+	_car = NULL;
+	_cVisitor = NULL;
+
+	_dynamic = NULL;
+	std::vector<osg::ref_ptr<Obstacle>>::iterator obs_i = _obstacleList.begin();
+	while (obs_i != _obstacleList.end())
+	{
+		*obs_i = NULL;
+		++obs_i;
+	}
+	obs_i = _collisionOBSList.begin();
+	while (obs_i != _collisionOBSList.end())
+	{
+		*obs_i = NULL;
+		++obs_i;
+	}
+
+	_opticFlowPoints = NULL;
+
+	std::vector<std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>, unsigned>>::iterator _opticVersion_i = _opticFlowVersions.begin();
+	while (_opticVersion_i != _opticFlowVersions.end())
+	{
+		std::vector<osg::ref_ptr<osg::Vec3Array>>::iterator array_i = (*_opticVersion_i).first.begin();
+		while (array_i != (*_opticVersion_i).first.end())
+		{
+			*array_i = NULL;
+			++array_i;
+		}
+		++_opticVersion_i;
+	}
+
+	_siren = NULL;
+	_coin = NULL;
+
+	_coinSample = NULL;
+	_cameraHUD = NULL;
+	_textHUD = NULL;
+	_geodeHUD = NULL;
+	_root = NULL;
+	_road = NULL;
+	_mv = NULL;
+	_anmCallback = NULL;
+	_centerList = NULL;
 }
 
 void ExperimentCallback::createObstacles()

@@ -7,7 +7,6 @@
 
 #include <vector>
 
-//typedef std::vector<osg::ref_ptr<LogicRoad>> logicRoadList;
 typedef std::vector<LogicRoad *> logicRoadList;
 
 class Road :
@@ -21,8 +20,6 @@ public:
 	void genRoad(osg::ref_ptr<ReadConfig> refRC);
 	const osg::ref_ptr<RoadSet> getRoadSet() const { return _roadSet; };
 private:
-	virtual ~Road();
-
 	osg::ref_ptr<osg::Vec2Array> universalTexture(const int i,const double size);
 	osg::ref_ptr<LogicRoad> universalLogicRoad(const int i, ROADTAG refTag);
 	osg::Group * addLogRoadtoList(LogicRoad *refLR);
@@ -38,6 +35,8 @@ private:
 
 	logicRoadList _ctrlList;
 	logicRoadList _midList;
+protected:
+	virtual ~Road();
 };
 
 

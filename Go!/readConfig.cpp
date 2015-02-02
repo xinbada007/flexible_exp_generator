@@ -51,6 +51,16 @@ _camset(NULL), _subjects(NULL), _saveState(NULL), _dynamicState(NULL)
 ReadConfig::~ReadConfig()
 {
 	std::cout << "Deconstruct ReadConfig" << std::endl;
+
+	_vehicle = NULL;
+	_screens = NULL;
+	_roads = NULL;
+	_camset = NULL;
+	_subjects = NULL;
+	_experiment = NULL;
+	_saveState = NULL;
+	_dynamicState = NULL;
+	_measuerment = NULL;
 }
 
 void ReadConfig::assignConfig()

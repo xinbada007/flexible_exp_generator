@@ -16,6 +16,9 @@ EulerPoly(copy, copyop), _vehicle(copy._vehicle), _carState(copy._carState)
 Car::~Car()
 {
 	std::cout << "Deconsturct Car" << std::endl;
+
+	_vehicle = NULL;
+	_carState = NULL;
 }
 
 void Car::genCar(osg::ref_ptr<ReadConfig> refRC)

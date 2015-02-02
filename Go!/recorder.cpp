@@ -75,6 +75,11 @@ Recorder::~Recorder()
 	}
 
 	std::cout << "Deconstruct Recorder" << std::endl;
+
+	_statusText = NULL;
+	_cameraHUD = NULL;
+	_geodeHUD = NULL;
+	_rc = NULL;
 }
 
 bool Recorder::output()
@@ -121,16 +126,21 @@ bool Recorder::output()
 			const std::string filename = _rc->getSubjects()->getRecPath() + "\\roads.txt";
 			const std::string filename_left = _rc->getSubjects()->getRecPath() + "\\roadsLeft.txt";
 			const std::string filename_right = _rc->getSubjects()->getRecPath() + "\\roadsRight.txt";
+			const std::string filename_wallLeft = _rc->getSubjects()->getRecPath() + "\\wallLeft.txt";
+			const std::string filename_wallRight = _rc->getSubjects()->getRecPath() + "\\wallRight.txt";
 			ofstream wout(filename);
 			ofstream wout_left(filename_left);
 			ofstream wout_right(filename_right);
-			if (!wout || !wout_left || !wout_right)
+			ofstream wout_wallLeft(filename_wallLeft);
+			ofstream wout_wallRight(filename_wallRight);
+			if (!wout || !wout_left || !wout_right || !wout_wallRight || !wout_wallLeft)
 			{
 				osg::notify(osg::FATAL) << "cannot create roads file" << std::endl;
 			}
 			else
 			{
 				string roads, roads_left, roads_right;
+				string wallsLeft, wallsRight;
 				char tempd[20];
 				const unsigned size_tempd(sizeof(tempd));
 				const unsigned numDigit(6);
@@ -140,6 +150,9 @@ bool Recorder::output()
 					osg::Vec3dArray::const_iterator j = (*i)->_path->begin();
 					osg::Vec3dArray::const_iterator j_left = (*i)->_path_left->begin();
 					osg::Vec3dArray::const_iterator j_right = (*i)->_path_right->begin();
+
+					osg::Vec3dArray::const_iterator w_left = (*i)->_wall_left->begin();
+					osg::Vec3dArray::const_iterator w_right = (*i)->_wall_right->begin();
 
 					osg::DoubleArray::const_iterator j_radius = (*i)->_radius->begin();
 					osg::DoubleArray::const_iterator j_radiusL = (*i)->_radiusL->begin();
@@ -208,16 +221,47 @@ bool Recorder::output()
 							roads_right += tempd;
 							roads_right += "\t";
 						}
+						if (w_left != (*i)->_wall_left->end())
+						{
+							_gcvt_s(tempd, size_tempd, (*w_left).x(), numDigit);
+							wallsLeft += tempd;
+							wallsLeft += "\t";
+							_gcvt_s(tempd, size_tempd, (*w_left).y(), numDigit);
+							wallsLeft += tempd;
+							wallsLeft += "\t";
+							_gcvt_s(tempd, size_tempd, (*w_left).z(), numDigit);
+							wallsLeft += tempd;
+							wallsLeft += "\t";
+							w_left++;
+						}
+						if (w_right != (*i)->_wall_right->end())
+						{
+							_gcvt_s(tempd, size_tempd, (*w_right).x(), numDigit);
+							wallsRight += tempd;
+							wallsRight += "\t";
+							_gcvt_s(tempd, size_tempd, (*w_right).y(), numDigit);
+							wallsRight += tempd;
+							wallsRight += "\t";
+							_gcvt_s(tempd, size_tempd, (*w_right).z(), numDigit);
+							wallsRight += tempd;
+							wallsRight += "\t";
+							w_right++;
+						}
 
 						roads += "\n";
 						roads_left += "\n";
 						roads_right += "\n";
+
+						wallsLeft += "\n";
+						wallsRight += "\n";
 					}
 					i++;
 				}
 				wout << roads << std::endl;
 				wout_left << roads_left << std::endl;
 				wout_right << roads_right << std::endl;
+				wout_wallLeft << wallsLeft << std::endl;
+				wout_wallRight << wallsRight << std::endl;
 			}
 		}
 	}

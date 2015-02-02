@@ -20,7 +20,6 @@ class MulitViewer :
 public:
 	MulitViewer();
 	MulitViewer(osg::ref_ptr<ReadConfig> refRC);
-	virtual ~MulitViewer();
 
 	inline osgViewer::View * getMainView() const { return _mainView; };
 	inline osgViewer::View * getHuDView() const { return _HUDView; };
@@ -70,5 +69,8 @@ private:
 	osg::ref_ptr<osgViewer::View> _HUDView;
 	osgText::Text* _HUDText;
 	osg::ref_ptr<osgViewer::View> _BGView;
+
+protected:
+	virtual ~MulitViewer();
 };
 

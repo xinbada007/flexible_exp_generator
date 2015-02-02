@@ -11,6 +11,8 @@ _frame(0), _pause(true)
 
 CarReplay::~CarReplay()
 {
+	_mTransform = NULL;
+	_carState = NULL;
 }
 
 void CarReplay::operator()(osg::Node *node, osg::NodeVisitor *nv)

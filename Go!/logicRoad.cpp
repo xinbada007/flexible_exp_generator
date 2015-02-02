@@ -25,6 +25,18 @@ _eFlagArray(copy._eFlagArray)
 LogicRoad::~LogicRoad()
 {
 	osg::notify(osg::DEBUG_INFO) << "Deconstruct logicRoad:\t" << this->_tag << std::endl;
+
+	_eFlag = NULL;
+	std::vector<osg::ref_ptr<osg::Vec3dArray>>::iterator edge_i = _eFlagArray.begin();
+	while (edge_i != _eFlagArray.end())
+	{
+		*edge_i = NULL;
+		++edge_i;
+	}
+
+	_project_LineV = NULL;
+	_next = NULL;
+	_prev = NULL;
 }
 
 void LogicRoad::line1D(const osg::Vec3dArray *V1, const osg::Vec3dArray *V2)

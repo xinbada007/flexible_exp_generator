@@ -17,6 +17,40 @@ _roadList(copy._roadList), _lWallList(copy._lWallList), _rWallList(copy._rWallLi
 Road::~Road()
 {
 	std::cout << "Deconstruct Road" << std::endl;
+	_roadSet = NULL;
+
+	std::vector<LogicRoad *>::iterator logic_i = _roadList.begin();
+	while (logic_i != _roadList.end())
+	{
+		*logic_i = NULL;
+		++logic_i;
+	}
+
+	logic_i = _lWallList.begin();
+	while (logic_i != _lWallList.end())
+	{
+		*logic_i = NULL;
+		++logic_i;
+	}
+
+	logic_i = _rWallList.begin();
+	while (logic_i != _rWallList.end())
+	{
+		*logic_i = NULL;
+		++logic_i;
+	}
+	logic_i = _ctrlList.begin();
+	while (logic_i != _ctrlList.end())
+	{
+		*logic_i = NULL;
+		++logic_i;
+	}
+	logic_i = _midList.begin();
+	while (logic_i != _midList.end())
+	{
+		*logic_i = NULL;
+		++logic_i;
+	}
 }
 
 osg::ref_ptr<osg::Vec2Array> Road::universalTexture(const int i,const double size)

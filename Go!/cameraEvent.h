@@ -9,9 +9,9 @@ class CameraEvent :
 {
 public:
 	CameraEvent();
-	virtual ~CameraEvent();
 	void genCamera(osg::ref_ptr<ReadConfig> refRC);
 protected:
+	virtual ~CameraEvent();
 	virtual osg::Matrixd getInverseMatrix() const;
 	virtual osg::Matrixd getMatrix() const;
 	virtual void setByInverseMatrix(const osg::Matrixd& matrix);

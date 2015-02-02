@@ -102,6 +102,19 @@ MusicPlayer::~MusicPlayer()
 // 	{
 // 		_music.release();
 // 	}
+
+	_buttons = NULL;
+	_music = NULL;
+	std::vector<osg::ref_ptr<osgAudio::FileStream>>::iterator file_i = _fileMusic.begin();
+	while (file_i != _fileMusic.end())
+	{
+		*file_i = NULL;
+		++file_i;
+	}
+
+	_cameraHUD = NULL;
+	_geodeHUD = NULL;
+	_textHUD = NULL;
 }
 
 bool MusicPlayer::joystick()

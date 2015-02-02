@@ -10,7 +10,6 @@ typedef std::vector<Plane*> quadList;
 typedef std::vector<Solid*> solidList;
 typedef std::vector<Obstacle*> obstacleList;
 
-
 typedef struct CarState:public osg::Referenced
 {
 	CarState()
@@ -156,7 +155,6 @@ typedef struct CarState:public osg::Referenced
 	inline obstacleList getObsList() const { return _obsList; };
 	inline osg::ref_ptr<osg::DoubleArray> getDistancetoObsBody() const { return _distancetoObsBody; };
 private:
-	~CarState(){ std::cout << "Deconstruct CarState" << std::endl; };
 	mutable double _D_Speed;
 	mutable double _R_Speed;
 	mutable double _D_Angle;
@@ -171,6 +169,20 @@ private:
 
 	obstacleList _obsList;
 	osg::ref_ptr<osg::DoubleArray> _distancetoObsBody;
+protected:
+	~CarState()
+	{ 
+		std::cout << "Deconstruct CarState" << std::endl; 
+
+		_midLine = NULL;
+		_backWheel = NULL;
+		_frontWheel = NULL;
+		_carArray = NULL;
+		_lastCarArray = NULL;
+		_saveState = NULL;
+		_dynamicState = NULL;
+		_distancetoObsBody = NULL;
+	};
 }CarState;
 
 class Car:public EulerPoly
@@ -183,8 +195,9 @@ public:
 	Vehicle * getVehicle() const { return _vehicle.get(); };
 	CarState * getCarState() const { return _carState.get(); };
 private:
-	virtual ~Car();
 	osg::ref_ptr<Vehicle> _vehicle;
 	osg::ref_ptr<CarState> _carState;
+protected:
+	virtual ~Car();
 };
 

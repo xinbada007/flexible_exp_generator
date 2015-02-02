@@ -16,6 +16,18 @@ _screens(NULL), _mainView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL)
 MulitViewer::~MulitViewer()
 {
 	std::cout << "Deconstruct MulitViewer" << std::endl;
+
+	_screens = NULL;
+	_mainView = NULL;
+	std::vector<osg::Camera*>::iterator cam_i = _slaveCamerasinMainView.begin();
+	while (cam_i != _slaveCamerasinMainView.end())
+	{
+		*cam_i = NULL;
+		++cam_i;
+	}
+	_HUDView = NULL;
+	_HUDText = NULL;
+	_BGView = NULL;
 }
 
 void MulitViewer::genMainView(osg::ref_ptr<ReadConfig> refRC)

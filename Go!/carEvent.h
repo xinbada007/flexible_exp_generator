@@ -11,7 +11,6 @@ public:
 	CarEvent();
 	void operator()(osg::Node *node, osg::NodeVisitor *nv);
 private:
-	~CarEvent();
 	void applyCarMovement();
 	void calculateCarMovement();
 
@@ -39,6 +38,8 @@ private:
 	bool _updated;
 
 	osg::ref_ptr<osg::UIntArray> _buttons;
+protected:
+	~CarEvent();
 };
 
 class dirtyVisitor :
