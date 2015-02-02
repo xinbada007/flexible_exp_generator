@@ -7,6 +7,7 @@
 #include "loop.h"
 
 #include <osg/MatrixTransform>
+#include <osg/Geode>
 
 Solid::Solid():
 _next(NULL), _prev(NULL), _updated(false), _numPoints(0), _numPlanes(0),
@@ -14,7 +15,7 @@ _startPlane(NULL), _startE(NULL), _startP(NULL), _texCoord(NULL), _imgTexture(NU
 _lastPlane(NULL), _index(0), _texMode(false), _ccw(true), _ccwupdated(false), _maxAnisotropy(1.0f), _solidType(Solid::solidType::SD_UNDEFINED),
 _pointsColorArray(NULL)
 {
-
+	_solidchildGeode = NULL;
 }
 
 Solid::Solid(const Solid &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
@@ -22,9 +23,8 @@ osg::Switch(copy,copyop),
 _next(copy._next), _prev(copy._prev), _updated(copy._updated), _numPoints(copy._numPoints), _numPlanes(copy._numPlanes),
 _startPlane(copy._startPlane), _startE(copy._startE), _startP(copy._startP), _texCoord(copy._texCoord), _imgTexture(copy._imgTexture),
 _lastPlane(copy._lastPlane), _index(copy._index), _texMode(copy._texMode), _ccw(copy._ccw), _ccwupdated(copy._ccwupdated),
-_maxAnisotropy(copy._maxAnisotropy), _solidType(copy._solidType), _pointsColorArray(copy._pointsColorArray)
+_maxAnisotropy(copy._maxAnisotropy), _solidType(copy._solidType), _pointsColorArray(copy._pointsColorArray), _solidchildGeode(copy._solidchildGeode)
 {
-
 }
 
 Solid::~Solid()
@@ -65,6 +65,8 @@ Solid::~Solid()
 		} while (refP);
 	}
 	_startP = NULL;
+
+	_solidchildGeode = NULL;
 }
 
 Plane * Solid::getAbstract() const
@@ -126,6 +128,24 @@ void Solid::addPointtoList(Points *refP)
 	refP->setIndex(_numPoints);
 }
 
+// void Solid::traverse()
+// {
+// 	if (_updated)
+// 	{
+// 		return;
+// 	}
+// 
+// 	Plane * drawPL = _startPlane;
+// 
+// 	while (drawPL && !drawPL->getAbstract())
+// 	{
+// 		this->addChild(drawPL->asGeode());
+// 		drawPL = drawPL->getNext();
+// 	}
+// 
+// 	_updated = true;
+// }
+
 void Solid::traverse()
 {
 	if (_updated)
@@ -133,11 +153,14 @@ void Solid::traverse()
 		return;
 	}
 
-	Plane * drawPL = _startPlane;
+	_solidchildGeode = new osg::Geode;
+	this->addChild(_solidchildGeode);
 
+	Plane *drawPL = _startPlane;
 	while (drawPL && !drawPL->getAbstract())
 	{
-		this->addChild(drawPL->asGeode());
+		_solidchildGeode->addDrawable(drawPL->asGeometry());
+		drawPL->traverse();
 		drawPL = drawPL->getNext();
 	}
 
@@ -329,27 +352,19 @@ void Solid::caclCCW() const
 
 void Solid::multiplyMatrix(const osg::Matrixd &m)
 {
-	osg::MatrixTransform *mt = dynamic_cast<osg::MatrixTransform*>(this->getParent(0));
-	if (mt)
+	osg::ref_ptr<osg::MatrixTransform> mt = dynamic_cast<osg::MatrixTransform*>(this->getParent(0));
+	if (!mt)
 	{
-		mt->setMatrix(m);
-
-		Points *p = _startP;
-		while (p)
-		{
-			p->setPoint(p->getPoint() * m);
-			p = p->getNext();
-		}
+		mt = new osg::MatrixTransform;
+		this->addParent(mt);
 	}
 
-	else
+	mt->setMatrix(m);
+	Points *p = _startP;
+	while (p)
 	{
-		Plane *pl = _startPlane;
-		while (pl)
-		{
-			pl->multiplyMatrix(m);
-			pl = pl->getNext();
-		}
+		p->setPoint(p->getPoint() * m);
+		p = p->getNext();
 	}
 
 	absoluteTerritory.center = absoluteTerritory.center * m;

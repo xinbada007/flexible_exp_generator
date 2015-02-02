@@ -53,17 +53,17 @@ bool Collision::detectFirst(const osg::ref_ptr<osg::Vec3dArray> planeMove, const
 	return false;
 }
 
-bool Collision::detectSecond(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Plane *planeObs)
-{
-	osg::BoundingBox bbMove;
-	osg::Vec3dArray::const_iterator i = planeMove->begin();
-	while (i != planeMove->end())
-	{
-		bbMove.expandBy(*i++);
-	}
-
-	return bbMove.intersects(planeObs->getBoundingBox());
-}
+// bool Collision::detectSecond(const osg::ref_ptr<osg::Vec3dArray> planeMove, const Plane *planeObs)
+// {
+// 	osg::BoundingBox bbMove;
+// 	osg::Vec3dArray::const_iterator i = planeMove->begin();
+// 	while (i != planeMove->end())
+// 	{
+// 		bbMove.expandBy(*i++);
+// 	}
+// 
+// 	return bbMove.intersects(planeObs->getBoundingBox());
+// }
 
 bool Collision::detectFinal(const osg::ref_ptr<osg::Vec3dArray> planeMove, Plane *planeObs)
 {

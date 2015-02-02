@@ -1,0 +1,88 @@
+#only comma, colon, space, and semicolon are allowed to use
+#folder path MUST NOT contain SPACE
+
+TrialConfig
+
+[ScreenSettings]
+#Num of Screent starts from 0
+Hdistance:	0.6	#5.44	#0.6
+Vdistance:	1.5	#1.25
+screen:		0
+aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		42.175	#Disable when RealWorld is enabled
+zNear:		0.1
+zFar:		1000
+RealWorld:	0
+MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
+
+[CarSettings]
+Acceleration:	1
+DynamicSensitiveLevel:	20	#could be float number like 1.2532564766578
+CarSpeed:	100
+SpeedIncr:	1
+CarWheel:	42.5
+WheelAccl:	0	#720	#180	#0	#normally do not apply this
+CarWidth:	1.7
+CarHeight:	0.15
+CarLength:	4.7
+CarVisible:	0	#1=Visible	0=Invisible
+CarReset:	0	#0 = disable	1 = auto	2 = manual
+ResetMode:	1	#0 = center	1 = nearest
+
+[RoadSettings]
+RoadLanes:	100.368
+RoadLength:	1833	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+TextureWidth:	9.18
+RoadPic:	../Resources/texture/road4096-0.png 16
+
+#RoadTxt is disabled when Roads in Subjects Section is enabled
+RoadTxt:	../Resources/roads/Line.txt;
+Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
+Density:	1000
+RoadVisible:	1	#1 = Visible	0 = Invisible
+
+WallHeight:	1
+WallRoadWidth:	9.18
+WallPic:	../Resources/texture/wall1024-2.jpg 16
+
+[Subjects]
+Name:		s01
+Age:		
+Gender:		
+Driving:		#how many years since driving
+
+TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Name
+
+[Experiment]
+##==Starting Condition===================
+Timer-Trigger:	0	#0 = use default	1 = use trigger
+Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
+Lane-Offset:	1.875	#Negative = L	Positive = R
+
+##==Deviation Warn Setting===============
+Deviation-Siren:	../Resources/sound/alert.wav
+
+##==Optic Flow Setting===========================================
+OpticFlow:		1	#1 = Enable	0= Disable
+OpticFlow-Visible:	1000	#only visible within 100 meters
+OpticFlow-FrameCounts:	0	
+OpticFlow-Versions:	0
+DepthDensity:		1	#every x meters
+OpticFlow-Width:	4000
+OpticFlow-Height:	500
+OpticFlow-Density:	100
+
+##==Trigger Setting======================
+Trigger-Enable:	1	1	1	1	1	1	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Time:	16	0	16	4	0	30
+Trigger-Time:	-1	16	-1	18	16	-1
+Trigger-Time:	-1	-1	-1	-1	-1	-1
+
+##==Text Setting=========================
+Text:	Please Change Lane	##==must line by line====================
+Text:	Road Disappears in 3s
+Text:	Please Change Lane
+Text:	Quit in 2s
+Text:	Quit in 1s
+Textime:	4	13	18	28	29
+Period:		2	1	2	1	1

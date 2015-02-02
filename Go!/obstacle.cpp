@@ -79,7 +79,7 @@ void Obstacle::genTextureNoZ(const bool perGmtry /* = false */)
 			tex->push_back(osg::Vec2(endI, 0.0f));
 			tex->push_back(osg::Vec2(endI, 1.0f));
 			tex->push_back(osg::Vec2(startI, 1.0f));
-			(*i)->getLoop()->setTexCoord(0, tex.release());
+			(*i)->setTexCoord(0, tex.release());
 			
 			startI += step;
 			endI += step;
@@ -222,7 +222,6 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 	}
 
 	//Create Cylinder first
-	const double height = R*(double(L - 1) / double(L));
 	line1D(sphereList.front());
 	link(sphereList.front()->front(), sphereList.front()->back());
 	sweep(sphereList.back());

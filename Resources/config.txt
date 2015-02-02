@@ -5,15 +5,15 @@ TrialConfig
 
 [ScreenSettings]
 #Num of Screent starts from 0
-Hdistance:	2.72	#5.44	#0.6
+Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
-aspect:	 	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
 fovy:		42.175	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
-RealWorld:	1:	42.268, 65.217, 42.391
-MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
+RealWorld:	0:	42.268, 65.217, 42.391
+MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
 Acceleration:	1
@@ -56,12 +56,42 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	1	#0 = use default	1 = use trigger
+Timer-Trigger:	0	#0 = use default	1 = use trigger
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 Lane-Offset:	-1.875	#Negative = L	Positive = R
 
 ##==Deviation Warn Setting===============
 Deviation-Siren:	../Resources/sound/alert.wav
+
+##==Obstacle Setting=====================
+Obstacle:	1 1	1 1	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	#1 1	1 1	1 1	1 1
+Obstacle-Range:	10 10	110 110	210 210 310 310 410 410	510 510
+Obstacle-Range:	610 610	710 710	810 810	910 910	1010 1010	1110 1110	1210 1210
+Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
+OBS-Position-Offset:	-2 2	-40 -44	-2 2	40 44	-2 2	-40 -44
+OBS-Position-Offset:	-2 2	40 44	-2 2	-40 -44	-2 2	40 44	-2 2	#Negtive = L	Positive = R
+
+Obstacle:	#1 1	1 1	#1 1 	1 1	1 1	1 1	1 1	1 1	1 1	#1 1	1 1	1 1	1 1
+Obstacle-Range:	10 110	110 110	210 210 310 310 410 410	510 510
+Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
+OBS-Position-Offset:	0 30	-40 -44	-2 2	40 44	-2 2	-40 -44
+
+OBS-Size:	.5	2.0	1.0	#Length X Width X Height
+OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Visible:	0
+OBS-Collision:	0	# 0 =disapper	1 = collision
+OBS-Pic:	../Resources/texture/red.jpg;
+
+OBS-Array:	../Resources/roads/lc.txt;#../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;
+OBS-Array-NurbsMethod:	1;
+OBS-ARRAY-LENGTH:	50;
+OBS-ARRAY-OFFSET:	0;
+OBS-Array-Align:	0 10 0;
+OBS-Array-Num:	100;
+OBS-Array-Pic:	../Resources/texture/tio.jpg
+OBS-Array-OBSSize:	0.1	0.1	0.1;
+OBS-Array-Mode:	1	# 0 = Animation	1 = Obs	2 = GLPOINTS
+OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Optic Flow Setting===========================================
 OpticFlow:		1	#1 = Enable	0= Disable

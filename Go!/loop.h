@@ -1,22 +1,19 @@
 #pragma once
 #include "math.h"
 
-#include <osg/Geometry>
-
 class HalfEdge;
 class Plane;
 class Edge;
 
 typedef std::vector<Edge*> edgelist;
 
-class Loop:public osg::Geometry
+class Loop
 {
 public:
 	Loop();
 	Loop(const Loop &copy, osg::CopyOp copyop = osg::CopyOp::SHALLOW_COPY);
 	~Loop();
 
-	META_Object(BP, Loop);
 	inline HalfEdge * getHE() const { return _startHE; };
 	inline void setHE(HalfEdge *ref) { _startHE = ref; };
 	inline Loop * getPrev() const { return _prev; };
@@ -36,7 +33,7 @@ public:
 
 	void addHEtoLoop(Edge *refE);
 	void splitLoop(Edge *refE, Loop *newL);
-	void draw();
+	osg::ref_ptr<osg::Vec3dArray> draw();
 
 	void setPlaneEQU(planeEQU ref) { _planeEQU = ref; };
 	planeEQU getPlaneEQU() const { return _planeEQU; };
@@ -45,11 +42,6 @@ public:
 	const osg::ref_ptr<osg::Vec3dArray> getPoints();
 	
 	bool ifPointinLoop(const osg::Vec3d &p);
-
-	void setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding binding = osg::Array::BIND_UNDEFINED);
-
-	void multiplyMatrix(const osg::Matrixd &m);
-
 private:
 	void forwardInsertHE(HalfEdge *he1, HalfEdge *he2);
 	HalfEdge *_startHE;

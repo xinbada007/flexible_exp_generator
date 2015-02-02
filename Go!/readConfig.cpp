@@ -1068,7 +1068,6 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + ROADPIC.size());
 				std::size_t found = config.find_first_not_of(SPACE);
 				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
-				std::size_t found_to = config.find_first_of(" ");
 				if (!config.empty())
 				{
 					std::size_t found_to = config.find_first_of(" ");
@@ -1163,7 +1162,6 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + WALLPIC.size());
 				std::size_t found = config.find_first_not_of(SPACE);
 				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
-				std::size_t found_to = config.find_first_of(" ");
 				if (!config.empty())
 				{
 					std::size_t found_to = config.find_first_of(" ");

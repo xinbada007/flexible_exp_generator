@@ -161,7 +161,7 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 		{
 			osg::ref_ptr<osg::Vec2Array> tex = universalTexture(i, wh);
 			const int numTixel = 4;
-			if (tex->size() / numTixel > newLogic->getNumGeometry())
+			if (tex->size() / numTixel == newLogic->getNumGeometry())
 			{
 				newLogic->setTexCoord(tex.release());
 			}

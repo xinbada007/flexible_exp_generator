@@ -66,18 +66,6 @@ bool TextureVisitor::texCoord(Solid *refS)
 		{
 			osg::notify(osg::FATAL) << "Tex Coord Array is not consistent with Solid" << std::endl;
 		}
-
-		//obviously if numTexcoord != numChildren the texcorrd is wrong
-// 		if (refTex->size() / numTexPixels < numGeometry && refS->getAbstract())
-// 		{
-// 			osg::notify(osg::WARN) << "Tex Coord Array is not consistent with Solid" << std::endl;
-// 			return false;
-// 		}
-// 		if (refTex->size() / numTexPixels < numGeometry && !refS->getAbstract())
-// 		{
-// 			osg::notify(osg::WARN) << "Tex Coord Array is not consistent with Solid" << std::endl;
-// 			return false;
-// 		}
 	}
 
 	unsigned geoIndex(0);

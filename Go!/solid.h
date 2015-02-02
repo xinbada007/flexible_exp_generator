@@ -3,6 +3,7 @@
 #include "loop.h"
 
 #include <osg/Switch>
+#include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Matrix>
 
@@ -32,16 +33,21 @@ public:
 	inline void setUpdated(bool ref) { _updated = ref; };
 	inline unsigned getNumPoints() const { return _numPoints; };
 //	inline void setNumPoints(unsigned ref) { _numPoints = ref; };
-	inline unsigned getNumGeometry() const { return this->getNumChildren(); };
-	inline osg::ref_ptr<osg::Geometry> getGeometry(const unsigned index) const 
+	inline unsigned getNumGeometry() const 
+	{ 
+		if (_solidchildGeode)	return _solidchildGeode->getNumDrawables();
+		
+		return _numPlanes - (getAbstract() ? 1 : 0);
+	};
+	inline osg::Geometry *getGeometry(const unsigned index) const
 	{
 		if (index >= _numPlanes)
 		{
 			return NULL;
 		}
-		const Plane *p(_startPlane);
+		Plane *p(_startPlane);
 		for (unsigned i(0); i != index; i++) p = p->getNext();
-		return p->getLoop()->asGeometry();
+		return p->asGeometry();
 	}
 	inline unsigned getNumPlanes() const { return _numPlanes; };
 //	inline void setNumPlanes(unsigned ref) { _numPlanes = ref; };
@@ -173,6 +179,8 @@ private:
 
 	osg::ref_ptr<Solid> _next;
 	osg::ref_ptr<Solid> _prev;
+
+	osg::ref_ptr<osg::Geode> _solidchildGeode;
 
 	unsigned _index;
 

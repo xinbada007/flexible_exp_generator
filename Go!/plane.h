@@ -2,10 +2,10 @@
 class Solid;
 class Loop;
 
-#include <osg/geode>
+#include <osg/Geometry>
 #include <osg/Matrix>
 
-class Plane: public osg::Geode
+class Plane: public osg::Geometry
 {
 public:
 	Plane();
@@ -148,7 +148,6 @@ public:
 		void across(unsigned flag);
 	};
 
-	META_Node(BP, Plane);
 	inline Loop * getLoop() const { return _startLoop; };
 	inline void setLoop(Loop *ref) { _startLoop = ref; };
 	inline Plane * getNext() const { return _next; };
@@ -165,10 +164,8 @@ public:
 	inline unsigned getIndex() const { return _index; };
 
 	bool isValid() const;
-
-	void multiplyMatrix(const osg::Matrixd &m);
-
 	void traverse();
+	void setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding binding = osg::Array::BIND_UNDEFINED);
 private:
 	void addLooptoList(Loop *refL);
 	Loop *_startLoop;

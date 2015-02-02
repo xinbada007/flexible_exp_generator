@@ -16,7 +16,7 @@ _startLoop(NULL), _prev(NULL), _next(NULL), _homeS(NULL), _updated(false), _abst
 }
 
 Plane::Plane(const Plane &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
-osg::Geode(copy, copyop), _startLoop(copy.getLoop()),
+osg::Geometry(copy, copyop), _startLoop(copy.getLoop()),
 _prev(copy._prev), _next(copy._next), _homeS(copy._homeS), _updated(copy._updated), _abstract(copy._abstract),
 _index(copy._index)
 {
@@ -41,6 +41,31 @@ void Plane::addLooptoList(Loop *refL)
 	refL->setHomeP(this);
 }
 
+// void Plane::traverse()
+// {
+// 	if (_updated)
+// 	{
+// 		return;
+// 	}
+// 
+// 	Loop *refL = _startLoop;
+// 
+// 	do
+// 	{
+// 		this->addDrawable(refL->asGeometry());
+// 		refL->draw();
+// 
+// 		if (!refL->getSwitch())
+// 		{
+// 			refL->getHomeP()->getHomeS()->setChildValue((this), false);
+// 		}
+// 
+// 		refL = refL->getNext();
+// 	} while (refL);
+// 
+// 	_updated = true;
+// }
+
 void Plane::traverse()
 {
 	if (_updated)
@@ -49,17 +74,9 @@ void Plane::traverse()
 	}
 
 	Loop *refL = _startLoop;
-
 	do 
 	{
-		this->addDrawable(refL->asGeometry());
-		refL->draw();
-
-		if (!refL->getSwitch())
-		{
-			refL->getHomeP()->getHomeS()->setChildValue((this), false);
-		}
-		
+		this->setVertexArray(refL->draw());
 		refL = refL->getNext();
 	} while (refL);
 
@@ -341,12 +358,8 @@ bool Plane::reverse_iterator::isValid()
 	return true;
 }
 
-void Plane::multiplyMatrix(const osg::Matrixd &m)
+void Plane::setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding binding /* = osg::Array::BIND_UNDEFINED */)
 {
-	Loop *l = _startLoop;
-	while (l)
-	{
-		l->multiplyMatrix(m);
-		l = l->getNext();
-	}
+	_homeS->setTexMode(true);
+	setTexCoordArray(unit, array, binding);
 }

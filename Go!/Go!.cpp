@@ -73,6 +73,17 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
+// 	std::vector<std::string> configs;
+// 	configs.push_back("..\\config\\15\\8.txt");
+// 	configs.push_back("..\\config\\15\\1.txt");
+// 	configs.push_back("..\\config\\15\\5.txt");
+// 	configs.push_back("..\\config\\15\\3.txt");
+// 	configs.push_back("..\\config\\15\\6.txt");
+// 	configs.push_back("..\\config\\15\\2.txt");
+// 	configs.push_back("..\\config\\15\\4.txt");
+// 	configs.push_back("..\\config\\15\\7.txt");
+// 	totalRep = 8;
+
 	extern bool init_joystick();
 	init_joystick();
 
@@ -95,6 +106,7 @@ int main(int argc, char** argv)
 		//obtain filename
 		string configFile = argv[1 + curRep];
 //		string configFile = "..\\Resources\\config.txt";
+//		string configFile = configs.at(curRep - 1);
 		string replayFile;
 		if (replyM)
 		{
@@ -190,7 +202,6 @@ int main(int argc, char** argv)
 		viewer->run(); 
 
 		Recorder *rec = recorder.at(i);
-		ReadConfig *rconfig = readConfig.at(i);
 		rec->output();
 
 		osg::Group *rt = root.at(i);

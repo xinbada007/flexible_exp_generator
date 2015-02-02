@@ -59,20 +59,29 @@ void RenderVistor::apply(osg::Group &refNode)
 	traverse(refNode);
 }
 
+// void RenderVistor::apply(osg::Geode &refGeode)
+// {
+// 	//osg::notify(osg::NOTICE) << refGeode.libraryName() << "::" << refGeode.className() << std::endl;
+// 
+// 	//pre-process before traverse
+// 	osg::ref_ptr<Plane> refP = dynamic_cast<Plane*> (&refGeode);
+// 	if (refP)
+// 	{
+// 		refP->traverse();
+// 
+// 		//actually render the objects 
+// 		_drawableList = refP->getDrawableList();
+// 		draw();
+// 	}
+// 
+// 	traverse(refGeode);
+// }
+
 void RenderVistor::apply(osg::Geode &refGeode)
 {
-	//osg::notify(osg::NOTICE) << refGeode.libraryName() << "::" << refGeode.className() << std::endl;
-
 	//pre-process before traverse
-	osg::ref_ptr<Plane> refP = dynamic_cast<Plane*> (&refGeode);
-	if (refP)
-	{
-		refP->traverse();
-
-		//actually render the objects 
-		_drawableList = refP->getDrawableList();
-		draw();
-	}
+	_drawableList = refGeode.getDrawableList();
+	draw();
 
 	traverse(refGeode);
 }

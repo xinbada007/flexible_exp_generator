@@ -303,6 +303,7 @@ void ExperimentCallback::createOpticFlow()
 	std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>, unsigned> ver;
 	std::vector<osg::ref_ptr<osg::Vec3Array>> verOrder;
 
+	randreseed();
 	for (i = 0; i < yv.size(); i++)
 	{
 		unsigned versions(0);
@@ -316,7 +317,7 @@ void ExperimentCallback::createOpticFlow()
 				}
 				else
 				{
-					unsigned int temp = randreseed();
+					randreseed();
 					y = randrange(_expSetting->_depthDensity);
 					y += drand();
 					y += yv.at(i);
@@ -448,7 +449,7 @@ void ExperimentCallback::showOpticFlow()
 			{
 				obs->asSwitch()->setAllChildrenOn();
 				obs->setFrameCounts(obs->getFrameCounts()+1);
-				dynamicFlow(obs, i);
+//				dynamicFlow(obs, i);
 			}
 		}
 
@@ -826,7 +827,6 @@ void ExperimentCallback::showText()
 	const std::string *whichshow(NULL);
 	while (i != limit)
 	{
-		bool show = false;
 		const unsigned time = moment->at(i);
 		const double last = period->at(i);
 		if (_expTime >= time && _expTime <= time + last)
@@ -908,13 +908,13 @@ void ExperimentCallback::showObstacle()
 			osg::ref_ptr<Obstacle> obs = *i;
 			osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
 			mT->addChild(obs);
-			_road->addChild(mT);
 
 			if (_anmCallback && ((*i)->getSolidType() == Solid::solidType::SD_ANIMATION))
 			{
 				mT->setUpdateCallback(_anmCallback);
-				_road->addChild(mT);
 			}
+
+			_road->addChild(mT);
 
 			i++;
 		}

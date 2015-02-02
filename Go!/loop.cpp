@@ -14,7 +14,6 @@ _switch(true), _numHE(0)
 }
 
 Loop::Loop(const Loop &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
-osg::Geometry(copy, copyop),
 _startHE(copy.getHE()), _prev(copy.getPrev()), _next(copy.getNext()), _homeP(copy.getHomeP()),
 _switch(copy.getSwitch()), _numHE(copy._numHE)
 {
@@ -26,17 +25,30 @@ Loop::~Loop()
 	osg::notify(osg::DEBUG_INFO) << "deleting Loop..." << std::endl;
 }
 
-void Loop::draw()
+// void Loop::draw()
+// {
+// 	HalfEdge *refHE = _startHE;
+// 	osg::ref_ptr<osg::Vec3dArray> varray = new osg::Vec3dArray;
+// 	do
+// 	{
+// 		varray->push_back(refHE->getPoint()->getPoint());
+// 		refHE = refHE->getNext();
+// 	} while (refHE != _startHE);
+// 
+// 	this->setVertexArray(varray.release());
+// }
+
+osg::ref_ptr<osg::Vec3dArray> Loop::draw()
 {
 	HalfEdge *refHE = _startHE;
 	osg::ref_ptr<osg::Vec3dArray> varray = new osg::Vec3dArray;
-	do
+	do 
 	{
 		varray->push_back(refHE->getPoint()->getPoint());
 		refHE = refHE->getNext();
 	} while (refHE != _startHE);
 
-	this->setVertexArray(varray.release());
+	return varray.release();
 }
 
 bool Loop::isValid() const
@@ -258,28 +270,4 @@ bool Loop::ifPointinLoop(const osg::Vec3d &p)
 	} while (he != _startHE);
 
 	return false;
-}
-
-void Loop::setTexCoord(unsigned int unit, osg::Array* array, osg::Array::Binding binding /* = osg::Array::BIND_UNDEFINED */)
-{
-	_homeP->getHomeS()->setTexMode(true);
-	setTexCoordArray(unit, array, binding);
-}
-
-void Loop::multiplyMatrix(const osg::Matrixd &m)
-{
-	HalfEdge *he = _startHE;
-	const HalfEdge * const start = _startHE;
-	do 
-	{
-		osg::Vec3 p = he->getPoint()->getPoint();
-		p = p * m;
-		he->getPoint()->setPoint(p);
-		he = he->getNext();
-	} while (he != start);
-
-	draw();
-
-	dirtyBound();
-	dirtyDisplayList();	
 }
