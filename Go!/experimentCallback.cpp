@@ -500,24 +500,32 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned 
 
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-	if (!_cVisitor)
+	if (!_cVisitor || !_road || !_root)
 	{
 		_cVisitor = CollVisitor::instance();
+		_root = dynamic_cast<osg::Group*>(node);
+		switchRoad swRD;
+		_root->accept(swRD);
+		_road = swRD.getSwRoad();
+
+		if (!_cVisitor || !_road || !_root)
+		{
+			osg::notify(osg::WARN) << "Cannot find nodes failed to control experiment" << std::endl;
+			return;
+		}
+
+		_cVisitor->reset();
+		_cVisitor->setMode(ROADTAG::ROAD);
+		_road->accept(*_cVisitor);
+		_cVisitor->setMode(ROADTAG::RWALL);
+		_road->accept(*_cVisitor);
+		_cVisitor->setMode(ROADTAG::LWALL);
+		_road->accept(*_cVisitor);
 	}
 	if (!_car)
 	{
 		osg::notify(osg::WARN) << "Cannot find Car failed to control experiment" << std::endl;
 		return;
-	}
-	if (!_root)
-	{
-		_root = dynamic_cast<osg::Group*>(node);
-	}
-	if (!_road)
-	{
-		switchRoad swRD;
-		_root->accept(swRD);
-		_road = swRD.getSwRoad();
 	}
 
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);

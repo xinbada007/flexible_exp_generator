@@ -234,14 +234,6 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 
 		i++;
 	}
-
-	CollVisitor *cv = CollVisitor::instance();
-	cv->setMode(ROADTAG::ROAD);
-	this->accept(*cv);
-	cv->setMode(ROADTAG::RWALL);
-	this->accept(*cv);
-	cv->setMode(ROADTAG::LWALL);
-	this->accept(*cv);
 }
 
 osg::Group * Road::addLogRoadtoList(LogicRoad *refLR)
