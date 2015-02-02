@@ -189,58 +189,24 @@ void ReadConfig::initializeAfterReadTrial()
 
 		if (!_replay)
 		{
-			char timestr[10], datestr[10];
-			_strtime_s(timestr, sizeof(timestr));
-			_strdate_s(datestr, sizeof(datestr));
-			timestr[2] = '-', timestr[5] = '-';
-			datestr[2] = '-', datestr[5] = '-';
-
-			const string timedir = timestr;
-			const string datedir = datestr;
 			const string subD = "..\\Subjects";
-			if (_access(subD.c_str(), 6) == -1) //if doesn't find the directory
+			if (!osgDB::makeDirectory(subD))
 			{
-				if (_mkdir(subD.c_str()) == -1) //creat one
-				{
-					osg::notify(osg::FATAL) << "Cannot create folder" << endl;
-				}
+				osg::notify(osg::FATAL) << "Cannot create folder\n" << subD << std::endl;
+				return;
 			}
-			const string dirPath = subD + ".\\" + _subjects->getName();
-			if (_access(dirPath.c_str(), 6) == -1) //if doesn't find the directory
+			const string dirPath = subD + "\\" + _subjects->getName() + "\\" + _subjects->getDirectoryName();
+			if (!osgDB::makeDirectory(dirPath))
 			{
-				if (_mkdir(dirPath.c_str()) == -1)//creat one
-				{
-					osg::notify(osg::FATAL) << "Cannot create folder" << endl;
-				}
+				osg::notify(osg::FATAL) << "Cannot create folder\n" << dirPath << std::endl;
+				return;
 			}
 			string path;
-			path = dirPath + ".\\" + _subjects->getTrialName();
-			if (_access(path.c_str(),6) == -1)
+			path = dirPath + "\\" + _subjects->getTrialName();
+			if (!osgDB::makeDirectory(path))
 			{
-				if (_mkdir(path.c_str()) == -1)
-				{
-					path = dirPath + ".\\" + datestr + '-' + timedir;
-					if (_access(path.c_str(),6) == -1)
-					{
-						if (_mkdir(path.c_str()) == -1)
-						{
-							osg::notify(osg::FATAL) << "Cannot create folder" << std::endl;
-							exit(0);
-						}
-					}
-					else
-					{
-						path += "R";
-						if (_access(path.c_str(), 6) == -1)
-						{
-							if (_mkdir(path.c_str()) == -1)
-							{
-								osg::notify(osg::FATAL) << "Cannot create folder" << std::endl;
-								exit(0);
-							}
-						}
-					}
-				}
+				osg::notify(osg::FATAL) << "Cannot create folder\n" << path << std::endl;
+				return;
 			}
 			const string out = path + "\\" + _subjects->getName() + ".txt";
 			fstream fileout(out.c_str(), ios::out);
@@ -250,7 +216,7 @@ void ReadConfig::initializeAfterReadTrial()
 				osg::notify(osg::FATAL) << "Cannot copy config file" << std::endl;
 				fileout.close();
 				filein.close();
-				exit(0);
+				return;
 			}
 			else
 			{
@@ -671,6 +637,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string RROAD = "RANDOMROADS";
 		static const string SUBROADS = "ROADS";
 		static const string TRIALNAME = "TRIALNAME";
+		static const string DIRNAME = "DIRECTORYNAME";
 		while (flag == SUBJECTS && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -679,7 +646,8 @@ void ReadConfig::readTrial(ifstream &in)
 			if (title == NAME)
 			{
 				config.erase(config.begin(), config.begin() + NAME.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				_subjects->setName(config);
 				continue;
 			}
@@ -721,7 +689,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == SUBROADS)
 			{
 				config.erase(config.begin(), config.begin() + SUBROADS.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				while (!config.empty())
 				{
 					std::string txtRoad;
@@ -730,7 +699,8 @@ void ReadConfig::readTrial(ifstream &in)
 					{
 						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtRoad));
 						config.erase(config.begin(), config.begin() + found_to);
-						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+						std::size_t found = config.find_first_not_of(SPACE);
+						if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 					}
 					else
 					{
@@ -744,21 +714,34 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == TRIALNAME)
 			{
 				config.erase(config.begin(), config.begin() + TRIALNAME.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
 					std::string::size_type sz;
 					int tn = stoi(config, &sz);
-					if (tn == 1)
+					if (tn == 0)
 					{
 						_subjects->setTrialName(osgDB::getSimpleFileName(osgDB::getNameLessAllExtensions(_filename)));
 					}
-					else if (tn == 2)
+					else if (tn == 1)
 					{
 						config.erase(config.begin(), config.begin() + sz);
-						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+						std::size_t found = config.find_first_not_of(SPACE);
+						if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 						_subjects->setTrialName(config);
 					}
+				}
+				continue;
+			}
+			else if (title == DIRNAME)
+			{
+				config.erase(config.begin(), config.begin() + DIRNAME.size());
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
+				if (!config.empty())
+				{
+					_subjects->setDirectoryName(config);
 				}
 				continue;
 			}
@@ -836,7 +819,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == BGPIC)
 			{
 				config.erase(config.begin(), config.begin() + BGPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				_screens->_background = config;
 				continue;
 			}
@@ -950,7 +934,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == CARPIC)
 			{
 				config.erase(config.begin(), config.begin() + CARPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				_vehicle->_texture = config;
 				continue;
 			}
@@ -1071,7 +1056,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == ROADPIC)
 			{
 				config.erase(config.begin(), config.begin() + ROADPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				std::size_t found_to = config.find_first_of(" ");
 				if (!config.empty())
 				{
@@ -1105,7 +1091,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == ROADTXT)
 			{
 				config.erase(config.begin(), config.begin() + ROADTXT.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				while (!config.empty())
 				{
 					std::string txtRoad;
@@ -1114,7 +1101,8 @@ void ReadConfig::readTrial(ifstream &in)
 					{
 						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtRoad));
 						config.erase(config.begin(), config.begin() + found_to);
-						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+						std::size_t found = config.find_first_not_of(SPACE);
+						if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 					}
 					else
 					{
@@ -1163,7 +1151,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == WALLPIC)
 			{
 				config.erase(config.begin(), config.begin() + WALLPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				std::size_t found_to = config.find_first_of(" ");
 				if (!config.empty())
 				{
@@ -1371,7 +1360,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == TEXT)
 			{
 				config.erase(config.begin(), config.begin() + TEXT.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
 					_experiment->_textContent.push_back(config);
@@ -1412,7 +1402,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == DYNAMICCHANGEPIC)
 			{
 				config.erase(config.begin(), config.begin() + DYNAMICCHANGEPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
 					_experiment->_dynamicPic = config;
@@ -1511,7 +1502,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == OBSPIC)
 			{
 				config.erase(config.begin(), config.begin() + OBSPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
 					std::size_t found_to = config.find_first_of(SPACE);
@@ -1535,7 +1527,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == OBSARRAY)
 			{
 				config.erase(config.begin(), config.begin() + OBSARRAY.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				while (!config.empty())
 				{
 					std::string txtOBS;
@@ -1544,7 +1537,8 @@ void ReadConfig::readTrial(ifstream &in)
 					{
 						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(txtOBS));
 						config.erase(config.begin(), config.begin() + found_to);
-						config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+						std::size_t found = config.find_first_not_of(SPACE);
+						if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 					}
 					else
 					{
@@ -1576,7 +1570,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == OBSARRAYPIC)
 			{
 				config.erase(config.begin(), config.begin() + OBSARRAYPIC.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
 					_experiment->_obsArrayPic = config;
@@ -1768,7 +1763,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == DEVIATIONWARN)
 			{
 				config.erase(config.begin(), config.begin() + DEVIATIONWARN.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
 					_experiment->_deviationWarn = config;
@@ -1782,7 +1778,8 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == DEVIATIONSIREN)
 			{
 				config.erase(config.begin(), config.begin() + DEVIATIONSIREN.size());
-				config.erase(config.begin(), config.begin() + config.find_first_not_of(SPACE));
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
 					_experiment->_deviationSiren = config;
