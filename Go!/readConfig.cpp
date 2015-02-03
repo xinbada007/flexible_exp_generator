@@ -474,6 +474,7 @@ void ReadConfig::initializeAfterReadTrial()
 	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
 	osg::Matrix m = osg::Matrix::translate(startOffset);
 	m *= osg::Matrix::translate(X_AXIS * _experiment->_laneOffset);
+		
 	arrayByMatrix(_vehicle->_V, m);
 	_vehicle->_O = _vehicle->_O * m;
 	_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
@@ -1710,7 +1711,7 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + OPTICFLOWWIDTH.size());
 				if (!config.empty())
 				{
-					_experiment->_opticFlowWidth = stoi(config);
+					_experiment->_opticFlowWidth = stod(config);
 				}
 				continue;
 			}
@@ -1719,7 +1720,7 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + OPTICFLOWHEIGHT.size());
 				if (!config.empty())
 				{
-					_experiment->_opticFlowHeight = stoi(config);
+					_experiment->_opticFlowHeight = stod(config);
 				}
 				continue;
 			}

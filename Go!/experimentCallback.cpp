@@ -13,6 +13,7 @@
 
 #include <iterator>
 #include <fstream>
+#include <random>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
@@ -286,7 +287,7 @@ void ExperimentCallback::createOpticFlow()
 		return;
 	}
 
-	_opticFlowPoints = new Obstacle;
+	_opticFlowPoints = new osg::Switch;
 	_opticFlowDrawn = false;
 
 	osg::ref_ptr<osg::Vec3Array> points = new osg::Vec3Array;
@@ -298,17 +299,37 @@ void ExperimentCallback::createOpticFlow()
 		yv.push_back(i*_expSetting->_depthDensity);
 		++i;
 	} while (yv.back() < _roadLength && _expSetting->_depthDensity);
+	i = 1;
+	do
+	{
+		yv.push_back(-i*_expSetting->_depthDensity);
+		++i;
+	} while (abs(yv.back()) < _roadLength && _expSetting->_depthDensity);
+	yv.push_back(-i*_expSetting->_depthDensity);
+
+	const double tanhalfH = _expSetting->_opticFlowWidth < 0 ? abs(_expSetting->_opticFlowWidth) : 0;
+	const double tanhalfV = _expSetting->_opticFlowHeight < 0 ? abs(_expSetting->_opticFlowHeight) : 0;
+
+	const unsigned flowWidth = tanhalfH == 0 ? abs(_expSetting->_opticFlowWidth) : 0;
+	const unsigned flowHeight = tanhalfV == 0 ? abs(_expSetting->_opticFlowHeight) : 0;
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	double upper;
+	double lower(0.0f);
 
 	float x, y, z;
 	std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>, unsigned> ver;
 	std::vector<osg::ref_ptr<osg::Vec3Array>> verOrder;
-
-	randreseed();
 	for (i = 0; i < yv.size(); i++)
 	{
 		unsigned versions(0);
 		do
 		{
+			lower = yv.at(i);
+			upper = lower + _expSetting->_depthDensity;
+			std::uniform_real_distribution<> disY(lower, upper);
+			const double curDistance = upper;
 			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 			{
 				if (!_expSetting->_depthDensity)
@@ -317,13 +338,13 @@ void ExperimentCallback::createOpticFlow()
 				}
 				else
 				{
-					randreseed();
-					y = randrange(_expSetting->_depthDensity);
-					y += drand();
-					y += yv.at(i);
+					y = disY(gen);
 				}
 				ya.push_back(y);
 			}
+			upper = (!flowHeight) ? abs(curDistance*tanhalfV) : flowHeight;
+			lower = -upper;
+			std::uniform_real_distribution<> disZ(lower, upper);
 			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 			{
 				if (!_expSetting->_opticFlowHeight)
@@ -332,21 +353,13 @@ void ExperimentCallback::createOpticFlow()
 				}
 				else
 				{
-					randreseed();
-					const int which = randbiased(0.5f);
-					z = randrange(_expSetting->_opticFlowHeight);
-					if (which)
-					{
-						z += drand();
-					}
-					else
-					{
-						z = -z;
-						z -= drand();
-					}
+					z = disZ(gen);					
 				}
 				zv.push_back(z);
 			}
+			upper = (!flowWidth) ? abs(curDistance*tanhalfH) : flowWidth;
+			lower = -upper;
+			std::uniform_real_distribution<> disX(lower,upper);
 			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 			{
 				if (!_expSetting->_opticFlowWidth)
@@ -355,18 +368,7 @@ void ExperimentCallback::createOpticFlow()
 				}
 				else
 				{
-					randreseed();
-					const int which = randbiased(0.5f);
-					x = randrange(_expSetting->_opticFlowWidth);
-					if (which)
-					{
-						x += drand();
-					}
-					else
-					{
-						x = -x;
-						x -= drand();
-					}
+					x = disX(gen);
 				}
 
 				z = zv.at(j);
@@ -396,6 +398,7 @@ void ExperimentCallback::createOpticFlow()
 		verOrder.clear();
 		_opticFlowVersions.push_back(ver);
 	}
+
 	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
 	osg::ref_ptr<osg::Point> psize = new osg::Point(3.0f);
 	ss->setAttribute(psize);
@@ -421,45 +424,102 @@ void ExperimentCallback::showOpticFlow()
 
 	if (_opticFlowDrawn)
 	{
+		const int &TOTL = _opticFlowPoints->getNumChildren();
 		const double &y = _car->getCarState()->_O.y();
+		const double forwardY = y + _expSetting->_opticFlowRange;
+		const double backwardY = y - _expSetting->_opticFlowRange;
 
-		const unsigned &TOTL = _opticFlowPoints->getNumChildren();
-
-		double nextY = y + _expSetting->_opticFlowRange;
-		const unsigned NEXT = (_expSetting->_depthDensity && _expSetting->_opticFlowRange) ? nextY / _expSetting->_depthDensity : TOTL;
-
-		double prevY = y - _expSetting->_opticFlowRange;
-		prevY = std::fmax(prevY, 0.0f);
-		const unsigned PREV = (_expSetting->_depthDensity) ? prevY / _expSetting->_depthDensity : 0;
-
-		for (unsigned i = 0; i < std::min(PREV, TOTL);i++)
+		int curY(0.0f);
+		if (y >= 0.0f)
 		{
-			Obstacle *obs = dynamic_cast<Obstacle*>(_opticFlowPoints->getChild(i));
-			if (obs)
+			curY = y / _expSetting->_depthDensity;
+			if (curY > TOTL / 2)
 			{
-				obs->asSwitch()->setAllChildrenOff();
-				obs->setFrameCounts(0);
+				curY = TOTL / 2;
+			}
+		}
+		else
+		{
+			curY = abs(y) / _expSetting->_depthDensity;
+			curY += TOTL / 2;
+			if (curY > TOTL)
+			{
+				curY = TOTL;
 			}
 		}
 
-		for (unsigned i = PREV; i < std::min(NEXT, TOTL); i++)
+		int curFor(0.0f);
+		if (forwardY >= 0.0f)
 		{
-			Obstacle *obs = dynamic_cast<Obstacle*>(_opticFlowPoints->getChild(i));
-			if (obs)
+			curFor = forwardY / _expSetting->_depthDensity;
+			if (curFor > TOTL / 2)
 			{
-				obs->asSwitch()->setAllChildrenOn();
-				obs->setFrameCounts(obs->getFrameCounts()+1);
-//				dynamicFlow(obs, i);
+				curFor = TOTL / 2;
+			}
+		}
+		else
+		{
+			curFor = abs(forwardY) / _expSetting->_depthDensity;
+			curFor += TOTL / 2;
+			if (curFor > TOTL)
+			{
+				curFor = TOTL;
 			}
 		}
 
-		for (unsigned i = NEXT; i < TOTL; i++)
+		int curBac(0.0f);
+		if (backwardY >= 0.0f)
 		{
-			Obstacle *obs = dynamic_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			curBac = backwardY / _expSetting->_depthDensity;
+			if (curBac > TOTL / 2)
+			{
+				curBac = TOTL / 2;
+			}
+		}
+		else
+		{
+			curBac = abs(backwardY) / _expSetting->_depthDensity;
+			curBac += TOTL / 2;
+			if (curBac > TOTL)
+			{
+				curBac = TOTL;
+			}
+		}
+
+		_opticFlowPoints->setAllChildrenOff();
+		const int startFor = (curFor > TOTL / 2) ? curFor : 0;
+		for (int i = startFor; i < curFor; i++)
+		{
+			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
 			if (obs)
 			{
-				obs->asSwitch()->setAllChildrenOff();
+				_opticFlowPoints->setChildValue(obs, true);
 				obs->setFrameCounts(0);
+				dynamicFlow(obs, i);
+			}
+		}
+
+		const int startBac = (curFor > TOTL / 2) ? curFor : TOTL / 2;
+		for (int i = startBac; i < curY; i++)
+		{
+			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			if (obs)
+			{
+				_opticFlowPoints->setChildValue(obs, true);
+				obs->setFrameCounts(0);
+				dynamicFlow(obs, i);
+			}
+		}
+
+		const int startrCur = (curY > TOTL / 2) ? curY : TOTL / 2;
+		for (int i = startrCur; i < curBac; i++)
+		{
+			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			if (obs)
+			{
+				_opticFlowPoints->setChildValue(obs, true);
+				obs->setFrameCounts(0);
+				dynamicFlow(obs, i);
 			}
 		}
 	}

@@ -39,7 +39,7 @@ private:
 	std::vector<osg::ref_ptr<Obstacle>> _collisionOBSList;
 	bool _obsListDrawn;
 
-	osg::ref_ptr<Obstacle> _opticFlowPoints;
+	osg::ref_ptr<osg::Switch> _opticFlowPoints;
 	std::vector<std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>,unsigned>> _opticFlowVersions;
 	bool _opticFlowDrawn;
 

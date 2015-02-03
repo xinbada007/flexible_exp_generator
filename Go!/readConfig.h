@@ -117,8 +117,8 @@ typedef struct Experiment :public osg::Referenced
 	bool _opticFlow;
 	int _opticFlowRange;
 	int _depthDensity;
-	int _opticFlowWidth;
-	int _opticFlowHeight;
+	double _opticFlowWidth;
+	double _opticFlowHeight;
 	int _opticFlowDensity;
 	unsigned int _opticFlowFrameCounts;
 	unsigned int _opticFlowVersions;
