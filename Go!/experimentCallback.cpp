@@ -329,7 +329,7 @@ void ExperimentCallback::createOpticFlow()
 			lower = yv.at(i);
 			upper = lower + _expSetting->_depthDensity;
 			std::uniform_real_distribution<> disY(lower, upper);
-			const double curDistance = upper;
+			const double curDistance = (lower >= 0) ? upper : lower;
 			for (int j = 0; j < _expSetting->_opticFlowDensity; j++)
 			{
 				if (!_expSetting->_depthDensity)
