@@ -18,7 +18,7 @@
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
-_opticFlowPoints(NULL)
+_opticFlowPoints(NULL), _switchOpticFlow(true)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -486,42 +486,74 @@ void ExperimentCallback::showOpticFlow()
 			}
 		}
 
-		_opticFlowPoints->setAllChildrenOff();
 		const int startFor = (curFor > TOTL / 2) ? curFor : 0;
-		for (int i = startFor; i < curFor; i++)
-		{
-			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
-			if (obs)
-			{
-				_opticFlowPoints->setChildValue(obs, true);
-				obs->setFrameCounts(0);
-				dynamicFlow(obs, i);
-			}
-		}
-
 		const int startBac = (curFor > TOTL / 2) ? curFor : TOTL / 2;
-		for (int i = startBac; i < curY; i++)
-		{
-			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
-			if (obs)
-			{
-				_opticFlowPoints->setChildValue(obs, true);
-				obs->setFrameCounts(0);
-				dynamicFlow(obs, i);
-			}
-		}
-
 		const int startrCur = (curY > TOTL / 2) ? curY : TOTL / 2;
-		for (int i = startrCur; i < curBac; i++)
+
+		for (int opticStart = 0; opticStart<TOTL; opticStart++)
 		{
-			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(opticStart));
 			if (obs)
 			{
-				_opticFlowPoints->setChildValue(obs, true);
-				obs->setFrameCounts(0);
-				dynamicFlow(obs, i);
+				if (opticStart >= startFor && opticStart < curFor)
+				{
+					obs->setAllChildrenOn();
+					obs->setFrameCounts(obs->getFrameCounts() + 1);
+					dynamicFlow(obs, opticStart);
+				}
+
+				else if (opticStart >= startBac && opticStart < curY)
+				{
+					obs->setAllChildrenOn();
+					obs->setFrameCounts(obs->getFrameCounts() + 1);
+					dynamicFlow(obs, opticStart);
+				}
+
+				else if (opticStart >= startrCur && opticStart < curBac)
+				{
+					obs->setAllChildrenOn();
+					obs->setFrameCounts(obs->getFrameCounts() + 1);
+					dynamicFlow(obs, opticStart);
+				}
+
+				else
+				{
+					obs->setAllChildrenOff();
+					obs->setFrameCounts(0);
+				}
 			}
 		}
+		
+// 		for (int i = startFor; i < curFor; i++)
+// 		{
+// 			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+// 			if (obs)
+// 			{
+// 				obs->setAllChildrenOn();
+// 				obs->setFrameCounts(obs->getFrameCounts() + 1);
+// 				dynamicFlow(obs, i);
+// 			}
+// 		}
+// 		for (int i = startBac; i < curY; i++)
+// 		{
+// 			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+// 			if (obs)
+// 			{
+// 				obs->setAllChildrenOn();
+// 				obs->setFrameCounts(obs->getFrameCounts() + 1);
+// 				dynamicFlow(obs, i);
+// 			}
+// 		}
+// 		for (int i = startrCur; i < curBac; i++)
+// 		{
+// 			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+// 			if (obs)
+// 			{
+// 				obs->setAllChildrenOn();
+// 				obs->setFrameCounts(obs->getFrameCounts() + 1);
+// 				dynamicFlow(obs, i);
+// 			}
+// 		}
 	}
 }
 
@@ -697,14 +729,15 @@ void ExperimentCallback::trigger()
 				case::Experiment::TRIGGER_COM::FLOW:
 					if (_opticFlowPoints)
 					{
-						if (_opticFlowPoints->getNewChildDefaultValue())
-						{
-							_opticFlowPoints->setAllChildrenOff();
-						}
-						else
+						if (!_switchOpticFlow)
 						{
 							_opticFlowPoints->setAllChildrenOn();
 						}
+						else
+						{
+							_opticFlowPoints->setAllChildrenOff();
+						}
+						_switchOpticFlow = !_switchOpticFlow;
 					}
 					break;
 				case::Experiment::TRIGGER_COM::CRASHPERMIT:

@@ -58,20 +58,20 @@ int main(int argc, char** argv)
 	int curRep(1);
 	int totalRep(1);
 	bool replyM(false);
-// 	if (argc >= 3)
-// 	{
-// 		totalRep = stoi((argv[1]));
-// 		if (!totalRep)
-// 		{
-// 			totalRep = 1;
-// 			replyM = true;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		std::cout << ("Require at least 1 input\n") << std::endl;
-// 		return 0;
-// 	}
+	if (argc >= 3)
+	{
+		totalRep = stoi((argv[1]));
+		if (!totalRep)
+		{
+			totalRep = 1;
+			replyM = true;
+		}
+	}
+	else
+	{
+		std::cout << ("Require at least 1 input\n") << std::endl;
+		return 0;
+	}
 
 // 	std::vector<std::string> configs;
 // 	configs.push_back("..\\config\\15\\8.txt");
@@ -104,8 +104,8 @@ int main(int argc, char** argv)
 	while (curRep <= totalRep)
 	{
 		//obtain filename
-//		string configFile = argv[1 + curRep];
-		string configFile = "..\\Resources\\config.txt";
+		string configFile = argv[1 + curRep];
+//		string configFile = "..\\Resources\\config.txt";
 //		string configFile = configs.at(curRep - 1);
 		string replayFile;
 		if (replyM)
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 		root.back()->addEventCallback(expcontroller.back().get());
 
 		//Measure
-		root.back()->addChild(readConfig.back()->measuer());
+//		root.back()->addChild(readConfig.back()->measuer());
 
 		root.back()->setDataVariance(osg::Object::DYNAMIC);
 

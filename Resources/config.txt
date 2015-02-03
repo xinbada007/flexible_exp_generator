@@ -96,15 +96,15 @@ OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 ##==Optic Flow Setting===========================================
 OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
-OpticFlow-FrameCounts:	0	
-OpticFlow-Versions:	0
+OpticFlow-FrameCounts:	6	
+OpticFlow-Versions:	10
 DepthDensity:		1	#every x meters
 OpticFlow-Width:	5670	
 OpticFlow-Height:	509	
 OpticFlow-Density:	200
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	0	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Enable:	1	1	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
 Trigger-Time:	0	0	16	4	0	30
 Trigger-Time:	-1	16	-1	18	16	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1

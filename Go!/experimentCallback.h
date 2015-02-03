@@ -60,6 +60,8 @@ private:
 	double _timeBuffer;
 	double _timeLastRecored;
 
+	bool _switchOpticFlow;
+
 	void dynamicChange();
 	void showText();
 	void showObstacle();
