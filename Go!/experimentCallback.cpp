@@ -424,10 +424,61 @@ void ExperimentCallback::showOpticFlow()
 
 	if (_opticFlowDrawn)
 	{
-		const int &TOTL = _opticFlowPoints->getNumChildren();
-		const double &y = _car->getCarState()->_O.y();
-		const double forwardY = y + _expSetting->_opticFlowRange;
-		const double backwardY = y - _expSetting->_opticFlowRange;
+		//FOV dectection
+		const double theta = 80.0f * TO_RADDIAN;
+		static CarState const *cs = _car->getCarState();
+		static const osg::Vec3d &direction = cs->_direction;
+		const double curtheta = acos((direction*X_AXIS) / (direction.length()*X_AXIS.length()));
+		static const double &L = _expSetting->_opticFlowRange;
+
+		const double L1 = abs(L*sin(curtheta - theta) / cos(theta)) + 0.5f;
+		const double L2 = abs(L*sin(PI - theta - curtheta) / cos(theta)) + 0.5f;
+
+
+		const int sign = direction*UP_DIR >= 0 ? 1 : -1;
+		double forwL, backL;
+		if (sign == 1)
+		{
+			if (curtheta >= theta && curtheta <= PI - theta)
+			{
+				forwL = std::max(L1, L2);
+				backL = 0.0f;
+			}
+			else if (curtheta < theta)
+			{
+				forwL = std::max(L1, L2);
+				backL = std::min(L1, L2);
+			}
+			else if (curtheta > PI - theta)
+			{
+				forwL = std::max(L1, L2);
+				backL = std::min(L1, L2);
+			}
+		}
+		else
+		{
+			if (curtheta >= theta && curtheta <= PI - theta)
+			{
+				backL = std::max(L1, L2);
+				forwL = 0.0f;
+			}
+			else if (curtheta < theta)
+			{
+				backL = std::max(L1, L2);
+				forwL = std::min(L1, L2);
+			}
+			else if (curtheta > PI - theta)
+			{
+				backL = std::max(L1, L2);
+				forwL = std::min(L1, L2);
+			}
+		}
+		//FOV dectection
+
+		static const int &TOTL = _opticFlowPoints->getNumChildren();
+		static const double &y = _car->getCarState()->_O.y();
+		const double forwardY = y + std::min(forwL,L);
+		const double backwardY = y - std::min(backL,L);
 
 		int curY(0.0f);
 		if (y >= 0.0f)
@@ -486,7 +537,7 @@ void ExperimentCallback::showOpticFlow()
 			}
 		}
 
-		const int startFor = (curFor > TOTL / 2) ? curFor : 0;
+		const int startFor = (curFor > TOTL / 2) ? curFor : ((curBac > TOTL / 2) ? 0 : curY);
 		const int startBac = (curFor > TOTL / 2) ? curFor : TOTL / 2;
 		const int startrCur = (curY > TOTL / 2) ? curY : TOTL / 2;
 
@@ -523,37 +574,6 @@ void ExperimentCallback::showOpticFlow()
 				}
 			}
 		}
-		
-// 		for (int i = startFor; i < curFor; i++)
-// 		{
-// 			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
-// 			if (obs)
-// 			{
-// 				obs->setAllChildrenOn();
-// 				obs->setFrameCounts(obs->getFrameCounts() + 1);
-// 				dynamicFlow(obs, i);
-// 			}
-// 		}
-// 		for (int i = startBac; i < curY; i++)
-// 		{
-// 			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
-// 			if (obs)
-// 			{
-// 				obs->setAllChildrenOn();
-// 				obs->setFrameCounts(obs->getFrameCounts() + 1);
-// 				dynamicFlow(obs, i);
-// 			}
-// 		}
-// 		for (int i = startrCur; i < curBac; i++)
-// 		{
-// 			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
-// 			if (obs)
-// 			{
-// 				obs->setAllChildrenOn();
-// 				obs->setFrameCounts(obs->getFrameCounts() + 1);
-// 				dynamicFlow(obs, i);
-// 			}
-// 		}
 	}
 }
 

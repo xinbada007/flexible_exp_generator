@@ -31,7 +31,7 @@ ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
 RoadLanes:	102.816
-RoadLength:	5	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+RoadLength:	1666	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
 TextureWidth:	18.36
 RoadPic:	../Resources/texture/road4096-0.png 16
 
@@ -56,7 +56,7 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	1	#0 = use default	1 = use trigger
+Timer-Trigger:	0	#0 = use default	1 = use trigger
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 Lane-Offset:	-1.875	#Negative = L	Positive = R
 
@@ -98,15 +98,15 @@ OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
-DepthDensity:		1	#every x meters
+DepthDensity:		100	#every x meters
 OpticFlow-Width:	5670	
 OpticFlow-Height:	509	
-OpticFlow-Density:	200
+OpticFlow-Density:	20000
 
 ##==Trigger Setting======================
 Trigger-Enable:	1	1	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
-Trigger-Time:	0	0	16	4	0	30
-Trigger-Time:	-1	16	-1	18	16	-1
+Trigger-Time:	0	-1	16	4	0	30
+Trigger-Time:	-1	-1	-1	18	16	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1
 
 ##==Text Setting=========================
