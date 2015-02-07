@@ -94,28 +94,28 @@ OBS-Array-Mode:	1	# 0 = Animation	1 = Obs	2 = GLPOINTS
 OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Optic Flow Setting===========================================
-OpticFlow:		1	#1 = Enable	0= Disable
+OpticFlow:		0	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
-OpticFlow-FrameCounts:	0	
-OpticFlow-Versions:	0
+OpticFlow-FrameCounts:	6	
+OpticFlow-Versions:	140
 DepthDensity:		100	#every x meters
 OpticFlow-Width:	5670	
 OpticFlow-Height:	509	
 OpticFlow-Density:	20000
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	1	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Enable:	0	0	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
 Trigger-Time:	0	-1	16	4	0	30
 Trigger-Time:	-1	-1	-1	18	16	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1
 
 ##==Text Setting=========================
-Text:	Please Change Lane	##==must line by line====================
+Text:	Please Change Lane\n\n------->	##==must line by line====================
 Text:	Road Disappears in 3s
 Text:	Please Change Lane
 Text:	Quit in 2s
 Text:	Quit in 1s
 Textime:	4	13	18	28	29
-Period:		2	1	2	1	1
+Period:		4	1	2	1	1
 
 #Roads:	../Resources/roads/Line.txt;

@@ -1373,6 +1373,22 @@ void ReadConfig::readTrial(ifstream &in)
 				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
 				if (!config.empty())
 				{
+					bool search(false);
+					const std::string temp = "\\n";
+					do 
+					{
+						std::size_t fd = config.find(temp);
+						if (fd != config.npos)
+						{
+							std::string linefeed = "\n";
+							config.replace(fd, temp.size(), linefeed);
+							search = true;
+						}
+						else
+						{
+							search = false;
+						}
+					} while (search);
 					_experiment->_textContent.push_back(config);
 				}
 				continue;
