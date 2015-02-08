@@ -267,6 +267,10 @@ void ReadConfig::initializeAfterReadTrial()
 		}
 		_screens->_aspect = (double)(sum_width) / (double)(min_height);
 	}
+	if (_screens->_realworld->empty())
+	{
+		_screens->_hFov = 2.0f*atan(_screens->_aspect*tan(_screens->_fovy*0.5f*TO_RADDIAN)) / TO_RADDIAN;
+	}
 
 	if (osgDB::fileExists(_screens->_background))
 	{
@@ -816,9 +820,10 @@ void ReadConfig::readTrial(ifstream &in)
 			}
 			else if (title == REALWORD)
 			{
-				config.erase(config.begin(), config.begin() + REALWORD.size());				
+				config.erase(config.begin(), config.begin() + REALWORD.size());		
 				std::string::size_type sz;
-				if(!stoi(config, &sz)) continue;
+				_screens->_hFov = stod(config, &sz);
+				if(!_screens->_hFov) continue;
 				config.erase(config.begin(), config.begin() + sz);
 				while (!config.empty())
 				{

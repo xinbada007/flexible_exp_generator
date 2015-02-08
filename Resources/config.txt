@@ -9,7 +9,7 @@ Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		42.175	#Disable when RealWorld is enabled
+fovy:		40	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
@@ -94,17 +94,17 @@ OBS-Array-Mode:	1	# 0 = Animation	1 = Obs	2 = GLPOINTS
 OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Optic Flow Setting===========================================
-OpticFlow:		0	#1 = Enable	0= Disable
+OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
-OpticFlow-FrameCounts:	6	
-OpticFlow-Versions:	140
+OpticFlow-FrameCounts:	0	
+OpticFlow-Versions:	0
 DepthDensity:		100	#every x meters
 OpticFlow-Width:	5670	
 OpticFlow-Height:	509	
 OpticFlow-Density:	20000
 
 ##==Trigger Setting======================
-Trigger-Enable:	0	0	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Enable:	1	0	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
 Trigger-Time:	0	-1	16	4	0	30
 Trigger-Time:	-1	-1	-1	18	16	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1

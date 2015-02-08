@@ -6,8 +6,6 @@
 
 #include <math.h>
 
-#include "randutil.h"
-
 const double FRUSTUM_Z_MAX = 65535;
 
 const double PI = 3.14159265358979323846;

@@ -18,7 +18,7 @@
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
-_opticFlowPoints(NULL), _switchOpticFlow(true)
+_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(rc->getScreens()->_hFov), _frameNumber(0)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -425,7 +425,7 @@ void ExperimentCallback::showOpticFlow()
 	if (_opticFlowDrawn)
 	{
 		//FOV dectection
-		const double theta = 80.0f * TO_RADDIAN;
+		const double theta = 0.5f * _fovX * TO_RADDIAN;
 		static CarState const *cs = _car->getCarState();
 		static const osg::Vec3d &direction = cs->_direction;
 		const double curtheta = acos((direction*X_AXIS) / (direction.length()*X_AXIS.length()));
@@ -483,7 +483,7 @@ void ExperimentCallback::showOpticFlow()
 		int curY(0.0f);
 		if (y >= 0.0f)
 		{
-			curY = y / _expSetting->_depthDensity;
+			curY = y / _expSetting->_depthDensity + 0.5f;
 			if (curY > TOTL / 2)
 			{
 				curY = TOTL / 2;
@@ -491,7 +491,7 @@ void ExperimentCallback::showOpticFlow()
 		}
 		else
 		{
-			curY = abs(y) / _expSetting->_depthDensity;
+			curY = (abs(y) / _expSetting->_depthDensity) + 0.5f;
 			curY += TOTL / 2;
 			if (curY > TOTL)
 			{
@@ -502,7 +502,7 @@ void ExperimentCallback::showOpticFlow()
 		int curFor(0.0f);
 		if (forwardY >= 0.0f)
 		{
-			curFor = forwardY / _expSetting->_depthDensity;
+			curFor = forwardY / _expSetting->_depthDensity + 0.5f;
 			if (curFor > TOTL / 2)
 			{
 				curFor = TOTL / 2;
@@ -510,7 +510,7 @@ void ExperimentCallback::showOpticFlow()
 		}
 		else
 		{
-			curFor = abs(forwardY) / _expSetting->_depthDensity;
+			curFor = abs(forwardY) / _expSetting->_depthDensity + 0.5f;
 			curFor += TOTL / 2;
 			if (curFor > TOTL)
 			{
@@ -521,7 +521,7 @@ void ExperimentCallback::showOpticFlow()
 		int curBac(0.0f);
 		if (backwardY >= 0.0f)
 		{
-			curBac = backwardY / _expSetting->_depthDensity;
+			curBac = backwardY / _expSetting->_depthDensity + 0.5f;
 			if (curBac > TOTL / 2)
 			{
 				curBac = TOTL / 2;
@@ -529,7 +529,7 @@ void ExperimentCallback::showOpticFlow()
 		}
 		else
 		{
-			curBac = abs(backwardY) / _expSetting->_depthDensity;
+			curBac = abs(backwardY) / _expSetting->_depthDensity + 0.5f;
 			curBac += TOTL / 2;
 			if (curBac > TOTL)
 			{
@@ -537,10 +537,13 @@ void ExperimentCallback::showOpticFlow()
 			}
 		}
 
-		const int startFor = (curFor > TOTL / 2) ? curFor : ((curBac > TOTL / 2) ? 0 : curY);
-		const int startBac = (curFor > TOTL / 2) ? curFor : TOTL / 2;
-		const int startrCur = (curY > TOTL / 2) ? curY : TOTL / 2;
-
+//		const int startFor = (curFor > TOTL / 2) ? curFor : ((curBac > TOTL / 2) ? 0 : curY);
+//		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : curY);
+		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : std::min(curFor,curBac));
+//		const int startBac = (curFor > TOTL / 2) ? curFor : TOTL / 2;
+		const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
+//		const int startrCur = (curY > TOTL / 2) ? curY : TOTL / 2;
+		const int startCur = (y < 0.0f) ? curY : TOTL / 2;
 		for (int opticStart = 0; opticStart<TOTL; opticStart++)
 		{
 			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(opticStart));
@@ -560,7 +563,7 @@ void ExperimentCallback::showOpticFlow()
 					dynamicFlow(obs, opticStart);
 				}
 
-				else if (opticStart >= startrCur && opticStart < curBac)
+				else if (opticStart >= startCur && opticStart < curBac)
 				{
 					obs->setAllChildrenOn();
 					obs->setFrameCounts(obs->getFrameCounts() + 1);
@@ -644,7 +647,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
 	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
-	CarState *carState = _car->getCarState();
+	static CarState *carState = _car->getCarState();
 	if (carState && ea)
 	{
 		Plane::reverse_across_iterator start = *carState->_OQuad;
@@ -690,6 +693,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			break;
 		case::osgGA::GUIEventAdapter::FRAME:
 			_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*carState->_startTime), 0.0f);
+			_frameNumber = carState->_frameStamp;
 			deviationCheck();
 			showText();
 			dynamicChange();
