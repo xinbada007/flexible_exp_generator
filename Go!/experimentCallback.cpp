@@ -593,6 +593,8 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned 
 
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
+	osg::notify(osg::NOTICE) << "Experiment Callback Begin" << std::endl;
+
 	if (!_cVisitor || !_road || !_root)
 	{
 		_cVisitor = CollVisitor::instance();
@@ -606,14 +608,6 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			osg::notify(osg::WARN) << "Cannot find nodes failed to control experiment" << std::endl;
 			return;
 		}
-
-		_cVisitor->reset();
-		_cVisitor->setMode(ROADTAG::ROAD);
-		_road->accept(*_cVisitor);
-		_cVisitor->setMode(ROADTAG::RWALL);
-		_road->accept(*_cVisitor);
-		_cVisitor->setMode(ROADTAG::LWALL);
-		_road->accept(*_cVisitor);
 	}
 	if (!_car)
 	{
@@ -686,7 +680,11 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		}
 	}
 
+	osg::notify(osg::NOTICE) << "Experiment Traverse" << std::endl;
+
 	traverse(node, nv);
+
+	osg::notify(osg::NOTICE) << "Experiment Callback End" << std::endl;
 }
 
 void ExperimentCallback::trigger()

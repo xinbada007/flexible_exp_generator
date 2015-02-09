@@ -90,6 +90,8 @@ void CameraEvent::updateLookAt(osg::View *viewer)
 
 bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
 {
+	osg::notify(osg::NOTICE) << "CamEvent..Begin..." << std::endl;
+
 	const Car * refC = dynamic_cast<Car*>(this->getUserData());
 	osg::View *viewer = us.asView();
 
@@ -207,8 +209,11 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			break;
 		}
 
+		osg::notify(osg::NOTICE) << "CamEvent..END..." << std::endl;
 		return false;
 	}
+
+	osg::notify(osg::NOTICE) << "CamEvent..END..." << std::endl;
 	return false;
 }
 

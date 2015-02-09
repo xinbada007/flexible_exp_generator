@@ -28,7 +28,21 @@ class LogicRoad :
 public:
 	LogicRoad();
 	LogicRoad(const LogicRoad &copy, osg::CopyOp copyop = osg::CopyOp::SHALLOW_COPY);
-	META_Node(LogicRoad, LogicRoad);
+//	META_Node(LogicRoad, LogicRoad);
+
+	virtual osg::Object* cloneType() const { return new LogicRoad(); };
+	virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new LogicRoad(*this, copyop); };
+	virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const LogicRoad *>(obj) != NULL; };
+	virtual const char* className() const { return "LogicRoad"; };
+	virtual const char* libraryName() const { return "LogicRoad"; };
+	virtual void accept(osg::NodeVisitor& nv)
+	{
+		osg::notify(osg::NOTICE) << nv.className() << "\t" << _tag << "\tBegin\n";
+		//		osg::notify(osg::NOTICE) << "LogicRoad::accept(nodevisitor)" << std::endl;
+		if (nv.validNodeMask(*this)) { nv.pushOntoNodePath(this); nv.apply(*this); nv.popFromNodePath(); }
+		osg::notify(osg::NOTICE) << "LogicRoad Ends" << "\n";
+	};
+
 
 	void line1D(const osg::Vec3dArray *V1, const osg::Vec3dArray *V2);
 	void line1D(const osg::Vec3dArray *refV);

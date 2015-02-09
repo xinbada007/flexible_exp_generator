@@ -29,7 +29,7 @@ _maxAnisotropy(copy._maxAnisotropy), _solidType(copy._solidType), _pointsColorAr
 
 Solid::~Solid()
 {
-	osg::notify(osg::DEBUG_INFO) << "deleting Solid...\t" << std::endl;
+	osg::notify(osg::NOTICE) << "deleting Solid...Begin...\t" << std::endl;
 	Edge *refE = _startE;
 	if (refE)
 	{
@@ -67,6 +67,8 @@ Solid::~Solid()
 	_startP = NULL;
 
 	_solidchildGeode = NULL;
+
+	osg::notify(osg::NOTICE) << "deleting Solid...Done...\t" << std::endl;
 }
 
 Plane * Solid::getAbstract() const

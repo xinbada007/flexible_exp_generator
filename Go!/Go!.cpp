@@ -198,8 +198,24 @@ int main(int argc, char** argv)
 	int i = 0;
 	while (i < totalRep)
 	{
+		CollVisitor::instance()->reset();
+		CollVisitor::instance()->setMode(ROADTAG::ROAD);
+		road.at(i)->accept(*CollVisitor::instance());
+		CollVisitor::instance()->setMode(ROADTAG::RWALL);
+		road.at(i)->accept(*CollVisitor::instance());
+		CollVisitor::instance()->setMode(ROADTAG::LWALL);
+		road.at(i)->accept(*CollVisitor::instance());
+
 		MulitViewer *viewer = mViewer.at(i);
 		viewer->run(); 
+// 		while (!viewer->done())
+// 		{
+// 			if (viewer->getFrameStamp()->getReferenceTime() >= 60.0f)
+// 			{
+// 				viewer->setDone(true);
+// 			}
+// 			viewer->frame();
+// 		}
 
 		Recorder *rec = recorder.at(i);
 		rec->output();
