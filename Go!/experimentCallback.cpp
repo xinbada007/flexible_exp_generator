@@ -168,6 +168,7 @@ void ExperimentCallback::createObstacles()
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;
 			}
+			obs->setDataVariance(osg::Object::STATIC);
 			_obstacleList.push_back(obs);
 			_collisionOBSList.push_back(obs);
 			++pos;
@@ -234,6 +235,7 @@ void ExperimentCallback::createObstacles()
 			obs->setTag(ROADTAG::RT_UNSPECIFIED);
 			obs->setImage(_expSetting->_imgObsArray);
 			obs->createBox(_expSetting->_obsArrayAlign, _expSetting->_obsArraySize);
+			obs->setDataVariance(osg::Object::STATIC);
 			_obstacleList.push_back(obs);
 		}
 
@@ -259,6 +261,7 @@ void ExperimentCallback::createObstacles()
 				obs->setStateSet(ss);
 				obs->setSolidType(Solid::solidType::GL_POINTS_BODY);
 				obs->setTag(ROADTAG::RT_UNSPECIFIED);
+				obs->setDataVariance(osg::Object::STATIC);
 
 				_obstacleList.push_back(obs);
 			}
@@ -271,6 +274,7 @@ void ExperimentCallback::createObstacles()
 					obs->setTag(ROADTAG::OBS);
 					obs->setImage(_expSetting->_imgObsArray);
 					obs->createBox(*centerBegin, _expSetting->_obsArraySize);
+					obs->setDataVariance(osg::Object::STATIC);
 
 					_obstacleList.push_back(obs);
 					centerBegin++;
@@ -386,6 +390,14 @@ void ExperimentCallback::createOpticFlow()
 					temp->createPOINTS(points);
 					temp->setSolidType(Solid::solidType::GL_POINTS_BODY);
 					temp->setTag(ROADTAG::RT_UNSPECIFIED);
+					if (_expSetting->_opticFlowVersions)
+					{
+						temp->setDataVariance(osg::Object::DYNAMIC);
+					}
+					else
+					{
+						temp->setDataVariance(osg::Object::STATIC);
+					}
 
 					_opticFlowPoints->addChild(temp);
 				}
@@ -616,7 +628,7 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned 
 
 void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-	osg::notify(osg::NOTICE) << "Experiment Callback Begin" << std::endl;
+//	osg::notify(osg::NOTICE) << "Experiment Callback Begin" << std::endl;
 
 	if (!_cVisitor || !_road || !_root)
 	{
@@ -704,11 +716,11 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		}
 	}
 
-	osg::notify(osg::NOTICE) << "Experiment Traverse" << std::endl;
+//	osg::notify(osg::NOTICE) << "Experiment Traverse" << std::endl;
 
 	traverse(node, nv);
 
-	osg::notify(osg::NOTICE) << "Experiment Callback End" << std::endl;
+//	osg::notify(osg::NOTICE) << "Experiment Callback End" << std::endl;
 }
 
 void ExperimentCallback::trigger()

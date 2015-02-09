@@ -29,7 +29,7 @@ _maxAnisotropy(copy._maxAnisotropy), _solidType(copy._solidType), _pointsColorAr
 
 Solid::~Solid()
 {
-	osg::notify(osg::NOTICE) << "deleting Solid...Begin...\t" << std::endl;
+//	osg::notify(osg::NOTICE) << "deleting Solid...Begin...\t" << std::endl;
 	Edge *refE = _startE;
 	if (refE)
 	{
@@ -68,7 +68,7 @@ Solid::~Solid()
 
 	_solidchildGeode = NULL;
 
-	osg::notify(osg::NOTICE) << "deleting Solid...Done...\t" << std::endl;
+//	osg::notify(osg::NOTICE) << "deleting Solid...Done...\t" << std::endl;
 }
 
 Plane * Solid::getAbstract() const
@@ -393,8 +393,6 @@ void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3Array> p)
 	
 	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, vertex->getNumElements()));
 
-	GLgeomtry->setDataVariance(osg::Object::DYNAMIC);
-
 	GLP->addDrawable(GLgeomtry.release());
 	this->addChild(GLP.release());
 }
@@ -419,8 +417,6 @@ void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
 	GLgeomtry->setColorBinding(osg::Geometry::BIND_OVERALL);
 
 	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, vertex->getNumElements()));
-
-	GLgeomtry->setDataVariance(osg::Object::DYNAMIC);
 
 	GLP->addDrawable(GLgeomtry.release());
 	this->addChild(GLP.release());

@@ -828,7 +828,7 @@ void Recorder::setStatus(const std::string &content)
 
 void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)
 {
-	osg::notify(osg::NOTICE) << "Recorder..Begin..." << std::endl;
+//	osg::notify(osg::NOTICE) << "Recorder..Begin..." << std::endl;
 
 	const Car *refC = dynamic_cast<Car*>(node);
 	const CarState *carState(NULL);
@@ -884,9 +884,9 @@ void Recorder::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		}
 	}
 
-	osg::notify(osg::NOTICE) << "Recorder..Traverse..." << std::endl;
+//	osg::notify(osg::NOTICE) << "Recorder..Traverse..." << std::endl;
 	traverse(node, nv);
-	osg::notify(osg::NOTICE) << "Recorder..END..." << std::endl;
+//	osg::notify(osg::NOTICE) << "Recorder..END..." << std::endl;
 }
 
 void Recorder::setHUDCamera(osg::Camera *cam)

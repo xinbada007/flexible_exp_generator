@@ -339,7 +339,7 @@ void switchRoad::reset()
 
 void switchRoad::apply(osg::Group &refNode)
 {
-	osg::notify(osg::NOTICE) << "DebugNode..Begin..." << std::endl;
+//	osg::notify(osg::NOTICE) << "DebugNode..Begin..." << std::endl;
 
 	std::string libName = refNode.libraryName();
 	std::string libClass = refNode.className();
@@ -362,7 +362,7 @@ void switchRoad::apply(osg::Group &refNode)
 // 			}
 // 		}
 // 	}
-	osg::notify(osg::NOTICE) << "DebugNode..Traverse..." << std::endl;
+//	osg::notify(osg::NOTICE) << "DebugNode..Traverse..." << std::endl;
 	traverse(refNode);
-	osg::notify(osg::NOTICE) << "DebugNode..END..." << std::endl;
+//	osg::notify(osg::NOTICE) << "DebugNode..END..." << std::endl;
 }

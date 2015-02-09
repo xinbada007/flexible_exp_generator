@@ -79,4 +79,6 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 	this->absoluteTerritory._detectR = std::max(_vehicle->_height, _vehicle->_width);
 	this->absoluteTerritory._detectR = std::max(this->absoluteTerritory._detectR, _vehicle->_length);
 	this->absoluteTerritory._refuseR = 0.0f;
+
+	setDataVariance(osg::Object::STATIC);
 }

@@ -122,7 +122,6 @@ void RenderVistor::render(osg::Drawable *refD) const
 		color->push_back(osg::Vec4(1.0, 1.0f, 1.0f, 1.0f));
 		refG->setColorArray(color);
 		refG->setColorBinding(osg::Geometry::BIND_OVERALL);
-		refG->setDataVariance(osg::Object::DYNAMIC);
 
 		osg::ref_ptr<osg::DrawArrays> drawArray;
 		if (!_numLim || refG->getVertexArray()->getNumElements() <= _numLim)

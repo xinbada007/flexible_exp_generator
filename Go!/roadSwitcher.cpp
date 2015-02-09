@@ -17,7 +17,7 @@ RoadSwitcher::~RoadSwitcher()
 
 void RoadSwitcher::operator()(osg::Node* node, osg::NodeVisitor* nv)
 {
-	osg::notify(osg::NOTICE) << "Roadswitcher..Begins..." << std::endl;
+//	osg::notify(osg::NOTICE) << "Roadswitcher..Begins..." << std::endl;
 
 	if (!_carState)
 	{
@@ -43,9 +43,9 @@ void RoadSwitcher::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			node->accept(*new RoadSwitchVisitor(solidCurrent));
 		}
 	}
-	osg::notify(osg::NOTICE) << "Roadswitch..Traverse..." << std::endl;
+//	osg::notify(osg::NOTICE) << "Roadswitch..Traverse..." << std::endl;
 	traverse(node, nv);
-	osg::notify(osg::NOTICE) << "Roadswitch..END..." << std::endl;
+//	osg::notify(osg::NOTICE) << "Roadswitch..END..." << std::endl;
 }
 
 void RoadSwitchVisitor::apply(osg::Switch &sw)

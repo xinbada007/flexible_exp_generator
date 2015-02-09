@@ -195,6 +195,7 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 
 		//Add Road
 		osg::ref_ptr<LogicRoad> newR = universalLogicRoad(j, ROAD);
+		newR->setDataVariance(osg::Object::STATIC);
 
 		newR->setMaxAnisotropy(_roadSet->_imgRoadAnisotropy);
 		newR->setSolidType(Solid::solidType::ROADBODY);
@@ -204,11 +205,13 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 
 		//Add mid-Line of Road
 		osg::ref_ptr<LogicRoad> newMD = universalLogicRoad(j, MIDQUAD);
+		newMD->setDataVariance(osg::Object::STATIC);
 		sw->addChild(addLogRoadtoList(newMD.get()));
 		_midList.push_back(newMD.get());
 
 		//Add ctrlRoad
 		osg::ref_ptr<LogicRoad> newLR = universalLogicRoad(j, CTRL);
+		newLR->setDataVariance(osg::Object::STATIC);
 		sw->addChild(addLogRoadtoList(newLR.get()));
 		_ctrlList.push_back(newLR.get());
 
@@ -216,6 +219,7 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 		if (buildWall)
 		{
 			osg::ref_ptr<LogicRoad> lWall = universalLogicRoad(j, LWALL);
+			lWall->setDataVariance(osg::Object::STATIC);
 
 			lWall->setMaxAnisotropy(_roadSet->_imgWallAnisotropy);
 			lWall->setSolidType(Solid::solidType::WALLBODY);
@@ -224,6 +228,7 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 			_lWallList.push_back(lWall.get());
 
 			osg::ref_ptr<LogicRoad> rWall = universalLogicRoad(j, RWALL);
+			rWall->setDataVariance(osg::Object::STATIC);
 
 			rWall->setMaxAnisotropy(_roadSet->_imgWallAnisotropy);
 			rWall->setSolidType(Solid::solidType::WALLBODY);

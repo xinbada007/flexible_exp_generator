@@ -210,11 +210,11 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnablePREfast>false</EnablePREfast>
-      <DebugInformationFormat>None</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>sisl.lib;sdl2.lib;osgAudio.lib;osg.lib;osgDB.lib;osgGA.lib;osgText.lib;osgUtil.lib;osgViewer.lib;OpenThreads.lib;%(AdditionalDependencies)</AdditionalDependencies>

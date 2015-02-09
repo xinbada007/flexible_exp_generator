@@ -335,7 +335,7 @@ bool CarEvent::Joystick()
 
 void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 {
-	osg::notify(osg::NOTICE) << "CarEvent..Begins..." << std::endl;
+//	osg::notify(osg::NOTICE) << "CarEvent..Begins..." << std::endl;
 
 	if (!_updated)
 	{
@@ -430,15 +430,15 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 			else
 			{
-//				if (_speedLock)
+				if (_speedLock)
 				{
 					_carState->_speed = _vehicle->_speed;
 				}
 			}
 
-			_carState->_angle += _vehicle->_rotate*_carState->_angle_incr;
-			_leftTurn = 1;
-			_shifted = true;
+// 			_carState->_angle += _vehicle->_rotate*_carState->_angle_incr;
+// 			_leftTurn = 1;
+// 			_shifted = true;
 
 			if (_carState->_reset && _vehicle->_carReset)
 			{
@@ -466,9 +466,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			break;
 		}
 	}
-	osg::notify(osg::NOTICE) << "CarEvent..Traverse..." << std::endl;
+//	osg::notify(osg::NOTICE) << "CarEvent..Traverse..." << std::endl;
 	traverse(node, nv);
-	osg::notify(osg::NOTICE) << "CarEvent..END..." << std::endl;
+//	osg::notify(osg::NOTICE) << "CarEvent..END..." << std::endl;
 }
 
 void CarEvent::applyCarMovement()

@@ -453,7 +453,7 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 
 void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 {
-	osg::notify(osg::NOTICE) << "Collision Callback Begin" << std::endl;
+//	osg::notify(osg::NOTICE) << "Collision Callback Begin" << std::endl;
 
 	const CollVisitor *refCV = CollVisitor::instance();
 	const Car *refC = dynamic_cast<Car*>(node);
@@ -495,9 +495,9 @@ void Collision::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		refC->getCarState()->setObsList(listObsCollsion(refC, refCV->getObstacle()));
 	}
 	
-	osg::notify(osg::NOTICE) << "Collision Traverse" << std::endl;
+//	osg::notify(osg::NOTICE) << "Collision Traverse" << std::endl;
 
 	traverse(node, nv);
 
-	osg::notify(osg::NOTICE) << "Collision Callback End" << std::endl;
+//	osg::notify(osg::NOTICE) << "Collision Callback End" << std::endl;
 }
