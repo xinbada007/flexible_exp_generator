@@ -168,7 +168,7 @@ void ExperimentCallback::createObstacles()
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;
 			}
-			obs->setDataVariance(osg::Object::STATIC);
+			obs->setDataVariance(osg::Object::DYNAMIC);
 			_obstacleList.push_back(obs);
 			_collisionOBSList.push_back(obs);
 			++pos;
@@ -235,7 +235,7 @@ void ExperimentCallback::createObstacles()
 			obs->setTag(ROADTAG::RT_UNSPECIFIED);
 			obs->setImage(_expSetting->_imgObsArray);
 			obs->createBox(_expSetting->_obsArrayAlign, _expSetting->_obsArraySize);
-			obs->setDataVariance(osg::Object::STATIC);
+			obs->setDataVariance(osg::Object::DYNAMIC);
 			_obstacleList.push_back(obs);
 		}
 
@@ -1149,6 +1149,8 @@ void ExperimentCallback::showObstacle()
 					obs->setTag(ROADTAG::OBS);
 					break;
 				}
+
+				obs->setDataVariance(osg::Object::STATIC);
 
 				_expSetting->_obstaclesTime->erase(obsTi);
 				_expSetting->_obstacleRange->erase(requiedDistance);

@@ -161,11 +161,11 @@ int main(int argc, char** argv)
 	expcontroller->setMultiViewer(mViewer);
 	root->addEventCallback(expcontroller);
 
-	osgUtil::Optimizer optimizer;
-	optimizer.optimize(root);
-//	optimizer.optimize(root.back().get(), osgUtil::Optimizer::SHARE_DUPLICATE_STATE|osgUtil::Optimizer::OPTIMIZE_TEXTURE_SETTINGS|
-//		osgUtil::Optimizer::INDEX_MESH|osgUtil::Optimizer::VERTEX_PRETRANSFORM|osgUtil::Optimizer::VERTEX_POSTTRANSFORM);
-	
+//	osgUtil::Optimizer optimizer;
+//	optimizer.optimize(root);
+// 	optimizer.optimize(root, osgUtil::Optimizer::SHARE_DUPLICATE_STATE|osgUtil::Optimizer::OPTIMIZE_TEXTURE_SETTINGS|
+// 		osgUtil::Optimizer::INDEX_MESH|osgUtil::Optimizer::VERTEX_PRETRANSFORM|osgUtil::Optimizer::VERTEX_POSTTRANSFORM);
+
 	//Ready to Run
 	CollVisitor::instance()->reset();
 	CollVisitor::instance()->setMode(ROADTAG::ROAD);
