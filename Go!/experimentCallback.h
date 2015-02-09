@@ -62,6 +62,9 @@ private:
 
 	bool _switchOpticFlow;
 
+	const double _fovX;
+	unsigned _frameNumber;
+
 	void dynamicChange();
 	void showText();
 	void showObstacle();

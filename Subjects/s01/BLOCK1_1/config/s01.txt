@@ -9,7 +9,7 @@ Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		42.175	#Disable when RealWorld is enabled
+fovy:		30	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
@@ -31,7 +31,7 @@ ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
 RoadLanes:	102.816
-RoadLength:	5	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+RoadLength:	1666	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
 TextureWidth:	18.36
 RoadPic:	../Resources/texture/road4096-0.png 16
 
@@ -56,7 +56,7 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	1	#0 = use default	1 = use trigger
+Timer-Trigger:	0	#0 = use default	1 = use trigger
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 Lane-Offset:	-1.875	#Negative = L	Positive = R
 
@@ -98,25 +98,25 @@ OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
-DepthDensity:		1	#every x meters
+DepthDensity:		100	#every x meters
 OpticFlow-Width:	5670	
 OpticFlow-Height:	509	
-OpticFlow-Density:	200
+OpticFlow-Density:	20000
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	1	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
-Trigger-Time:	0	0	16	4	0	30
-Trigger-Time:	-1	16	-1	18	16	-1
+Trigger-Enable:	1	0	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Time:	0	-1	16	4	0	30
+Trigger-Time:	-1	-1	-1	18	16	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1
 
 ##==Text Setting=========================
-Text:	Please Change Lane	##==must line by line====================
+Text:	Please Change Lane\n\n------->	##==must line by line====================
 Text:	Road Disappears in 3s
 Text:	Please Change Lane
 Text:	Quit in 2s
 Text:	Quit in 1s
 Textime:	4	13	18	28	29
-Period:		2	1	2	1	1
+Period:		4	1	2	1	1
 
 #Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;
