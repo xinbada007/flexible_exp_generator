@@ -416,6 +416,8 @@ typedef struct Screens:public osg::Referenced
 {
 	Screens()
 	{
+		_HMD = 0;
+
 		_zNear = 0.0f;
 		_zFar = 0.0f;
 		_aspect = 0.0f;
@@ -432,6 +434,8 @@ typedef struct Screens:public osg::Referenced
 		_imgBg = NULL;
 	}
 	
+	unsigned _HMD;
+
 	double _zNear;
 	double _zFar;
 	double _aspect;

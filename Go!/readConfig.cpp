@@ -768,6 +768,7 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//Set Screen
 		static const string SCR = "SCREEN";
+		static const string USEHMD = "USE_HMD";
 		static const string ASPECT = "ASPECT";
 		static const string REALWORD = "REALWORLD";
 		static const string BGPIC = "BACKGROUND";
@@ -791,6 +792,15 @@ void ReadConfig::readTrial(ifstream &in)
 					std::string::size_type sz;
 					_screens->_scrs->push_back(stoi(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == USEHMD)
+			{
+				config.erase(config.begin(), config.begin() + USEHMD.size());
+				if (!config.empty())
+				{
+					_screens->_HMD = stoi(config);
 				}
 				continue;
 			}
