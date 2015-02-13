@@ -4,12 +4,17 @@
 #include <osg/Notify>
 #include <osgViewer/Viewer>
 #include <osg/Depth>
-#include <osgText/Text>
 #include <osgDB/ReadFile>
 #include <osg/Multisample>
 
-MulitViewer::MulitViewer():
-_screens(NULL), _mainView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL)
+#include <osgViewer/api/Win32/GraphicsHandleWin32>
+
+#include <OVR.h>
+#include <OVR_CAPI.h>
+#include <OVR_CAPI_GL.h>
+
+MulitViewer::MulitViewer(osg::ref_ptr<ReadConfig> refRC):
+_screens(refRC->getScreens()), _mainView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL), _hmdViewer(NULL), _masterTex(NULL)
 {
 }
 
@@ -30,9 +35,8 @@ MulitViewer::~MulitViewer()
 	_BGView = NULL;
 }
 
-void MulitViewer::genMainView(osg::ref_ptr<ReadConfig> refRC)
+void MulitViewer::genMainView()
 {
-	_screens = refRC->getScreens();
 	if (!_screens)
 	{
 		osg::notify(osg::FATAL) << "Error Creating Screens!" << std::endl;
@@ -200,26 +204,6 @@ osg::Camera * MulitViewer::createHUDCamerainWindow(osg::GraphicsContext *windows
 	return camera.release();
 }
 
-// void MulitViewer::createHUDView()
-// {
-// 	if (!_mainView && _HUDView)
-// 	{
-// 		return;
-// 	}
-// 	
-// 	_HUDView = new osgViewer::View;
-// 
-// 	osgViewer::Viewer::Windows windows;
-// 	this->getWindows(windows);
-// 	osg::Camera *camera = createHUDCamerainWindow(windows[0]);
-// 	// add special depth attribute
-// 	camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
-// 	camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::HUDDISPLAY);
-// 
-// 	_HUDView->setCamera(camera);
-// 	this->addView(_HUDView);
-// }
-
 void MulitViewer::createHUDView()
 {
 	if (!_mainView && _HUDView)
@@ -295,4 +279,271 @@ void MulitViewer::createBackgroundView()
 	}
 
 	this->addView(_BGView);
+}
+
+bool MulitViewer::hmd_Initialise()
+{
+	if (_hmdViewer)
+	{
+		return true;
+	}
+
+	if (!ovr_Initialize())
+	{
+		osg::notify(osg::FATAL) << "Cannot Initialize Oculus Rift" << std::endl;
+		system("pause");
+		return false;
+	}
+
+	_hmd = ovrHmd_Create(0);
+	if (!_hmd)
+	{
+		_hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
+	}
+
+	uint32_t l_SupportedSensorCaps = ovrTrackingCap_Orientation | ovrTrackingCap_Position | ovrTrackingCap_MagYawCorrection;
+	uint32_t l_RequiredTrackingCaps = 0;
+	ovrBool l_TrackingResult = ovrHmd_ConfigureTracking(_hmd, l_SupportedSensorCaps, l_RequiredTrackingCaps);
+	if (!l_TrackingResult)
+	{
+		osg::notify(osg::WARN) << "Cannot Config Oculus Rift Tracking" << std::endl;
+		system("pause");
+	}
+
+	_windowsR = _hmd->Resolution;
+	_windowsR.w /= 2;
+	_windowsR.h /= 2;
+
+	_hmdViewer = new osgViewer::Viewer;
+	_hmdViewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
+	_hmdViewer->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, 0);
+
+	_eyeTextureSize[ovrEye_Left] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->DefaultEyeFov[ovrEye_Left], 1.0f);
+	_eyeTextureSize[ovrEye_Right] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Right, _hmd->DefaultEyeFov[ovrEye_Right], 1.0f);
+
+	_targetSize.w = _eyeTextureSize[ovrEye_Left].w + _eyeTextureSize[ovrEye_Right].w;
+	_targetSize.h = max(_eyeTextureSize[ovrEye_Left].h, _eyeTextureSize[ovrEye_Right].h);
+
+	_masterTex = new osg::Texture2D;
+	_masterTex->setTextureSize(_targetSize.w, _targetSize.h);
+	_masterTex->setInternalFormat(GL_RGBA);
+	_masterTex->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+	_masterTex->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+
+	_hmdViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+	_hmdViewer->getCamera()->setViewport(0, 0, _masterTex->getTextureWidth(), _masterTex->getTextureHeight());
+	_hmdViewer->getCamera()->setRenderOrder(osg::Camera::PRE_RENDER);
+	_hmdViewer->getCamera()->attach(osg::Camera::COLOR_BUFFER, _masterTex);
+
+	osg::Camera *leftCam = createSlaveCamerainHMD(_hmdViewer, _masterTex);
+	osg::Camera *rightCam = createSlaveCamerainHMD(_hmdViewer, _masterTex);
+
+	_hmdViewer->addSlave(leftCam, osg::Matrix(), osg::Matrix(), true);
+	_hmdViewer->addSlave(rightCam, osg::Matrix(), osg::Matrix(), true);
+
+	_hmdViewer->getCamera()->setDrawBuffer(GL_NONE);
+	leftCam->setDrawBuffer(GL_NONE);
+	rightCam->setDrawBuffer(GL_NONE);
+	_hmdViewer->getCamera()->setReadBuffer(GL_NONE);
+	leftCam->setReadBuffer(GL_NONE);
+	rightCam->setReadBuffer(GL_NONE);
+	_hmdViewer->getCamera()->getGraphicsContext()->setSwapCallback(new swapcallback);
+
+	return true;
+}
+
+bool MulitViewer::setHMDSceneData(osg::Node *node)
+{
+	if (!_hmdViewer)
+	{
+		osg::notify(osg::FATAL) << "No HMD Viewer Found!" << std::endl;
+		system("pause");
+		return false;
+	}
+
+	int g_DistortionCaps = 0
+		| ovrDistortionCap_Vignette
+		| ovrDistortionCap_Chromatic
+		| ovrDistortionCap_Overdrive
+		| ovrDistortionCap_TimeWarp // Turning this on gives ghosting???
+		;
+
+	_hmdViewer->setSceneData(node);
+	_hmdViewer->realize();
+
+	osgViewer::ViewerBase::Windows windows;
+	_hmdViewer->getWindows(windows);
+	if (windows.size() > 1)
+	{
+		osg::notify(osg::FATAL) << "Currently Does NOT support multiple windows!" << std::endl;
+		return false;
+	}
+	osgViewer::GraphicsHandleWin32 *osgwin = dynamic_cast<osgViewer::GraphicsHandleWin32*>(windows.front());
+	HWND hWnd = osgwin->getHWND();
+	HDC hDc = GetDC(hWnd);
+
+	ovrHmd_AttachToWindow(_hmd, hWnd, NULL, NULL);
+
+	_hmdViewer->frame();
+
+	_hmdViewer->getCamera()->getGraphicsContext()->makeCurrent();
+
+	std::cout << glGetString(GL_VERSION) << std::endl;
+
+	_glCfg.OGL.Header.API = ovrRenderAPI_OpenGL;
+	_glCfg.OGL.Header.BackBufferSize = _windowsR;
+	_glCfg.OGL.Header.Multisample = 0;
+	_glCfg.OGL.Window = hWnd;
+	_glCfg.OGL.DC = GetDC(hWnd);
+
+	ovrBool configResult = ovrHmd_ConfigureRendering(_hmd, &_glCfg.Config, g_DistortionCaps, _hmd->MaxEyeFov, _eyeRenderDesc);
+	if (!configResult)
+	{
+		osg::notify(osg::FATAL) << "Oculus Rift Config Render Failed!" << std::endl;
+		system("pause");
+		return false;
+	}
+
+	unsigned contextID = _hmdViewer->getCamera()->getGraphicsContext()->getState()->getContextID();
+	GLuint master_TexID = 20;
+	if (_masterTex->getTextureObject(contextID))
+	{
+		master_TexID = _masterTex->getTextureObject(contextID)->id();
+	}
+
+	ovrGLTexture leftTex;
+	leftTex.OGL.Header.API = ovrRenderAPI_OpenGL;
+	leftTex.OGL.Header.TextureSize = _targetSize;
+	leftTex.OGL.Header.RenderViewport.Pos.x = 0;
+	leftTex.OGL.Header.RenderViewport.Pos.y = 0;
+	leftTex.OGL.Header.RenderViewport.Size = _eyeTextureSize[ovrEye_Left];
+	leftTex.OGL.TexId = master_TexID;
+
+	ovrGLTexture rightTex;
+	rightTex.OGL.Header.API = ovrRenderAPI_OpenGL;
+	rightTex.OGL.Header.TextureSize = _targetSize;
+	rightTex.OGL.Header.RenderViewport.Pos.x = _eyeTextureSize[ovrEye_Left].w;
+	rightTex.OGL.Header.RenderViewport.Pos.y = 0;
+	rightTex.OGL.Header.RenderViewport.Size = _eyeTextureSize[ovrEye_Right];
+	rightTex.OGL.TexId = master_TexID;
+
+	_eyeTextures[ovrEye_Left] = leftTex.Texture;
+	_eyeTextures[ovrEye_Right] = rightTex.Texture;
+}
+
+void MulitViewer::runHMD()
+{
+	if (!_hmdViewer)
+	{
+		osg::notify(osg::FATAL) << "Cannot find HMD Viewer!" << std::endl;
+		return;
+	}
+
+	_projectionMatrici[ovrEye_Left] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Left].Fov, _screens->_zNear, _screens->_zFar, true);
+	_projectionMatrici[ovrEye_Right] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Right].Fov, _screens->_zNear, _screens->_zFar, true);
+	osg::Matrix l_proj_M, r_proj_M, l_view_M, r_view_M;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			l_proj_M(i, j) = _projectionMatrici[ovrEye_Left].Transposed().M[i][j];
+			r_proj_M(i, j) = _projectionMatrici[ovrEye_Right].Transposed().M[i][j];
+		}
+	}
+
+	_eyeOffsets[ovrEye_Left] = _eyeRenderDesc[ovrEye_Left].HmdToEyeViewOffset;
+	_eyeOffsets[ovrEye_Right] = _eyeRenderDesc[ovrEye_Right].HmdToEyeViewOffset;
+	l_view_M = osg::Matrix::translate(_eyeOffsets[ovrEye_Left].x, _eyeOffsets[ovrEye_Left].y, _eyeOffsets[ovrEye_Left].z);
+	r_view_M = osg::Matrix::translate(_eyeOffsets[ovrEye_Right].x, _eyeOffsets[ovrEye_Right].y, _eyeOffsets[ovrEye_Right].z);
+
+	osg::Camera *leftcam = _hmdViewer->getSlave(ovrEye_Left)._camera;
+	osg::Camera *rightcam = _hmdViewer->getSlave(ovrEye_Right)._camera;
+
+	leftcam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.x,
+		_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.y,
+		_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.w,
+		_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.h);
+	rightcam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.w,
+		_eyeTextures[ovrEye_Right].Header.RenderViewport.Pos.y,
+		_eyeTextures[ovrEye_Right].Header.RenderViewport.Size.w,
+		_eyeTextures[ovrEye_Right].Header.RenderViewport.Size.h);
+
+	leftcam->setProjectionMatrix(l_proj_M);
+	rightcam->setProjectionMatrix(r_proj_M);
+
+	ovrHmd_RecenterPose(_hmd);
+	ovrFrameTiming l_HmdFrameTiming;
+
+	typedef BOOL(GL_APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
+	PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
+	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
+
+	while (!_hmdViewer->done())
+	{
+		const unsigned &frameIndex = _hmdViewer->getFrameStamp()->getFrameNumber();
+		l_HmdFrameTiming = ovrHmd_BeginFrame(_hmd, frameIndex);
+		ovrHmd_GetEyePoses(_hmd, frameIndex, _eyeOffsets, _eyePoses, NULL);
+
+		OVR::Quatd leftOrientation = OVR::Quatd(_eyePoses[ovrEye_Left].Orientation);
+		OVR::Matrix4d leftMVMatrix = OVR::Matrix4d(leftOrientation.Inverted());
+		OVR::Quatd rightOrientation = OVR::Quatd(_eyePoses[ovrEye_Right].Orientation);
+		OVR::Matrix4d rightMVMatrix = OVR::Matrix4d(rightOrientation.Inverted());
+		osg::Matrixd leftMatrix, rightMatrix;
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				leftMatrix(i, j) = leftMVMatrix.Transposed().M[i][j];
+				rightMatrix(i, j) = rightMVMatrix.Transposed().M[i][j];
+			}
+		}
+
+		leftcam->setViewMatrix(_hmdViewer->getCamera()->getViewMatrix() * leftMatrix * l_view_M);
+		rightcam->setViewMatrix(_hmdViewer->getCamera()->getViewMatrix() * rightMatrix * r_view_M);
+
+		if (wglSwapIntervalEXT)
+		{
+			wglSwapIntervalEXT(0);
+		}
+
+		_hmdViewer->frame();
+		_hmdViewer->getCamera()->getGraphicsContext()->makeCurrent();
+		ovrHmd_EndFrame(_hmd, _eyePoses, _eyeTextures);
+	}
+}
+
+void MulitViewer::shutdownHMD()
+{
+	ovrHmd_Destroy(_hmd);
+	ovr_Shutdown();
+}
+
+osg::Camera * MulitViewer::createRTTCamera(osg::Camera::BufferComponent buffer, osg::Texture *tex)
+{
+	osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+	camera->setClearColor(osg::Vec4(135.f / 255.f, 206.f / 255.f, 250.f / 255.f, 1.0f));
+	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+	camera->setRenderOrder(osg::Camera::PRE_RENDER);
+	if (tex)
+	{
+		tex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
+		tex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+		camera->setViewport(0, 0, tex->getTextureWidth(), tex->getTextureHeight());
+		camera->attach(buffer, tex);
+		camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+	}
+
+	return camera.release();
+}
+
+osg::Camera * MulitViewer::createSlaveCamerainHMD(osgViewer::Viewer *viewer, osg::ref_ptr<osg::Texture2D> tex)
+{
+	osg::GraphicsContext *context = viewer->getCamera()->getGraphicsContext();
+
+	osg::ref_ptr<osg::Camera> camera = createRTTCamera(osg::Camera::COLOR_BUFFER, tex);
+	camera->setGraphicsContext(context);
+	camera->setView(viewer);
+
+	return camera.release();
 }

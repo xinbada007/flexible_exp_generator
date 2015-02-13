@@ -41,19 +41,60 @@ CollVisitor::~CollVisitor()
 		*sod_i = NULL;
 		++sod_i;
 	}
+	sod_i = _wall.begin();
+	while (sod_i != _wall.end())
+	{
+		*sod_i = NULL;
+		++sod_i;
+	}
 
 	_obs.clear();
 	_rd.clear();
 	_lwall.clear();
 	_rwall.clear();
+	_wall.clear();
 }
 
 void CollVisitor::reset()
 {
+	obstacleList::iterator obs_i = _obs.begin();
+	while (obs_i != _obs.end())
+	{
+		*obs_i = NULL;
+		++obs_i;
+	}
+
+	solidList::iterator sod_i = _rd.begin();
+	while (sod_i != _rd.end())
+	{
+		*sod_i = NULL;
+		++sod_i;
+	}
+	sod_i = _lwall.begin();
+	while (sod_i != _lwall.end())
+	{
+		*sod_i = NULL;
+		++sod_i;
+	}
+	sod_i = _rwall.begin();
+	while (sod_i != _rwall.end())
+	{
+		*sod_i = NULL;
+		++sod_i;
+	}
+	sod_i = _wall.begin();
+	while (sod_i != _wall.end())
+	{
+		*sod_i = NULL;
+		++sod_i;
+	}
+
 	_obs.clear();
 	_rd.clear();
 	_lwall.clear();
 	_rwall.clear();
+	_wall.clear();
+
 	_mode = ROAD;
 }
 

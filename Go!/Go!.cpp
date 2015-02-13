@@ -3,22 +3,11 @@
 #include "stdafx.h"
 #include "headers.h"
 
+#include <osgViewer/api/Win32/GraphicsHandleWin32>
+
 #include <OVR.h>
 #include <OVR_CAPI.h>
 #include <OVR_CAPI_GL.h>
-
-#include <osgViewer/api/Win32/GraphicsWindowWin32>
-#include <osgViewer/api/Win32/PixelBufferWin32>
-#include <osgViewer/View>
-
-#include <osg/GL>
-#include <osg/DeleteHandler>
-#include <osg/ApplicationUsage>
-
-#include <vector>
-#include <map>
-#include <sstream>
-#include <windowsx.h>
 
 Road * obtainRoad(ReadConfig *rc)
 {
@@ -64,7 +53,202 @@ CameraEvent *obtainCamMatrix(ReadConfig *rc, Car *car)
 	return camMatrix.release();
 }
 
-osg::Camera *createRTTCamera(osg::Camera::BufferComponent buffer, osg::Texture *tex)
+void runScene(ReadConfig *readConfig, osgViewer::ViewerBase *vb)
+{
+	//Always Render first and then texture
+	osg::ref_ptr<RenderVistor> rv = new RenderVistor;
+	osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
+
+	//Build Road && Render Road && Texture Road
+	osg::ref_ptr<Road> road;
+	road = obtainRoad(readConfig);
+	if (road->getRoadSet()->_visible)
+	{
+		rv->setBeginMode(GL_QUADS);
+		road->accept(*rv);
+		road->accept(*tv);
+	}
+	//Visit to find walls and roads
+	CollVisitor::instance()->reset();
+	CollVisitor::instance()->setMode(ROADTAG::ROAD);
+	road->accept(*CollVisitor::instance());
+	CollVisitor::instance()->setMode(ROADTAG::RWALL);
+	road->accept(*CollVisitor::instance());
+	CollVisitor::instance()->setMode(ROADTAG::LWALL);
+	road->accept(*CollVisitor::instance());
+
+	//Build Car & Render Car && Obtain carMatrix
+	osg::ref_ptr<Car> car;
+	car = obtainCar(readConfig);
+	if (car->getVehicle()->_visibility)
+	{
+		rv->reset();
+		rv->setBeginMode(GL_POINTS);
+		car->accept(*rv);
+	}
+	osg::ref_ptr<osg::MatrixTransform> carMatrix;
+	carMatrix = obtainCarMatrix(car);
+
+	//Root Node && collect information for tracing car and collision detection
+	osg::ref_ptr<osg::Group> root;
+	root = new osg::Group;
+	root->addChild(road);
+	root->addChild(carMatrix);
+	//Measure
+//	root.back()->addChild(readConfig.back()->measuer());
+
+	//Collision detect && Trace Car
+	osg::ref_ptr<Collision> colldetect;
+	colldetect = new Collision;
+	car->addUpdateCallback(colldetect);
+	osg::ref_ptr<RoadSwitcher> roadSwitcher;
+	roadSwitcher = new RoadSwitcher;
+	roadSwitcher->setCarState(car->getCarState());
+	road->addUpdateCallback(roadSwitcher);
+
+	//Record Car
+	osg::ref_ptr<Recorder> recorder;
+	recorder = new Recorder(readConfig);
+	car->addUpdateCallback(recorder);
+
+	//ExperimentControl
+	osg::ref_ptr<ExperimentCallback> expcontroller;
+	expcontroller = new ExperimentCallback(readConfig);
+	expcontroller->setCar(car);
+	root->addEventCallback(expcontroller);
+
+	//Camera event callback
+	osg::ref_ptr<CameraEvent> camMatrix;
+	camMatrix = obtainCamMatrix(readConfig, car);
+
+	//Viewer Setup
+	osg::ref_ptr<MulitViewer> mViewer = dynamic_cast<MulitViewer*>(vb);
+	if (!mViewer)
+	{
+		return;
+	}
+	if (mViewer->getMainView())
+	{
+		//mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
+		mViewer->getMainView()->setSceneData(root);
+		mViewer->getMainView()->setCameraManipulator(camMatrix);
+		expcontroller->setMultiViewer(mViewer);
+		if (mViewer->getHuDView())
+		{
+			recorder->setHUDCamera(mViewer->getHUDCamera(MulitViewer::LEFT));
+			expcontroller->setHUDCamera(mViewer->getHUDCamera(MulitViewer::CENTRE));
+		}
+		mViewer->run();
+	}
+	else if (mViewer->getHMDViewer())
+	{
+		mViewer->setHMDSceneData(root);
+		mViewer->getHMDViewer()->setCameraManipulator(camMatrix);
+		expcontroller->setMultiViewer(mViewer);
+		mViewer->runHMD();
+		mViewer->shutdownHMD();
+	}
+
+	//after run output records
+	recorder->output();
+	//after run set ref_ptr to null
+	root->accept(*new DeConstructerVisitor);
+	vb = NULL;
+	mViewer = NULL;
+	recorder = NULL;
+	readConfig = NULL;
+	root = NULL;
+	road = NULL;
+	car = NULL;
+	carMatrix = NULL;
+	colldetect = NULL;
+	roadSwitcher = NULL;
+	camMatrix = NULL;
+	expcontroller = NULL;
+	CollVisitor::instance()->reset();
+}
+
+int main(int argc, char** argv)
+{
+	bool replayM(false);
+	std::string configFile = "..\\Resources\\config.txt";
+	configFile = osgDB::fileExists(configFile) ? configFile : "";
+	std::string replayFile = "";
+	if (argc >= 2)
+	{
+		configFile = osgDB::fileExists(argv[1]) ? argv[1] : "";
+		if (argc == 3)
+		{
+			replayFile = osgDB::fileExists(argv[2]) ? argv[2] : "";
+			replayM = true;
+		}
+	}
+	if (configFile.empty() || (replayM == true && replayFile.empty()))
+	{
+		osg::notify(osg::FATAL) << "cannot find config file or replay file!" << std::endl;
+		osg::notify(osg::FATAL) << "configFile:\t" << configFile
+								<< "\nreplayFile:\t" << replayFile << std::endl;
+		system("pause");
+		return 0;
+	}
+
+	osg::ref_ptr<ReadConfig> readConfig = replayM ? new ReadConfig(configFile, replayFile) :
+													new ReadConfig(configFile);
+
+	osg::ref_ptr<osgViewer::ViewerBase> viewer;
+	osg::ref_ptr<MulitViewer> mViewer(NULL);
+	if (!readConfig->getScreens()->_HMD)
+	{
+		viewer = new MulitViewer(readConfig);
+		mViewer = static_cast<MulitViewer*>(&(*viewer));
+		mViewer->genMainView();
+		mViewer->createHUDView();
+		mViewer->createBackgroundView();
+		mViewer->setRunMaxFrameRate(frameRate::instance()->getDesignfRate());
+		osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
+		mViewer->setThreadingModel(th);
+	}
+	else
+	{
+		viewer = new MulitViewer(readConfig);
+		osg::ref_ptr<MulitViewer> mViewer = static_cast<MulitViewer*>(&(*viewer));
+		mViewer->hmd_Initialise();
+	}
+
+	//before running open joystick and sound
+	extern bool init_joystick();
+	init_joystick();
+	osgAudio::SoundManager::instance()->init(16, true);
+
+	runScene(readConfig, viewer);
+	mViewer = NULL;
+	viewer = NULL;
+
+	//after running shutdown sound and joystick
+	osgAudio::SoundManager::instance()->stopAllSources();
+	extern void close_joystick();
+	close_joystick();
+
+	if (osg::Referenced::getDeleteHandler())
+	{
+		osg::Referenced::getDeleteHandler()->setNumFramesToRetainObjects(0);
+		osg::Referenced::getDeleteHandler()->flushAll();
+	}
+
+	osgAudio::SoundManager::instance()->instance()->shutdown();
+
+	//exit the main function
+	return 0;
+}
+
+//Debug Node
+// 		osg::ref_ptr<DebugNode> debugger = new DebugNode;
+// 		debugger->setUserData(cv.get());
+// 		root.back()->addEventCallback(debugger.get());
+// 		root.back()->addChild(readConfig.back()->measuer());
+
+/*
+osg::Camera* createRTTCamera(osg::Camera::BufferComponent buffer, osg::Texture* tex)
 {
 	osg::ref_ptr<osg::Camera> camera = new osg::Camera;
 	camera->setClearColor(osg::Vec4(135.f / 255.f, 206.f / 255.f, 250.f / 255.f, 1.0f));
@@ -94,137 +278,102 @@ osg::Camera *createSlaveCamera(osgViewer::Viewer *viewer, osg::ref_ptr<osg::Text
 	return camera.release();
 }
 
-class swapcallback :
-	public osg::GraphicsContext::SwapCallback
-{
-public:
-	swapcallback(){};
-	~swapcallback(){};
-	virtual void swapBuffersImplementation(osg::GraphicsContext *gc){};
-};
+std::vector<osg::ref_ptr<ReadConfig>> readConfig;
+std::vector<osg::ref_ptr<Road>> road;
+std::vector<osg::ref_ptr<Car>> car;
+std::vector<osg::ref_ptr<osg::MatrixTransform>> carMatrix;
+std::vector<osg::ref_ptr<osg::Group>> root;
+std::vector<osg::ref_ptr<Collision>> colldetect;
+std::vector<osg::ref_ptr<RoadSwitcher>> roadSwitcher;
+std::vector<osg::ref_ptr<CameraEvent>> camMatrix;
+std::vector<osg::ref_ptr<Recorder>> recorder;
+std::vector<osg::ref_ptr<ExperimentCallback>> expcontroller;
 
-void runScene(ReadConfig *readConfig, osgViewer::ViewerBase *vb)
+void createScene()
 {
+	//obtain filename
+	std::string configFile = "..\\Resources\\config.txt";
+	readConfig.push_back(new ReadConfig(configFile));
+
 	//Always Render first and then texture
 	osg::ref_ptr<RenderVistor> rv = new RenderVistor;
 	osg::ref_ptr<TextureVisitor> tv = new TextureVisitor;
 
 	//Build Road && Render Road && Texture Road
-	osg::ref_ptr<Road> road;
-	road = obtainRoad(readConfig);
-	if (road->getRoadSet()->_visible)
+	road.push_back(obtainRoad(readConfig.back()));
+	if (road.back()->getRoadSet()->_visible)
 	{
 		rv->setBeginMode(GL_QUADS);
-		road->accept(*rv);
-		road->accept(*tv);
+		road.back()->accept(*rv);
+		road.back()->accept(*tv);
 	}
+	CollVisitor *cv = CollVisitor::instance();
+	cv->setMode(ROADTAG::ROAD);
+	road.back()->accept(*cv);
+	cv->setMode(ROADTAG::RWALL);
+	road.back()->accept(*cv);
+	cv->setMode(ROADTAG::LWALL);
+	road.back()->accept(*cv);
 
 	//Build Car & Render Car && Obtain carMatrix
-
-	osg::ref_ptr<Car> car;
-	car = obtainCar(readConfig);
-	if (car->getVehicle()->_visibility)
+	car.push_back(obtainCar(readConfig.back()));
+	if (car.back()->getVehicle()->_visibility)
 	{
 		rv->reset();
 		rv->setBeginMode(GL_POINTS);
-		car->accept(*rv);
+		car.back()->accept(*rv);
 	}
-	osg::ref_ptr<osg::MatrixTransform> carMatrix;
-	carMatrix = obtainCarMatrix(car);
+	carMatrix.push_back(obtainCarMatrix(car.back()));
 
 	//Root Node && collect information for tracing car and collision detection
-	osg::ref_ptr<osg::Group> root;
-	root = new osg::Group;
-	root->addChild(road);
-	root->addChild(carMatrix);
-	//Measure
-	//	root.back()->addChild(readConfig.back()->measuer());
+	root.push_back(new osg::Group());
+	root.back()->addChild(road.back().get());
+	root.back()->addChild(carMatrix.back().get());
 
 	//Collision detect && Trace Car
-	osg::ref_ptr<Collision> colldetect;
-	colldetect = new Collision;
-	car->addUpdateCallback(colldetect);
-	osg::ref_ptr<RoadSwitcher> roadSwitcher;
-	roadSwitcher = new RoadSwitcher;
-	roadSwitcher->setCarState(car->getCarState());
-	road->addUpdateCallback(roadSwitcher);
-
-	//Record Car
-	osg::ref_ptr<Recorder> recorder;
-	recorder = new Recorder(readConfig);
-	car->addUpdateCallback(recorder);
-
-	//ExperimentControl
-	osg::ref_ptr<ExperimentCallback> expcontroller;
-	expcontroller = new ExperimentCallback(readConfig);
-	expcontroller->setCar(car);
-	root->addEventCallback(expcontroller);
+	colldetect.push_back(new Collision);
+	car.back()->addUpdateCallback(colldetect.back().get());
+	roadSwitcher.push_back(new RoadSwitcher);
+	roadSwitcher.back()->setCarState(car.back()->getCarState());
+	road.back()->addUpdateCallback(roadSwitcher.back().get());
 
 	//Camera event callback
-	osg::ref_ptr<CameraEvent> camMatrix;
-	camMatrix = obtainCamMatrix(readConfig, car);
+	camMatrix.push_back(obtainCamMatrix(readConfig.back(), car.back().get()));
 
-	//Viewer Setup
-	osg::ref_ptr<MulitViewer> mViewer = dynamic_cast<MulitViewer*>(vb);
-	if (mViewer)
-	{
-		//mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
-		mViewer->getMainView()->setSceneData(root);
-		mViewer->getMainView()->setCameraManipulator(camMatrix);
+	//Record Car
+	recorder.push_back(new Recorder(readConfig.back().get()));
+	car.back()->addUpdateCallback(recorder.back().get());
 
-		recorder->setHUDCamera(mViewer->getHUDCamera(MulitViewer::LEFT));
-		expcontroller->setHUDCamera(mViewer->getHUDCamera(MulitViewer::CENTRE));
-		expcontroller->setMultiViewer(mViewer);
-	}
-
-	//Ready to Run
-	CollVisitor::instance()->reset();
-	CollVisitor::instance()->setMode(ROADTAG::ROAD);
-	road->accept(*CollVisitor::instance());
-	CollVisitor::instance()->setMode(ROADTAG::RWALL);
-	road->accept(*CollVisitor::instance());
-	CollVisitor::instance()->setMode(ROADTAG::LWALL);
-	road->accept(*CollVisitor::instance());
-
-	//Run
-	vb->run();
-
-	//after run output records
-	recorder->output();
-	//after run set ref_ptr to null
-	root->accept(*new DeConstructerVisitor);
-	mViewer = NULL;
-	recorder = NULL;
-	readConfig = NULL;
-	root = NULL;
-	road = NULL;
-	car = NULL;
-	carMatrix = NULL;
-	colldetect = NULL;
-	roadSwitcher = NULL;
-	camMatrix = NULL;
-	expcontroller = NULL;
+	//ExperimentControl
+	expcontroller.push_back(new ExperimentCallback(readConfig.back()));
+	expcontroller.back()->setCar(car.back().get());
+	//	root.back()->addEventCallback(expcontroller.back().get());
 }
 
-void createHMD()
+
+int g_DistortionCaps = 0
+| ovrDistortionCap_Vignette
+| ovrDistortionCap_Chromatic
+| ovrDistortionCap_Overdrive
+| ovrDistortionCap_TimeWarp // Turning this on gives ghosting???
+;
+
+ovrHmd g_Hmd;
+ovrGLConfig g_Cfg;
+ovrEyeRenderDesc g_EyeRenderDesc[2];
+ovrVector3f g_EyeOffsets[2];
+ovrPosef g_EyePoses[2];
+ovrTexture g_EyeTextures[2];
+OVR::Matrix4f g_ProjectionMatrici[2];
+OVR::Sizei g_RenderTargetSize;
+
+
+int main()
 {
-	int g_DistortionCaps = 0
-		| ovrDistortionCap_Vignette
-		| ovrDistortionCap_Chromatic
-		| ovrDistortionCap_Overdrive
-		| ovrDistortionCap_TimeWarp // Turning this on gives ghosting???
-		;
+	extern bool init_joystick();
+	init_joystick();
 
-	ovrHmd g_Hmd;
-	ovrGLConfig g_Cfg;
-	ovrEyeRenderDesc g_EyeRenderDesc[2];
-	ovrVector3f g_EyeOffsets[2];
-	ovrPosef g_EyePoses[2];
-	ovrTexture g_EyeTextures[2];
-	OVR::Matrix4f g_ProjectionMatrici[2];
-	OVR::Sizei g_RenderTargetSize;
-
-	ovr_Initialize();
+	ovrBool ini = ovr_Initialize();
 	g_Hmd = ovrHmd_Create(0);
 	if (!g_Hmd)
 	{
@@ -242,8 +391,9 @@ void createHMD()
 	osgViewer::Viewer viewer;
 	viewer.setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 	viewer.setUpViewInWindow(0, 0, windowsR.w, windowsR.h, 0);
-//	viewer.setSceneData(createScene());
-// 	viewer.setCameraManipulator(obtainCamMatrix(readConfig, car));
+	createScene();
+	viewer.setSceneData(root.back());
+	viewer.setCameraManipulator(camMatrix.back());
 
 	ovrSizei l_EyeTextureSizes[2];
 	l_EyeTextureSizes[ovrEye_Left] = ovrHmd_GetFovTextureSize(g_Hmd, ovrEye_Left, g_Hmd->DefaultEyeFov[ovrEye_Left], 1.0f);
@@ -295,7 +445,7 @@ void createHMD()
 	viewer.getWindows(windows);
 	if (windows.size() > 1)
 	{
-		return;
+		return 1;
 	}
 	osgViewer::GraphicsHandleWin32 *osgwin = dynamic_cast<osgViewer::GraphicsHandleWin32*>(windows.front());
 	HWND hWnd = osgwin->getHWND();
@@ -403,84 +553,23 @@ void createHMD()
 		leftCam->setViewMatrix(viewer.getCamera()->getViewMatrix() * leftMatrix * l_view_M);
 		rightCam->setViewMatrix(viewer.getCamera()->getViewMatrix() * rightMatrix * r_view_M);
 
-		if (wglSwapIntervalEXT)
-		{
-			wglSwapIntervalEXT(0);
-		}
+// 		if (wglSwapIntervalEXT)
+// 		{
+// 			wglSwapIntervalEXT(0);
+// 		}
 
+//		viewer.getCamera()->getGraphicsContext()->makeCurrent();
 		viewer.frame();
+		viewer.getCamera()->getGraphicsContext()->makeCurrent();
 		ovrHmd_EndFrame(g_Hmd, g_EyePoses, g_EyeTextures);
 	}
 
 	ovrHmd_Destroy(g_Hmd);
 	ovr_Shutdown();
-}
 
-int main(int argc, char** argv)
-{
-	bool replayM(false);
-	std::string configFile = "..\\Resources\\config.txt";
-	std::string replayFile = "";
-	if (argc >= 2)
-	{
-		configFile = osgDB::fileExists(argv[1]) ? argv[1] : "";
-		if (argc == 3)
-		{
-			replayFile = osgDB::fileExists(argv[2]) ? argv[2] : "";
-			replayM = true;
-		}
-	}
-	if (configFile.empty() || (replayM == true && replayFile.empty()))
-	{
-		osg::notify(osg::FATAL) << "cannot find config file or replay file!" << std::endl;
-		osg::notify(osg::FATAL) << "configFile:\t" << configFile 
-								<< "\nreplayFile:\t" << replayFile << std::endl;
-		system("pause");
-		return 0;
-	}
-
-	osg::ref_ptr<ReadConfig> readConfig = replayM ? new ReadConfig(configFile, replayFile) : 
-													new ReadConfig(configFile);
-
-	osg::ref_ptr<osgViewer::ViewerBase> viewer;
-	if (!readConfig->getScreens()->_HMD)
-	{
-		viewer = new MulitViewer;
-		osg::ref_ptr<MulitViewer> mViewer = static_cast<MulitViewer*>(&(*viewer));
-		mViewer->genMainView(readConfig);
-		mViewer->createHUDView();
-		mViewer->createBackgroundView();
-		mViewer->setRunMaxFrameRate(frameRate::instance()->getDesignfRate());
-		osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
-		mViewer->setThreadingModel(th);
-	}
-
-	//before running open joystick and sound
-	extern bool init_joystick();
-	init_joystick();
-	osgAudio::SoundManager::instance()->init(16, true);
-
-	runScene(readConfig, viewer);
-
-	//after running shutdown sound and joystick
-	osgAudio::SoundManager::instance()->stopAllSources();
 	extern void close_joystick();
 	close_joystick();
 
-	if (osg::Referenced::getDeleteHandler())
-	{
-		osg::Referenced::getDeleteHandler()->setNumFramesToRetainObjects(0);
-		osg::Referenced::getDeleteHandler()->flushAll();
-	}
-
-	osgAudio::SoundManager::instance()->instance()->shutdown();
-
-	//exit the main function
 	return 0;
 }
-
-//Debug Node
-// 		osg::ref_ptr<DebugNode> debugger = new DebugNode;
-// 		debugger->setUserData(cv.get());
-// 		root.back()->addEventCallback(debugger.get());
-// 		root.back()->addChild(readConfig.back()->measuer());
+*/

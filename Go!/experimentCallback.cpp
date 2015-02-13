@@ -14,6 +14,7 @@
 #include <iterator>
 #include <fstream>
 #include <random>
+#include <assert.h>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
@@ -438,59 +439,59 @@ void ExperimentCallback::showOpticFlow()
 	{
 		//FOV dectection
 		const double theta = 0.5f * _fovX * TO_RADDIAN;
-		static CarState const *cs = _car->getCarState();
-		static const osg::Vec3d &direction = cs->_direction;
+		CarState const *cs = _car->getCarState();
+		const osg::Vec3d &direction = cs->_direction;
 		const double curtheta = acos((direction*X_AXIS) / (direction.length()*X_AXIS.length()));
-		static const double &L = _expSetting->_opticFlowRange;
+		const double &L = _expSetting->_opticFlowRange;
 
+		assert(cos(theta));
 		const double L1 = abs(L*sin(curtheta - theta) / cos(theta)) + 0.5f;
 		const double L2 = abs(L*sin(PI - theta - curtheta) / cos(theta)) + 0.5f;
 
-
 		const int sign = direction*UP_DIR >= 0 ? 1 : -1;
-		double forwL, backL;
+		double forwL(L), backL(L);
 		if (sign == 1)
 		{
 			if (curtheta >= theta && curtheta <= PI - theta)
 			{
-				forwL = std::max(L1, L2);
+				forwL = max(L1, L2);
 				backL = 0.0f;
 			}
 			else if (curtheta < theta)
 			{
-				forwL = std::max(L1, L2);
-				backL = std::min(L1, L2);
+				forwL = max(L1, L2);
+				backL = min(L1, L2);
 			}
 			else if (curtheta > PI - theta)
 			{
-				forwL = std::max(L1, L2);
-				backL = std::min(L1, L2);
+				forwL = max(L1, L2);
+				backL = min(L1, L2);
 			}
 		}
 		else
 		{
 			if (curtheta >= theta && curtheta <= PI - theta)
 			{
-				backL = std::max(L1, L2);
+				backL = max(L1, L2);
 				forwL = 0.0f;
 			}
 			else if (curtheta < theta)
 			{
-				backL = std::max(L1, L2);
-				forwL = std::min(L1, L2);
+				backL = max(L1, L2);
+				forwL = min(L1, L2);
 			}
 			else if (curtheta > PI - theta)
 			{
-				backL = std::max(L1, L2);
-				forwL = std::min(L1, L2);
+				backL = max(L1, L2);
+				forwL = min(L1, L2);
 			}
 		}
 		//FOV dectection
 
-		static const int &TOTL = _opticFlowPoints->getNumChildren();
-		static const double &y = _car->getCarState()->_O.y();
-		const double forwardY = y + std::min(forwL,L);
-		const double backwardY = y - std::min(backL,L);
+		const int &TOTL = _opticFlowPoints->getNumChildren();
+		const double &y = _car->getCarState()->_O.y();
+		const double forwardY = y + min(forwL,L);
+		const double backwardY = y - min(backL,L);
 
 		int curY(0.0f);
 		if (y >= 0.0f)
@@ -551,7 +552,7 @@ void ExperimentCallback::showOpticFlow()
 
 //		const int startFor = (curFor > TOTL / 2) ? curFor : ((curBac > TOTL / 2) ? 0 : curY);
 //		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : curY);
-		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : std::min(curFor,curBac));
+		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : min(curFor,curBac));
 //		const int startBac = (curFor > TOTL / 2) ? curFor : TOTL / 2;
 		const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
 //		const int startrCur = (curY > TOTL / 2) ? curY : TOTL / 2;
@@ -653,7 +654,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
 	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
-	static CarState *carState = _car->getCarState();
+	CarState *carState = _car->getCarState();
 	if (carState && ea)
 	{
 		Plane::reverse_across_iterator start = *carState->_OQuad;

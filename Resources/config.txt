@@ -95,7 +95,7 @@ OBS-Array-Mode:	1	# 0 = Animation	1 = Obs	2 = GLPOINTS
 OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Optic Flow Setting===========================================
-OpticFlow:		1	#1 = Enable	0= Disable
+OpticFlow:		0	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
@@ -105,8 +105,8 @@ OpticFlow-Height:	509
 OpticFlow-Density:	20000
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	0	0	0	0	0	#road	#optic flow	#crash permits	#alert	#fov	#quit
-Trigger-Time:	0	-1	16	4	0	30
+Trigger-Enable:	1	0	0	0	0	1	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Time:	15	-1	16	4	0	15
 Trigger-Time:	-1	-1	-1	18	16	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1
 
