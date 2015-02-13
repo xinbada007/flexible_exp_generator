@@ -5,13 +5,14 @@ TrialConfig
 
 [ScreenSettings]
 Use_HMD:	1	#enable this disbles all other screen settings
+HMD_RefreshRate:	75
 #Num of Screent starts from 0
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
 fovy:		30	#Disable when RealWorld is enabled
-zNear:	0.1
+zNear:	0.5
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
 MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
@@ -27,8 +28,8 @@ CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
 CarVisible:	0	#1=Visible	0=Invisible
-CarReset:	0	#0 = disable	1 = auto	2 = manual
-ResetMode:	1	#0 = center	1 = nearest
+CarReset:	2	#0 = disable	1 = auto	2 = manual
+ResetMode:	2	#0 = center	1 = nearest
 
 [RoadSettings]
 RoadLanes:	102.816
@@ -96,19 +97,19 @@ OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Optic Flow Setting===========================================
 OpticFlow:		0	#1 = Enable	0= Disable
-OpticFlow-Visible:	1000	#only visible within 100 meters
+OpticFlow-Visible:	0	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
 DepthDensity:		100	#every x meters
-OpticFlow-Width:	5670	
-OpticFlow-Height:	509	
+OpticFlow-Width:	1928	#HMD = 1.928	#realworld = 5.670
+OpticFlow-Height:	4060	#HMD = 4.060	#realword = 0.509
 OpticFlow-Density:	20000
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	0	0	0	0	1	#road	#optic flow	#crash permits	#alert	#fov	#quit
-Trigger-Time:	15	-1	16	4	0	15
-Trigger-Time:	-1	-1	-1	18	16	-1
-Trigger-Time:	-1	-1	-1	-1	-1	-1
+Trigger-Enable:	1	0	0	0	1	0	1	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Time:	0	-1	16	4	4	4	15
+Trigger-Time:	-1	-1	-1	18	8	8	-1
+Trigger-Time:	-1	-1	-1	-1	12	12	-1
 
 ##==Text Setting=========================
 Text:	Please Change Lane\n\n------->	##==must line by line====================

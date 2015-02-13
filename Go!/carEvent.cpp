@@ -204,16 +204,23 @@ void CarEvent::makeResetMatrix()
 
 	_reset.makeIdentity();
 	osg::Vec3d MO = _carState->_O_Project;
-	if (_vehicle->_resetMode != 0)
+	if (_vehicle->_resetMode == 1)
 	{
 		MO = _carState->_lastCarArray->back();
-		const osg::Vec3d MD = (_carState->_O_Project - _carState->_lastCarArray->back());
+		const osg::Vec3d MD = (_carState->_O_Project - MO);
 		const double &length = MD.length();
 		if (length)
 		{
 			const double ratio = _vehicle->_width / MD.length();
 			MO = MO * osg::Matrix::translate(MD*ratio);
 		}
+	}
+	else if (_vehicle->_resetMode == 2)
+	{
+		MO = _carState->_lastCarArray->back();
+		const osg::Vec3d MD = (_carState->_O_Project - MO);
+		MO = MO * osg::Matrix::translate(MD);
+		MO = MO * (_vehicle->_initialState);
 	}
 
 	_reset *= osg::Matrix::translate(MO - _carState->_O);
@@ -418,12 +425,6 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 		case osgGA::GUIEventAdapter::FRAME:
 			if (_carState->_collide && _carState->_crashPermit)
 			{
-// 				unsigned obs = _carState->getObsList().empty() ? 0 : 1;
-// 				unsigned wall = _carState->_collisionQuad.empty() ? 0 : 1;
-// 				osg::notify(osg::DEBUG_INFO) << "COLLISION DETECTED" << std::endl;
-// 				osg::notify(osg::DEBUG_INFO) << "REASON:\t" << "obs:\t" << obs << "\t" << "wall:\t" << wall << std::endl;
-// 				osg::notify(osg::DEBUG_INFO) << "DETECTION:\t" << "Collision" << _carState->_collide << "\t" << "Crash Permit:\t" << _carState->_crashPermit << std::endl;
-
 				const double MAXSPEED(1.0f/3.6f);
 				int sign = (_carState->_speed > 0) ? -1 : 1;
 				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
@@ -436,11 +437,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				}
 			}
 
-// 			_carState->_angle += _vehicle->_rotate*_carState->_angle_incr;
-// 			_leftTurn = 1;
-// 			_shifted = true;
-
-			if (_carState->_reset && _vehicle->_carReset)
+			if (_carState->_reset)
 			{
 				makeResetMatrix();
 				_carState->_reset = false;

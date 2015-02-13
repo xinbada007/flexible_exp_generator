@@ -53,7 +53,7 @@ CameraEvent *obtainCamMatrix(ReadConfig *rc, Car *car)
 	return camMatrix.release();
 }
 
-void runScene(ReadConfig *readConfig, osgViewer::ViewerBase *vb)
+void runScene(ReadConfig *readConfig)
 {
 	//Always Render first and then texture
 	osg::ref_ptr<RenderVistor> rv = new RenderVistor;
@@ -122,38 +122,23 @@ void runScene(ReadConfig *readConfig, osgViewer::ViewerBase *vb)
 	camMatrix = obtainCamMatrix(readConfig, car);
 
 	//Viewer Setup
-	osg::ref_ptr<MulitViewer> mViewer = dynamic_cast<MulitViewer*>(vb);
-	if (!mViewer)
-	{
-		return;
-	}
-	if (mViewer->getMainView())
-	{
-		//mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
-		mViewer->getMainView()->setSceneData(root);
-		mViewer->getMainView()->setCameraManipulator(camMatrix);
-		expcontroller->setMultiViewer(mViewer);
-		if (mViewer->getHuDView())
-		{
-			recorder->setHUDCamera(mViewer->getHUDCamera(MulitViewer::LEFT));
-			expcontroller->setHUDCamera(mViewer->getHUDCamera(MulitViewer::CENTRE));
-		}
-		mViewer->run();
-	}
-	else if (mViewer->getHMDViewer())
-	{
-		mViewer->setHMDSceneData(root);
-		mViewer->getHMDViewer()->setCameraManipulator(camMatrix);
-		expcontroller->setMultiViewer(mViewer);
-		mViewer->runHMD();
-		mViewer->shutdownHMD();
-	}
+	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer(readConfig);
+	mViewer->genMainView();
+//	mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
+	mViewer->getMainView()->setCameraManipulator(camMatrix);
+	mViewer->setMainViewSceneData(root);
+	mViewer->createHUDView();
+
+	recorder->setHUDCamera(mViewer->getHUDCamera(MulitViewer::LEFT));
+	expcontroller->setHUDCamera(mViewer->getHUDCamera(MulitViewer::CENTRE));
+	expcontroller->setViewer(mViewer);
+
+	mViewer->go();
 
 	//after run output records
 	recorder->output();
 	//after run set ref_ptr to null
 	root->accept(*new DeConstructerVisitor);
-	vb = NULL;
 	mViewer = NULL;
 	recorder = NULL;
 	readConfig = NULL;
@@ -195,34 +180,32 @@ int main(int argc, char** argv)
 	osg::ref_ptr<ReadConfig> readConfig = replayM ? new ReadConfig(configFile, replayFile) :
 													new ReadConfig(configFile);
 
-	osg::ref_ptr<osgViewer::ViewerBase> viewer;
-	osg::ref_ptr<MulitViewer> mViewer(NULL);
-	if (!readConfig->getScreens()->_HMD)
-	{
-		viewer = new MulitViewer(readConfig);
-		mViewer = static_cast<MulitViewer*>(&(*viewer));
-		mViewer->genMainView();
-		mViewer->createHUDView();
-		mViewer->createBackgroundView();
-		mViewer->setRunMaxFrameRate(frameRate::instance()->getDesignfRate());
-		osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
-		mViewer->setThreadingModel(th);
-	}
-	else
-	{
-		viewer = new MulitViewer(readConfig);
-		osg::ref_ptr<MulitViewer> mViewer = static_cast<MulitViewer*>(&(*viewer));
-		mViewer->hmd_Initialise();
-	}
+// 	osg::ref_ptr<osgViewer::ViewerBase> viewer = new MulitViewer(readConfig);
+// 	osg::ref_ptr<MulitViewer> mViewer(NULL);
+// 	if (!readConfig->getScreens()->_HMD)
+// 	{
+// 		viewer = new MulitViewer(readConfig);
+// 		mViewer = static_cast<MulitViewer*>(&(*viewer));
+// 		mViewer->genMainView();
+// 		mViewer->createHUDView();
+// 		mViewer->createBackgroundView();
+// 		mViewer->setRunMaxFrameRate(frameRate::instance()->getDesignfRate());
+// 		osgViewer::ViewerBase::ThreadingModel th = osgViewer::ViewerBase::ThreadPerCamera;
+// 		mViewer->setThreadingModel(th);
+// 	}
+// 	else
+// 	{
+// 		viewer = new MulitViewer(readConfig);
+// 		osg::ref_ptr<MulitViewer> mViewer = static_cast<MulitViewer*>(&(*viewer));
+// 		mViewer->hmd_Initialise();
+// 	}
 
 	//before running open joystick and sound
 	extern bool init_joystick();
 	init_joystick();
 	osgAudio::SoundManager::instance()->init(16, true);
 
-	runScene(readConfig, viewer);
-	mViewer = NULL;
-	viewer = NULL;
+	runScene(readConfig);
 
 	//after running shutdown sound and joystick
 	osgAudio::SoundManager::instance()->stopAllSources();
@@ -347,7 +330,7 @@ void createScene()
 	//ExperimentControl
 	expcontroller.push_back(new ExperimentCallback(readConfig.back()));
 	expcontroller.back()->setCar(car.back().get());
-	//	root.back()->addEventCallback(expcontroller.back().get());
+	root.back()->addEventCallback(expcontroller.back().get());
 }
 
 
@@ -553,12 +536,11 @@ int main()
 		leftCam->setViewMatrix(viewer.getCamera()->getViewMatrix() * leftMatrix * l_view_M);
 		rightCam->setViewMatrix(viewer.getCamera()->getViewMatrix() * rightMatrix * r_view_M);
 
-// 		if (wglSwapIntervalEXT)
-// 		{
-// 			wglSwapIntervalEXT(0);
-// 		}
+		if (wglSwapIntervalEXT)
+		{
+			wglSwapIntervalEXT(0);
+		}
 
-//		viewer.getCamera()->getGraphicsContext()->makeCurrent();
 		viewer.frame();
 		viewer.getCamera()->getGraphicsContext()->makeCurrent();
 		ovrHmd_EndFrame(g_Hmd, g_EyePoses, g_EyeTextures);

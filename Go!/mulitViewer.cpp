@@ -6,26 +6,33 @@
 #include <osg/Depth>
 #include <osgDB/ReadFile>
 #include <osg/Multisample>
-
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
 
 #include <OVR.h>
 #include <OVR_CAPI.h>
 #include <OVR_CAPI_GL.h>
 
+#include <assert.h>
+
 MulitViewer::MulitViewer(osg::ref_ptr<ReadConfig> refRC):
-_screens(refRC->getScreens()), _mainView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL), _hmdViewer(NULL), _masterTex(NULL)
+_screens(refRC->getScreens()), _normalView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL), _hmdView(NULL), _masterTex(NULL), _hFOV(0.0f)
 {
+	_eyeDirection.set(O_POINT);
 }
 
 MulitViewer::~MulitViewer()
 {
 	std::cout << "Deconstruct MulitViewer" << std::endl;
 
+	if (_hmdView)
+	{
+		shutdownHMD();
+	}
+
 	_screens = NULL;
-	_mainView = NULL;
-	std::vector<osg::Camera*>::iterator cam_i = _slaveCamerasinMainView.begin();
-	while (cam_i != _slaveCamerasinMainView.end())
+	_normalView = NULL;
+	std::vector<osg::Camera*>::iterator cam_i = _slaveCamerasinNormalView.begin();
+	while (cam_i != _slaveCamerasinNormalView.end())
 	{
 		*cam_i = NULL;
 		++cam_i;
@@ -42,29 +49,64 @@ void MulitViewer::genMainView()
 		osg::notify(osg::FATAL) << "Error Creating Screens!" << std::endl;
 		return;
 	}
-	
-	osg::GraphicsContext::WindowingSystemInterface *wsi;
-	wsi = osg::GraphicsContext::getWindowingSystemInterface();
 
-	unsigned numScreensTxt = _screens->_scrs->getNumElements();
-	osg::ref_ptr<osg::UIntArray> screenNumber = new osg::UIntArray(_screens->_scrs->begin(), _screens->_scrs->end());
-	osg::UIntArray::iterator uni = std::unique(screenNumber->begin(), screenNumber->end());
-	numScreensTxt -= (screenNumber->end() - uni);
-	unsigned numScreensSys = wsi->getNumScreens();
-
-	if (!numScreensTxt || numScreensTxt > numScreensSys)
+	if (_hmdView || _normalView)
 	{
-		osg::notify(osg::FATAL) << "Num of screens are wrong!" << std::endl;
 		return;
 	}
 
-	if (!_mainView)
+	if (_screens->_HMD)
 	{
-		_mainView = createPowerWall();
+		hmd_Initialise();
+		assert(_hmdView);
+		this->addView(_hmdView);
+		this->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
+		frameRate::instance()->setDesignedfRate(_screens->_HMD_RefreshRate);
+		this->setRunMaxFrameRate(_screens->_HMD_RefreshRate);
+		assert(_hmd);
+		_hFOV = max(_hmd->MaxEyeFov->LeftTan, _hmd->MaxEyeFov->RightTan);
+		_hFOV *= 2.0f;
+		_hFOV /= TO_RADDIAN;
+	}
+	else
+	{
+		osg::GraphicsContext::WindowingSystemInterface *wsi;
+		wsi = osg::GraphicsContext::getWindowingSystemInterface();
+
+		unsigned numScreensTxt = _screens->_scrs->getNumElements();
+		osg::ref_ptr<osg::UIntArray> screenNumber = new osg::UIntArray(_screens->_scrs->begin(), _screens->_scrs->end());
+		osg::UIntArray::iterator uni = std::unique(screenNumber->begin(), screenNumber->end());
+		numScreensTxt -= (screenNumber->end() - uni);
+		unsigned numScreensSys = wsi->getNumScreens();
+
+		if (!numScreensTxt || numScreensTxt > numScreensSys)
+		{
+			osg::notify(osg::FATAL) << "Num of screens are wrong!" << std::endl;
+			return;
+		}
+
+		osg::GraphicsContext::ScreenSettings ss;
+		wsi->getScreenSettings(screenNumber->front(), ss);
+		double refreshRate(ss.refreshRate);
+		for (osg::UIntArray::iterator i = screenNumber->begin(); i != uni; i++)
+		{
+			wsi->getScreenSettings(*i, ss);
+			if (!isEqual(refreshRate, ss.refreshRate, 1.0f))
+			{
+				osg::notify(osg::WARN) << "Refresh Rate is inconsistent please adjust otherwise program WILL be affected" << std::endl;
+				system("pause");
+			}
+		}
+
+		_normalView = createPowerWall();
+		this->addView(_normalView);
+		this->setThreadingModel(osgViewer::ViewerBase::ThreadPerCamera);
+		frameRate::instance()->setDesignedfRate(refreshRate);
+		this->setRunMaxFrameRate(refreshRate);
+		_hFOV = _screens->_hFov;
 	}
 
-	this->addView(_mainView);
-
+	
 	return;
 }
 
@@ -106,7 +148,7 @@ osgViewer::View * MulitViewer::createPowerWall()
 
 			unsigned index = si_count - sn_count;
 
-			osg::ref_ptr<osg::Camera> camera = createSlaveCamerainMainView(si, ss, ss.width * (--index));
+			osg::ref_ptr<osg::Camera> camera = createSlaveCamerainNormalView(si, ss, ss.width * (--index));
 
 			osg::Matrix proOffset = osg::Matrix::scale(numColumns, numRows, 1.0f)
 				* osg::Matrix::translate(int(numColumns - 2 * i - 1), 0.0f, 0.0f);
@@ -131,13 +173,13 @@ osgViewer::View * MulitViewer::createPowerWall()
 			wsi->getScreenSettings(si, ss);
 			ss.height = tileHeight;
 			ss.width = tileWidth;
-			osg::ref_ptr<osg::Camera> camera = createSlaveCamerainMainView(si, ss, tileWidth*i);
+			osg::ref_ptr<osg::Camera> camera = createSlaveCamerainNormalView(si, ss, tileWidth*i);
 
 			const double rotation = _screens->_realworld->back() * (i - 1);
 
 			osg::Matrix viewOffset = osg::Matrix::rotate(rotation * TO_RADDIAN, UP_DIR);
 
-			_slaveCamerasinMainView.push_back(camera.get());
+			_slaveCamerasinNormalView.push_back(camera.get());
 			view->addSlave(camera.release(), osg::Matrix(), viewOffset, true);
 		}
 	}
@@ -145,7 +187,7 @@ osgViewer::View * MulitViewer::createPowerWall()
 	return view.release();
 }
 
-osg::Camera * MulitViewer::createSlaveCamerainMainView(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX /* = 0 */, const int startY /* = 0 */)
+osg::Camera * MulitViewer::createSlaveCamerainNormalView(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX /* = 0 */, const int startY /* = 0 */)
 {
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
 	traits->screenNum = screenNum;
@@ -206,84 +248,118 @@ osg::Camera * MulitViewer::createHUDCamerainWindow(osg::GraphicsContext *windows
 
 void MulitViewer::createHUDView()
 {
-	if (!_mainView && _HUDView)
+	if (_normalView)
 	{
+		assert(!_hmdView);
+		if (_HUDView)
+		{
+			return;
+		}
+
+		_HUDView = new osgViewer::View;
+
+		osgViewer::Viewer::Windows windows;
+		this->getWindows(windows);
+		osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+		ss->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
+		for (unsigned i = 0; i < windows.size(); i++)
+		{
+			osg::ref_ptr<osg::Camera> camera = createHUDCamerainWindow(windows[i]);
+			camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::HUDDISPLAY);
+			camera->setStateSet(ss);
+
+			_HUDView->addSlave(camera.release(), false);
+		}
+
+		this->addView(_HUDView);
+
 		return;
 	}
 
-	_HUDView = new osgViewer::View;
-
-	osgViewer::Viewer::Windows windows;
-	this->getWindows(windows);
-	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-	ss->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
-	for (unsigned i = 0; i < windows.size(); i++)
+	else if (_hmdView)
 	{
-		osg::ref_ptr<osg::Camera> camera = createHUDCamerainWindow(windows[i]);
-		camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::HUDDISPLAY);
-		camera->setStateSet(ss);
+		assert(!_normalView);
+		if (_HUDView)
+		{
+			return;
+		}
 
-		_HUDView->addSlave(camera.release(), false);
+		//Do something here
+		//Do something here
+
+		return;
 	}
-
-	this->addView(_HUDView);
 }
 
 void MulitViewer::createBackgroundView()
 {
-	if (!_mainView && _BGView)
+	if (_normalView)
 	{
+		assert(!_hmdView);
+		assert(_screens);
+		if (_BGView || !_screens->_imgBg)
+		{
+			return;
+		}
+
+		osg::Image *image = _screens->_imgBg;
+
+		osg::ref_ptr<osg::Texture2D> background = new osg::Texture2D;
+		background->setImage(image);
+		background->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR_MIPMAP_LINEAR);
+		background->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+		osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(osg::Vec3d(0.0f, 0.0f, 0.0f),
+			osg::Vec3d(1.0f, 0.0f, 0.0f), osg::Vec3d(0.0f, 1.0f, 0.0f));
+		quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, background);
+		osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+		geode->addDrawable(quad.release());
+
+		_BGView = new osgViewer::View;
+		_BGView->getCamera()->addChild(geode.get());
+		osgViewer::Viewer::Windows windows;
+		this->getWindows(windows);
+		double x_start(0.0f);
+		double x_step = 1.0f / double(windows.size());
+		double x_end = x_start + x_step;
+		for (unsigned i = 0; i < windows.size(); i++)
+		{
+			osg::Camera *camera = createHUDCamerainWindow(windows[i]);
+
+			//set the projection matrix
+			camera->setProjectionMatrixAsOrtho2D(x_start, x_end, 0.0f, 1.0f);
+			x_start = x_end;
+			x_end += x_step;
+
+			camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 1.0f, 1.0f));
+			camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::BACKGROUND);
+
+			_BGView->addSlave(camera, true);
+		}
+
+		this->addView(_BGView);
+
 		return;
 	}
-	if (!_screens)
+
+	else if (_hmdView)
 	{
+		assert(!_normalView);
+		assert(_screens);
+		if (_BGView)
+		{
+			return;
+		}
+
+		//Do something here
+		//Do something here
+
 		return;
 	}
-	if (!_screens->_imgBg)
-	{
-		return;
-	}
-
-	osg::Image *image = _screens->_imgBg;
-
-	osg::ref_ptr<osg::Texture2D> background = new osg::Texture2D;
-	background->setImage(image);
-	background->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR_MIPMAP_LINEAR);
-	background->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
-	osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(osg::Vec3d(0.0f, 0.0f, 0.0f),
-		osg::Vec3d(1.0f, 0.0f, 0.0f), osg::Vec3d(0.0f, 1.0f, 0.0f));
-	quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, background);
-	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(quad.release());
-
-	_BGView = new osgViewer::View;
-	_BGView->getCamera()->addChild(geode.get());
-	osgViewer::Viewer::Windows windows;
-	this->getWindows(windows);
-	double x_start(0.0f);
-	double x_step = 1.0f / double(windows.size());
-	double x_end = x_start + x_step;
-	for (unsigned i = 0; i < windows.size(); i++)
-	{
-		osg::Camera *camera = createHUDCamerainWindow(windows[i]);
-
-		//set the projection matrix
-		camera->setProjectionMatrixAsOrtho2D(x_start, x_end, 0.0f, 1.0f);
-		x_start = x_end;
-		x_end += x_step;
-
-		camera->getOrCreateStateSet()->setAttributeAndModes(new osg::Depth(osg::Depth::LEQUAL, 1.0f, 1.0f));
-		camera->setRenderOrder(osg::Camera::POST_RENDER, RenderOrder::BACKGROUND);
-
-		_BGView->addSlave(camera, true);
-	}
-
-	this->addView(_BGView);
 }
 
 bool MulitViewer::hmd_Initialise()
 {
-	if (_hmdViewer)
+	if (_hmdView)
 	{
 		return true;
 	}
@@ -314,12 +390,12 @@ bool MulitViewer::hmd_Initialise()
 	_windowsR.w /= 2;
 	_windowsR.h /= 2;
 
-	_hmdViewer = new osgViewer::Viewer;
-	_hmdViewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
-	_hmdViewer->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, 0);
+	_hmdView = new osgViewer::View;
+	this->addView(_hmdView);
+	_hmdView->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, 0);
 
-	_eyeTextureSize[ovrEye_Left] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->DefaultEyeFov[ovrEye_Left], 1.0f);
-	_eyeTextureSize[ovrEye_Right] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Right, _hmd->DefaultEyeFov[ovrEye_Right], 1.0f);
+	_eyeTextureSize[ovrEye_Left] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->MaxEyeFov[ovrEye_Left], 1.0f);
+	_eyeTextureSize[ovrEye_Right] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Right, _hmd->MaxEyeFov[ovrEye_Right], 1.0f);
 
 	_targetSize.w = _eyeTextureSize[ovrEye_Left].w + _eyeTextureSize[ovrEye_Right].w;
 	_targetSize.h = max(_eyeTextureSize[ovrEye_Left].h, _eyeTextureSize[ovrEye_Right].h);
@@ -330,31 +406,32 @@ bool MulitViewer::hmd_Initialise()
 	_masterTex->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
 	_masterTex->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 
-	_hmdViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-	_hmdViewer->getCamera()->setViewport(0, 0, _masterTex->getTextureWidth(), _masterTex->getTextureHeight());
-	_hmdViewer->getCamera()->setRenderOrder(osg::Camera::PRE_RENDER);
-	_hmdViewer->getCamera()->attach(osg::Camera::COLOR_BUFFER, _masterTex);
+	_hmdView->getCamera()->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+	_hmdView->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+	_hmdView->getCamera()->setViewport(0, 0, _masterTex->getTextureWidth(), _masterTex->getTextureHeight());
+	_hmdView->getCamera()->setRenderOrder(osg::Camera::PRE_RENDER);
+	_hmdView->getCamera()->attach(osg::Camera::COLOR_BUFFER, _masterTex);
 
-	osg::Camera *leftCam = createSlaveCamerainHMD(_hmdViewer, _masterTex);
-	osg::Camera *rightCam = createSlaveCamerainHMD(_hmdViewer, _masterTex);
+	osg::Camera *leftCam = createSlaveCamerainHMD(_hmdView, _masterTex);
+	osg::Camera *rightCam = createSlaveCamerainHMD(_hmdView, _masterTex);
 
-	_hmdViewer->addSlave(leftCam, osg::Matrix(), osg::Matrix(), true);
-	_hmdViewer->addSlave(rightCam, osg::Matrix(), osg::Matrix(), true);
+	_hmdView->addSlave(leftCam, osg::Matrix(), osg::Matrix(), true);
+	_hmdView->addSlave(rightCam, osg::Matrix(), osg::Matrix(), true);
 
-	_hmdViewer->getCamera()->setDrawBuffer(GL_NONE);
+	_hmdView->getCamera()->setDrawBuffer(GL_NONE);
 	leftCam->setDrawBuffer(GL_NONE);
 	rightCam->setDrawBuffer(GL_NONE);
-	_hmdViewer->getCamera()->setReadBuffer(GL_NONE);
+	_hmdView->getCamera()->setReadBuffer(GL_NONE);
 	leftCam->setReadBuffer(GL_NONE);
 	rightCam->setReadBuffer(GL_NONE);
-	_hmdViewer->getCamera()->getGraphicsContext()->setSwapCallback(new swapcallback);
+	_hmdView->getCamera()->getGraphicsContext()->setSwapCallback(new swapcallback);
 
 	return true;
 }
 
 bool MulitViewer::setHMDSceneData(osg::Node *node)
 {
-	if (!_hmdViewer)
+	if (!_hmdView)
 	{
 		osg::notify(osg::FATAL) << "No HMD Viewer Found!" << std::endl;
 		system("pause");
@@ -368,11 +445,11 @@ bool MulitViewer::setHMDSceneData(osg::Node *node)
 		| ovrDistortionCap_TimeWarp // Turning this on gives ghosting???
 		;
 
-	_hmdViewer->setSceneData(node);
-	_hmdViewer->realize();
+	_hmdView->setSceneData(node);
+	this->realize();
 
 	osgViewer::ViewerBase::Windows windows;
-	_hmdViewer->getWindows(windows);
+	this->getWindows(windows);
 	if (windows.size() > 1)
 	{
 		osg::notify(osg::FATAL) << "Currently Does NOT support multiple windows!" << std::endl;
@@ -382,11 +459,17 @@ bool MulitViewer::setHMDSceneData(osg::Node *node)
 	HWND hWnd = osgwin->getHWND();
 	HDC hDc = GetDC(hWnd);
 
-	ovrHmd_AttachToWindow(_hmd, hWnd, NULL, NULL);
+	ovrBool attached = ovrHmd_AttachToWindow(_hmd, hWnd, NULL, NULL);
+	if (!attached)
+	{
+		osg::notify(osg::FATAL) << "Attch to windows failed!" << std::endl;
+		system("pause");
+		return false;
+	}
 
-	_hmdViewer->frame();
+	this->frame();
 
-	_hmdViewer->getCamera()->getGraphicsContext()->makeCurrent();
+	_hmdView->getCamera()->getGraphicsContext()->makeCurrent();
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
@@ -404,7 +487,7 @@ bool MulitViewer::setHMDSceneData(osg::Node *node)
 		return false;
 	}
 
-	unsigned contextID = _hmdViewer->getCamera()->getGraphicsContext()->getState()->getContextID();
+	unsigned contextID = _hmdView->getCamera()->getGraphicsContext()->getState()->getContextID();
 	GLuint master_TexID = 20;
 	if (_masterTex->getTextureObject(contextID))
 	{
@@ -429,11 +512,13 @@ bool MulitViewer::setHMDSceneData(osg::Node *node)
 
 	_eyeTextures[ovrEye_Left] = leftTex.Texture;
 	_eyeTextures[ovrEye_Right] = rightTex.Texture;
+
+	return true;
 }
 
 void MulitViewer::runHMD()
 {
-	if (!_hmdViewer)
+	if (!_hmdView)
 	{
 		osg::notify(osg::FATAL) << "Cannot find HMD Viewer!" << std::endl;
 		return;
@@ -456,8 +541,8 @@ void MulitViewer::runHMD()
 	l_view_M = osg::Matrix::translate(_eyeOffsets[ovrEye_Left].x, _eyeOffsets[ovrEye_Left].y, _eyeOffsets[ovrEye_Left].z);
 	r_view_M = osg::Matrix::translate(_eyeOffsets[ovrEye_Right].x, _eyeOffsets[ovrEye_Right].y, _eyeOffsets[ovrEye_Right].z);
 
-	osg::Camera *leftcam = _hmdViewer->getSlave(ovrEye_Left)._camera;
-	osg::Camera *rightcam = _hmdViewer->getSlave(ovrEye_Right)._camera;
+	osg::Camera *leftcam = _hmdView->getSlave(ovrEye_Left)._camera;
+	osg::Camera *rightcam = _hmdView->getSlave(ovrEye_Right)._camera;
 
 	leftcam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.x,
 		_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.y,
@@ -471,16 +556,17 @@ void MulitViewer::runHMD()
 	leftcam->setProjectionMatrix(l_proj_M);
 	rightcam->setProjectionMatrix(r_proj_M);
 
-	ovrHmd_RecenterPose(_hmd);
-	ovrFrameTiming l_HmdFrameTiming;
-
 	typedef BOOL(GL_APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
 	PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	assert(wglSwapIntervalEXT);
 
-	while (!_hmdViewer->done())
+	_eyeDirection = UP_DIR;
+	ovrHmd_RecenterPose(_hmd);
+	ovrFrameTiming l_HmdFrameTiming;
+	while (!this->done())
 	{
-		const unsigned &frameIndex = _hmdViewer->getFrameStamp()->getFrameNumber();
+		const unsigned &frameIndex = _hmdView->getFrameStamp()->getFrameNumber();
 		l_HmdFrameTiming = ovrHmd_BeginFrame(_hmd, frameIndex);
 		ovrHmd_GetEyePoses(_hmd, frameIndex, _eyeOffsets, _eyePoses, NULL);
 
@@ -498,16 +584,28 @@ void MulitViewer::runHMD()
 			}
 		}
 
-		leftcam->setViewMatrix(_hmdViewer->getCamera()->getViewMatrix() * leftMatrix * l_view_M);
-		rightcam->setViewMatrix(_hmdViewer->getCamera()->getViewMatrix() * rightMatrix * r_view_M);
+		leftcam->setViewMatrix(_hmdView->getCamera()->getViewMatrix() * leftMatrix * l_view_M);
+		rightcam->setViewMatrix(_hmdView->getCamera()->getViewMatrix() * rightMatrix * r_view_M);
+		_eyeDirection = _eyeDirection * leftMatrix;
 
-		if (wglSwapIntervalEXT)
+		_projectionMatrici[ovrEye_Left] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Left].Fov, _screens->_zNear, _screens->_zFar, true);
+		_projectionMatrici[ovrEye_Right] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Right].Fov, _screens->_zNear, _screens->_zFar, true);
+		osg::Matrix l_proj_M, r_proj_M;
+		for (int i = 0; i < 4; i++)
 		{
-			wglSwapIntervalEXT(0);
+			for (int j = 0; j < 4; j++)
+			{
+				l_proj_M(i, j) = _projectionMatrici[ovrEye_Left].Transposed().M[i][j];
+				r_proj_M(i, j) = _projectionMatrici[ovrEye_Right].Transposed().M[i][j];
+			}
 		}
+		leftcam->setProjectionMatrix(l_proj_M);
+		rightcam->setProjectionMatrix(r_proj_M);
 
-		_hmdViewer->frame();
-		_hmdViewer->getCamera()->getGraphicsContext()->makeCurrent();
+		wglSwapIntervalEXT(0);
+
+		this->frame();
+		_hmdView->getCamera()->getGraphicsContext()->makeCurrent();
 		ovrHmd_EndFrame(_hmd, _eyePoses, _eyeTextures);
 	}
 }
@@ -537,13 +635,51 @@ osg::Camera * MulitViewer::createRTTCamera(osg::Camera::BufferComponent buffer, 
 	return camera.release();
 }
 
-osg::Camera * MulitViewer::createSlaveCamerainHMD(osgViewer::Viewer *viewer, osg::ref_ptr<osg::Texture2D> tex)
+osg::Camera * MulitViewer::createSlaveCamerainHMD(osgViewer::View *view, osg::ref_ptr<osg::Texture2D> tex)
 {
-	osg::GraphicsContext *context = viewer->getCamera()->getGraphicsContext();
+	osg::GraphicsContext *context = view->getCamera()->getGraphicsContext();
 
 	osg::ref_ptr<osg::Camera> camera = createRTTCamera(osg::Camera::COLOR_BUFFER, tex);
 	camera->setGraphicsContext(context);
-	camera->setView(viewer);
+	camera->setView(view);
 
 	return camera.release();
+}
+
+bool MulitViewer::setMainViewSceneData(osg::Node *node)
+{
+	if (_normalView)
+	{
+		assert(!_hmdView);
+		
+		_normalView->setSceneData(node);
+
+		return true;
+	}
+
+	else if (_hmdView)
+	{
+		assert(!_normalView);
+
+		return setHMDSceneData(node);
+	}
+
+	return false;
+}
+
+int MulitViewer::go()
+{
+	if (_normalView)
+	{
+		assert(!_hmdView);
+		return run();
+	}
+	else if (_hmdView)
+	{
+		assert(!_normalView);
+		runHMD();
+		return 0;
+	}
+
+	return -1;
 }

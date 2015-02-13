@@ -18,6 +18,7 @@ typedef struct CarState:public osg::Referenced
 		this->_lastO.set(O_POINT);
 		this->_O_Project.set(O_POINT);
 		this->_direction.set(UP_DIR);
+		this->_eyeDirection.set(_direction);
 		this->_heading.set(_direction);
 		this->_directionLastFrame.set(_direction);
 		_angle = 0.0f;
@@ -79,6 +80,7 @@ typedef struct CarState:public osg::Referenced
 	osg::Vec3d _O_Project;
 	osg::Vec3d _shiftD;
 	osg::Vec3d _heading;
+	osg::Vec3d _eyeDirection;
 	osg::Vec3d _direction;
 	osg::Vec3d _directionLastFrame;
 	osg::ref_ptr<osg::Vec3dArray> _midLine;

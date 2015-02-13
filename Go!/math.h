@@ -86,14 +86,16 @@ private:
 class frameRate:
 	public osg::Referenced
 {
+	friend class MulitViewer;
 public:
 	static frameRate *instance();
 	double getDesignfRate() const { return _designfRate; };
 	void setRealfRate(double rate) { _realfRate = rate;};
 	double getRealfRate() const { return _realfRate; };
 private:
-	frameRate() :_designfRate(60.0f), _realfRate(60.0f) {};
+	void setDesignedfRate(double ref) { _designfRate = ref; _realfRate = _designfRate; };
+	frameRate() :_designfRate(60.0f), _realfRate(_designfRate) {};
 	~frameRate(){};
-	const double _designfRate;
+	double _designfRate;
 	double _realfRate;
 };

@@ -17,9 +17,9 @@
 #include <assert.h>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _vb(NULL), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
-_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(rc->getScreens()->_hFov), _frameNumber(0)
+_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -129,6 +129,7 @@ ExperimentCallback::~ExperimentCallback()
 	_geodeHUD = NULL;
 	_root = NULL;
 	_road = NULL;
+	_vb = NULL;
 	_mv = NULL;
 	_anmCallback = NULL;
 	_centerList = NULL;
@@ -435,11 +436,14 @@ void ExperimentCallback::showOpticFlow()
 		_root->addChild(_opticFlowPoints);
 	}
 
-	if (_opticFlowDrawn)
+	if (_opticFlowDrawn && _expSetting->_opticFlowRange)
 	{
 		//FOV dectection
-		const double theta = 0.5f * _fovX * TO_RADDIAN;
+		const double MAX_SUPPORTED_FOV(178.0f);
+		assert(_fovX < MAX_SUPPORTED_FOV);
+		const double theta = 0.5f * (min(_fovX*1.05f, MAX_SUPPORTED_FOV)) * TO_RADDIAN;	//slightly increase the fov by 10%
 		CarState const *cs = _car->getCarState();
+
 		const osg::Vec3d &direction = cs->_direction;
 		const double curtheta = acos((direction*X_AXIS) / (direction.length()*X_AXIS.length()));
 		const double &L = _expSetting->_opticFlowRange;
@@ -449,6 +453,7 @@ void ExperimentCallback::showOpticFlow()
 		const double L2 = abs(L*sin(PI - theta - curtheta) / cos(theta)) + 0.5f;
 
 		const int sign = direction*UP_DIR >= 0 ? 1 : -1;
+		
 		double forwL(L), backL(L);
 		if (sign == 1)
 		{
@@ -664,9 +669,9 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			start.add(future);
 			if (!(*start))
 			{
-				if (_mv)
+				if (_vb)
 				{
-					_mv->setDone(true);
+					_vb->setDone(true);
 				}
 			}
 		}
@@ -701,6 +706,14 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		case::osgGA::GUIEventAdapter::FRAME:
 			_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*carState->_startTime), 0.0f);
 			_frameNumber = carState->_frameStamp;
+			if (_mv && (_mv->getEyeDirection() != O_POINT))
+			{
+				carState->_eyeDirection = _mv->getEyeDirection();
+			}
+			else
+			{
+				carState->_eyeDirection = carState->_direction;
+			}
 			deviationCheck();
 			showText();
 			dynamicChange();
@@ -792,20 +805,23 @@ void ExperimentCallback::trigger()
 					if (_mv)
 					{
 						osg::Camera *cam = _mv->getMainView()->getCamera();
-						if (cam->getComputeNearFarMode() == osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
-						{
-							cam->setComputeNearFarMode(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
-						}
-						else
-						{
-							cam->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
-						}
+						assert(cam);
+						cam->setComputeNearFarMode(cam->getComputeNearFarMode() == osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR ?
+						osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES
+						: osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
+						cam->dirtyBound();
+					}
+					break;
+				case::Experiment::TRIGGER_COM::CARRESET:
+					if (_car)
+					{
+						_car->getCarState()->_reset = true;
 					}
 					break;
 				case::Experiment::TRIGGER_COM::QUIT:
-					if (_mv)
+					if (_vb)
 					{
-						_mv->setDone(true);
+						_vb->setDone(true);
 					}
 					break;
 				default:

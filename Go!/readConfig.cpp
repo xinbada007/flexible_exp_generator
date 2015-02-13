@@ -481,6 +481,7 @@ void ReadConfig::initializeAfterReadTrial()
 		
 	arrayByMatrix(_vehicle->_V, m);
 	_vehicle->_O = _vehicle->_O * m;
+	_vehicle->_initialState = m;
 	_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
 
 	//Initialize Triggers
@@ -769,6 +770,7 @@ void ReadConfig::readTrial(ifstream &in)
 		//Set Screen
 		static const string SCR = "SCREEN";
 		static const string USEHMD = "USE_HMD";
+		static const string HMDREFRESHRATE = "HMD_REFRESHRATE";
 		static const string ASPECT = "ASPECT";
 		static const string REALWORD = "REALWORLD";
 		static const string BGPIC = "BACKGROUND";
@@ -801,6 +803,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_screens->_HMD = stoi(config);
+				}
+				continue;
+			}
+			else if (title == HMDREFRESHRATE)
+			{
+				config.erase(config.begin(), config.begin() + HMDREFRESHRATE.size());
+				if (!config.empty())
+				{
+					_screens->_HMD_RefreshRate = stod(config);
 				}
 				continue;
 			}

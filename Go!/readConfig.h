@@ -18,7 +18,7 @@ typedef std::pair<int, enum TRIGGER_COM> triggerEnablePair;
 typedef struct Experiment :public osg::Referenced
 {
 	Experiment():
-	_NUMTRIGGERCOM(6)
+	_NUMTRIGGERCOM(7)
 	{
 		_timer = 0;
 		_startLane = 0;
@@ -132,6 +132,7 @@ typedef struct Experiment :public osg::Referenced
 		CRASHPERMIT,
 		SOUNDALERT,
 		NEAR_FAR_COMPUTE,
+		CARRESET,
 		QUIT
 	};
 	const unsigned _NUMTRIGGERCOM;
@@ -396,6 +397,7 @@ typedef struct Vehicle:public osg::Referenced
 
 	int _carReset;
 	int _resetMode;
+	osg::Matrixd _initialState;
 
 	enum VEHICLE_RESET_TYPE
 	{
@@ -417,6 +419,7 @@ typedef struct Screens:public osg::Referenced
 	Screens()
 	{
 		_HMD = 0;
+		_HMD_RefreshRate = 60.0f;
 
 		_zNear = 0.0f;
 		_zFar = 0.0f;
@@ -435,6 +438,7 @@ typedef struct Screens:public osg::Referenced
 	}
 	
 	unsigned _HMD;
+	double _HMD_RefreshRate;
 
 	double _zNear;
 	double _zFar;
