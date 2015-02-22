@@ -21,10 +21,9 @@ public:
 	virtual ~ExperimentCallback();
 	void operator()(osg::Node* node, osg::NodeVisitor* nv);
 	void setHUDCamera(osg::Camera *cam);
-	inline void setViewer(osgViewer::ViewerBase *vb)
+	inline void setViewer(MulitViewer *mv)
 	{ 
-		_vb = vb; 
-		_mv = dynamic_cast<MulitViewer*>(vb);
+		_mv = (mv) ? mv : NULL;
 		_fovX = (_mv) ? _mv->getHorizontalFov() : 0.0f;
 	};
 	inline void setCar(Car *car) { _car = car;};
@@ -57,7 +56,6 @@ private:
 	osg::ref_ptr<osg::Geode> _geodeHUD;
 	osg::ref_ptr<osg::Group> _root;
 	osg::ref_ptr<osg::Switch> _road;
-	osg::ref_ptr<osgViewer::ViewerBase> _vb;
 	osg::ref_ptr<MulitViewer> _mv;
 	const double _roadLength;
 

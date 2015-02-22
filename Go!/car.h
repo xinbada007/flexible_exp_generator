@@ -61,6 +61,7 @@ typedef struct CarState:public osg::Referenced
 		_OQuad = NULL;
 
 		_reset = false;
+		_steer = true;
 
 		_D_Speed = _speed;
 		_R_Speed = _speed;
@@ -96,6 +97,7 @@ typedef struct CarState:public osg::Referenced
 	Plane::iterator _OQuad;
 
 	bool _reset;
+	bool _steer;
 
 	double _angle;
 	double _angle_incr;

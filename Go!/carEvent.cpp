@@ -274,16 +274,22 @@ bool CarEvent::Joystick()
 	{
 		_carState->_swDeDead = (x / MAX)*MAX_ANGLE;
 
-		_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX);
-		_leftTurn = (x < 0);
-		_shifted = true;
+		if (_carState->_steer)
+		{
+			_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX);
+			_leftTurn = (x < 0);
+			_shifted = true;
+		}
 	}
 	else if ((abs(x)) <= DeadZone)
 	{
 		_carState->_swDeDead = 0.0f;
 
-		_carState->_angle = 0.0f;
-		_shifted = false;
+		if (_carState->_steer)
+		{
+			_carState->_angle = 0.0f;
+			_shifted = false;
+		}
 	}
 
 	if (!_speedLock)

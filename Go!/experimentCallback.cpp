@@ -17,7 +17,7 @@
 #include <assert.h>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
-, _road(NULL), _root(NULL), _dynamicUpdated(false), _vb(NULL), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
+, _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
 _opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0)
 {
@@ -129,7 +129,6 @@ ExperimentCallback::~ExperimentCallback()
 	_geodeHUD = NULL;
 	_root = NULL;
 	_road = NULL;
-	_vb = NULL;
 	_mv = NULL;
 	_anmCallback = NULL;
 	_centerList = NULL;
@@ -669,9 +668,9 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			start.add(future);
 			if (!(*start))
 			{
-				if (_vb)
+				if (_mv)
 				{
-					_vb->setDone(true);
+					_mv->setDone(true);
 				}
 			}
 		}
@@ -818,10 +817,16 @@ void ExperimentCallback::trigger()
 						_car->getCarState()->_reset = true;
 					}
 					break;
-				case::Experiment::TRIGGER_COM::QUIT:
-					if (_vb)
+				case::Experiment::TRIGGER_COM::JOYSTICK:
+					if (_car)
 					{
-						_vb->setDone(true);
+						_car->getCarState()->_steer = !(_car->getCarState()->_steer);
+					}
+					break;
+				case::Experiment::TRIGGER_COM::QUIT:
+					if (_mv)
+					{
+						_mv->setDone(true);
 					}
 					break;
 				default:
@@ -969,6 +974,8 @@ void ExperimentCallback::showText()
 	int i = 0;
 	const int limit(moment->size());
 	const std::string *whichshow(NULL);
+	std::string totalTxt;
+	totalTxt.push_back('\n');
 	while (i != limit)
 	{
 		const unsigned time = moment->at(i);
@@ -976,19 +983,15 @@ void ExperimentCallback::showText()
 		if (_expTime >= time && _expTime <= time + last)
 		{
 			whichshow = &(_expSetting->_textContent[i]);
+			totalTxt += *whichshow;
+			totalTxt.push_back('\n');
 		}
 		i++;
 	}
 
-	std::string totalTxt;
-	totalTxt.push_back('\n');
 	if (warnshow)
 	{
 		totalTxt += *warnshow;
-	}
-	if (whichshow)
-	{
-		totalTxt += *whichshow;
 	}
 
 	_textHUD->setText(totalTxt);

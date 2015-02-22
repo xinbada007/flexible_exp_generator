@@ -56,6 +56,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._dynamic);
 	_outMoment.push_back(&_recS._usrHit);
 	_outMoment.push_back(&_recS._pointsEarned);
+	_outMoment.push_back(&_recS._steering);
 	_outMoment.push_back(&_recS._distanceObsBody);
 	_outMoment.push_back(&_recS._replay);
 
@@ -536,6 +537,8 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, carState->_pointsEarned, nDigit);
 	_recS._pointsEarned = tempd + _recS._TAB;
 
+	_recS._steering = carState->_steer ? "1" : "-1" + _recS._TAB;
+
 	osg::ref_ptr<osg::DoubleArray> toOBS = carState->getDistancetoObsBody();
 	osg::DoubleArray::const_iterator begin_toOBS = toOBS->begin();
 	osg::DoubleArray::const_iterator end_toOBS = toOBS->end();
@@ -603,7 +606,7 @@ void Recorder::copyandSetHUDText()
 // 				lesscontent += temp;
 // 				lesscontent.push_back('\t');
 // 				break;
-				case Recorder::TypeofText::SCORE:
+				case Recorder::TypeofText::STEERING:
 					lesscontent += temp;
 					lesscontent.push_back('\t');
 				default:
@@ -716,13 +719,23 @@ void Recorder::setStatusLess(const std::string &txt)
 // 		}
 // 	}
 
-	//5. Score
-	text += (i == txt.cend()) ? "" : "\n\nSCORE:  ";
+	//5. Steering Wheel
+	text += (i == txt.cend()) ? "" : "\n\nSteering Wheel:  ";
+	std::string temp;
 	while (*i != '\t' && i != txt.cend())
 	{
-		text.push_back(*i);
+		temp += *i;
 		i++;
 	}
+	if (temp != "-1" && temp != "1")
+	{
+		text += "Error";
+	}
+	else
+	{
+		text += (temp == "-1" ? "OFF" : "ON");
+	}
+
 	(*i == '\t') ? ++i : i;
 
 
@@ -813,6 +826,11 @@ void Recorder::setStatus(const std::string &content)
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Score: ";
+				break;
+			case Recorder::TypeofText::STEERING:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "Steering Wheel: ";
 				break;
 			default:
 				text.push_back(' ');

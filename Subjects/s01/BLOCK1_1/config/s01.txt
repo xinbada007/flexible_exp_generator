@@ -4,14 +4,14 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	1	#enable this disbles all other screen settings
+Use_HMD:	0	#enable this disbles all other screen settings
 HMD_RefreshRate:	75
 #Num of Screent starts from 0
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		30	#Disable when RealWorld is enabled
+fovy:		90	#Disable when RealWorld is enabled
 zNear:	0.5
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
@@ -97,28 +97,29 @@ OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
 ##==Optic Flow Setting===========================================
 OpticFlow:		0	#1 = Enable	0= Disable
-OpticFlow-Visible:	0	#only visible within 100 meters
+OpticFlow-Visible:	1000	#only visible within 100 meters
 OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
 DepthDensity:		100	#every x meters
-OpticFlow-Width:	1928	#HMD = 1.928	#realworld = 5.670
+OpticFlow-Width:	1600	#HMD = 1.928	#realworld = 5.670
 OpticFlow-Height:	4060	#HMD = 4.060	#realword = 0.509
-OpticFlow-Density:	20000
+OpticFlow-Density:	10000
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	0	0	0	1	0	1	#road	#optic flow	#crash permits	#alert	#fov	#quit
-Trigger-Time:	0	-1	16	4	4	4	15
-Trigger-Time:	-1	-1	-1	18	8	8	-1
-Trigger-Time:	-1	-1	-1	-1	12	12	-1
+Trigger-Enable:	0	0	0	0	0	0	0	0#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Time:	0	-1	16	4	4	4	1	-1
+Trigger-Time:	-1	-1	-1	18	8	8	-1	-1
+Trigger-Time:	-1	-1	-1	-1	12	12	-1	-1
 
 ##==Text Setting=========================
+Text:	TEST
 Text:	Please Change Lane\n\n------->	##==must line by line====================
 Text:	Road Disappears in 3s
 Text:	Please Change Lane
 Text:	Quit in 2s
 Text:	Quit in 1s
-Textime:	4	13	18	28	29
-Period:		4	1	2	1	1
+Textime:	0	4	13	18	28	29
+Period:		100	4	1	2	1	1
 
 #Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;

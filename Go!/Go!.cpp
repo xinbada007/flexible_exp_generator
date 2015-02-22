@@ -128,6 +128,7 @@ void runScene(ReadConfig *readConfig)
 	mViewer->getMainView()->setCameraManipulator(camMatrix);
 	mViewer->setMainViewSceneData(root);
 	mViewer->createHUDView();
+	mViewer->createBackgroundView();
 
 	recorder->setHUDCamera(mViewer->getHUDCamera(MulitViewer::LEFT));
 	expcontroller->setHUDCamera(mViewer->getHUDCamera(MulitViewer::CENTRE));

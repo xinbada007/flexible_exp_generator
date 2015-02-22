@@ -18,7 +18,7 @@ typedef std::pair<int, enum TRIGGER_COM> triggerEnablePair;
 typedef struct Experiment :public osg::Referenced
 {
 	Experiment():
-	_NUMTRIGGERCOM(7)
+	_NUMTRIGGERCOM(8)
 	{
 		_timer = 0;
 		_startLane = 0;
@@ -133,6 +133,7 @@ typedef struct Experiment :public osg::Referenced
 		SOUNDALERT,
 		NEAR_FAR_COMPUTE,
 		CARRESET,
+		JOYSTICK,
 		QUIT
 	};
 	const unsigned _NUMTRIGGERCOM;
