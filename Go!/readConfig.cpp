@@ -330,7 +330,7 @@ void ReadConfig::initializeAfterReadTrial()
 // 			lightsource->setStateSetModes(*ss, osg::StateAttribute::ON);
 // 
 // 			carNode->asGroup()->addChild(lightsource);
-// 			osgDB::writeNodeFile(*carNode, "test.ive");
+// 			osgDB::writeNodeFile(*carNode, "test.osg");
 // 		}
 
 		_vehicle->_carNode = carNode.release();

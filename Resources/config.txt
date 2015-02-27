@@ -5,7 +5,7 @@ TrialConfig
 
 [ScreenSettings]
 Use_HMD:	1	#enable this disbles all other screen settings
-HMD_RefreshRate:	30
+HMD_RefreshRate:	60
 #Num of Screent starts from 0
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
@@ -24,8 +24,8 @@ DynamicSensitiveLevel:	20	#could be float number like 1.2532564766578
 CarSpeed:	10
 SpeedIncr:	1
 CarWheel:	42.5
-CarModel:	../Resources/models/pontiacG3_lightON.ive;
-CarVisible:	1	#1=Visible	0=Invisible
+CarModel:	../Resources/models/pontiacG3_lightON_exsimplified.ive;
+CarVisible:	0	#1=Visible	0=Invisible
 CarReset:	2	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest
 
