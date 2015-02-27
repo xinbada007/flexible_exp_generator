@@ -5,22 +5,28 @@
 #include "renderVistor.h"
 #include "textureVisitor.h"
 
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+#include <osg/MatrixTransform>
+#include <osgUtil/Optimizer>
+
 #include <algorithm>
 
 Obstacle::Obstacle():
-_frameCounts(0)
+_frameCounts(0), _objNode(NULL)
 {
 	_tag = ROADTAG::OBS;
 }
 
 Obstacle::Obstacle(const Obstacle &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
-LogicRoad(copy, copyop), _frameCounts(copy._frameCounts)
+LogicRoad(copy, copyop), _frameCounts(copy._frameCounts), _objNode(copy._objNode)
 {
 
 }
 
 Obstacle::~Obstacle()
 {
+	_objNode = NULL;
 }
 
 void Obstacle::genBoxTexture()
@@ -152,7 +158,7 @@ void Obstacle::createCylinder(const osg::Vec3d &center, const double &radius, co
 void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 {
 	osg::Vec3d left_bottom = center * osg::Matrix::translate(-radius*0.5f);
-	left_bottom.z() = 0.0f;
+	left_bottom.z() = center.z();
 
 	osg::Vec3d right_bottom = left_bottom;
 	right_bottom.x() += radius.x();
@@ -179,7 +185,7 @@ void Obstacle::createBox(osg::Vec3d center, osg::Vec3d radius)
 	this->absoluteTerritory.center.set(center.x(),center.y(),center.z() + radius.z()*0.5f);
 	this->absoluteTerritory._detectR = pow(std::max(radius.x(), radius.y()), 2) + pow((radius.z()*0.5f), 2);
 	this->absoluteTerritory._detectR = 2*sqrt(this->absoluteTerritory._detectR);
-	this->absoluteTerritory._refuseR = 0.0f;
+	this->absoluteTerritory._refuseR = 0.0f;//std::min(radius.x(), radius.y());
 
 	genBoxTexture();
 
@@ -414,4 +420,88 @@ void Obstacle::sweep(const double height)
 	} while (startHE != endHE);
 
 	link(firstP, lastP);
+}
+
+void Obstacle::createNode(const std::string file)
+{
+	osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(file);
+	BoundingboxVisitor bbV;
+	node->accept(bbV);
+	const osg::BoundingBoxd &bb = bbV.getBoundingBox();
+
+ 	osg::Vec3d minP(bb.xMin(), bb.yMin(), bb.zMin());
+	osg::Vec3d maxP(bb.xMax(), bb.yMax(), bb.zMax());
+	osg::Vec3d center = (minP + maxP)*0.5f;
+	osg::Matrix m;
+	m = osg::Matrix::translate(osg::Vec3d(0.0f,0.0f,-bb.zMin()));
+	osg::ref_ptr<osg::Vec3dArray> a = new osg::Vec3dArray;
+	osg::ref_ptr<osg::Vec3dArray> b = new osg::Vec3dArray;
+	getCCWCubefromLBfromBBox(bb, a, b);
+
+	arrayByMatrix(a, m);
+	arrayByMatrix(b, m);
+	center = center * m;
+
+	osg::Vec3dArray::iterator i = b->begin();
+	osg::Vec3dArray::iterator j = a->begin();
+
+	line1D(a);
+	link(a->front(), a->back());
+	sweep(b);
+	Plane *abs = this->getAbstract();
+	if (abs)
+	{
+		abs->setAbstract(false);
+	}
+
+	RenderVistor rv;
+	rv.setBeginMode(GL_QUADS);
+	this->accept(rv);
+
+	this->absoluteTerritory.center.set(center);
+	this->absoluteTerritory._detectR = bb.radius2();
+	this->absoluteTerritory._refuseR = 0.0f;
+
+	_objNode = node.release();
+	osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
+	mT->addChild(_objNode);
+	mT->setMatrix(m);
+	this->addChild(mT);
+
+	mT->setDataVariance(osg::Object::STATIC);
+	osgUtil::Optimizer op;
+	op.optimize(this, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
+//	op.optimize(this, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
+}
+
+void Obstacle::multiplyMatrix(const osg::Matrixd &m)
+{
+	osg::ref_ptr<osg::MatrixTransform> mt = dynamic_cast<osg::MatrixTransform*>(this->getParent(0));
+	if (!mt)
+	{
+		mt = new osg::MatrixTransform;
+		this->addParent(mt);
+	}
+	mt->setMatrix(m);
+
+	Points *p = this->getPoint();
+	while (p)
+	{
+		p->setPoint(p->getPoint() * m);
+		p = p->getNext();
+	}
+
+	Plane *pl = this->getPlane();
+	while (pl)
+	{
+		Loop *lp = pl->getLoop();
+		while (lp)
+		{
+			calcPlaneEQU(lp);
+			lp = lp->getNext();
+		}
+		pl = pl->getNext();
+	}
+
+	absoluteTerritory.center = absoluteTerritory.center * m;
 }

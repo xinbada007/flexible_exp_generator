@@ -81,8 +81,6 @@ public:
 	inline void setIndex(const unsigned ref){ _index = ref; };
 	inline unsigned getIndex() const { return _index; };
 
-	void multiplyMatrix(const osg::Matrixd &m);
-
 	inline bool getCCW() const { if(!_ccwupdated) caclCCW(); return _ccw; };
 
 	bool ifPointinSolid(const osg::Vec3d p) const;

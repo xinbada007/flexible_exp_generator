@@ -42,6 +42,10 @@ public:
 	inline osg::Camera * getHUDCamera(HUDPOS ref) const 
 	{
 		if (!_HUDView) return NULL;
+		if (!_HUDView->getNumSlaves())
+		{
+			return _HUDView->getCamera();
+		}
 
 		switch (ref)
 		{

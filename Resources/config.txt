@@ -4,30 +4,28 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	0	#enable this disbles all other screen settings
-HMD_RefreshRate:	75
+Use_HMD:	1	#enable this disbles all other screen settings
+HMD_RefreshRate:	30
 #Num of Screent starts from 0
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		90	#Disable when RealWorld is enabled
-zNear:	0.5
+fovy:		60	#Disable when RealWorld is enabled
+zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
 MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
 Acceleration:	1
+SteeringDeadBand:	0.05	#deadband
 DynamicSensitiveLevel:	20	#could be float number like 1.2532564766578
-CarSpeed:	50
+CarSpeed:	10
 SpeedIncr:	1
 CarWheel:	42.5
-WheelAccl:	0	#720	#180	#0	#normally do not apply this
-CarWidth:	1.7
-CarHeight:	0.15
-CarLength:	4.7
-CarVisible:	0	#1=Visible	0=Invisible
+CarModel:	../Resources/models/pontiacG3_lightON.ive;
+CarVisible:	1	#1=Visible	0=Invisible
 CarReset:	2	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest
 
@@ -40,7 +38,7 @@ RoadPic:	../Resources/texture/road4096-0.png 16
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/roads/Line.txt;
 Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
-Density:	2000
+Density:	50
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
 WallHeight:	1
@@ -60,40 +58,25 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 ##==Starting Condition===================
 Timer-Trigger:	0	#0 = use default	1 = use trigger
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
-Lane-Offset:	-1.875	#Negative = L	Positive = R
+Lane-Offset:	0	#Negative = L	Positive = R
 
 ##==Deviation Warn Setting===============
 Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Obstacle Setting=====================
-#Obstacle:	1 1	1 1	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	#1 1	1 1	1 1	1 1
-Obstacle-Range:	10 10	110 110	210 210 310 310 410 410	510 510
+Obstacle:	1 #1	#1 1	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	#1 1	1 1	1 1	1 1
+Obstacle-Range:	15 15	110 110	210 210 310 310 410 410	510 510
 Obstacle-Range:	610 610	710 710	810 810	910 910	1010 1010	1110 1110	1210 1210
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-2 2	-40 -44	-2 2	40 44	-2 2	-40 -44
+OBS-Position-Offset:	0 8	-40 -44	-2 2	40 44	-2 2	-40 -44
 OBS-Position-Offset:	-2 2	40 44	-2 2	-40 -44	-2 2	40 44	-2 2	#Negtive = L	Positive = R
 
-#Obstacle:	#1 1	1 1	#1 1 	1 1	1 1	1 1	1 1	1 1	1 1	#1 1	1 1	1 1	1 1
-Obstacle-Range:	10 110	110 110	210 210 310 310 410 410	510 510
-Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	0 30	-40 -44	-2 2	40 44	-2 2	-40 -44
-
-OBS-Size:	.5	2.0	1.0	#Length X Width X Height
-OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Size:	5.0	2.0	1.0	#Length X Width X Height
+OBS-Shape:	0	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
 OBS-Visible:	0
-OBS-Collision:	0	# 0 =disapper	1 = collision
-OBS-Pic:	../Resources/texture/red.jpg;
-
-#OBS-Array:	../Resources/roads/lc.txt;#../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;
-OBS-Array-NurbsMethod:	1;
-OBS-ARRAY-LENGTH:	50;
-OBS-ARRAY-OFFSET:	0;
-OBS-Array-Align:	0 10 0;
-OBS-Array-Num:	100;
-OBS-Array-Pic:	../Resources/texture/tio.jpg
-OBS-Array-OBSSize:	0.1	0.1	0.1;
-OBS-Array-Mode:	1	# 0 = Animation	1 = Obs	2 = GLPOINTS
-OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
+OBS-Collision:	1	# 0 =disapper	1 = collision
+#OBS-Pic:	../Resources/texture/red.jpg;
+OBS-Pic:	../Resources/models/pontiacG3.ive;
 
 ##==Optic Flow Setting===========================================
 OpticFlow:		0	#1 = Enable	0= Disable
@@ -107,18 +90,20 @@ OpticFlow-Density:	10000
 
 ##==Trigger Setting======================
 Trigger-Enable:	0	0	0	0	0	0	0	0#road	#optic flow	#crash permits	#alert	#fov	#quit
-Trigger-Time:	0	-1	16	4	4	4	1	-1
+Trigger-Time:	-1	-1	0	4	4	4	1	-1
 Trigger-Time:	-1	-1	-1	18	8	8	-1	-1
 Trigger-Time:	-1	-1	-1	-1	12	12	-1	-1
 
 ##==Text Setting=========================
-Text:	TEST
 Text:	Please Change Lane\n\n------->	##==must line by line====================
 Text:	Road Disappears in 3s
 Text:	Please Change Lane
 Text:	Quit in 2s
 Text:	Quit in 1s
-Textime:	0	4	13	18	28	29
-Period:		100	4	1	2	1	1
+Textime:	4	13	18	28	29
+Period:		4	1	2	1	1
+
+[CAMERASETTINGS]
+offset:	-0.41508434456460819,0.2012868258516682829,1.0558066537516700
 
 #Roads:	../Resources/roads/Line.txt;

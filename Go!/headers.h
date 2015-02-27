@@ -31,6 +31,7 @@
 
 #include <iostream>
 
+#include <osg/PolygonMode>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/MatrixTransform>

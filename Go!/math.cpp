@@ -205,6 +205,15 @@ void arrayByMatrix(osg::Vec3dArray *source, const osg::Matrix refM)
 	}
 }
 
+void arrayByMatrix(osg::Vec3Array *source, const osg::Matrix refM)
+{
+	osg::Vec3Array::iterator i = source->begin();
+	for (; i != source->end(); i++)
+	{
+		(*i) = (*i) * (refM);
+	}
+}
+
 osg::BoundingBox BoundingboxByMatrix(const osg::BoundingBox &refBB, const osg::Matrix &refM) /*WILL SET Z to Zero*/
 {
 	osg::Vec3d xminymin(refBB.xMin(), refBB.yMin(), 0.0f);
@@ -499,6 +508,23 @@ double asinR(double product)
 	int sign = (product > 0) ? 1 : -1;
 	product = (abs(product) > 1.0f) ? sign : product;
 	return asin(product);
+}
+
+void getCCWCubefromLBfromBBox(const osg::BoundingBoxd &bb, osg::ref_ptr<osg::Vec3dArray> Zmin, osg::ref_ptr<osg::Vec3dArray> Zmax)
+{
+	const osg::Vec3d n1(bb.xMin(),bb.yMin(),bb.zMin());
+	const osg::Vec3d n2(bb.xMin(), bb.yMax(), bb.zMin());
+	const osg::Vec3d n3(bb.xMax(), bb.yMax(), bb.zMin());
+	const osg::Vec3d n4(bb.xMax(), bb.yMin(), bb.zMin());
+	Zmin->clear();
+	Zmin->push_back(n1); Zmin->push_back(n2); Zmin->push_back(n3); Zmin->push_back(n4);
+
+	const osg::Vec3d m1(bb.xMin(), bb.yMin(), bb.zMax());
+	const osg::Vec3d m2(bb.xMin(), bb.yMax(), bb.zMax());
+	const osg::Vec3d m3(bb.xMax(), bb.yMax(), bb.zMax());
+	const osg::Vec3d m4(bb.xMax(), bb.yMin(), bb.zMax());
+	Zmax->clear();
+	Zmax->push_back(m1); Zmax->push_back(m2); Zmax->push_back(m3); Zmax->push_back(m4);
 }
 
 frameRate * frameRate::instance()

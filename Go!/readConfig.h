@@ -350,13 +350,15 @@ typedef struct Vehicle:public osg::Referenced
 	{
 		_width = 1.7;
 		_length = 4.7;
-		_height = 0.15;
+		_height = 0.0f;
+		_carNode = NULL;
 
 		_speed = 60 / 3.6f;
 		_speedincr = 20 / 3.6f;
 		_rotate = 42.5 * TO_RADDIAN;
-		_rotationAccl = _rotate;
+		_rotationAccl = 0.0f;
 		_acceleration = 1;
+		_deadband = 0.075f;
 		_dynamicSensitive = 1.0f;
 
 		_startDelay = 1.0f;
@@ -387,8 +389,10 @@ typedef struct Vehicle:public osg::Referenced
 	double _rotate;
 	double _rotationAccl;
 	bool _acceleration;
+	double _deadband;
 	double _dynamicSensitive;
-	std::string _texture;
+	std::string _carModel;
+	osg::ref_ptr<osg::Node> _carNode;
 
 	double _startDelay;
 
@@ -588,4 +592,22 @@ private:
 	osg::ref_ptr<osg::MatrixdArray> _saveState;
 	osg::ref_ptr<osg::IntArray> _dynamicState;
 	bool _replay;
+};
+
+class BoundingboxVisitor :
+	public osg::NodeVisitor
+{
+public:
+	BoundingboxVisitor();
+	virtual ~BoundingboxVisitor();
+
+	virtual void reset();
+	virtual void apply(osg::Geode &gdNode);
+
+	inline osg::BoundingBoxd getBoundingBox() { return bb; };
+	inline double getDimention_X() { return bb.xMax() - bb.xMin(); };
+	inline double getDimention_Z() { return bb.zMax() - bb.zMin(); };
+	inline double getDimention_Y() { return bb.yMax() - bb.yMin(); };
+private:
+	osg::BoundingBoxd bb;
 };

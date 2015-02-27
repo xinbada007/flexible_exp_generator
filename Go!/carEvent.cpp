@@ -7,7 +7,7 @@
 
 CarEvent::CarEvent() :
 _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
-, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false)
+, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _limitCheck(true)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
@@ -63,19 +63,38 @@ void CarEvent::checkRotationLimit()
 	_lastAngle = angle;
 }
 
+void CarEvent::dealCollision()
+{
+	if (_carState->_collide && _carState->_crashPermit)
+	{
+		const double MAXSPEED(0.5f / 3.6f);
+		_carState->_speed = (_carState->_speed > 0) ? (-MAXSPEED) : MAXSPEED;
+	}
+	else
+	{
+		if (_speedLock)
+		{
+			_carState->_speed = _vehicle->_speed;
+		}
+	}
+}
+
 void CarEvent::calculateCarMovement()
 {
 	//Limit the speed under MAX
 	const double dr_rate = frameRate::instance()->getDesignfRate() / frameRate::instance()->getRealfRate();
 
-	_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ? 
-		(_vehicle->_speed*(abs(_carState->_speed) / _carState->_speed)) : _carState->_speed;
+	if (_limitCheck)
+	{
+		_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ?
+			(_vehicle->_speed*(abs(_carState->_speed) / _carState->_speed)) : _carState->_speed;
 
-	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
+		_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
 
-	//set rotation direction and limit
-	_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
-	_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
+		//set rotation direction and limit
+		_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
+		_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
+	}
 
 	//set the acceleration of rotation
 	checkRotationLimit();
@@ -103,7 +122,6 @@ void CarEvent::calculateCarMovement()
 		_carState->_direction = _carState->_direction * osg::Matrix::rotate(qt);
 	}
 	_carState->_direction.normalize();
-//	_carState->_angle = 0.0f;
 
 	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed / frameRate::instance()->getRealfRate());
 
@@ -266,9 +284,9 @@ bool CarEvent::Joystick()
 
 	const double MAX(32767.0f);
 	const double MAX_ANGLE = 120.0f;
-	const double DEAD = 0.075f;
-	const int DeadZone(MAX*DEAD);
 	_carState->_swangle = (x / MAX)*MAX_ANGLE;
+	const double &DEAD = _vehicle->_deadband;
+	const int DeadZone(MAX*DEAD);
 
 	if ((abs(x)) > DeadZone)
 	{
@@ -429,26 +447,11 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				break;
 			}
 		case osgGA::GUIEventAdapter::FRAME:
-			if (_carState->_collide && _carState->_crashPermit)
-			{
-				const double MAXSPEED(1.0f/3.6f);
-				int sign = (_carState->_speed > 0) ? -1 : 1;
-				_carState->_speed = (abs(_carState->_speed) > MAXSPEED) ? MAXSPEED*sign : _carState->_speed;
-			}
-			else
-			{
-				if (_speedLock)
-				{
-					_carState->_speed = _vehicle->_speed;
-				}
-			}
-
 			if (_carState->_reset)
 			{
 				makeResetMatrix();
 				_carState->_reset = false;
 			}
-
 			if (!_reset.isIdentity())
 			{
 				_carState->_speed = 0.0f;
@@ -459,7 +462,10 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			//2nd
 			autoNavigation();
 			//3rd
+			dealCollision();
+			//4th
 			calculateCarMovement();
+
 			//always final
 			applyCarMovement();
 
@@ -484,11 +490,11 @@ void CarEvent::applyCarMovement()
 	arrayByMatrix(_carState->_carArray, _moment);
 
 	_mTransform->setMatrix(_carState->_state);
-	if (_carState->_state != osg::Matrix::identity())
-	{
-		dirtyVisitor dv;
-		_mTransform->accept(dv);
-	}
+// 	if (_carState->_state != osg::Matrix::identity())
+// 	{
+// 		dirtyVisitor dv;
+// 		_mTransform->accept(dv);
+// 	}
 
 	//Initialize
 	_moment.makeIdentity();

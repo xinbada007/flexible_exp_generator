@@ -36,6 +36,7 @@ osg::Vec3d find_Prependicular(const osg::Vec3d p0, const osg::Vec3d p1, const do
 
 osg::Matrix rotate(const osg::Vec3dArray *source, const osg::Vec3dArray *des);
 void arrayByMatrix(osg::Vec3dArray *source, const osg::Matrix refM);
+void arrayByMatrix(osg::Vec3Array *source, const osg::Matrix refM);
 osg::ref_ptr<osg::Vec3dArray> arrayLinearTransform(const osg::Vec3dArray *A, const osg::Vec3dArray *B, const double lamida);
 osg::BoundingBox BoundingboxByMatrix(const osg::BoundingBox &refBB, const osg::Matrix &refM);
 
@@ -58,6 +59,8 @@ bool isDouble(const std::string &ref, double *number);
 
 double acosR(double product);
 double asinR(double product);
+
+void getCCWCubefromLBfromBBox(const osg::BoundingBoxd &bb, osg::ref_ptr<osg::Vec3dArray> Zmin, osg::ref_ptr<osg::Vec3dArray> Zmax);
 
 struct searchIndex
 {

@@ -352,26 +352,6 @@ void Solid::caclCCW() const
 	_ccwupdated = true;
 }
 
-void Solid::multiplyMatrix(const osg::Matrixd &m)
-{
-	osg::ref_ptr<osg::MatrixTransform> mt = dynamic_cast<osg::MatrixTransform*>(this->getParent(0));
-	if (!mt)
-	{
-		mt = new osg::MatrixTransform;
-		this->addParent(mt);
-	}
-
-	mt->setMatrix(m);
-	Points *p = _startP;
-	while (p)
-	{
-		p->setPoint(p->getPoint() * m);
-		p = p->getNext();
-	}
-
-	absoluteTerritory.center = absoluteTerritory.center * m;
-}
-
 void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3Array> p)
 {
 	osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array(p->begin(), p->end());

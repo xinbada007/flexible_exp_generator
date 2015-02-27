@@ -1,0 +1,123 @@
+#only comma, colon, space, and semicolon are allowed to use
+#folder path MUST NOT contain SPACE
+
+TrialConfig
+
+[ScreenSettings]
+Use_HMD:	1	#enable this disbles all other screen settings
+HMD_RefreshRate:	75
+#Num of Screent starts from 0
+Hdistance:	0.6	#2.72	#5.44	#0.6
+Vdistance:	1.5	#1.25
+screen:		0
+aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		30	#Disable when RealWorld is enabled
+zNear:	0.5
+zFar:	1000
+RealWorld:	0:	42.268, 65.217, 42.391
+MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
+
+[CarSettings]
+Acceleration:	1
+DynamicSensitiveLevel:	20	#could be float number like 1.2532564766578
+CarSpeed:	50
+SpeedIncr:	1
+CarWheel:	42.5
+WheelAccl:	0	#720	#180	#0	#normally do not apply this
+CarWidth:	1.7
+CarHeight:	0.15
+CarLength:	4.7
+CarVisible:	0	#1=Visible	0=Invisible
+CarReset:	2	#0 = disable	1 = auto	2 = manual
+ResetMode:	2	#0 = center	1 = nearest
+
+[RoadSettings]
+RoadLanes:	102.816
+RoadLength:	1666	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+TextureWidth:	18.36
+RoadPic:	../Resources/texture/road4096-0.png 16
+
+#RoadTxt is disabled when Roads in Subjects Section is enabled
+RoadTxt:	../Resources/roads/Line.txt;
+Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
+Density:	2000
+RoadVisible:	1	#1 = Visible	0 = Invisible
+
+WallHeight:	1
+WallRoadWidth:	18.36
+WallPic:	../Resources/texture/wall1024-2.jpg 16
+
+[Subjects]
+Name:		s01
+Age:		
+Gender:		
+Driving:		#how many years since driving
+
+DirectoryName:	BLOCK1_1
+TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
+
+[Experiment]
+##==Starting Condition===================
+Timer-Trigger:	0	#0 = use default	1 = use trigger
+Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
+Lane-Offset:	-1.875	#Negative = L	Positive = R
+
+##==Deviation Warn Setting===============
+Deviation-Siren:	../Resources/sound/alert.wav
+
+##==Obstacle Setting=====================
+#Obstacle:	1 1	1 1	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	#1 1	1 1	1 1	1 1
+Obstacle-Range:	10 10	110 110	210 210 310 310 410 410	510 510
+Obstacle-Range:	610 610	710 710	810 810	910 910	1010 1010	1110 1110	1210 1210
+Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
+OBS-Position-Offset:	-2 2	-40 -44	-2 2	40 44	-2 2	-40 -44
+OBS-Position-Offset:	-2 2	40 44	-2 2	-40 -44	-2 2	40 44	-2 2	#Negtive = L	Positive = R
+
+#Obstacle:	#1 1	1 1	#1 1 	1 1	1 1	1 1	1 1	1 1	1 1	#1 1	1 1	1 1	1 1
+Obstacle-Range:	10 110	110 110	210 210 310 310 410 410	510 510
+Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
+OBS-Position-Offset:	0 30	-40 -44	-2 2	40 44	-2 2	-40 -44
+
+OBS-Size:	.5	2.0	1.0	#Length X Width X Height
+OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Visible:	0
+OBS-Collision:	0	# 0 =disapper	1 = collision
+OBS-Pic:	../Resources/texture/red.jpg;
+
+#OBS-Array:	../Resources/roads/lc.txt;#../Resources/roads/l.txt;../Resources/roads/l.txt;../Resources/roads/l.txt;
+OBS-Array-NurbsMethod:	1;
+OBS-ARRAY-LENGTH:	50;
+OBS-ARRAY-OFFSET:	0;
+OBS-Array-Align:	0 10 0;
+OBS-Array-Num:	100;
+OBS-Array-Pic:	../Resources/texture/tio.jpg
+OBS-Array-OBSSize:	0.1	0.1	0.1;
+OBS-Array-Mode:	1	# 0 = Animation	1 = Obs	2 = GLPOINTS
+OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
+
+##==Optic Flow Setting===========================================
+OpticFlow:		0	#1 = Enable	0= Disable
+OpticFlow-Visible:	0	#only visible within 100 meters
+OpticFlow-FrameCounts:	0	
+OpticFlow-Versions:	0
+DepthDensity:		100	#every x meters
+OpticFlow-Width:	1928	#HMD = 1.928	#realworld = 5.670
+OpticFlow-Height:	4060	#HMD = 4.060	#realword = 0.509
+OpticFlow-Density:	20000
+
+##==Trigger Setting======================
+Trigger-Enable:	1	0	0	0	1	0	1	#road	#optic flow	#crash permits	#alert	#fov	#quit
+Trigger-Time:	0	-1	16	4	4	4	15
+Trigger-Time:	-1	-1	-1	18	8	8	-1
+Trigger-Time:	-1	-1	-1	-1	12	12	-1
+
+##==Text Setting=========================
+Text:	Please Change Lane\n\n------->	##==must line by line====================
+Text:	Road Disappears in 3s
+Text:	Please Change Lane
+Text:	Quit in 2s
+Text:	Quit in 1s
+Textime:	4	13	18	28	29
+Period:		4	1	2	1	1
+
+#Roads:	../Resources/roads/Line.txt;

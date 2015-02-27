@@ -165,6 +165,9 @@ void ExperimentCallback::createObstacles()
 			case 3:
 				obs->createSphere(center, _expSetting->_obsSize.x());
 				break;
+			case 4:
+				obs->createNode(_expSetting->_obsPic);
+				break;
 			default:
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;

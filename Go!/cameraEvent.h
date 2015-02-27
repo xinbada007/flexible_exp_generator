@@ -8,8 +8,7 @@ class CameraEvent :
 	public osgGA::CameraManipulator
 {
 public:
-	CameraEvent();
-	void genCamera(osg::ref_ptr<ReadConfig> refRC);
+	CameraEvent(osg::ref_ptr<ReadConfig> refRC);
 protected:
 	virtual ~CameraEvent();
 	virtual osg::Matrixd getInverseMatrix() const;
@@ -19,6 +18,7 @@ protected:
 	virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
 
 private:
+	void genCamera(osg::ref_ptr<ReadConfig> refRC);
 	void updateLookAt(osg::View *viewer);
 	osg::Quat _camRotationOrigin;
 	osg::Quat _camRotation;
@@ -37,6 +37,7 @@ private:
 
 	bool _reset;
 	bool _eyeTracker;
+	const bool _useHMD;
 
 	osg::Vec2d _windowsPick;
 	osg::Vec3d _zNear;

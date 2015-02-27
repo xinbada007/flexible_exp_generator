@@ -21,6 +21,7 @@ private:
 	void shiftVehicle();
 	void autoNavigation();
 	void checkRotationLimit();
+	void dealCollision();
 
 	osg::ref_ptr<Car> _car;
 	osg::ref_ptr<CarState> _carState;
@@ -36,6 +37,7 @@ private:
 	bool _speedLock;
 
 	bool _updated;
+	bool _limitCheck;
 
 	osg::ref_ptr<osg::UIntArray> _buttons;
 protected:

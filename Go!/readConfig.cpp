@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "readConfig.h"
+#include "obstacle.h"
 
 #include <string>
 #include <fstream>
@@ -11,8 +12,14 @@
 #include <osg/Notify>
 #include <osg/Geometry>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include <osgDB/FileNameUtils>
 #include <osgDB/FileUtils>
+#include <osg/MatrixTransform>
+#include <osgUtil/Optimizer>
+#include <osg/PolygonMode>
+#include <osg/Light>
+#include <osg/LightSource>
 
 #include <sisl.h>
 
@@ -283,19 +290,66 @@ void ReadConfig::initializeAfterReadTrial()
 	}	
 
 	//Initialize Vehicle
-	const double halfW = _vehicle->_width * 0.5f;
-	const double halfL = _vehicle->_length * 0.5f;
-	osg::Vec3d right_bottom(halfW, -halfL, _vehicle->_height);
-	osg::Vec3d right_top(halfW, halfL, _vehicle->_height);
-	osg::Vec3d left_top(-halfW, halfL, _vehicle->_height);
-	osg::Vec3d left_bottom(-halfW, -halfL, _vehicle->_height);
-	_vehicle->_V->clear();
-	_vehicle->_V->push_back(right_bottom); _vehicle->_V->push_back(right_top);
-	_vehicle->_V->push_back(left_top); _vehicle->_V->push_back(left_bottom);
-	_alignPoint = (right_bottom + left_bottom) * 0.5f;
-	_alignPoint += (_alignPoint - _vehicle->_O) * eps_100;
-	_alignPoint.z() = 0.0f;
+	osg::ref_ptr<osg::Node> carNode = osgDB::readNodeFile(_vehicle->_carModel);
+	if (carNode)
+	{
+		BoundingboxVisitor bbV;
+		carNode->accept(bbV);
+		const osg::BoundingBox &bb = bbV.getBoundingBox();
+		_vehicle->_width = bbV.getDimention_X();
+		_vehicle->_length = bbV.getDimention_Y();
+		osg::ref_ptr<osg::Vec3dArray> zMin = new osg::Vec3dArray;
+		osg::ref_ptr<osg::Vec3dArray> zMax = new osg::Vec3dArray;
+		getCCWCubefromLBfromBBox(bb, zMin, zMax);
 
+		osg::Vec3d left_bottom(zMin->at(0));
+		osg::Vec3d left_top(zMin->at(1));
+		osg::Vec3d right_top(zMin->at(2));
+		osg::Vec3d right_bottom(zMin->at(3));
+		_vehicle->_V->clear();
+		_vehicle->_V->push_back(right_bottom); _vehicle->_V->push_back(right_top);
+		_vehicle->_V->push_back(left_top); _vehicle->_V->push_back(left_bottom);
+		_alignPoint = (right_bottom + left_bottom) * 0.5f;
+		_alignPoint += (_alignPoint - _vehicle->_O) * eps_100;
+		_alignPoint.z() = 0.0f;
+
+// 		{
+// 			osg::ref_ptr<osg::StateSet> ss = carNode->getOrCreateStateSet();
+// 			ss->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+// 			ss->setMode(GL_LIGHT0, osg::StateAttribute::ON);
+// 			ss->setMode(GL_LIGHT1, osg::StateAttribute::ON);
+// 
+// 			osg::ref_ptr<osg::Light> light = new osg::Light;
+// 			light->setLightNum(1);
+// 			light->setDiffuse(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+// 			light->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+// 			light->setConstantAttenuation(0.8f);
+// 			light->setPosition(osg::Vec4(0.0, 0.1f, bbV.getDimention_Z()*0.9f, 1.0f));
+// 			osg::ref_ptr<osg::LightSource> lightsource = new osg::LightSource;
+// 			lightsource->setLight(light);
+// 			lightsource->setStateSetModes(*ss, osg::StateAttribute::ON);
+// 
+// 			carNode->asGroup()->addChild(lightsource);
+// 			osgDB::writeNodeFile(*carNode, "test.ive");
+// 		}
+
+		_vehicle->_carNode = carNode.release();
+	}
+	else
+	{
+		const double halfW = _vehicle->_width * 0.5f;
+		const double halfL = _vehicle->_length * 0.5f;
+		osg::Vec3d right_bottom(halfW, -halfL, _vehicle->_height);
+		osg::Vec3d right_top(halfW, halfL, _vehicle->_height);
+		osg::Vec3d left_top(-halfW, halfL, _vehicle->_height);
+		osg::Vec3d left_bottom(-halfW, -halfL, _vehicle->_height);
+		_vehicle->_V->clear();
+		_vehicle->_V->push_back(right_bottom); _vehicle->_V->push_back(right_top);
+		_vehicle->_V->push_back(left_top); _vehicle->_V->push_back(left_bottom);
+		_alignPoint = (right_bottom + left_bottom) * 0.5f;
+		_alignPoint += (_alignPoint - _vehicle->_O) * eps_100;
+		_alignPoint.z() = 0.0f;
+	}
 	//convert speed from KM/H to M/S
 	_vehicle->_speed /= 3.6f;
 	_vehicle->_speedincr /= 3.6f;
@@ -478,11 +532,21 @@ void ReadConfig::initializeAfterReadTrial()
 	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
 	osg::Matrix m = osg::Matrix::translate(startOffset);
 	m *= osg::Matrix::translate(X_AXIS * _experiment->_laneOffset);
-		
-	arrayByMatrix(_vehicle->_V, m);
-	_vehicle->_O = _vehicle->_O * m;
-	_vehicle->_initialState = m;
-	_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
+
+	{
+		arrayByMatrix(_vehicle->_V, m);
+		_vehicle->_O = _vehicle->_O * m;
+		_vehicle->_initialState = m;
+		_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
+
+		osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
+		mT->addChild(_vehicle->_carNode);
+		mT->setMatrix(m);
+		mT->setDataVariance(osg::Object::STATIC);
+		osgUtil::Optimizer op;
+		op.optimize(mT, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
+		mT = NULL;
+	}
 
 	//Initialize Triggers
 	const unsigned &numTriggers = _experiment->_triggerTimer->getNumElements();
@@ -923,9 +987,10 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//Set Vehicle
 		static const string ACCEL = "ACCELERATION";
+		static const string DEADBAND = "STEERINGDEADBAND";
 		static const string CARSPEED = "CARSPEED";
 		static const string CARWHEEL = "CARWHEEL";
-		static const string CARPIC = "CARPIC";
+		static const string CARMODEL = "CARMODEL";
 		static const string CARWIDTH = "CARWIDTH";
 		static const string CARHEIGHT = "CARHEIGHT";
 		static const string CARLENGTH = "CARLENGTH";
@@ -944,6 +1009,15 @@ void ReadConfig::readTrial(ifstream &in)
 			{
 				config.erase(config.begin(), config.begin() + ACCEL.size());
 				_vehicle->_acceleration = (stoi(config) == 1) ? true : false;
+				continue;
+			}
+			if (title == DEADBAND)
+			{
+				config.erase(config.begin(), config.begin() + DEADBAND.size());
+				if (!config.empty())
+				{
+					_vehicle->_deadband = stod(config);
+				}
 				continue;
 			}
 			if (title == DYNAMICSENSITIVE)
@@ -968,12 +1042,12 @@ void ReadConfig::readTrial(ifstream &in)
 				_vehicle->_rotate *= TO_RADDIAN;
 				continue;
 			}
-			else if (title == CARPIC)
+			else if (title == CARMODEL)
 			{
-				config.erase(config.begin(), config.begin() + CARPIC.size());
+				config.erase(config.begin(), config.begin() + CARMODEL.size());
 				std::size_t found = config.find_first_not_of(SPACE);
 				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
-				_vehicle->_texture = config;
+				_vehicle->_carModel = config;
 				continue;
 			}
 			else if (title == CARWIDTH)
@@ -2365,4 +2439,23 @@ osg::Geode* ReadConfig::measuer()
 	gd->addDrawable(gm);
 
 	return gd;
+}
+
+BoundingboxVisitor::BoundingboxVisitor() :
+osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+{
+}
+
+BoundingboxVisitor::~BoundingboxVisitor()
+{
+}
+
+void BoundingboxVisitor::apply(osg::Geode &gdNode)
+{
+	bb.expandBy(gdNode.getBoundingBox());
+}
+
+void BoundingboxVisitor::reset()
+{
+	bb.init();
 }

@@ -12,6 +12,7 @@ public:
 	void createBox(osg::Vec3d center, osg::Vec3d radius);
 	void createCylinder(const osg::Vec3d &center, const double &radius, const double &height);
 	void createSphere(const osg::Vec3d &centre, const double &radius);
+	void createNode(const std::string file);
 	void createPOINTS(osg::ref_ptr<osg::Vec3Array> p);
 	void createPOINTS(osg::ref_ptr<osg::Vec3dArray> p);
 	inline void setPointsColorArray(osg::ref_ptr<osg::Vec4Array> color) { _pointsColorArray = color.release(); };
@@ -22,6 +23,7 @@ public:
 	inline void setFrameCounts(const unsigned &ref) { _frameCounts = ref; };
 	inline unsigned getFrameCounts() const { return _frameCounts; };
 
+	void multiplyMatrix(const osg::Matrixd &m);
 private:
 	virtual ~Obstacle();
 	void sweep(const double height);
@@ -30,7 +32,7 @@ private:
 	void genTextureNoZ(const bool perGmtry = false);
 //	void genUnifiedTexture();
 
+	osg::ref_ptr<osg::Node> _objNode;
 	mutable osg::Vec3d _distanceVector;
 	unsigned _frameCounts;
 };
-
