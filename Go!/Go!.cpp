@@ -41,7 +41,6 @@ Car * obtainCar(ReadConfig *rc)
 		carNode->setDataVariance(osg::Object::STATIC);
 		osgUtil::Optimizer op;
 		op.optimize(carNode, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
-
 		car->addChild(carNode);
 	}
 

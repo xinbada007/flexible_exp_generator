@@ -920,9 +920,21 @@ void ReadConfig::readTrial(ifstream &in)
 			else if (title == BGPIC)
 			{
 				config.erase(config.begin(), config.begin() + BGPIC.size());
-				std::size_t found = config.find_first_not_of(SPACE);
-				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
-				_screens->_background = config;
+
+				std::stringstream ss;
+				double r,g,b;
+				ss << config;
+				ss >> r >> g >> b;
+				if (ss.fail())
+				{
+					std::size_t found = config.find_first_not_of(SPACE);
+					if (found != config.npos) config.erase(config.begin(), config.begin() + found);
+					_screens->_background = config;
+				}
+				else
+				{
+					_screens->_bgColor.set(r, g, b, 1.0f);
+				}
 				continue;
 			}
 			else if (title == HDISTANCE)

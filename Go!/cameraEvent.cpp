@@ -197,23 +197,23 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				refCS->_timeReference = viewer->getFrameStamp()->getReferenceTime();
 			}
 
-			//Test
-			if (_useHMD)
-			{
-				if (viewer->getNumSlaves() >= 3)
-				{
-					osg::Camera *backCam = viewer->getSlave(2)._camera;
-					osg::Quat rotation = _camRotation;
-					osg::Quat temp;
-					temp.makeRotate(PI, _eye_Z_Axis);
-					rotation *= temp;
-					osg::Matrix viewM = osg::Matrix::translate(-_eyePoint) *
-						osg::Matrix::rotate(rotation.inverse()) *
-						_matrixLookAt;
-					backCam->setViewMatrix(viewM);
-				}
-			}
-			//Test
+// 			//Test
+// 			if (_useHMD)
+// 			{
+// 				if (viewer->getNumSlaves() >= 3)
+// 				{
+// 					osg::Camera *backCam = viewer->getSlave(2)._camera;
+// 					osg::Quat rotation = _camRotation;
+// 					osg::Quat temp;
+// 					temp.makeRotate(PI, _eye_Z_Axis);
+// 					rotation *= temp;
+// 					osg::Matrix viewM = osg::Matrix::translate(-_eyePoint) *
+// 						osg::Matrix::rotate(rotation.inverse()) *
+// 						_matrixLookAt;
+// 					backCam->setViewMatrix(viewM);
+// 				}
+// 			}
+// 			//Test
 
 			break;
 		default:

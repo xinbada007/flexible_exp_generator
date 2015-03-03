@@ -125,7 +125,7 @@ osgViewer::View * MulitViewer::createPowerWall()
 	{
 		view->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, .1f, 1000.0f);
 	}
-	view->getCamera()->setClearColor(osg::Vec4(135.0f / 255.0f, 206.f / 255.f, 250.f / 255.f, 1.0f));
+	view->getCamera()->setClearColor(_screens->_bgColor);
 
 	osg::GraphicsContext::WindowingSystemInterface *wsi;
 	wsi = osg::GraphicsContext::getWindowingSystemInterface();
@@ -704,20 +704,6 @@ void MulitViewer::runHMD()
 		leftcam->setViewMatrix(_hmdView->getCamera()->getViewMatrix() * leftMatrix * l_view_M);
 		rightcam->setViewMatrix(_hmdView->getCamera()->getViewMatrix() * rightMatrix * r_view_M);
 		_eyeDirection = _eyeDirection * leftMatrix;
-
-		_projectionMatrici[ovrEye_Left] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Left].Fov, _screens->_zNear, _screens->_zFar, true);
-		_projectionMatrici[ovrEye_Right] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Right].Fov, _screens->_zNear, _screens->_zFar, true);
-		osg::Matrix l_proj_M, r_proj_M;
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 4; j++)
-			{
-				l_proj_M(i, j) = _projectionMatrici[ovrEye_Left].Transposed().M[i][j];
-				r_proj_M(i, j) = _projectionMatrici[ovrEye_Right].Transposed().M[i][j];
-			}
-		}
-		leftcam->setProjectionMatrix(l_proj_M);
-		rightcam->setProjectionMatrix(r_proj_M);
 
 // 		//Test
 // //		backCam->setViewMatrix(_hmdView->getCamera()->getViewMatrix());

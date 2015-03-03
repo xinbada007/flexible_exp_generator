@@ -439,6 +439,7 @@ typedef struct Screens:public osg::Referenced
 
 		_scrs = new osg::UIntArray;
 		_realworld = new osg::DoubleArray;
+		_bgColor.set(0.0f, 0.0f, 0.0f, 1.0f);
 		_imgBg = NULL;
 	}
 	
@@ -459,6 +460,7 @@ typedef struct Screens:public osg::Referenced
 	osg::ref_ptr<osg::UIntArray> _scrs;
 	osg::ref_ptr<osg::DoubleArray> _realworld;
 	std::string _background;
+	osg::Vec4 _bgColor;
 	osg::ref_ptr<osg::Image> _imgBg;
 
 protected:
