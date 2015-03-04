@@ -557,12 +557,8 @@ void ExperimentCallback::showOpticFlow()
 			}
 		}
 
-//		const int startFor = (curFor > TOTL / 2) ? curFor : ((curBac > TOTL / 2) ? 0 : curY);
-//		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : curY);
 		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : min(curFor,curBac));
-//		const int startBac = (curFor > TOTL / 2) ? curFor : TOTL / 2;
 		const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
-//		const int startrCur = (curY > TOTL / 2) ? curY : TOTL / 2;
 		const int startCur = (y < 0.0f) ? curY : TOTL / 2;
 		for (int opticStart = 0; opticStart<TOTL; opticStart++)
 		{
@@ -595,6 +591,18 @@ void ExperimentCallback::showOpticFlow()
 					obs->setAllChildrenOff();
 					obs->setFrameCounts(0);
 				}
+			}
+		}
+	}
+	if (!_expSetting->_opticFlowRange)
+	{
+		for (unsigned i = 0; i != _opticFlowPoints->getNumChildren(); i++)
+		{
+			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			if (obs)
+			{
+				obs->setFrameCounts(obs->getFrameCounts() + 1);
+				dynamicFlow(obs, i);
 			}
 		}
 	}
