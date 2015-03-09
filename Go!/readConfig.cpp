@@ -313,7 +313,7 @@ void ReadConfig::initializeAfterReadTrial()
 		_alignPoint += (_alignPoint - _vehicle->_O) * eps_100;
 		_alignPoint.z() = 0.0f;
 
-// 		{
+ 		{
 // 			osg::ref_ptr<osg::StateSet> ss = carNode->getOrCreateStateSet();
 // 			ss->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 // 			ss->setMode(GL_LIGHT0, osg::StateAttribute::ON);
@@ -331,7 +331,7 @@ void ReadConfig::initializeAfterReadTrial()
 // 
 // 			carNode->asGroup()->addChild(lightsource);
 // 			osgDB::writeNodeFile(*carNode, "test.osg");
-// 		}
+		}
 
 		_vehicle->_carNode = carNode.release();
 	}
@@ -1006,6 +1006,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string CARWIDTH = "CARWIDTH";
 		static const string CARHEIGHT = "CARHEIGHT";
 		static const string CARLENGTH = "CARLENGTH";
+		static const string WHEELBASE = "WHEELBASE";
 		static const string WHEELACCL = "WHEELACCL";
 		static const string SPEEDINCR = "SPEEDINCR";
 		static const string DYNAMICSENSITIVE = "DYNAMICSENSITIVELEVEL";
@@ -1086,6 +1087,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_vehicle->_length = stod(config);
+				}
+				continue;
+			}
+			else if (title == WHEELBASE)
+			{
+				config.erase(config.begin(), config.begin() + WHEELBASE	.size());
+				if (!config.empty())
+				{
+					_vehicle->_wheelBase = stod(config);
 				}
 				continue;
 			}

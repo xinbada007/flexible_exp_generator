@@ -96,6 +96,11 @@ void CarEvent::calculateCarMovement()
 		_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
 	}
 
+	//Cacluate Turning Radius
+	{
+		_carState->_turningRadius = _vehicle->_wheelBase / sin(_carState->_angle);
+	}
+
 	//set the acceleration of rotation
 	checkRotationLimit();
 
@@ -295,7 +300,7 @@ bool CarEvent::Joystick()
 		if (_carState->_steer)
 		{
 			_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX);
-			_leftTurn = (x < 0);
+			_leftTurn = (_carState->_speed >= 0) ? (x < 0) : (x > 0);
 			_shifted = true;
 		}
 	}

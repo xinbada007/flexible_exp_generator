@@ -26,7 +26,7 @@ Car * obtainCar(ReadConfig *rc)
 	{
 		RenderVistor rv;
 		rv.reset();
-		rv.setBeginMode(GL_POINTS);
+		rv.setBeginMode(GL_QUADS);
 		car->accept(rv);
 	}
 

@@ -348,8 +348,9 @@ typedef struct Vehicle:public osg::Referenced
 {
 	Vehicle() :_MAXSPEED(280 / 3.6f)
 	{
-		_width = 1.7;
-		_length = 4.7;
+		_width = 1.730;
+		_length = 4.520;
+		_wheelBase = 2.615;
 		_height = 0.0f;
 		_carNode = NULL;
 
@@ -382,6 +383,7 @@ typedef struct Vehicle:public osg::Referenced
 	double _width;
 	double _height;
 	double _length;
+	double _wheelBase;
 	
 	double _speed;
 	double _speedincr;

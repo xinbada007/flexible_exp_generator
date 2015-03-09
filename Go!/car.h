@@ -21,9 +21,11 @@ typedef struct CarState:public osg::Referenced
 		this->_eyeDirection.set(_direction);
 		this->_heading.set(_direction);
 		this->_directionLastFrame.set(_direction);
+
+		_turningRadius = 0.0f;
 		_angle = 0.0f;
 		_lastAngle = _angle;
-		_angle_incr = 0.2f;
+		_angle_incr = 1.0f / frameRate::instance()->getDesignfRate();
 		_swangle = 0.0f;
 		_swDeDead = 0.0f;
 		_speed = 0.0f;
@@ -99,6 +101,7 @@ typedef struct CarState:public osg::Referenced
 	bool _reset;
 	bool _steer;
 
+	double _turningRadius;
 	double _angle;
 	double _angle_incr;
 	double _swangle;

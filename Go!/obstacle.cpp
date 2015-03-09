@@ -425,6 +425,11 @@ void Obstacle::sweep(const double height)
 void Obstacle::createNode(const std::string file)
 {
 	osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(file);
+	if (!node)
+	{
+		osg::notify(osg::WARN) << "cannot find node file!" << std::endl;
+		return;
+	}
 	BoundingboxVisitor bbV;
 	node->accept(bbV);
 	const osg::BoundingBoxd &bb = bbV.getBoundingBox();
@@ -433,17 +438,33 @@ void Obstacle::createNode(const std::string file)
 	osg::Vec3d maxP(bb.xMax(), bb.yMax(), bb.zMax());
 	osg::Vec3d center = (minP + maxP)*0.5f;
 	osg::Matrix m;
-	m = osg::Matrix::translate(osg::Vec3d(0.0f,0.0f,-bb.zMin()));
+  	m *= osg::Matrix::translate(H_POINT);
+
+	_objNode = node.release();
+	osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
+	mT->addChild(_objNode);
+	mT->setMatrix(m);
+	this->addChild(mT);
+
+	mT->setDataVariance(osg::Object::STATIC);
+	_objNode->setDataVariance(osg::Object::STATIC);
+	osgUtil::Optimizer op;
+	op.optimize(this, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
+	op.optimize(_objNode, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
+
+	mT->removeChild(_objNode);
+	this->removeChild(mT);
+	this->addChild(_objNode);
+
 	osg::ref_ptr<osg::Vec3dArray> a = new osg::Vec3dArray;
 	osg::ref_ptr<osg::Vec3dArray> b = new osg::Vec3dArray;
 	getCCWCubefromLBfromBBox(bb, a, b);
-
 	arrayByMatrix(a, m);
 	arrayByMatrix(b, m);
 	center = center * m;
-
-	osg::Vec3dArray::iterator i = b->begin();
-	osg::Vec3dArray::iterator j = a->begin();
+	this->absoluteTerritory.center.set(center);
+	this->absoluteTerritory._detectR = bb.radius2();
+	this->absoluteTerritory._refuseR = 0.0f;
 
 	line1D(a);
 	link(a->front(), a->back());
@@ -454,24 +475,9 @@ void Obstacle::createNode(const std::string file)
 		abs->setAbstract(false);
 	}
 
-	RenderVistor rv;
-	rv.setBeginMode(GL_QUADS);
-	this->accept(rv);
-
-	this->absoluteTerritory.center.set(center);
-	this->absoluteTerritory._detectR = bb.radius2();
-	this->absoluteTerritory._refuseR = 0.0f;
-
-	_objNode = node.release();
-	osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
-	mT->addChild(_objNode);
-	mT->setMatrix(m);
-	this->addChild(mT);
-
-	mT->setDataVariance(osg::Object::STATIC);
-	osgUtil::Optimizer op;
-	op.optimize(this, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
-//	op.optimize(this, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
+// 	RenderVistor rv;
+// 	rv.setBeginMode(GL_QUADS);
+// 	this->accept(rv);
 }
 
 void Obstacle::multiplyMatrix(const osg::Matrixd &m)
@@ -504,4 +510,5 @@ void Obstacle::multiplyMatrix(const osg::Matrixd &m)
 	}
 
 	absoluteTerritory.center = absoluteTerritory.center * m;
+	osg::Vec3d test = absoluteTerritory.center;
 }
