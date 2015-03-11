@@ -22,7 +22,7 @@ Acceleration:	1
 SteeringDeadBand:	0.05	#deadband
 CarSpeed:	10
 CarWheel:	35
-CarModel:	../Resources/models/pontiacG3_lightON_exsimplified.ive;
+CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive
 CarReset:	2	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = starting position
 

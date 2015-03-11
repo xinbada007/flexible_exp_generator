@@ -501,7 +501,6 @@ void CarEvent::getTurningFactor()
 	bool ISLEFT = (_carState->_speed >= 0) ? _leftTurn : !_leftTurn;
 	const osg::Vec3d BASEPOS = (ISLEFT) ? RIGHT_TOP : LEFT_TOP;
 	osg::Vec3d WHEELBASE = (ISLEFT) ? RIGHT_TOP - RIGHT_BOTTOM : LEFT_TOP - LEFT_BOTTOM;
-	WHEELBASE = (_carState->_speed >= 0) ? WHEELBASE : -WHEELBASE;
 	const double &Xm = WHEELBASE.x(); const double &Ym = WHEELBASE.y();
 	const double WHEELBASE_LENGTH2 = WHEELBASE.length2();
 	assert(WHEELBASE_LENGTH2);

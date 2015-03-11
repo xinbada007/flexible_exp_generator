@@ -313,7 +313,7 @@ void ReadConfig::initializeAfterReadTrial()
 		_alignPoint += (_alignPoint - _vehicle->_O) * eps_100;
 		_alignPoint.z() = 0.0f;
 
- 		{
+//  		{
 // 			osg::ref_ptr<osg::StateSet> ss = carNode->getOrCreateStateSet();
 // 			ss->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 // 			ss->setMode(GL_LIGHT0, osg::StateAttribute::ON);
@@ -330,8 +330,8 @@ void ReadConfig::initializeAfterReadTrial()
 // 			lightsource->setStateSetModes(*ss, osg::StateAttribute::ON);
 // 
 // 			carNode->asGroup()->addChild(lightsource);
-// 			osgDB::writeNodeFile(*carNode, "test.osg");
-		}
+//  			osgDB::writeNodeFile(*carNode, "test.ive");
+// 		}
 
 		_vehicle->_carNode = carNode.release();
 	}
