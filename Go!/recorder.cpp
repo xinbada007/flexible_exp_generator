@@ -57,6 +57,10 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._usrHit);
 	_outMoment.push_back(&_recS._pointsEarned);
 	_outMoment.push_back(&_recS._steering);
+	_outMoment.push_back(&_recS._turningRadius);
+	_outMoment.push_back(&_recS._turningX);
+	_outMoment.push_back(&_recS._turningY);
+	_outMoment.push_back(&_recS._turningZ);
 	_outMoment.push_back(&_recS._distanceObsBody);
 	_outMoment.push_back(&_recS._replay);
 
@@ -539,6 +543,18 @@ void Recorder::rectoTxt(const CarState *carState)
 
 	_recS._steering = carState->_steer ? "1" : "-1" + _recS._TAB;
 
+	_gcvt_s(tempd, size_tempd, carState->_turningRadius, nDigit);
+	_recS._turningRadius = tempd + _recS._TAB;
+	const double &centerX = carState->_turningCenter.x();
+	const double &centerY = carState->_turningCenter.y();
+	const double &centerZ = carState->_turningCenter.z();
+	_gcvt_s(tempd, size_tempd, centerX, nDigit);
+	_recS._turningX = tempd + _recS._TAB;
+	_gcvt_s(tempd, size_tempd, centerY, nDigit);
+	_recS._turningY = tempd + _recS._TAB;
+	_gcvt_s(tempd, size_tempd, centerZ, nDigit);
+	_recS._turningZ = tempd + _recS._TAB;
+
 	osg::ref_ptr<osg::DoubleArray> toOBS = carState->getDistancetoObsBody();
 	osg::DoubleArray::const_iterator begin_toOBS = toOBS->begin();
 	osg::DoubleArray::const_iterator end_toOBS = toOBS->end();
@@ -831,6 +847,15 @@ void Recorder::setStatus(const std::string &content)
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Steering Wheel: ";
+				break;
+			case Recorder::TypeofText::TURNINGRADIUS:
+				text.push_back('\n');
+				text += "TURNING RADIUS: ";
+				break;
+			case Recorder::TypeofText::TURNING_X:
+				text.push_back(' ');
+				text.push_back(' ');
+				text += "Turning Center: ";
 				break;
 			default:
 				text.push_back(' ');

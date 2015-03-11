@@ -871,7 +871,10 @@ void ExperimentCallback::removeNodefromRoad(osg::Node *n)
 
 	if (!_road->removeChild(n))
 	{
-		removeNodefromRoad(n->getParent(0));
+		if (n->getNumParents())
+		{
+			removeNodefromRoad(n->getParent(0));
+		}
 	}
 
 	return;
@@ -920,6 +923,10 @@ void ExperimentCallback::dealCollision()
 		}
 		++i;
 	}
+
+	//post deal collision
+	carstate->getObsList().clear();
+	carstate->_collisionQuad.clear();
 }
 
 void ExperimentCallback::deviationCheck()

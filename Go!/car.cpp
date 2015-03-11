@@ -7,7 +7,7 @@ Car::Car()
 	_carState = new CarState;
 }
 
-Car::Car(const Car &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
+Car::Car(const Car &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
 EulerPoly(copy, copyop), _vehicle(copy._vehicle), _carState(copy._carState)
 {
 
@@ -35,14 +35,25 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
 
 	//Set-up backWheel and frontWheel
 	i = refV->begin();
+
+	const osg::Vec3d &RIGHT_TOP = *(i + 1);
+	const osg::Vec3d &LEFT_TOP = *(i + 2);
+	const osg::Vec3d &RIGHT_BOTTOM = *i;
+	const osg::Vec3d &LEFT_BOTTOM = *(i + 3);
+	const double ratio = 0.5f - (_vehicle->_wheelBase / (2 * _vehicle->_length));
+
 	//right-top
-	_carState->_frontWheel->push_back(*(i + 1));
+//	_carState->_frontWheel->push_back(*(i + 1));
+	_carState->_frontWheel->push_back(RIGHT_TOP*(1 - ratio) + RIGHT_BOTTOM*ratio);
 	//left-top
-	_carState->_frontWheel->push_back(*(i + 2));
+//	_carState->_frontWheel->push_back(*(i + 2));
+	_carState->_frontWheel->push_back(LEFT_TOP*(1 - ratio) + LEFT_BOTTOM*ratio);
 	//right-bottom
-	_carState->_backWheel->push_back(*(i));
+//	_carState->_backWheel->push_back(*(i));
+	_carState->_backWheel->push_back(RIGHT_BOTTOM*(1 - ratio) + RIGHT_TOP*ratio);
 	//left-bottom
-	_carState->_backWheel->push_back(*(i + 3));
+//	_carState->_backWheel->push_back(*(i + 3));
+	_carState->_backWheel->push_back(LEFT_BOTTOM*(1 - ratio) + LEFT_TOP*ratio);
 
 	_carState->_frontWheel->front().z() = 0.0f;
 	_carState->_frontWheel->back().z() = 0.0f;

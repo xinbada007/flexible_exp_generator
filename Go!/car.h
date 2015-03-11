@@ -86,6 +86,7 @@ typedef struct CarState:public osg::Referenced
 	osg::Vec3d _eyeDirection;
 	osg::Vec3d _direction;
 	osg::Vec3d _directionLastFrame;
+	osg::Vec3d _turningCenter;
 	osg::ref_ptr<osg::Vec3dArray> _midLine;
 	osg::ref_ptr<osg::Vec3dArray> _backWheel;
 	osg::ref_ptr<osg::Vec3dArray> _frontWheel;

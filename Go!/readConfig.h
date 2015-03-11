@@ -49,7 +49,7 @@ typedef struct Experiment :public osg::Referenced
 		_obsArrayNurbsMethod = 0;
 		_GLPOINTSMODE = false;
 		_obsArrayLength = 0.0f;
-		_speed = 60.0f / 3.6f;
+		_speed = frameRate::instance()->getDesignfRate() / 3.6f;
 
 		_opticFlow = false;
 		_opticFlowRange = 100;
@@ -354,19 +354,19 @@ typedef struct Vehicle:public osg::Referenced
 		_height = 0.0f;
 		_carNode = NULL;
 
-		_speed = 60 / 3.6f;
-		_speedincr = 20 / 3.6f;
-		_rotate = 42.5 * TO_RADDIAN;
+		_speed = frameRate::instance()->getDesignfRate() / 3.6f;
+		_speedincr = 1.0;
+		_rotate = 35 * TO_RADDIAN;
 		_rotationAccl = 0.0f;
 		_acceleration = 1;
-		_deadband = 0.075f;
+		_deadband = 0.05f;
 		_dynamicSensitive = 1.0f;
 
 		_startDelay = 1.0f;
 
 		_baseline = 0.0f;
 
-		_visibility = true;
+		_visibility = false;
 
 		_carReset = DISABLE;
 		_resetMode = 0;

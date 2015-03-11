@@ -18,7 +18,8 @@ typedef struct recState
 		_dAngle("DAngle"), _swAngle("swAngle"), _swReal("swNoDead"), _OX("OX"), _OY("OY"), _OZ("OZ"), _HX("HX"), _HY("HY"),
 		_HZ("HZ"), _DX("DX"), _DY("DY"), _DZ("DZ"), _HA("HA"), _RHA("RHA"), _AHA("AccumulativeHeading(Y)"),
 		_speed("Speed"), _Rspeed("RSpeed"), _radius("radius"), _radiusR("radiusR"), _radiusL("radiusL"),
-		_dynamic("Dynamic"), _usrHit("USRHIT"), _pointsEarned("SCORE"), _steering("STEERING"), _distanceObsBody("toOBS"), _replay(""), _accumulativeHeading(0.0f)
+		_dynamic("Dynamic"), _usrHit("USRHIT"), _pointsEarned("SCORE"), _steering("STEERING"), _turningRadius("TurningRadius"),
+		_turningX("TX"), _turningY("TY"), _turningZ("TZ"), _distanceObsBody("toOBS"), _replay(""), _accumulativeHeading(0.0f)
 	{
 		_time += _TAB; _fps += _TAB; _frame += _TAB; _crash += _TAB;
 		_rb += _TAB; _ru += _TAB; _lu += _TAB; _lb += _TAB; _oc += _TAB; _dither += _TAB; _customDither += _TAB;
@@ -26,7 +27,8 @@ typedef struct recState
 		_HX += _TAB; _HY += _TAB; _HZ += _TAB; _DX += _TAB; _DY += _TAB; _DZ += _TAB;
 		_HA += _TAB; _RHA += _TAB;  _AHA += _TAB; _speed += _TAB; _Rspeed += _TAB;
 		_radius += _TAB; _radiusR += _TAB; _radiusL += _TAB;
-		_dynamic += _TAB; _usrHit += _TAB; _pointsEarned += _TAB; _steering += _TAB; _distanceObsBody += _TAB;
+		_dynamic += _TAB; _usrHit += _TAB; _pointsEarned += _TAB; _steering += _TAB; _turningRadius += _TAB;
+		_turningX += _TAB; _turningY += _TAB; _turningZ += _TAB; _distanceObsBody += _TAB;
 	}
 	std::string _time;
 	std::string _fps;
@@ -63,6 +65,10 @@ typedef struct recState
 	std::string _usrHit;
 	std::string _pointsEarned;
 	std::string _steering;
+	std::string _turningRadius;
+	std::string _turningX;
+	std::string _turningY;
+	std::string _turningZ;
 	std::string _distanceObsBody;
 	std::string _replay;
 
@@ -119,6 +125,7 @@ private:
 		HA, RHA, AHA, SPEED,
 		RSPEED, RADIUS, RADIUSR, RADIUSL,
 		DYNAMIC, USRHIT, SCORE, STEERING,
+		TURNINGRADIUS, TURNING_X, TURNING_Y, TURNING_Z,
 		TOOBSBODY
 	} TypeTxt;
 };

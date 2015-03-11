@@ -490,7 +490,7 @@ void ReadConfig::initializeAfterReadTrial()
 	if (_experiment->_obsCollision->getNumElements() != numObs)
 	{
 		const unsigned numCollision = _experiment->_obsCollision->getNumElements();
-		_experiment->_obsCollision->resize(numObs);
+		_experiment->_obsCollision->resize(numObs, 1);
 		if (numObs > numCollision)
 		{
 			osg::UIntArray::const_iterator assign_start = _experiment->_obsCollision->begin();

@@ -5,6 +5,8 @@
 #include <osg/Notify>
 #include <osgGA/EventVisitor>
 
+#include <assert.h>
+
 CarEvent::CarEvent() :
 _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
 , _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _limitCheck(true)
@@ -96,11 +98,6 @@ void CarEvent::calculateCarMovement()
 		_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
 	}
 
-	//Cacluate Turning Radius
-	{
-		_carState->_turningRadius = _vehicle->_wheelBase / sin(_carState->_angle);
-	}
-
 	//set the acceleration of rotation
 	checkRotationLimit();
 
@@ -108,7 +105,7 @@ void CarEvent::calculateCarMovement()
 	_carState->_directionLastFrame = _carState->_direction;
 	if (_carState->_dynamic || _autoNavi)
 	{
-		osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
+		osg::Vec3d &origin = _carState->_turningCenter;
 		osg::Matrix rotation = osg::Matrix::translate(-origin);
 		rotation *= osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate::instance()->getRealfRate()), Z_AXIS);
 		rotation *= osg::Matrix::translate(origin);
@@ -265,10 +262,7 @@ void CarEvent::shiftVehicle()
 	_carState->_shiftD.z() = _carState->_heading.z();
 	_carState->_shiftD.normalize();
 
-	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
-	osg::Vec3d r = origin - _carState->_O;
-
-	double R = r.length();
+	double R = _carState->_turningRadius;
 	R *= sin(abs(_carState->_angle) * 1.0f / frameRate::instance()->getRealfRate());
 	R *= _vehicle->_dynamicSensitive;
 
@@ -404,7 +398,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			{
 				int sign = (key == osgGA::GUIEventAdapter::KEY_A) ? 1 : -1;
 				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
-				_leftTurn = (sign == 1);
+				_leftTurn = (_carState->_speed >= 0) ? (sign == 1) : (sign == -1);
 				_shifted = true;
 				break;
 			}
@@ -462,6 +456,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				_carState->_speed = 0.0f;
 			}
 
+			//initial calculate turning radius and turning center
+			getTurningFactor();
+
 			//1st
 			shiftVehicle();
 			//2nd
@@ -483,6 +480,99 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 //	osg::notify(osg::NOTICE) << "CarEvent..Traverse..." << std::endl;
 	traverse(node, nv);
 //	osg::notify(osg::NOTICE) << "CarEvent..END..." << std::endl;
+}
+
+void CarEvent::getTurningFactor()
+{
+	const double sinTheta = sin(_carState->_angle);
+	if (!sinTheta)
+	{
+		_carState->_turningRadius = -2.0f;
+		_carState->_turningCenter.set(-2.0f, -2.0f, -2.0f);
+		return;
+	}
+
+	_carState->_turningRadius = _vehicle->_wheelBase / sinTheta;
+
+	const osg::Vec3d &RIGHT_TOP = _carState->_frontWheel->front();
+	const osg::Vec3d &LEFT_TOP = _carState->_frontWheel->back();
+	const osg::Vec3d &RIGHT_BOTTOM = _carState->_backWheel->front();
+	const osg::Vec3d &LEFT_BOTTOM = _carState->_backWheel->back();
+	bool ISLEFT = (_carState->_speed >= 0) ? _leftTurn : !_leftTurn;
+	const osg::Vec3d BASEPOS = (ISLEFT) ? RIGHT_TOP : LEFT_TOP;
+	osg::Vec3d WHEELBASE = (ISLEFT) ? RIGHT_TOP - RIGHT_BOTTOM : LEFT_TOP - LEFT_BOTTOM;
+	WHEELBASE = (_carState->_speed >= 0) ? WHEELBASE : -WHEELBASE;
+	const double &Xm = WHEELBASE.x(); const double &Ym = WHEELBASE.y();
+	const double WHEELBASE_LENGTH2 = WHEELBASE.length2();
+	assert(WHEELBASE_LENGTH2);
+
+	const double A = _carState->_turningRadius*WHEELBASE.length()*(-sinTheta);
+	const double &B = _carState->_turningRadius;
+
+	const double a = (WHEELBASE_LENGTH2);
+	const double b = - (2 * A * Ym);
+	const double c = A*A - B*B*Xm*Xm;
+	double delta = b * b - 4 * a * c;
+	if (isEqual(delta , 0.0f))
+	{
+		delta = 0.0f;
+	}
+
+	double Y = -b + sqrt(delta);
+	Y /= 2 * a;
+	double X;
+	if (Xm)
+	{
+		X = (A - Y * Ym) / Xm;
+	}
+
+	double Y1 = -b - sqrt(delta);
+	Y1 /= 2 * a;
+	double X1;
+	if (Xm)
+	{
+		X1 = (A - Y1 * Ym) / Xm;
+	}
+	else
+	{
+		X1 = sqrt(B*B - Y*Y1);
+		X = -X1;
+	}
+
+	const osg::Vec3d R1(X, Y, 0.0f);
+	const osg::Vec3d R2(X1, Y1, 0.0f);
+	osg::Vec3d realVec;
+	if (ISLEFT)
+	{
+		realVec = (WHEELBASE^R1).z() >= 0 ? R1 : R2;
+	}
+	else
+	{
+		realVec = (WHEELBASE^R1).z() <= 0 ? R1 : R2;
+	}
+
+	_carState->_turningCenter = BASEPOS + realVec;
+
+// 	osg::notify(osg::NOTICE) << "BASE\t" << BASEPOS.x() << "\t" << BASEPOS.y() << std::endl;
+// 	osg::notify(osg::NOTICE) << "VEC\t" << realVec.x() << "\t" << realVec.y() << std::endl;
+// 	osg::notify(osg::NOTICE) << "CENTER\t" << _carState->_turningCenter.x() << "\t" << _carState->_turningCenter.y() << std::endl;
+
+	double theta = acos((realVec*WHEELBASE) / (realVec.length()*WHEELBASE.length()));
+	theta -= PI*0.5f;
+	theta -= abs(_carState->_angle);
+	if (!isEqual(theta,0.0f))
+	{
+		osg::notify(osg::WARN) << "Error decteced in Turning Center" << std::endl;
+	}
+	bool DIR = (ISLEFT) ? (WHEELBASE^realVec).z() > 0 : (WHEELBASE^realVec).z() < 0;
+	if (!DIR)
+	{
+		osg::notify(osg::WARN) << "Error decteced in Turning Center" << std::endl;
+	}
+	
+// 	osg::notify(osg::NOTICE) << "RESULT\t" << theta - abs(_carState->_angle) / TO_RADDIAN << std::endl;
+// 	osg::notify(osg::NOTICE) << "DIR\t" << (WHEELBASE^realVec).z() << std::endl;
+// 	osg::notify(osg::NOTICE) << "RADIUS\t" << _carState->_turningRadius << std::endl;
 }
 
 void CarEvent::applyCarMovement()

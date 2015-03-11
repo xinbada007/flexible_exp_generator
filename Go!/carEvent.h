@@ -18,6 +18,7 @@ private:
 
 	void makeResetMatrix();
 
+	void getTurningFactor();
 	void shiftVehicle();
 	void autoNavigation();
 	void checkRotationLimit();
