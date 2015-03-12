@@ -676,7 +676,7 @@ void MulitViewer::runHMD()
 // 	backCam->setProjectionMatrix(projMosg);
 	//Test
 
-	osg::Matrixd L, R;
+	osg::Matrixd L, R ,HM;
 	CameraEvent *camEvent = dynamic_cast<CameraEvent*>(_hmdView->getCameraManipulator());
 	if (camEvent)
 	{
@@ -684,12 +684,16 @@ void MulitViewer::runHMD()
 		camEvent->addCameratoList(leftcam);
 		camEvent->addOffsetMatrixtoList(&R);
 		camEvent->addCameratoList(rightcam);
+
+		camEvent->setEyePointOffset(&HM);
 	}
 
 	typedef BOOL(GL_APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
 	PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
 	assert(wglSwapIntervalEXT);
+
+	ovrTrackingState hmdState;
 
 	ovrHmd_RecenterPose(_hmd);
 	ovrHmd_DismissHSWDisplay(_hmd);
@@ -699,12 +703,12 @@ void MulitViewer::runHMD()
 	{
 		const unsigned &frameIndex = _hmdView->getFrameStamp()->getFrameNumber();
  		l_HmdFrameTiming = ovrHmd_BeginFrame(_hmd, frameIndex);
-		ovrHmd_GetEyePoses(_hmd, frameIndex, _eyeOffsets, _eyePoses, NULL);
+		ovrHmd_GetEyePoses(_hmd, frameIndex, _eyeOffsets, _eyePoses, &hmdState);
 
-		OVR::Quatd leftOrientation = OVR::Quatd(_eyePoses[ovrEye_Left].Orientation);
-		OVR::Matrix4d leftMVMatrix = OVR::Matrix4d(leftOrientation.Inverted());
-		OVR::Quatd rightOrientation = OVR::Quatd(_eyePoses[ovrEye_Right].Orientation);
-		OVR::Matrix4d rightMVMatrix = OVR::Matrix4d(rightOrientation.Inverted());
+		const OVR::Quatd &leftOrientation = OVR::Quatd(_eyePoses[ovrEye_Left].Orientation);
+		const OVR::Matrix4d &leftMVMatrix = OVR::Matrix4d(leftOrientation.Inverted());
+		const OVR::Quatd &rightOrientation = OVR::Quatd(_eyePoses[ovrEye_Right].Orientation);
+		const OVR::Matrix4d &rightMVMatrix = OVR::Matrix4d(rightOrientation.Inverted());
 		osg::Matrixd leftMatrix, rightMatrix;
 		for (int i = 0; i < 4; i++)
 		{
@@ -714,7 +718,11 @@ void MulitViewer::runHMD()
 				rightMatrix(i, j) = rightMVMatrix.Transposed().M[i][j];
 			}
 		}
-
+		const double &headX = hmdState.HeadPose.ThePose.Position.x;
+		const double &headY = 0.0f;
+		const double &headZ = 0.0f;
+		osg::Vec3d headVector(headX, headY, headZ);
+		HM = osg::Matrix::translate(headVector);
 		L = leftMatrix * l_view_M;
 		R = rightMatrix* r_view_M;
 

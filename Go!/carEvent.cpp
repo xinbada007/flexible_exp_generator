@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "carEvent.h"
 #include "math.h"
+#include "edge.h"
+#include "halfedge.h"
+#include "points.h"
 
 #include <osg/Notify>
 #include <osgGA/EventVisitor>
@@ -69,8 +72,62 @@ void CarEvent::dealCollision()
 {
 	if (_carState->_collide && _carState->_crashPermit)
 	{
-		const double MAXSPEED(0.5f / 3.6f);
-		_carState->_speed = (_carState->_speed > 0) ? (-MAXSPEED) : MAXSPEED;
+		const obstacleList &obsList = _carState->getObsList();
+		const quadList &wallList = _carState->_collisionQuad;
+		obstacleList::const_iterator obsIndex = obsList.cbegin();
+		quadList::const_iterator wallIndex = wallList.cbegin();
+
+		osg::Vec3d carO = _carState->_O;
+		carO.z() = 0.0f;
+		while (obsIndex != obsList.cend())
+		{
+			osg::Vec3d obsO = (*obsIndex)->absoluteTerritory.center;
+			obsO.z() = 0.0f;
+
+			const osg::Vec3d cartoObs = obsO - carO;
+			const osg::Vec3d &carDirection = _carState->_direction;
+			if (carDirection*cartoObs > 0.0f)
+			{
+				_carState->_speed = (_carState->_speed > 0.0f) ? 0.0f : _carState->_speed;
+			}
+			else
+			{
+				_carState->_speed = (_carState->_speed < 0.0f) ? 0.0f : _carState->_speed;
+			}
+			++obsIndex;
+		}
+		while (wallIndex != wallList.cend())
+		{
+			const edgelist &list = (*wallIndex)->getLoop()->getFlagEdge();
+			if (!list.empty())
+			{
+				edgelist::const_iterator i = list.cbegin();
+				edgelist::const_iterator listEND = list.cend();
+				while (i != listEND)
+				{
+					if ((*i)->getEdgeFlag()->_collsionEdge)
+					{
+ 						const osg::Vec3d &a = (*i)->getHE1()->getPoint()->getPoint();
+ 						const osg::Vec3d &b = (*i)->getHE2()->getPoint()->getPoint();
+						osg::Vec3d wallO = (a + b)*0.5f;
+						wallO.z() = 0.0f;
+
+						const osg::Vec3d cartoWall = wallO - carO;
+						const osg::Vec3d &carDirection = _carState->_direction;
+						if (carDirection*cartoWall > 0.0f)
+						{
+							_carState->_speed = (_carState->_speed > 0.0f) ? 0.0f : _carState->_speed;
+						}
+						else
+						{
+							_carState->_speed = (_carState->_speed < 0.0f) ? 0.0f : _carState->_speed;
+						}
+					}
+					++i;
+				}
+			}
+			++wallIndex;
+		}
 	}
 	else
 	{

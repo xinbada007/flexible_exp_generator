@@ -14,6 +14,7 @@ public:
 	CameraEvent(osg::ref_ptr<ReadConfig> refRC);
 	inline void addOffsetMatrixtoList(osg::Matrixd *offset){ _matrixList.push_back(offset); };
 	inline void addCameratoList(osg::Camera *cam){ _camList.push_back(cam); };
+	inline void setEyePointOffset(osg::Matrixd *eyeOffset) { _eyePointOffset = eyeOffset; };
 
 protected:
 	virtual ~CameraEvent();
@@ -30,6 +31,7 @@ private:
 	osg::Quat _camRotation;
 	osg::Vec3d _offsetOrigin;
 	osg::Vec3d _offset;
+	osg::Vec3d _realOffset;
 	osg::Vec3d _eyePoint;
 
 	osg::Quat _eyeRotation;
@@ -52,10 +54,9 @@ private:
 
 	osg::Matrix _stateLast;
 
-	osg::Matrix * _leftOffset;
-	osg::Matrix * _rightOffset; 
-
 	cameraList _camList;
 	matrixList _matrixList;
+
+	osg::Matrix *_eyePointOffset;
 };
 

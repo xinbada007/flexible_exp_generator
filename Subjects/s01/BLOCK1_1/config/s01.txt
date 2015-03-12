@@ -35,10 +35,10 @@ RoadPic:	../Resources/texture/road4096-0.png 16
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/roads/Line.txt;
 Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
-Density:	50
+Density:	1000
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
-WallHeight:	0
+WallHeight:	0.0
 WallRoadWidth:	11
 WallPic:	../Resources/texture/wall1024-2.jpg 16
 
@@ -61,12 +61,12 @@ Lane-Offset:	0	#Negative = L	Positive = R
 Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Obstacle Setting=====================
-Obstacle:	1 #1
+Obstacle:	1 1
 Obstacle-Range:	15 24	
 Obstacle-Position:	0 0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	-7.5 -7.5
 OBS-Shape:	4	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
-Obs-Collision:	0
+Obs-Collision:	1
 OBS-Pic:	../Resources/models/Beetle.ive;
 
 ##==Optic Flow Setting===========================================

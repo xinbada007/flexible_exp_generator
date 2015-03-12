@@ -7,7 +7,7 @@
 
 CameraEvent::CameraEvent(osg::ref_ptr<ReadConfig> refRC):
 _reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(1.0f),
-_useHMD(refRC->getScreens()->_HMD == 1), _leftOffset(NULL), _rightOffset(NULL)
+_useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);
@@ -55,7 +55,7 @@ osg::Matrixd CameraEvent::getInverseMatrix() const
 							osg::Matrix::rotate(_camRotation.inverse()) *
 								_matrixLookAt;
 
-	if (_camList.size() == _matrixList.size())
+	if ((!_camList.empty() && !_matrixList.empty()) && (_camList.size() == _matrixList.size()))
 	{
 		cameraList::const_iterator camIndex = _camList.cbegin();
 		matrixList::const_iterator mIndex = _matrixList.cbegin();
@@ -203,7 +203,15 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				_reset = false;
 			}
 
-			_eyePoint.set(refCS->_O + _offset);
+			if (_eyePointOffset)
+			{
+				_realOffset = _offset * (*_eyePointOffset);
+			}
+			else
+			{
+				_realOffset = _offset;
+			}
+			_eyePoint.set(refCS->_O + _realOffset);
 			_stateLast = refCS->_state;
 			if (viewer)
 			{

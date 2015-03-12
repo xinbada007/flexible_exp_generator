@@ -916,10 +916,6 @@ void ExperimentCallback::dealCollision()
 		}
 		++i;
 	}
-
-	//post deal collision
-	carstate->getObsList().clear();
-	carstate->_collisionQuad.clear();
 }
 
 void ExperimentCallback::deviationCheck()
