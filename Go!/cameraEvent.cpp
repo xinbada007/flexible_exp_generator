@@ -7,7 +7,7 @@
 
 CameraEvent::CameraEvent(osg::ref_ptr<ReadConfig> refRC):
 _reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(1.0f),
-_useHMD(refRC->getScreens()->_HMD == 1)
+_useHMD(refRC->getScreens()->_HMD == 1), _leftOffset(NULL), _rightOffset(NULL)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);
@@ -51,9 +51,23 @@ osg::Matrixd CameraEvent::getMatrix() const
 
 osg::Matrixd CameraEvent::getInverseMatrix() const
 {
-	return osg::Matrix::translate(-_eyePoint) * 
-		       osg::Matrix::rotate(_camRotation.inverse()) * 
-					_matrixLookAt;
+	const osg::Matrixd M = osg::Matrix::translate(-_eyePoint) *
+							osg::Matrix::rotate(_camRotation.inverse()) *
+								_matrixLookAt;
+
+	if (_camList.size() == _matrixList.size())
+	{
+		cameraList::const_iterator camIndex = _camList.cbegin();
+		matrixList::const_iterator mIndex = _matrixList.cbegin();
+		while (camIndex != _camList.cend() && mIndex != _matrixList.cend())
+		{
+			(*camIndex)->setViewMatrix(M*(*(*mIndex)));
+			++camIndex;
+			++mIndex;
+		}
+	}
+
+	return M;
 }
 
 void CameraEvent::updateLookAt(osg::View *viewer)
@@ -196,6 +210,7 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				refCS->_frameStamp = viewer->getFrameStamp()->getFrameNumber();
 				refCS->_timeReference = viewer->getFrameStamp()->getReferenceTime();
 			}
+// 			osg::notify(osg::NOTICE) << "EyeOFFSET:\t" << _offset.x() <<"\t"<< _offset.y() <<"\t"<< _offset.z() << std::endl;
 
 // 			//Test
 // 			if (_useHMD)

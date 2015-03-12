@@ -5,7 +5,7 @@ TrialConfig
 
 [ScreenSettings]
 Use_HMD:	0	#enable this disbles all other screen settings
-HMD_RefreshRate:	75
+HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
@@ -20,7 +20,7 @@ Background:	0.529,0.808,0.980
 [CarSettings]
 Acceleration:	1
 SteeringDeadBand:	0.05	#deadband
-CarSpeed:	10
+CarSpeed:	5
 CarWheel:	35
 CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive
 CarReset:	2	#0 = disable	1 = auto	2 = manual
@@ -61,11 +61,12 @@ Lane-Offset:	0	#Negative = L	Positive = R
 Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Obstacle Setting=====================
-Obstacle:	1 1
+Obstacle:	1 #1
 Obstacle-Range:	15 24	
 Obstacle-Position:	0 0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	-7.5 -7.5
 OBS-Shape:	4	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
+Obs-Collision:	0
 OBS-Pic:	../Resources/models/Beetle.ive;
 
 ##==Optic Flow Setting===========================================

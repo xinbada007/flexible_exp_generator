@@ -116,10 +116,6 @@ void runScene(ReadConfig *readConfig)
 	osg::ref_ptr<Collision> colldetect;
 	colldetect = new Collision;
 	car->addUpdateCallback(colldetect);
-	osg::ref_ptr<RoadSwitcher> roadSwitcher;
-	roadSwitcher = new RoadSwitcher;
-	roadSwitcher->setCarState(car->getCarState());
-	road->addUpdateCallback(roadSwitcher);
 
 	//Record Car
 	osg::ref_ptr<Recorder> recorder;
@@ -139,7 +135,6 @@ void runScene(ReadConfig *readConfig)
 	//Viewer Setup
 	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer(readConfig);
 	mViewer->genMainView();
-//	mViewer->getMainView()->addEventHandler(new osgViewer::StatsHandler);
 	mViewer->getMainView()->setCameraManipulator(camMatrix);
 	mViewer->setMainViewSceneData(root);
 	mViewer->createHUDView();
@@ -163,7 +158,6 @@ void runScene(ReadConfig *readConfig)
 	car = NULL;
 	carMatrix = NULL;
 	colldetect = NULL;
-	roadSwitcher = NULL;
 	camMatrix = NULL;
 	expcontroller = NULL;
 	CollVisitor::instance()->reset();

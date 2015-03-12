@@ -26,7 +26,6 @@ public:
 	MulitViewer(osg::ref_ptr<ReadConfig> refRC);
 
 	inline double getHorizontalFov() const { return _hFOV; };
-	inline osg::Vec3d getEyeDirection() const { return _eyeDirection; };
 	inline osgViewer::View * getHMDView() const { return _hmdView; };
 	inline osgViewer::View * getNormalView() const { return _normalView; };
 	inline osgViewer::View * getMainView() const { return (_normalView) ? _normalView : _hmdView; };
@@ -106,7 +105,6 @@ private:
 	osg::ref_ptr<osgViewer::View> _BGView;
 
 	double _hFOV;
-	osg::Vec3d _eyeDirection;
 
 protected:
 	virtual ~MulitViewer();

@@ -4,11 +4,17 @@
 #include <osgGA/CameraManipulator>
 #include <osg/Quat>
 
+typedef std::vector<osg::Camera*> cameraList;
+typedef std::vector<osg::Matrixd*> matrixList;
+
 class CameraEvent :
 	public osgGA::CameraManipulator
 {
 public:
 	CameraEvent(osg::ref_ptr<ReadConfig> refRC);
+	inline void addOffsetMatrixtoList(osg::Matrixd *offset){ _matrixList.push_back(offset); };
+	inline void addCameratoList(osg::Camera *cam){ _camList.push_back(cam); };
+
 protected:
 	virtual ~CameraEvent();
 	virtual osg::Matrixd getInverseMatrix() const;
@@ -45,5 +51,11 @@ private:
 	osg::Matrix _matrixLookAt;
 
 	osg::Matrix _stateLast;
+
+	osg::Matrix * _leftOffset;
+	osg::Matrix * _rightOffset; 
+
+	cameraList _camList;
+	matrixList _matrixList;
 };
 

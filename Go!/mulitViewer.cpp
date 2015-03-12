@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "mulitViewer.h"
+#include "cameraEvent.h"
 
 #include <osg/Notify>
 #include <osgViewer/Viewer>
@@ -17,7 +18,6 @@
 MulitViewer::MulitViewer(osg::ref_ptr<ReadConfig> refRC):
 _screens(refRC->getScreens()), _normalView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL), _hmdView(NULL), _masterTex(NULL), _hFOV(0.0f)
 {
-	_eyeDirection.set(O_POINT);
 }
 
 MulitViewer::~MulitViewer()
@@ -457,6 +457,11 @@ bool MulitViewer::hmd_Initialise()
 		_hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
 	}
 
+	//Test
+	unsigned hmdCaps = /*ovrHmdCap_NoMirrorToWindow |*/ ovrHmdCap_NoVSync;
+	ovrHmd_SetEnabledCaps(_hmd, hmdCaps);
+	//Test
+
 	uint32_t l_SupportedSensorCaps = ovrTrackingCap_Orientation | ovrTrackingCap_Position | ovrTrackingCap_MagYawCorrection;
 	uint32_t l_RequiredTrackingCaps = 0;
 	ovrBool l_TrackingResult = ovrHmd_ConfigureTracking(_hmd, l_SupportedSensorCaps, l_RequiredTrackingCaps);
@@ -471,7 +476,6 @@ bool MulitViewer::hmd_Initialise()
 	_windowsR.h /= 2;
 
 	_hmdView = new osgViewer::View;
-	this->addView(_hmdView);
 	_hmdView->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, 0);
 
 	_eyeTextureSize[ovrEye_Left] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->MaxEyeFov[ovrEye_Left], 1.0f);
@@ -624,7 +628,7 @@ void MulitViewer::runHMD()
 
 	_projectionMatrici[ovrEye_Left] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Left].Fov, _screens->_zNear, _screens->_zFar, true);
 	_projectionMatrici[ovrEye_Right] = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Right].Fov, _screens->_zNear, _screens->_zFar, true);
-	osg::Matrix l_proj_M, r_proj_M, l_view_M, r_view_M;
+	osg::Matrixd l_proj_M, r_proj_M, l_view_M, r_view_M;
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
@@ -672,19 +676,29 @@ void MulitViewer::runHMD()
 // 	backCam->setProjectionMatrix(projMosg);
 	//Test
 
+	osg::Matrixd L, R;
+	CameraEvent *camEvent = dynamic_cast<CameraEvent*>(_hmdView->getCameraManipulator());
+	if (camEvent)
+	{
+		camEvent->addOffsetMatrixtoList(&L);
+		camEvent->addCameratoList(leftcam);
+		camEvent->addOffsetMatrixtoList(&R);
+		camEvent->addCameratoList(rightcam);
+	}
+
 	typedef BOOL(GL_APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
 	PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
 	assert(wglSwapIntervalEXT);
 
-	_eyeDirection = UP_DIR;
 	ovrHmd_RecenterPose(_hmd);
 	ovrHmd_DismissHSWDisplay(_hmd);
 	ovrFrameTiming l_HmdFrameTiming;
+
 	while (!this->done())
 	{
 		const unsigned &frameIndex = _hmdView->getFrameStamp()->getFrameNumber();
-		l_HmdFrameTiming = ovrHmd_BeginFrame(_hmd, frameIndex);
+ 		l_HmdFrameTiming = ovrHmd_BeginFrame(_hmd, frameIndex);
 		ovrHmd_GetEyePoses(_hmd, frameIndex, _eyeOffsets, _eyePoses, NULL);
 
 		OVR::Quatd leftOrientation = OVR::Quatd(_eyePoses[ovrEye_Left].Orientation);
@@ -701,12 +715,11 @@ void MulitViewer::runHMD()
 			}
 		}
 
-		leftcam->setViewMatrix(_hmdView->getCamera()->getViewMatrix() * leftMatrix * l_view_M);
-		rightcam->setViewMatrix(_hmdView->getCamera()->getViewMatrix() * rightMatrix * r_view_M);
-		_eyeDirection = _eyeDirection * leftMatrix;
+		L = leftMatrix * l_view_M;
+		R = rightMatrix* r_view_M;
 
 // 		//Test
-// //		backCam->setViewMatrix(_hmdView->getCamera()->getViewMatrix());
+//		backCam->setViewMatrix(_hmdView->getCamera()->getViewMatrix());
 // 		proM = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Left].Fov, _screens->_zNear, _screens->_zFar, true);
 // 		for (int i = 0; i < 4; i++)
 // 		{
@@ -718,11 +731,11 @@ void MulitViewer::runHMD()
 // 		backCam->setProjectionMatrix(projMosg);
 // 		//Test
 
-		wglSwapIntervalEXT(0);
+//  	wglSwapIntervalEXT(0);
 
 		this->frame();
 		_hmdView->getCamera()->getGraphicsContext()->makeCurrent();
-		ovrHmd_EndFrame(_hmd, _eyePoses, _eyeTextures);
+ 		ovrHmd_EndFrame(_hmd, _eyePoses, _eyeTextures);
 	}
 }
 
@@ -789,6 +802,11 @@ int MulitViewer::go()
 	{
 		assert(!_hmdView);
 		return run();
+// 		while (!this->done())
+// 		{
+// 			this->frame();
+// 		}
+// 		return 0;
 	}
 	else if (_hmdView)
 	{

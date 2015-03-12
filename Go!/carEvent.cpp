@@ -106,14 +106,23 @@ void CarEvent::calculateCarMovement()
 	if (_carState->_dynamic || _autoNavi)
 	{
 		osg::Vec3d &origin = _carState->_turningCenter;
+		const double &radius = _carState->_turningRadius;
+		const double perimeter = 2 * PI*radius;
+		double ratio = 0.0f;
+		if (radius > 0.0f)
+		{
+			ratio = abs((_carState->_speed / perimeter)*(360.0f)*TO_RADDIAN);
+			ratio = (_carState->_speed > 0.0f) ? (_leftTurn) ? ratio : -ratio : (_leftTurn) ? ratio: -ratio;
+		}
+		const osg::Matrix circle = osg::Matrix::rotate(ratio / frameRate::instance()->getRealfRate(), Z_AXIS);
+		
 		osg::Matrix rotation = osg::Matrix::translate(-origin);
-		rotation *= osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate::instance()->getRealfRate()), Z_AXIS);
+		rotation *= circle;
 		rotation *= osg::Matrix::translate(origin);
 
 		_moment *= rotation;
 
-		_carState->_direction = _carState->_direction * 
-			osg::Matrix::rotate(_carState->_angle*(1.0f / frameRate::instance()->getRealfRate()), Z_AXIS);
+		_carState->_direction = _carState->_direction * circle;
 	}
 	else
 	{
@@ -123,9 +132,12 @@ void CarEvent::calculateCarMovement()
 		qt.makeRotate(_carState->_direction, expected);
 		_carState->_direction = _carState->_direction * osg::Matrix::rotate(qt);
 	}
-	_carState->_direction.normalize();
 
-	_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed / frameRate::instance()->getRealfRate());
+	_carState->_direction.normalize();
+	if (!_carState->_angle)
+	{
+		_moment *= osg::Matrix::translate(_carState->_direction * _carState->_speed / frameRate::instance()->getRealfRate());
+	}
 
 	//apply the shift vector
 	_carState->_shiftD = (_carState->_speed == 0) ? osg::Vec3d(0.0f, 0.0f, 0.0f) : _carState->_shiftD;
@@ -388,7 +400,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 	if (_carState && ea)
 	{
-		Joystick();
+ 		Joystick();
 
 		const int &key = ea->getKey();
 		switch (ea->getEventType())
@@ -397,15 +409,15 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			if ((key == osgGA::GUIEventAdapter::KEY_A || key == osgGA::GUIEventAdapter::KEY_D))
 			{
 				int sign = (key == osgGA::GUIEventAdapter::KEY_A) ? 1 : -1;
-				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
 				_leftTurn = (_carState->_speed >= 0) ? (sign == 1) : (sign == -1);
+				sign = (_leftTurn) ? 1 : -1;
+				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
 				_shifted = true;
 				break;
 			}
 			else if (key == osgGA::GUIEventAdapter::KEY_W || key == osgGA::GUIEventAdapter::KEY_S)
 			{
 				double sign = (key == osgGA::GUIEventAdapter::KEY_W) ? 1 : -1;
-//				_carState->_speed += _vehicle->_speed*sign*_carState->_speed_incr;
 				sign *= sign > 0 ? 1 : 2.5;
 				_carState->_speed += sign*_vehicle->_speedincr;
 				break;
@@ -439,7 +451,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				break;
 			}
 		case osgGA::GUIEventAdapter::KEYUP:
-			if (key == 'a' || key == 'd')
+			if (key == osgGA::GUIEventAdapter::KEY_A || key == osgGA::GUIEventAdapter::KEY_D)
 			{
 				_carState->_angle = 0.0f;
 				_shifted = false;
@@ -559,14 +571,17 @@ void CarEvent::getTurningFactor()
 	double theta = acos((realVec*WHEELBASE) / (realVec.length()*WHEELBASE.length()));
 	theta -= PI*0.5f;
 	theta -= abs(_carState->_angle);
-	if (!isEqual(theta,0.0f))
+	if (!isEqual(theta,0.0f,eps_100))
 	{
-		osg::notify(osg::WARN) << "Error decteced in Turning Center" << std::endl;
+		osg::notify(osg::WARN) << "Error decteced in Turning Center\n";
+		osg::notify(osg::WARN) << "theta:\t" << theta / TO_RADDIAN << std::endl;
 	}
 	bool DIR = (ISLEFT) ? (WHEELBASE^realVec).z() > 0 : (WHEELBASE^realVec).z() < 0;
 	if (!DIR)
 	{
-		osg::notify(osg::WARN) << "Error decteced in Turning Center" << std::endl;
+		std::string temp = (ISLEFT) ? "LEFT" : "RIGHT";
+		osg::notify(osg::WARN) << "Error decteced in Turning Center\n";
+		osg::notify(osg::WARN) << temp << "\t" << (WHEELBASE^realVec).z() << std::endl;
 	}
 	
 // 	osg::notify(osg::NOTICE) << "RESULT\t" << theta - abs(_carState->_angle) / TO_RADDIAN << std::endl;
@@ -584,11 +599,6 @@ void CarEvent::applyCarMovement()
 	arrayByMatrix(_carState->_carArray, _moment);
 
 	_mTransform->setMatrix(_carState->_state);
-// 	if (_carState->_state != osg::Matrix::identity())
-// 	{
-// 		dirtyVisitor dv;
-// 		_mTransform->accept(dv);
-// 	}
 
 	//Initialize
 	_moment.makeIdentity();
@@ -601,9 +611,6 @@ void CarEvent::applyCarMovement()
 	_carState->_heading = hD;
 
 	_car->absoluteTerritory.center = _carState->_O;
-
-	//set carstate
-//	_carState->cacluateSpeedandAngle();
 
 	//set carstate
 	if (*_carState->_OQuad)

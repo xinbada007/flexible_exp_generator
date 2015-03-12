@@ -716,14 +716,6 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		case::osgGA::GUIEventAdapter::FRAME:
 			_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*carState->_startTime), 0.0f);
 			_frameNumber = carState->_frameStamp;
-			if (_mv && (_mv->getEyeDirection() != O_POINT))
-			{
-				carState->_eyeDirection = _mv->getEyeDirection();
-			}
-			else
-			{
-				carState->_eyeDirection = carState->_direction;
-			}
 			deviationCheck();
 			showText();
 			dynamicChange();
@@ -885,6 +877,7 @@ void ExperimentCallback::dealCollision()
 	CarState *carstate = _car->getCarState();
 	const obstacleList &obsList = carstate->getObsList();
 	const quadList &wallList = carstate->_collisionQuad;
+
 	if (!obsList.size() && !wallList.size())
 	{
 		carstate->_collide = false;

@@ -95,10 +95,13 @@ public:
 	double getDesignfRate() const { return _designfRate; };
 	void setRealfRate(double rate) { _realfRate = rate;};
 	double getRealfRate() const { return _realfRate; };
+	unsigned getFrameIndex() const { return _frameIndex; };
+	void setFrameIndex(unsigned fs) { _frameIndex = fs; };
 private:
 	void setDesignedfRate(double ref) { _designfRate = ref; _realfRate = _designfRate; };
-	frameRate() :_designfRate(60.0f), _realfRate(_designfRate) {};
+	frameRate() :_designfRate(60.0f), _realfRate(_designfRate),_frameIndex(0) {};
 	~frameRate(){};
 	double _designfRate;
 	double _realfRate;
+	unsigned _frameIndex;
 };
