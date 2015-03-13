@@ -472,11 +472,19 @@ bool MulitViewer::hmd_Initialise()
 	}
 
 	_windowsR = _hmd->Resolution;
-	_windowsR.w /= 2;
-	_windowsR.h /= 2;
+	bool directMode = !(_hmd->HmdCaps & ovrHmdCap_ExtendDesktop);
+	_windowsR.w /= (directMode) ? 2 : 1;
+	_windowsR.h /= (directMode) ? 2 : 1;
 
 	_hmdView = new osgViewer::View;
-	_hmdView->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, 0);
+	if (directMode)
+	{
+		_hmdView->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, 0);
+	}
+	else
+	{
+		_hmdView->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, _screens->_HMDScreen);
+	}
 
 	_eyeTextureSize[ovrEye_Left] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->MaxEyeFov[ovrEye_Left], 1.0f);
 	_eyeTextureSize[ovrEye_Right] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Right, _hmd->MaxEyeFov[ovrEye_Right], 1.0f);

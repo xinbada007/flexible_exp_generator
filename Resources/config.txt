@@ -4,7 +4,8 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	0	#enable this disbles all other screen settings
+Use_HMD:	1	#enable this disbles all other screen settings
+HMD_Screen:	1
 HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25

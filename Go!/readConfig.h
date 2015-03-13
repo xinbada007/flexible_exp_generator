@@ -433,6 +433,7 @@ typedef struct Screens:public osg::Referenced
 	{
 		_HMD = 0;
 		_HMD_RefreshRate = 60.0f;
+		_HMDScreen = 0;
 
 		_zNear = 0.0f;
 		_zFar = 0.0f;
@@ -452,6 +453,7 @@ typedef struct Screens:public osg::Referenced
 	}
 	
 	unsigned _HMD;
+	unsigned _HMDScreen;
 	double _HMD_RefreshRate;
 
 	double _zNear;
