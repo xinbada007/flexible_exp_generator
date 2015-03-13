@@ -1155,6 +1155,12 @@ void ExperimentCallback::showObstacle()
 				osg::ref_ptr<Obstacle> obs = *posOBS;
 				const osg::Vec3d &OC = H_POINT;
 				osg::Matrixd m = osg::Matrix::translate(center - OC);
+
+				std::vector<osg::Quat>::iterator orientationPos = _expSetting->_obsOrientation.begin() + offset;
+				m *= osg::Matrix::translate(-center);
+				m *= osg::Matrix::rotate(*orientationPos);
+				m *= osg::Matrix::translate(center);
+
 				obs->multiplyMatrix(m);
 
 				osg::UIntArray::iterator posCollision = _expSetting->_obsCollision->begin() + offset;
@@ -1181,6 +1187,7 @@ void ExperimentCallback::showObstacle()
 				_expSetting->_obstacleRange->erase(requiedDistance);
 				_expSetting->_obstaclePos->erase(pos);
 				_expSetting->_obsPosOffset->erase(posOffset);
+				_expSetting->_obsOrientation.erase(orientationPos);
 				_expSetting->_obsCollision->erase(posCollision);
 				_collisionOBSList.erase(posOBS);
 				hit = true;

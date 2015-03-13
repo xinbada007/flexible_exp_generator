@@ -92,6 +92,11 @@ void runScene(ReadConfig *readConfig)
 		osgUtil::Optimizer op;
 		op.optimize(road, osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS | osgUtil::Optimizer::INDEX_MESH);
 	}
+	if (road->getRoadSet()->_groundNode)
+	{
+		road->addChild(road->getRoadSet()->_groundNode);
+	}
+
 	//Visit to find walls and roads
 	CollVisitor::instance()->reset();
 	CollVisitor::instance()->setMode(ROADTAG::ROAD);

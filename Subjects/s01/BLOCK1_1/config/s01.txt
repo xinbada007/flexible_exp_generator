@@ -4,14 +4,14 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	1	#enable this disbles all other screen settings
+Use_HMD:	0	#enable this disbles all other screen settings
 HMD_Screen:	1
 HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
 aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		30	#Disable when RealWorld is enabled
+fovy:		60	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
@@ -27,10 +27,14 @@ CarReset:	2	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = starting position
 
 [RoadSettings]
-RoadLanes:	102.816
+RoadLanes:	7.344
 RoadLength:	1666	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-TextureWidth:	18.36
+TextureWidth:	9.18
 RoadPic:	../Resources/texture/road4096-0.png 16
+
+GroundPlane:	500 1000
+GroundPic:	../Resources/texture/grass.jpg 16
+GroundPicRes:	500 1000
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/roads/Line.txt;
@@ -62,15 +66,18 @@ Deviation-Siren:	../Resources/sound/alert.wav
 Time-Start:	0
 Distance-Start:	0
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
-Lane-Offset:	-6.0	#Negative = L	Positive = R
+Lane-Offset:	-2.0	#Negative = L	Positive = R
 
 ##==Obstacle Setting=====================
-Obstacle:	0 0 0 0
-Obstacle-Range:	5 10 20 25
+Obstacle:	0 0 0 0;	0 0 0 0 0;
+Obstacle-Range:	5 10 20 25;	5 10 15 20 25; 
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-9.15
+OBS-Position-Offset:	-4.575 -4.575 -4.575 -4.575;	4.575 4.575 4.575 4.575 4.575;
+OBS-Collision:	1
 OBS-Shape:	4	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
 OBS-Pic:	../Resources/models/Beetle.ive;
+OBS-Orientation:	0,0,1,0;	0,0,1,0;	0,0,1,0;	0,0,1,0;
+OBS-Orientation:	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;
 
 ##==Trigger Setting======================
 Trigger-Enable:	0	0	0	0	0	0	0	0#road	#optic flow	#crash permits	#alert	#fov	#quit
@@ -79,7 +86,7 @@ Trigger-Time:	-1	-1	-1	18	8	8	-1	-1
 Trigger-Time:	-1	-1	-1	-1	12	12	-1	-1
 
 [CAMERASETTINGS]
-offset:	-0.41508434456460819,0.2012868258516682829,1.0558066537516700
+offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700
 
 #Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;

@@ -458,7 +458,7 @@ bool MulitViewer::hmd_Initialise()
 	}
 
 	//Test
-	unsigned hmdCaps = /*ovrHmdCap_NoMirrorToWindow |*/ ovrHmdCap_NoVSync;
+	unsigned hmdCaps = ovrHmdCap_NoMirrorToWindow | ovrHmdCap_NoVSync;
 	ovrHmd_SetEnabledCaps(_hmd, hmdCaps);
 	//Test
 

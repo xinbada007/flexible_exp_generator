@@ -39,6 +39,7 @@ typedef struct Experiment :public osg::Referenced
 		_obstaclePos = new osg::IntArray;
 		_obsPosOffset = new osg::DoubleArray;
 		_obsCollision = new osg::UIntArray;
+
 		_obsSize.set(1.0f, 1.0f, 1.0f);
 		_obsShape = 1;
 		_obsVisible = 300.0f;
@@ -92,6 +93,7 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::IntArray> _obstaclePos;
 	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;
 	osg::ref_ptr<osg::UIntArray> _obsCollision;
+	std::vector<osg::Quat> _obsOrientation;
 	osg::Vec3d _obsSize;
 	osg::Vec3d _obsArraySize;
 	std::string _obsArrayPic;
@@ -155,6 +157,11 @@ protected:
 	virtual ~Experiment()
 	{
 		std::cout << "Deconstruct Experiment" << std::endl;
+		_carTimefromStart = NULL;
+		_carDistancefromStart = NULL;
+		_carStartLane = NULL;
+		_carLaneOffset = NULL;
+
 		_textTime = NULL;
 		_textPeriod = NULL;
 		_dynamicChange = NULL;
@@ -301,6 +308,13 @@ typedef struct RoadSet:public osg::Referenced
 		_wallRoadWidth = 0.0f;
 		_density = 1000;
 
+		_groundLength = 1000.0f;
+		_groundWidth =  500.0f;
+		_groundResW = _groundWidth / 4.0f;
+		_groundResH = _groundLength / 4.0f;
+		_imgGround = NULL;
+		_imgGroundAnisotropy = 1.0f;
+
 		_scale.set(1.0f,1.0f,1.0f);
 
 		_textureWidth = 8.0f;
@@ -323,6 +337,15 @@ typedef struct RoadSet:public osg::Referenced
 
 	unsigned _density;
 	
+	unsigned _groundResW;
+	unsigned _groundResH;
+	double _groundLength;
+	double _groundWidth;
+	std::string _textureGround;
+	osg::ref_ptr<osg::Image> _imgGround;
+	double _imgGroundAnisotropy;
+	osg::ref_ptr<osg::Geode> _groundNode;
+
 	osg::Vec3d _scale;
 	
 	std::string _texture;
@@ -345,6 +368,8 @@ protected:
 	{ 
 		std::cout << "Deconstruct RoadSet" << std::endl; 
 
+		_groundNode = NULL;
+		_imgGround = NULL;
 		_imgRoad = NULL;
 		_imgWall = NULL;
 	};

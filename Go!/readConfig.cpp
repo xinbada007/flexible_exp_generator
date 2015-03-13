@@ -20,6 +20,7 @@
 #include <osg/PolygonMode>
 #include <osg/Light>
 #include <osg/LightSource>
+#include <osg/TexEnv>
 
 #include <sisl.h>
 
@@ -313,7 +314,7 @@ void ReadConfig::initializeAfterReadTrial()
 		_alignPoint += (_alignPoint - _vehicle->_O) * eps_100;
 		_alignPoint.z() = 0.0f;
 
-//  		{
+  		{
 // 			osg::ref_ptr<osg::StateSet> ss = carNode->getOrCreateStateSet();
 // 			ss->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 // 			ss->setMode(GL_LIGHT0, osg::StateAttribute::ON);
@@ -330,8 +331,18 @@ void ReadConfig::initializeAfterReadTrial()
 // 			lightsource->setStateSetModes(*ss, osg::StateAttribute::ON);
 // 
 // 			carNode->asGroup()->addChild(lightsource);
-//  			osgDB::writeNodeFile(*carNode, "test.ive");
-// 		}
+
+// 			osg::ref_ptr<osg::MatrixTransform> mt = new osg::MatrixTransform;
+// 			osg::Matrix M;
+// 			M(0, 0) = -1;
+// 			mt->setMatrix(M);
+// 			mt->addChild(carNode);
+// 			mt->setDataVariance(osg::Object::STATIC);
+// 			carNode->setDataVariance(osg::Object::STATIC);
+// 			osgUtil::Optimizer op;
+// 			op.optimize(mt,osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
+// 	  		osgDB::writeNodeFile(*carNode, "test.ive");
+ 		}
 
 		_vehicle->_carNode = carNode.release();
 	}
@@ -398,6 +409,49 @@ void ReadConfig::initializeAfterReadTrial()
 		}
 	}
 
+	//Initialize Ground Texture
+	_roads->_imgGround = osgDB::readImageFile(_roads->_textureGround);
+	_roads->_imgGround = (_roads->_imgGround.valid()) ? _roads->_imgGround : NULL;
+	if (_roads->_groundLength && _roads->_groundWidth && _roads->_imgGround)
+	{
+		osg::ref_ptr<osg::Texture2D> ground = new osg::Texture2D;
+		ground->setImage(_roads->_imgGround);
+		ground->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR_MIPMAP_LINEAR);
+		ground->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+		ground->setMaxAnisotropy(_roads->_imgGroundAnisotropy);
+		
+		osg::ref_ptr<osg::Vec3dArray> varray = new osg::Vec3dArray;
+		varray->push_back(osg::Vec3d(-_roads->_groundWidth, -_roads->_groundLength, -1e-1));
+		varray->push_back(osg::Vec3d(-_roads->_groundWidth, _roads->_groundLength, -1e-1));
+		varray->push_back(osg::Vec3d(_roads->_groundWidth, _roads->_groundLength, -1e-1));
+		varray->push_back(osg::Vec3d(_roads->_groundWidth, -_roads->_groundLength, -1e-1));
+
+		osg::ref_ptr<osg::Geometry> quad = new osg::Geometry;
+		quad->setVertexArray(varray);
+		
+		osg::ref_ptr<osg::Vec2dArray> tarray = new osg::Vec2dArray;
+		tarray->push_back(osg::Vec2d(0.0f, 0.0f));
+		tarray->push_back(osg::Vec2d(0.0f, (_roads->_groundResH)));
+		tarray->push_back(osg::Vec2d(_roads->_groundResW, (_roads->_groundResH)));
+		tarray->push_back(osg::Vec2d(_roads->_groundResW, 0.0f));
+		quad->setTexCoordArray(0, tarray);
+
+		quad->addPrimitiveSet(new osg::DrawArrays(GL_QUADS, 0, varray->size()));
+
+		ground->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+		ground->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+		osg::TexEnv *decalTexEnv = new osg::TexEnv();
+		decalTexEnv->setMode(osg::TexEnv::DECAL);
+
+		quad->getOrCreateStateSet()->setTextureAttributeAndModes(0, ground);
+		quad->getOrCreateStateSet()->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
+		quad->getOrCreateStateSet()->setTextureAttribute(0, decalTexEnv);
+
+		_roads->_groundNode = new osg::Geode;
+		_roads->_groundNode->setName("GroundPlaneNode");
+		_roads->_groundNode->addDrawable(quad.release());
+	}
+
 	//Initialize Camera
 	if (_camset->_offset->empty())
 	{
@@ -421,94 +475,12 @@ void ReadConfig::initializeAfterReadTrial()
 	}
 	//Initialize Obstacles
 	const unsigned &numObs = _experiment->_obstaclesTime->size();
-	if (_experiment->_obstacleRange->size() != numObs)
-	{
-		const unsigned numRange = _experiment->_obstacleRange->getNumElements();
-		_experiment->_obstacleRange->resize(numObs);
-		if (numObs > numRange)
-		{
-			osg::DoubleArray::const_iterator assign_start = _experiment->_obstacleRange->begin();
-			osg::DoubleArray::const_iterator assign_end = assign_start + numRange;
-			osg::DoubleArray::iterator i = _experiment->_obstacleRange->begin() + numRange;
-			while (i != _experiment->_obstacleRange->end())
-			{
-				if (assign_start == assign_end)
-				{
-					assign_start = _experiment->_obstacleRange->begin();
-				}
-				*i = *assign_start;
-				++i;
-				++assign_start;
-			}
-		}
-		osg::notify(osg::NOTICE) << "Obstacles Range Resized" << std::endl;
-	}
-	if (_experiment->_obstaclePos->size() != numObs)
-	{
-		const unsigned numPos = _experiment->_obstaclePos->getNumElements();
-		_experiment->_obstaclePos->resize(numObs);
-		if (numObs > numPos)
-		{
-			osg::IntArray::const_iterator assign_start = _experiment->_obstaclePos->begin();
-			osg::IntArray::const_iterator assign_end = assign_start + numPos;
-			osg::IntArray::iterator i = _experiment->_obstaclePos->begin() + numPos;
-			while (i != _experiment->_obstaclePos->end())
-			{
-				if (assign_start == assign_end)
-				{
-					assign_start = _experiment->_obstaclePos->begin();
-				}
-				*i = *assign_start;
-				++i;
-				++assign_start;
-			}
-		}
-		osg::notify(osg::NOTICE) << "Obstacles Position Resized" << std::endl;
-	}
-	if (_experiment->_obsPosOffset->size() != numObs)
-	{
-		const unsigned numOffset = _experiment->_obsPosOffset->getNumElements();
-		_experiment->_obsPosOffset->resize(numObs);
-		if (numObs > numOffset)
-		{
-			osg::DoubleArray::const_iterator assign_start = _experiment->_obsPosOffset->begin();
-			osg::DoubleArray::const_iterator assign_end = assign_start + numOffset;
-			osg::DoubleArray::iterator i = _experiment->_obsPosOffset->begin() + numOffset;
-			while (i != _experiment->_obsPosOffset->end())
-			{
-				if (assign_start == assign_end)
-				{
-					assign_start = _experiment->_obsPosOffset->begin();
-				}
-				*i = *assign_start;
-				++i;
-				++assign_start;
-			}
-		}
-		osg::notify(osg::NOTICE) << "Obstacles PosOffset Resized" << std::endl;
-	}
-	if (_experiment->_obsCollision->getNumElements() != numObs)
-	{
-		const unsigned numCollision = _experiment->_obsCollision->getNumElements();
-		_experiment->_obsCollision->resize(numObs, 1);
-		if (numObs > numCollision)
-		{
-			osg::UIntArray::const_iterator assign_start = _experiment->_obsCollision->begin();
-			osg::UIntArray::const_iterator assign_end = assign_start + numCollision;
-			osg::UIntArray::iterator i = _experiment->_obsCollision->begin() + numCollision;
-			while (i != _experiment->_obsCollision->end())
-			{
-				if (assign_start == assign_end)
-				{
-					assign_start = _experiment->_obsCollision->begin();
-				}
-				*i = *assign_start;
-				++i;
-				++assign_start;
-			}
-		}
-		osg::notify(osg::NOTICE) << "Obstacles Collision Detection Resized" << std::endl;
-	}
+	normalizeArrayLength<osg::DoubleArray>(_experiment->_obstacleRange.get(), numObs);
+	normalizeArrayLength<osg::IntArray>(_experiment->_obstaclePos.get(), numObs);
+	normalizeArrayLength<osg::DoubleArray>(_experiment->_obsPosOffset.get(), numObs);
+	normalizeArrayLength<osg::UIntArray>(_experiment->_obsCollision.get(), numObs);
+	normalizeArrayLength<std::vector<osg::Quat>>(&(_experiment->_obsOrientation), numObs);
+
 	_experiment->_imgOBS = osgDB::readImageFile(_experiment->_obsPic);
 	_experiment->_imgObsArray = osgDB::readImageFile(_experiment->_obsArrayPic);
 	if (!_experiment->_imgOBS.valid())
@@ -528,24 +500,6 @@ void ReadConfig::initializeAfterReadTrial()
 	}
 	_experiment->_speed = _vehicle->_speed;
  	_experiment->_offset = _roads->_width;
-// 	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
-// 	osg::Matrix m = osg::Matrix::translate(startOffset);
-// 	m *= osg::Matrix::translate(X_AXIS * _experiment->_laneOffset);
-// 
-// 	{
-// 		arrayByMatrix(_vehicle->_V, m);
-// 		_vehicle->_O = _vehicle->_O * m;
-// 		_vehicle->_initialState = m;
-// 		_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
-// 
-// 		osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
-// 		mT->addChild(_vehicle->_carNode);
-// 		mT->setMatrix(m);
-// 		mT->setDataVariance(osg::Object::STATIC);
-// 		osgUtil::Optimizer op;
-// 		op.optimize(mT, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
-// 		mT = NULL;
-// 	}
 
 	{
 		const unsigned &SIZE = _experiment->_carTimefromStart->size();
@@ -1177,6 +1131,9 @@ void ReadConfig::readTrial(ifstream &in)
 		}
 
 		//Setting Road
+		static const string GROUNDPLANE = "GROUNDPLANE";
+		static const string GROUNDPIC = "GROUNDPIC";
+		static const string GROUNDPICRES = "GROUNDPICRES";
 		static const string ROADPIC = "ROADPIC";
 		static const string TEXTUREWIDTH = "TEXTUREWIDTH";
 		static const string ROADTXT = "ROADTXT";
@@ -1199,6 +1156,53 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_roads->_roadLane = stod(config);
+				}
+				continue;
+			}
+			else if (title == GROUNDPLANE)
+			{
+				config.erase(config.begin(), config.begin() + GROUNDPLANE.size());
+				if (!config.empty())
+				{
+					std::stringstream ss;
+					ss << config;
+					ss >> _roads->_groundWidth >> _roads->_groundLength;
+				}
+				continue;
+			}
+			else if (title == GROUNDPICRES)
+			{
+				config.erase(config.begin(), config.begin() + GROUNDPICRES.size());
+				if (!config.empty())
+				{
+					std::stringstream ss;
+					ss << config;
+					ss >> _roads->_groundResW >> _roads->_groundResH;
+				}
+				continue;
+			}
+			else if (title == GROUNDPIC)
+			{
+				config.erase(config.begin(), config.begin() + GROUNDPIC.size());
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
+				if (!config.empty())
+				{
+					std::size_t found_to = config.find_first_of(" ");
+					if (found_to != config.npos)
+					{
+						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_roads->_textureGround));
+						config.erase(config.begin(), config.begin() + found_to);
+					}
+					else
+					{
+						_roads->_textureGround = config;
+						config.clear();
+					}
+				}
+				if (!config.empty())
+				{
+					_roads->_imgGroundAnisotropy = stod(config);
 				}
 				continue;
 			}
@@ -1424,6 +1428,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSPOSOFFSET("OBS-POSITION-OFFSET");
 		static const string OBSSIZE("OBS-SIZE");
 		static const string OBSSHAPE("OBS-SHAPE");
+		static const string OBSORIENTATION("OBS-ORIENTATION");
 		static const string OBSVISIBLE("OBS-VISIBLE");
 		static const string OBSPIC("OBS-PIC");
 		static const string OBSCOLLISION("OBS-COLLISION");
@@ -1680,6 +1685,21 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_obsShape = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OBSORIENTATION)
+			{
+				config.erase(config.begin(), config.begin() + OBSORIENTATION.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					double x = stod(config, &sz); config.erase(config.begin(), config.begin() + sz);
+					double y = stod(config, &sz); config.erase(config.begin(), config.begin() + sz);
+					double z = stod(config, &sz); config.erase(config.begin(), config.begin() + sz);
+					double angle = stod(config, &sz); config.erase(config.begin(), config.begin() + sz);
+					angle *= TO_RADDIAN;
+					_experiment->_obsOrientation.push_back(osg::Quat(angle, osg::Vec3d(x, y, z)));
 				}
 				continue;
 			}
