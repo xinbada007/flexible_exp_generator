@@ -25,6 +25,9 @@ public:
 	LogicRoad(const LogicRoad &copy, osg::CopyOp copyop = osg::CopyOp::SHALLOW_COPY);
 	META_Node(LogicRoad, LogicRoad);
 
+	virtual bool texture();
+	virtual void traverse();
+
 	void line1D(const osg::Vec3dArray *V1, const osg::Vec3dArray *V2);
 	void line1D(const osg::Vec3dArray *refV);
 	void sweep1D(const osg::Vec3dArray *refV);

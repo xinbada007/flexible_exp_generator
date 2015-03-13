@@ -65,9 +65,9 @@ Obstacle:	1 1
 Obstacle-Range:	15 24	
 Obstacle-Position:	0 0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	-7.5 -7.5
-OBS-Shape:	4	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
+OBS-Shape:	0	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
 Obs-Collision:	1
-OBS-Pic:	../Resources/models/Beetle.ive;
+#OBS-Pic:	../Resources/models/Beetle.ive;
 
 ##==Optic Flow Setting===========================================
 OpticFlow:		0	#1 = Enable	0= Disable

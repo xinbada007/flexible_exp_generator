@@ -6,6 +6,7 @@
 
 #include <osg/Notify>
 #include <osg/Switch>
+#include <osg/PolygonMode>
 
 LogicRoad::LogicRoad():
 _next(NULL), _prev(NULL), _tag(ROAD),
@@ -126,4 +127,57 @@ void LogicRoad::setUpFlag()
 			newEFlag->_navigationArray->push_back(this->getEdge()->getHE2()->getPoint()->getPoint());
 		}
 	}
+}
+
+bool LogicRoad::texture()
+{
+	if (!_solidchildGeode || !_solidchildGeode->getNumDrawables())
+	{
+		return false;
+	}
+
+	osg::Geometry *gmtry = _solidchildGeode->getDrawable(0)->asGeometry();
+	if (!gmtry)
+	{
+		return false;
+	}
+
+	gmtry->setTexCoordArray(0,this->getTexCoord());
+
+	return true;
+}
+
+void LogicRoad::traverse()
+{
+	if (_solidchildGeode || _updated)
+	{
+		return;
+	}
+
+	_solidchildGeode = new osg::Geode;
+	this->addChild(_solidchildGeode);
+	osg::ref_ptr<osg::Geometry> gmtNode = new osg::Geometry;
+	_solidchildGeode->addDrawable(gmtNode);
+
+	osg::ref_ptr<osg::Vec3dArray> vArray = new osg::Vec3dArray;
+
+	Plane *drawPL = getPlane();
+	while (drawPL && !drawPL->getAbstract())
+	{
+		Loop *drawLoop = drawPL->getLoop();
+		while (drawLoop)
+		{
+			const osg::ref_ptr<osg::Vec3dArray> v = drawLoop->getPoints();
+			std::copy(v->begin(), v->end(), std::back_inserter(*vArray));
+			drawLoop = drawLoop->getNext();
+		}
+		drawPL = drawPL->getNext();
+	}
+
+	gmtNode->setVertexArray(vArray);
+
+	this->setDataVariance(osg::Object::STATIC);
+	_solidchildGeode->setDataVariance(osg::Object::STATIC);
+	gmtNode->setDataVariance(osg::Object::STATIC);
+	_updated = true;
 }

@@ -85,9 +85,12 @@ void runScene(ReadConfig *readConfig)
 	road = obtainRoad(readConfig);
 	if (road->getRoadSet()->_visible)
 	{
-		rv->setBeginMode(GL_QUADS);
-		road->accept(*rv);
+ 		rv->setBeginMode(GL_QUADS);
+ 		road->accept(*rv);
 		road->accept(*tv);
+		road->setDataVariance(osg::Object::STATIC);
+		osgUtil::Optimizer op;
+		op.optimize(road, osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS | osgUtil::Optimizer::INDEX_MESH);
 	}
 	//Visit to find walls and roads
 	CollVisitor::instance()->reset();

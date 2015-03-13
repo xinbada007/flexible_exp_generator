@@ -161,7 +161,7 @@ osg::ref_ptr<LogicRoad> Road::universalLogicRoad(const int i, ROADTAG refTag)
 		{
 			osg::ref_ptr<osg::Vec2Array> tex = universalTexture(i, wh);
 			const int numTixel = 4;
-			if (tex->size() / numTixel == newLogic->getNumGeometry())
+			if (tex->size() / numTixel == newLogic->getNumPlanes())
 			{
 				newLogic->setTexCoord(tex.release());
 			}
@@ -203,17 +203,17 @@ void Road::genRoad(osg::ref_ptr<ReadConfig> refRC)
 		sw->addChild(addLogRoadtoList(newR.get()));	
 		_roadList.push_back(newR.get());
 
-		//Add mid-Line of Road
-		osg::ref_ptr<LogicRoad> newMD = universalLogicRoad(j, MIDQUAD);
-		newMD->setDataVariance(osg::Object::STATIC);
-		sw->addChild(addLogRoadtoList(newMD.get()));
-		_midList.push_back(newMD.get());
-
-		//Add ctrlRoad
-		osg::ref_ptr<LogicRoad> newLR = universalLogicRoad(j, CTRL);
-		newLR->setDataVariance(osg::Object::STATIC);
-		sw->addChild(addLogRoadtoList(newLR.get()));
-		_ctrlList.push_back(newLR.get());
+// 		//Add mid-Line of Road
+// 		osg::ref_ptr<LogicRoad> newMD = universalLogicRoad(j, MIDQUAD);
+// 		newMD->setDataVariance(osg::Object::STATIC);
+// 		sw->addChild(addLogRoadtoList(newMD.get()));
+// 		_midList.push_back(newMD.get());
+// 
+// 		//Add ctrlRoad
+// 		osg::ref_ptr<LogicRoad> newLR = universalLogicRoad(j, CTRL);
+// 		newLR->setDataVariance(osg::Object::STATIC);
+// 		sw->addChild(addLogRoadtoList(newLR.get()));
+// 		_ctrlList.push_back(newLR.get());
 
 		//Add Walls
 		if (buildWall)

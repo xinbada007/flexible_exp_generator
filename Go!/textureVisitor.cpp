@@ -36,7 +36,7 @@ void TextureVisitor::apply(osg::Group &refNode)
 		if (refS->getImageTexture().valid())
 		{
 			osg::notify(osg::NOTICE) << "Texture caught \t" << refNode.libraryName() << "\t" << refNode.className() << std::endl;
-			if (texCoord(refS)) { texture(refS); }
+			if (refS->texture() || texCoord(refS)) { texture(refS); }
 		}
 	}
 	
@@ -65,6 +65,7 @@ bool TextureVisitor::texCoord(Solid *refS)
 		if (refTex->getNumElements() / numTexPixels != numGeometry)
 		{
 			osg::notify(osg::FATAL) << "Tex Coord Array is not consistent with Solid" << std::endl;
+			return false;
 		}
 	}
 

@@ -29,15 +29,12 @@ public:
 	inline void setNext(Solid *ref) { _next = ref; };
 	inline Solid * getPrev() const { return _prev; };
 	inline void setPrev(Solid *ref) { _prev = ref; };
-	inline bool getUpdated() const { return _updated; };
-	inline void setUpdated(bool ref) { _updated = ref; };
 	inline unsigned getNumPoints() const { return _numPoints; };
-//	inline void setNumPoints(unsigned ref) { _numPoints = ref; };
 	inline unsigned getNumGeometry() const 
 	{ 
 		if (_solidchildGeode)	return _solidchildGeode->getNumDrawables();
 		
-		return _numPlanes - (getAbstract() ? 1 : 0);
+		return 0;
 	};
 	inline osg::Geometry *getGeometry(const unsigned index) const
 	{
@@ -49,8 +46,7 @@ public:
 		for (unsigned i(0); i != index; i++) p = p->getNext();
 		return p->asGeometry();
 	}
-	inline unsigned getNumPlanes() const { return _numPlanes; };
-//	inline void setNumPlanes(unsigned ref) { _numPlanes = ref; };
+	inline unsigned getNumPlanes() const { return _numPlanes - (getAbstract() ? 1 : 0); };
 
 	inline void setTexMode(bool mode){ _texMode = mode; };
 	inline bool getTexMode() const { return _texMode; };
@@ -67,7 +63,8 @@ public:
 	void addEdgetoList(Edge *refE);
 	void addPointtoList(Points *refP);
 
-	void traverse();
+	virtual bool texture(){ return false; };
+	virtual void traverse();
 	bool isValid();
 	Points * findPoint(osg::Vec3d ref);
 	Edge * findEdge(const osg::Vec3d &p1, const osg::Vec3d &p2);
@@ -162,9 +159,9 @@ protected:
 	void createGLPOINTS(osg::ref_ptr<osg::Vec3Array> p);
 	void createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p);
 	osg::ref_ptr<osg::Vec4Array> _pointsColorArray;
-
-private:
+	osg::ref_ptr<osg::Geode> _solidchildGeode;
 	bool _updated;
+private:
 	mutable bool _ccw;
 	mutable bool _ccwupdated;
 
@@ -177,8 +174,6 @@ private:
 
 	osg::ref_ptr<Solid> _next;
 	osg::ref_ptr<Solid> _prev;
-
-	osg::ref_ptr<osg::Geode> _solidchildGeode;
 
 	unsigned _index;
 
