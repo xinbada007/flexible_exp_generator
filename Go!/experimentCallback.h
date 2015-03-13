@@ -71,6 +71,7 @@ private:
 
 	void dynamicChange();
 	void showText();
+	void positionCar();
 	void showObstacle();
 	void showOpticFlow();
 	void dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned depth);

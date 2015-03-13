@@ -719,6 +719,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			deviationCheck();
 			showText();
 			dynamicChange();
+			positionCar();
 			showObstacle();
 			showOpticFlow();
 			dealCollision();
@@ -848,10 +849,7 @@ void ExperimentCallback::trigger()
 		}
 		++i;
 	}
-
-
 }
-
 
 void ExperimentCallback::removeNodefromRoad(osg::Node *n)
 {
@@ -1208,6 +1206,94 @@ void ExperimentCallback::showObstacle()
 			_cVisitor->setMode(OBS);
 			_road->accept(*_cVisitor);
 		}
+	}
+}
+
+void ExperimentCallback::positionCar()
+{
+	const unsigned &timeSize = _expSetting->_carTimefromStart->size();
+	const unsigned &distanceSize = _expSetting->_carDistancefromStart->size();
+	const unsigned &offsetSize = _expSetting->_carLaneOffset->size();
+	const unsigned &laneSize = _expSetting->_carStartLane->size();
+
+	if (!timeSize || !distanceSize || !offsetSize || !laneSize)
+	{
+		return;
+	}
+
+	if (timeSize != distanceSize || timeSize != offsetSize || timeSize != laneSize)
+	{
+		osg::notify(osg::WARN) << "cannot position Car because size are inconsistent" << std::endl;
+		return;
+	}
+
+	osg::DoubleArray::iterator carTi = _expSetting->_carTimefromStart->begin();
+	while (carTi != _expSetting->_carTimefromStart->end())
+	{
+		if (_expTime > *carTi)
+		{
+			CarState *carState = _car->getCarState();
+			Plane::reverse_across_iterator curO = *carState->_OQuad;
+			if (*curO)
+			{
+				const int offset = carTi - _expSetting->_carTimefromStart->begin();
+				osg::DoubleArray::iterator requiredDistance = _expSetting->_carDistancefromStart->begin() + offset;
+				double reDistance(abs(*requiredDistance));
+				osg::ref_ptr<osg::Vec3dArray> navi = (*curO)->getLoop()->getNavigationEdge();
+				osg::Vec3d mid = navi->front() - navi->back();
+				double alreadyDistance(0.0f);
+				if (*requiredDistance >= 0.0f)
+					alreadyDistance = (carState->_O_Project - navi->back()).length();
+				else
+					alreadyDistance = (carState->_O_Project - navi->front()).length();
+				double distance(mid.length() - alreadyDistance);
+				reDistance -= distance;
+				while (reDistance > 0 && (*curO))
+				{
+					*requiredDistance >= 0.0f ? ++curO : --curO;
+					if (!(*curO))
+					{
+						break;
+					}
+					navi = (*curO)->getLoop()->getNavigationEdge();
+					mid = navi->front() - navi->back();
+					reDistance -= mid.length();
+				}
+
+				osg::IntArray::iterator pos = _expSetting->_carStartLane->begin() + offset;
+				osg::DoubleArray::iterator posLaneOffset = _expSetting->_carLaneOffset->begin() + offset;
+				const double distanceRatio = std::fmin((mid.length() + reDistance) / mid.length(), 1.0f);
+				osg::Vec3d center;
+				if (*requiredDistance >= 0.0f)
+					center = navi->front()*distanceRatio + navi->back()*(1 - distanceRatio);
+				else
+					center = navi->back()*distanceRatio + navi->front()*(1 - distanceRatio);
+
+				center = center * osg::Matrix::translate(X_AXIS* *pos * _expSetting->_offset * 0.25f);
+				center = center * osg::Matrix::translate(X_AXIS * *posLaneOffset);
+				const osg::Matrixd M = osg::Matrix::translate(center - carState->_O);
+				carState->_forceReset = M;
+				_car->getVehicle()->_initialState = M;
+				_car->getVehicle()->_baseline = _expSetting->_offset * _expSetting->_deviationBaseline * 0.25f;
+				arrayByMatrix(_car->getVehicle()->_V, M);
+				_car->getVehicle()->_O = _car->getVehicle()->_O * M;
+
+				_expSetting->_carTimefromStart->erase(carTi);
+				_expSetting->_carDistancefromStart->erase(requiredDistance);
+				_expSetting->_carStartLane->erase(pos);
+				_expSetting->_carLaneOffset->erase(posLaneOffset);
+
+				if (_expSetting->_carTimefromStart->empty())
+				{
+					break;
+				}
+
+				carTi = _expSetting->_carTimefromStart->begin();
+				carTi += offset;
+				continue;
+			}
+		}
+		++carTi;
 	}
 }
 

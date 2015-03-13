@@ -62,6 +62,31 @@ double asinR(double product);
 
 void getCCWCubefromLBfromBBox(const osg::BoundingBoxd &bb, osg::ref_ptr<osg::Vec3dArray> Zmin, osg::ref_ptr<osg::Vec3dArray> Zmax);
 
+template <typename T> void normalizeArrayLength(T *v, const unsigned &S)
+{
+	if (v->size() != S)
+	{
+		const unsigned numPos = v->size();
+		v->resize(S);
+		if (S > numPos)
+		{
+			T::iterator assign_start = v->begin();
+			T::iterator assign_end = assign_start + numPos;
+			T::iterator i = v->begin() + numPos;
+			while (i != v->end())
+			{
+				if (assign_start == assign_end)
+				{
+					assign_start = v->begin();
+				}
+				*i = *assign_start;
+				++i;
+				++assign_start;
+			}
+		}
+	}
+}
+
 struct searchIndex
 {
 	searchIndex(unsigned ref) :_index(ref){};

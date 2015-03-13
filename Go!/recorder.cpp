@@ -342,7 +342,6 @@ void Recorder::rectoTxt(const CarState *carState)
 	const double fps = (frameStamp - _lastFrameStamp) / (timeReference - _lastTimeReference);
 	frameRate::instance()->setRealfRate(fps);
 	frameRate::instance()->setFrameIndex(frameStamp);
-//	frameRate::instance()->setRealfRate(60.0f);
 	const double timePeriod = timeReference - _lastTimeReference;
 	_gcvt_s(tempd, size_tempd, fps, nDigit);
 	_recS._fps = tempd + _recS._TAB;

@@ -124,6 +124,7 @@ typedef struct CarState:public osg::Referenced
 
 	osg::Matrix _state;
 	osg::Matrix _moment;
+	osg::Matrix _forceReset;
 	osg::ref_ptr<osg::MatrixdArray> _saveState;
 	osg::ref_ptr<osg::IntArray> _dynamicState;
 	bool _replay;

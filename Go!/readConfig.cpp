@@ -527,25 +527,31 @@ void ReadConfig::initializeAfterReadTrial()
 		_experiment->_nurbs.push_back(thisNurbs.release());
 	}
 	_experiment->_speed = _vehicle->_speed;
-
-	_experiment->_offset = _roads->_width;
-	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
-	osg::Matrix m = osg::Matrix::translate(startOffset);
-	m *= osg::Matrix::translate(X_AXIS * _experiment->_laneOffset);
+ 	_experiment->_offset = _roads->_width;
+// 	osg::Vec3d startOffset = X_AXIS * _experiment->_offset * _experiment->_startLane * 0.25f;
+// 	osg::Matrix m = osg::Matrix::translate(startOffset);
+// 	m *= osg::Matrix::translate(X_AXIS * _experiment->_laneOffset);
+// 
+// 	{
+// 		arrayByMatrix(_vehicle->_V, m);
+// 		_vehicle->_O = _vehicle->_O * m;
+// 		_vehicle->_initialState = m;
+// 		_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
+// 
+// 		osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
+// 		mT->addChild(_vehicle->_carNode);
+// 		mT->setMatrix(m);
+// 		mT->setDataVariance(osg::Object::STATIC);
+// 		osgUtil::Optimizer op;
+// 		op.optimize(mT, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
+// 		mT = NULL;
+// 	}
 
 	{
-		arrayByMatrix(_vehicle->_V, m);
-		_vehicle->_O = _vehicle->_O * m;
-		_vehicle->_initialState = m;
-		_vehicle->_baseline = _experiment->_offset * _experiment->_deviationBaseline * 0.25f;
-
-		osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;
-		mT->addChild(_vehicle->_carNode);
-		mT->setMatrix(m);
-		mT->setDataVariance(osg::Object::STATIC);
-		osgUtil::Optimizer op;
-		op.optimize(mT, osgUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
-		mT = NULL;
+		const unsigned &SIZE = _experiment->_carTimefromStart->size();
+		normalizeArrayLength<osg::DoubleArray>(_experiment->_carDistancefromStart.get(), SIZE);
+		normalizeArrayLength<osg::IntArray>(_experiment->_carStartLane.get(), SIZE);
+		normalizeArrayLength<osg::DoubleArray>(_experiment->_carLaneOffset.get(), SIZE);
 	}
 
 	//Initialize Triggers
@@ -1388,8 +1394,12 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//set Experiment
 		static const string TIMERTRIGGER("TIMER-TRIGGER");
+
+		static const string TIMEFROMSTART("TIME-START");
+		static const string DISTANCEFROMSTART("DISTANCE-START");
 		static const string STARTLANE("START-LANE");
 		static const string LANEOFFSET("LANE-OFFSET");
+
 		static const string TEXTIME("TEXTIME");
 		static const string PERIOD("PERIOD");
 		static const string TEXT("TEXT");
@@ -1448,12 +1458,36 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-			if (title == STARTLANE)
+			else if (title == TIMEFROMSTART)
+			{
+				config.erase(config.begin(), config.begin() + TIMEFROMSTART.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_carTimefromStart->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == DISTANCEFROMSTART)
+			{
+				config.erase(config.begin(), config.begin() + DISTANCEFROMSTART.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_carDistancefromStart->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == STARTLANE)
 			{
 				config.erase(config.begin(), config.begin() + STARTLANE.size());
-				if (!config.empty())
+				while (!config.empty())
 				{
-					_experiment->_startLane = stoi(config);
+					std::string::size_type sz;
+					_experiment->_carStartLane->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;
 			}
@@ -1462,7 +1496,9 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + LANEOFFSET.size());
 				if (!config.empty())
 				{
-					_experiment->_laneOffset = stod(config);
+					std::string::size_type sz;
+					_experiment->_carLaneOffset->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;
 			}

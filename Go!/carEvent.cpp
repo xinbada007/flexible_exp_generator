@@ -200,12 +200,20 @@ void CarEvent::calculateCarMovement()
 	_carState->_shiftD = (_carState->_speed == 0) ? osg::Vec3d(0.0f, 0.0f, 0.0f) : _carState->_shiftD;
 	_moment *= osg::Matrix::translate(_carState->_shiftD);
 
-	//apply reset matrix;
-	if (!_reset.isIdentity())
+// 	//apply reset matrix;
+// 	if (!_reset.isIdentity())
+// 	{
+// 		_moment *= _reset;
+// 		_carState->_direction = _carState->_direction * osg::Matrix::rotate(_reset.getRotate());
+// 		_carState->_heading = _carState->_heading * osg::Matrix::rotate(_reset.getRotate());
+// 	}
+
+	//applay ForceReset matrix
+	if (!_carState->_forceReset.isIdentity())
 	{
-		_moment *= _reset;
-		_carState->_direction = _carState->_direction * osg::Matrix::rotate(_reset.getRotate());
-		_carState->_heading = _carState->_heading * osg::Matrix::rotate(_reset.getRotate());
+		_moment *= _carState->_forceReset;
+		_carState->_direction = _carState->_direction * osg::Matrix::rotate(_carState->_forceReset.getRotate());
+		_carState->_heading = _carState->_heading * osg::Matrix::rotate(_carState->_forceReset.getRotate());
 	}
 }
 
@@ -316,6 +324,8 @@ void CarEvent::makeResetMatrix()
 	_reset *= osg::Matrix::translate(-MO);
 	_reset *= osg::Matrix::rotate(qt);
 	_reset *= osg::Matrix::translate(MO);
+
+	_carState->_forceReset = _reset;
 }
 
 void CarEvent::shiftVehicle()
@@ -650,6 +660,7 @@ void CarEvent::applyCarMovement()
 {
 	_carState->_state *= _moment;
 	_carState->_moment = _moment;
+	_carState->_forceReset.makeIdentity();
 	_carState->_O = _carState->_O * _moment;
 	arrayByMatrix(_carState->_backWheel, _moment);
 	arrayByMatrix(_carState->_frontWheel, _moment);
