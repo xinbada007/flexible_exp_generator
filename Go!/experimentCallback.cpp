@@ -674,24 +674,27 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	if (carState && ea)
 	{
 //		Plane::reverse_across_iterator start = *carState->_OQuad;
-		Plane::reverse_across_iterator start = NULL;
-		if (!carState->_lastQuad.empty())
+		if (_expSetting->_endofRoadExit)
 		{
-			start = carState->_lastQuad.back();
-		}
-		if (*start)
-		{
-			const int future = (int)((*start)->getHomeS()->getNumPlanes()*0.01f) + 1;
-			start.add(future);
-			if (!(*start) && !(*(carState->_OQuad)))
+			Plane::reverse_across_iterator start = NULL;
+			if (!carState->_lastQuad.empty())
 			{
-				if (_mv)
+				start = carState->_lastQuad.back();
+			}
+			if (*start)
+			{
+				const int future = (int)((*start)->getHomeS()->getNumPlanes()*0.01f) + 1;
+				start.add(future);
+				if (!(*start) && !(*(carState->_OQuad)))
 				{
-					_mv->setDone(true);
+					if (_mv)
+					{
+						_mv->setDone(true);
+					}
 				}
 			}
 		}
-		
+
 		quadList::const_iterator i = carState->_currentQuad.cbegin();
 		unsigned notFound(0);
 		while (i != carState->_currentQuad.cend())

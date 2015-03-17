@@ -21,6 +21,7 @@ typedef struct Experiment :public osg::Referenced
 	_NUMTRIGGERCOM(8)
 	{
 		_timer = 0;
+		_endofRoadExit = false;
 
 		_carTimefromStart = new osg::DoubleArray;
 		_carDistancefromStart = new osg::DoubleArray;
@@ -72,6 +73,7 @@ typedef struct Experiment :public osg::Referenced
 		_deviationBaseline = 0.0f;
 	};
 	unsigned _timer;
+	bool _endofRoadExit;
 
 	osg::ref_ptr<osg::DoubleArray> _carTimefromStart;
 	osg::ref_ptr<osg::DoubleArray> _carDistancefromStart;

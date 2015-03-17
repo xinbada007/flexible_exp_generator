@@ -114,8 +114,8 @@ _value(ref._value), _solid(ref._solid), _BACKWARD(ref._BACKWARD), _FORWARD(ref._
 	_solid = (_value) ? _value->getHomeS() : NULL;
 }
 
-Plane::reverse_across_iterator::reverse_across_iterator(Plane *ref):
-_value(ref), _BACKWARD(0), _FORWARD(1)
+Plane::reverse_across_iterator::reverse_across_iterator(Plane *ref) :
+_value(ref), _solid((_value) ? ref->getHomeS() : NULL), _BACKWARD(0), _FORWARD(1)
 {
 	_value = isValid() ? _value : NULL;
 	_solid = (_value) ? _value->getHomeS() : NULL;
