@@ -356,7 +356,8 @@ quadList Collision::listRoadQuad(const Car *refC, const solidList road)
 			solidList::const_iterator iRoad = road.cbegin();
 			{
 				//will cause performance issue so be careful
-				step += (*iRoad)->getNumPlanes()*.05f;
+				/*step += (*iRoad)->getNumPlanes()*.05f;*/
+				step += (*iRoad)->getNumPlanes();
 			}
 		}
 

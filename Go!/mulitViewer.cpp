@@ -196,10 +196,12 @@ osg::Camera * MulitViewer::createSlaveCamerainNormalView(const unsigned screenNu
 	traits->width = ss.width;
 	traits->height = ss.height;
 	traits->windowDecoration = false;
+	traits->supportsResize = false;
 	traits->doubleBuffer = true;
 	traits->sharedContext = 0;
 	traits->vsync = true;
 	traits->samples = _screens->_fxaa;
+	traits->useCursor = false;
 
 	osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
 
@@ -458,7 +460,7 @@ bool MulitViewer::hmd_Initialise()
 	}
 
 	//Test
-	unsigned hmdCaps = ovrHmdCap_NoMirrorToWindow | ovrHmdCap_NoVSync;
+	unsigned hmdCaps = /*ovrHmdCap_NoMirrorToWindow |*/ ovrHmdCap_NoVSync;
 	ovrHmd_SetEnabledCaps(_hmd, hmdCaps);
 	//Test
 
@@ -485,6 +487,18 @@ bool MulitViewer::hmd_Initialise()
 	{
 		_hmdView->setUpViewInWindow(0, 0, _windowsR.w, _windowsR.h, _screens->_HMDScreen);
 	}
+	osg::ref_ptr<osg::GraphicsContext> gc = _hmdView->getCamera()->getGraphicsContext();
+	osg::ref_ptr<osg::GraphicsContext::Traits> trait = new osg::GraphicsContext::Traits;
+	*trait = *(gc->getTraits());
+	trait->windowDecoration = false;
+	trait->supportsResize = false;
+	trait->doubleBuffer = true;
+	trait->sharedContext = 0;
+	trait->vsync = true;
+	trait->samples = _screens->_fxaa;
+	trait->useCursor = false;
+	gc = osg::GraphicsContext::createGraphicsContext(trait);
+	_hmdView->getCamera()->setGraphicsContext(gc);
 
 	_eyeTextureSize[ovrEye_Left] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->MaxEyeFov[ovrEye_Left], 1.0f);
 	_eyeTextureSize[ovrEye_Right] = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Right, _hmd->MaxEyeFov[ovrEye_Right], 1.0f);
@@ -585,7 +599,7 @@ bool MulitViewer::setHMDSceneData(osg::Node *node)
 
 	_glCfg.OGL.Header.API = ovrRenderAPI_OpenGL;
 	_glCfg.OGL.Header.BackBufferSize = _windowsR;
-	_glCfg.OGL.Header.Multisample = 0;
+	_glCfg.OGL.Header.Multisample = (_screens->_fxaa > 0) ? 1 : 0;
 	_glCfg.OGL.Window = hWnd;
 	_glCfg.OGL.DC = GetDC(hWnd);
 

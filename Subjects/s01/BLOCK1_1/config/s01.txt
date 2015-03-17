@@ -4,7 +4,7 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	0	#enable this disbles all other screen settings
+Use_HMD:	1	#enable this disbles all other screen settings
 HMD_Screen:	1
 HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
@@ -15,7 +15,7 @@ fovy:		60	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
-MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
+MultiSamples:	16	#on-board, old ,rubbish cards use 4	#nice cards use 16
 Background:	0.529,0.808,0.980
 
 [CarSettings]
@@ -27,14 +27,14 @@ CarReset:	2	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = starting position
 
 [RoadSettings]
-RoadLanes:	7.344
-RoadLength:	1666	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-TextureWidth:	9.18
+RoadLanes:	4.896
+RoadLength:	1000	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+TextureWidth:	18.36
 RoadPic:	../Resources/texture/road4096-0.png 16
 
-GroundPlane:	500 1000
+GroundPlane:	500 2000
 GroundPic:	../Resources/texture/grass.jpg 16
-GroundPicRes:	500 1000
+GroundPicRes:	500 2000
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/roads/Line.txt;
@@ -42,9 +42,7 @@ Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
 Density:	50
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
-WallHeight:	0.0
-WallRoadWidth:	11.0
-WallPic:	../Resources/texture/wall1024-2.jpg 16
+WallHeight:	0
 
 [Subjects]
 Name:		s01
@@ -57,22 +55,22 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	0	#0 = use default	1 = use trigger
+Timer-Trigger:	1	#0 = use default	1 = use trigger
 
 ##==Deviation Warn Setting===============
 Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Car Position=========================
-Time-Start:	0
-Distance-Start:	0
+Time-Start:	-1
+Distance-Start:	11
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
-Lane-Offset:	-2.0	#Negative = L	Positive = R
+Lane-Offset:	-3.75	#Negative = L	Positive = R
 
 ##==Obstacle Setting=====================
-Obstacle:	0 0 0 0;	0 0 0 0 0;
-Obstacle-Range:	5 10 20 25;	5 10 15 20 25; 
+Obstacle:	-1 -1 -1 -1;	-1 -1 -1 -1 -1;
+Obstacle-Range:	1 6 16 21;	1 6 11 16 21; 
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-4.575 -4.575 -4.575 -4.575;	4.575 4.575 4.575 4.575 4.575;
+OBS-Position-Offset:	-6.575 -6.575 -6.575 -6.575;	6.575 6.575 6.575 6.575 6.575;
 OBS-Collision:	1
 OBS-Shape:	4	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
 OBS-Pic:	../Resources/models/Beetle.ive;
@@ -80,10 +78,10 @@ OBS-Orientation:	0,0,1,0;	0,0,1,0;	0,0,1,0;	0,0,1,0;
 OBS-Orientation:	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;
 
 ##==Trigger Setting======================
-Trigger-Enable:	0	0	0	0	0	0	0	0#road	#optic flow	#crash permits	#alert	#fov	#quit
-Trigger-Time:	-1	-1	0	4	4	4	1	-1
-Trigger-Time:	-1	-1	-1	18	8	8	-1	-1
-Trigger-Time:	-1	-1	-1	-1	12	12	-1	-1
+Trigger-Enable:	1	0	1	1	0	1	0	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#quit
+Trigger-Time:	-1	-1	0	4	4	-1	1	30
+Trigger-Time:	-1	-1	-1	18	8	16	-1	-1
+Trigger-Time:	-1	-1	-1	-1	12	-1	-1	-1
 
 [CAMERASETTINGS]
 offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700

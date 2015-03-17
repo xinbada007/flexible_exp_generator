@@ -12,7 +12,8 @@
 
 CarEvent::CarEvent() :
 _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
-, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _limitCheck(true)
+, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _limitCheck(true), _speedSign(1),
+_buttonBrake(false)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
@@ -145,8 +146,8 @@ void CarEvent::calculateCarMovement()
 
 	if (_limitCheck)
 	{
-		_carState->_speed = abs(_carState->_speed) > _vehicle->_speed ?
-			(_vehicle->_speed*(abs(_carState->_speed) / _carState->_speed)) : _carState->_speed;
+		_carState->_speed = abs(_carState->_speed) > abs(_vehicle->_speed) ?
+			(_vehicle->_speed*(_carState >= 0 ? 1 : -1)) : _carState->_speed;
 
 		_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
 
@@ -314,10 +315,9 @@ void CarEvent::makeResetMatrix()
 	}
 	else if (_vehicle->_resetMode == 2)
 	{
-		MO = _carState->_lastCarArray->back();
-		const osg::Vec3d MD = (_carState->_O_Project - MO);
-		MO = MO * osg::Matrix::translate(MD);
-		MO = MO * (_vehicle->_initialState);
+		MO = _carState->_O;
+		MO = MO * (osg::Matrix::inverse(_carState->_state) * _vehicle->_initialState);
+		qt = (osg::Matrix::inverse(_carState->_state) * _vehicle->_initialState).getRotate();
 	}
 
 	_reset *= osg::Matrix::translate(MO - _carState->_O);
@@ -326,6 +326,8 @@ void CarEvent::makeResetMatrix()
 	_reset *= osg::Matrix::translate(MO);
 
 	_carState->_forceReset = _reset;
+	_buttonBrake = false;
+	_speedSign = 1;
 }
 
 void CarEvent::shiftVehicle()
@@ -392,10 +394,21 @@ bool CarEvent::Joystick()
 	{
 		if (abs(y) > DeadZone)
 		{
-			_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
+			_buttonBrake = (y > 0) ? true : false;
+//			_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
+			if (y < 0)
+			{
+				_carState->_speed = _vehicle->_speed * _speedSign;
+			}
+			if (_carState->_startTime == INT_MAX)
+			{
+				_carState->_startTime = _carState->_timeReference;
+			}
 		}
 		else if (abs(y) <= DeadZone)
 		{
+			_speedSign = (_buttonBrake) ? -_speedSign : _speedSign;
+			_buttonBrake = false;
 			_carState->_speed = 0.0f;
 		}
 	}
@@ -599,7 +612,7 @@ void CarEvent::getTurningFactor()
 	double Y = -b + sqrt(delta);
 	Y /= 2 * a;
 	double X;
-	if (Xm)
+	if (!isEqual(Xm, 0.0f))
 	{
 		X = (A - Y * Ym) / Xm;
 	}
@@ -607,7 +620,7 @@ void CarEvent::getTurningFactor()
 	double Y1 = -b - sqrt(delta);
 	Y1 /= 2 * a;
 	double X1;
-	if (Xm)
+	if (!isEqual(Xm, 0.0f))
 	{
 		X1 = (A - Y1 * Ym) / Xm;
 	}

@@ -15,6 +15,7 @@
 #include <fstream>
 #include <random>
 #include <assert.h>
+#include <climits>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
@@ -145,8 +146,8 @@ void ExperimentCallback::createObstacles()
 
 	if (!_expSetting->_obstaclesTime->empty())
 	{
-		osg::UIntArray::const_iterator pos = _expSetting->_obstaclesTime->begin();
-		osg::UIntArray::const_iterator posEND = _expSetting->_obstaclesTime->end();
+		osg::DoubleArray::const_iterator pos = _expSetting->_obstaclesTime->begin();
+		osg::DoubleArray::const_iterator posEND = _expSetting->_obstaclesTime->end();
 		while (pos != posEND)
 		{
 			const osg::Vec3d &center = H_POINT;
@@ -1114,7 +1115,7 @@ void ExperimentCallback::showObstacle()
 		return;
 	}
 
-	osg::UIntArray::iterator obsTi = _expSetting->_obstaclesTime->begin();
+	osg::DoubleArray::iterator obsTi = _expSetting->_obstaclesTime->begin();
 	bool hit(false);
 	while (obsTi != _expSetting->_obstaclesTime->end())
 	{
@@ -1241,6 +1242,7 @@ void ExperimentCallback::positionCar()
 		{
 			CarState *carState = _car->getCarState();
 			Plane::reverse_across_iterator curO = *carState->_OQuad;
+			if(!(*curO) && !carState->_lastQuad.empty()) curO = carState->_lastQuad.back();
 			if (*curO)
 			{
 				const int offset = carTi - _expSetting->_carTimefromStart->begin();
@@ -1254,7 +1256,7 @@ void ExperimentCallback::positionCar()
 				else
 					alreadyDistance = (carState->_O_Project - navi->front()).length();
 				double distance(mid.length() - alreadyDistance);
-				reDistance -= distance;
+ 				reDistance -= distance;
 				while (reDistance > 0 && (*curO))
 				{
 					*requiredDistance >= 0.0f ? ++curO : --curO;
@@ -1280,6 +1282,8 @@ void ExperimentCallback::positionCar()
 				center = center * osg::Matrix::translate(X_AXIS * *posLaneOffset);
 				const osg::Matrixd M = osg::Matrix::translate(center - carState->_O);
 				carState->_forceReset = M;
+				carState->_lastQuad.back() = *curO;
+
 				_car->getVehicle()->_initialState = M;
 				_car->getVehicle()->_baseline = _expSetting->_offset * _expSetting->_deviationBaseline * 0.25f;
 				arrayByMatrix(_car->getVehicle()->_V, M);

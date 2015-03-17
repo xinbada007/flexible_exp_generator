@@ -34,7 +34,7 @@ typedef struct Experiment :public osg::Referenced
 		_dynamicChangeLasting = 0;
 		_imgDynamic = NULL;
 
-		_obstaclesTime = new osg::UIntArray;
+		_obstaclesTime = new osg::DoubleArray;
 		_obstacleRange = new osg::DoubleArray;
 		_obstaclePos = new osg::IntArray;
 		_obsPosOffset = new osg::DoubleArray;
@@ -88,7 +88,7 @@ typedef struct Experiment :public osg::Referenced
 	std::string _dynamicPic;
 	osg::ref_ptr<osg::Image> _imgDynamic;
 
-	osg::ref_ptr<osg::UIntArray> _obstaclesTime;
+	osg::ref_ptr<osg::DoubleArray> _obstaclesTime;
 	osg::ref_ptr<osg::DoubleArray> _obstacleRange;
 	osg::ref_ptr<osg::IntArray> _obstaclePos;
 	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;

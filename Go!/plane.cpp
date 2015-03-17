@@ -167,7 +167,8 @@ bool Plane::reverse_across_iterator::operator!=(const reverse_across_iterator &r
 
 Plane::reverse_across_iterator & Plane::reverse_across_iterator::operator=(Plane *ref)
 {
-	_value = ref;
+	_value = (ref) ? ref : NULL;
+	_solid = (ref) ? ref->getHomeS() : NULL;
 	return (*this);
 }
 
@@ -267,7 +268,7 @@ Plane * Plane::reverse_across_iterator::operator*()
 
 bool Plane::reverse_across_iterator::isValid()
 {
-	if (!_value || _value->getAbstract())
+	if (!_solid || !_value || _value->getAbstract())
 		return false;
 	return true;
 }
