@@ -55,7 +55,7 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	1	#0 = use default	1 = use trigger
+Timer-Trigger:	0	#0 = use default	1 = use trigger
 
 ##==Deviation Warn Setting===============
 Deviation-Siren:	../Resources/sound/alert.wav
@@ -70,7 +70,12 @@ Lane-Offset:	-1.875	#Negative = L	Positive = R
 Trigger-Enable:	1	0	1	1	0	0	0	1	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#quit
 Trigger-Time:	16	-1	0	4	4	-1	1	30
 Trigger-Time:	-1	-1	-1	18	8	-1	-1	-1
-Trigger-Time:	-1	-1	-1	-1	12	-1	-1	-1
+Trigger-Time:	-1	-1	-1	8	12	-1	-1	-1
+Trigger-Time:	-1	-1	-1	8.2	-1	-1	-1	-1
+Trigger-Time:	-1	-1	-1	8.4	-1	-1	-1	-1
+Trigger-Time:	-1	-1	-1	8.6	-1	-1	-1	-1
+Trigger-Time:	-1	-1	-1	8.8	-1	-1	-1	-1
+
 
 [CAMERASETTINGS]
 offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700

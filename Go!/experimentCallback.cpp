@@ -31,15 +31,15 @@ _opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0)
 	createOpticFlow();
 
 //	osg::ref_ptr<osgAudio::FileStream> sample = NULL;
-	osg::ref_ptr<osgAudio::Sample> sample = NULL;
+	_sirenSample = NULL;
 	try
 	{
-		sample = new osgAudio::Sample(_expSetting->_deviationSiren);
+		_sirenSample = new osgAudio::Sample(_expSetting->_deviationSiren);
 	}
 	catch (std::exception &e)
 	{
 		osg::notify(osg::WARN) << "Error:  " << e.what() << std::endl;
-		sample = NULL;
+		_sirenSample = NULL;
 	}
 
 	_coinSample = NULL;
@@ -53,14 +53,14 @@ _opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0)
 		_coinSample = NULL;
 	}
 
-	if (sample)
+	if (_sirenSample)
 	{
 		_siren = osgAudio::SoundManager::instance()->findSoundState("GOsiren");
 		if (!_siren)
 		{
 			_siren = new osgAudio::SoundState("GOsiren");
 			_siren->allocateSource(20);
-			_siren->setSample(sample.release());
+			_siren->setSample(_sirenSample.get());
 			_siren->setAmbient(true);
 			_siren->setPlay(false);
 			_siren->setLooping(false);
@@ -125,6 +125,7 @@ ExperimentCallback::~ExperimentCallback()
 	_coin = NULL;
 
 	_coinSample = NULL;
+	_sirenSample = NULL;
 	_cameraHUD = NULL;
 	_textHUD = NULL;
 	_geodeHUD = NULL;
@@ -809,6 +810,7 @@ void ExperimentCallback::trigger()
 				case::Experiment::TRIGGER_COM::SOUNDALERT:
 					if (_siren)
 					{
+						_siren->setSample(_sirenSample);
 						_siren->setGain(2.00f);
 						_siren->setPlay(true);
 					}

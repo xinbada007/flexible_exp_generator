@@ -48,6 +48,7 @@ private:
 	bool _opticFlowDrawn;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
+	osg::ref_ptr<osgAudio::Sample> _sirenSample;
 	osg::ref_ptr<osgAudio::SoundState> _coin;
 	osg::ref_ptr<osgAudio::Sample> _coinSample;
 
