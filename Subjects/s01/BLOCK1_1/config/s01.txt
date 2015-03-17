@@ -4,7 +4,7 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	1	#enable this disbles all other screen settings
+Use_HMD:	0	#enable this disbles all other screen settings
 HMD_Screen:	1
 HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
@@ -15,12 +15,12 @@ fovy:		60	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
-MultiSamples:	16	#on-board, old ,rubbish cards use 4	#nice cards use 16
+MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 Background:	0.529,0.808,0.980
 
 [CarSettings]
 SteeringDeadBand:	0.05	#deadband
-CarSpeed:	5
+CarSpeed:	50
 CarWheel:	35
 CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive
 CarReset:	2	#0 = disable	1 = auto	2 = manual
@@ -78,7 +78,7 @@ OBS-Orientation:	0,0,1,0;	0,0,1,0;	0,0,1,0;	0,0,1,0;
 OBS-Orientation:	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	0	1	1	0	1	0	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#quit
+Trigger-Enable:	1	0	1	1	0	0	0	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#quit
 Trigger-Time:	-1	-1	0	4	4	-1	1	30
 Trigger-Time:	-1	-1	-1	18	8	16	-1	-1
 Trigger-Time:	-1	-1	-1	-1	12	-1	-1	-1

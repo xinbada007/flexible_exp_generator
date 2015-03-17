@@ -673,12 +673,17 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 	CarState *carState = _car->getCarState();
 	if (carState && ea)
 	{
-		Plane::reverse_across_iterator start = *carState->_OQuad;
+//		Plane::reverse_across_iterator start = *carState->_OQuad;
+		Plane::reverse_across_iterator start = NULL;
+		if (!carState->_lastQuad.empty())
+		{
+			start = carState->_lastQuad.back();
+		}
 		if (*start)
 		{
 			const int future = (int)((*start)->getHomeS()->getNumPlanes()*0.01f) + 1;
 			start.add(future);
-			if (!(*start))
+			if (!(*start) && !(*(carState->_OQuad)))
 			{
 				if (_mv)
 				{
