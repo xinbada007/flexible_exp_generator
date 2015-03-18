@@ -25,6 +25,7 @@ public:
 	{ 
 		_mv = (mv) ? mv : NULL;
 		_fovX = (_mv) ? _mv->getHorizontalFov() : 0.0f;
+		_clearColor = (_mv) ? _mv->getMainView()->getCamera()->getClearColor() : _clearColor;
 	};
 	inline void setCar(Car *car) { _car = car;};
 private:
@@ -58,6 +59,9 @@ private:
 	osg::ref_ptr<osg::Group> _root;
 	osg::ref_ptr<osg::Switch> _road;
 	osg::ref_ptr<MulitViewer> _mv;
+	osg::Vec4d _clearColor;
+	osg::Vec4d _otherColor;
+	bool _speedColor;
 	const double _roadLength;
 
 	osg::ref_ptr<osg::AnimationPathCallback> _anmCallback;

@@ -18,7 +18,7 @@ typedef std::pair<int, enum TRIGGER_COM> triggerEnablePair;
 typedef struct Experiment :public osg::Referenced
 {
 	Experiment():
-	_NUMTRIGGERCOM(8)
+	_NUMTRIGGERCOM(9)
 	{
 		_timer = 0;
 		_endofRoadExit = false;
@@ -71,6 +71,8 @@ typedef struct Experiment :public osg::Referenced
 
 		_deviation = 0.0f;
 		_deviationBaseline = 0.0f;
+
+		_clearColor.set(0.0f, 0.0f, 0.0f, 1.0f);
 	};
 	unsigned _timer;
 	bool _endofRoadExit;
@@ -120,6 +122,7 @@ typedef struct Experiment :public osg::Referenced
 		LOOP,
 		NO_LOOPING
 	};
+	osg::Vec4d _clearColor;
 	bool _GLPOINTSMODE;
 	double _obsArrayLength;
 	double _speed;
@@ -144,6 +147,7 @@ typedef struct Experiment :public osg::Referenced
 		NEAR_FAR_COMPUTE,
 		CARRESET,
 		JOYSTICK,
+		SPEEDCOLOR,
 		QUIT
 	};
 	const unsigned _NUMTRIGGERCOM;

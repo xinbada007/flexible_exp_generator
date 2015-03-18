@@ -1421,6 +1421,7 @@ void ReadConfig::readTrial(ifstream &in)
 		//set Experiment
 		static const string TIMERTRIGGER("TIMER-TRIGGER");
 		static const string ENDOFROADEXIT("ENDOFROAD-EXIT");
+		static const string SPEEDCOLOR("SPEED-COLOR-NOTICE");
 
 		static const string TIMEFROMSTART("TIME-START");
 		static const string DISTANCEFROMSTART("DISTANCE-START");
@@ -1492,6 +1493,19 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_endofRoadExit = (stoi(config) > 0) ? true : false;
+				}
+				continue;
+			}
+			else if (title == SPEEDCOLOR)
+			{
+				config.erase(config.begin(), config.begin() + SPEEDCOLOR.size());
+				if (!config.empty())
+				{
+					std::stringstream ss;
+					ss << config;
+					double x, y, z;
+					ss >> x >> y >> z;
+					_experiment->_clearColor.set(x, y, z, 1.0f);
 				}
 				continue;
 			}

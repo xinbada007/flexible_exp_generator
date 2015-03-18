@@ -20,7 +20,7 @@
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
-_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0)
+_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -726,6 +726,25 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 		case::osgGA::GUIEventAdapter::FRAME:
 			_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*carState->_startTime), 0.0f);
 			_frameNumber = carState->_frameStamp;
+
+			if (_speedColor)
+			{
+				if (carState && carState->_speed < 0.0f)
+				{
+					if (_mv->getMainView()->getCamera()->getClearColor() != _otherColor)
+					{
+						_mv->getMainView()->getCamera()->setClearColor(_otherColor);
+					}
+				}
+				else
+				{
+					if (_mv->getMainView()->getCamera()->getClearColor() != _clearColor)
+					{
+						_mv->getMainView()->getCamera()->setClearColor(_clearColor);
+					}
+				}
+			}
+
 			deviationCheck();
 			showText();
 			dynamicChange();
@@ -837,6 +856,9 @@ void ExperimentCallback::trigger()
 					{
 						_car->getCarState()->_steer = !(_car->getCarState()->_steer);
 					}
+					break;
+				case::Experiment::TRIGGER_COM::SPEEDCOLOR:
+					_speedColor = !_speedColor;
 					break;
 				case::Experiment::TRIGGER_COM::QUIT:
 					if (_mv)
