@@ -30,6 +30,8 @@ public:
 	inline osgViewer::View * getNormalView() const { return _normalView; };
 	inline osgViewer::View * getMainView() const { return (_normalView) ? _normalView : _hmdView; };
 	inline std::vector<osg::Camera*> getSlaveCamerasinMainView() const { return _slaveCamerasinNormalView; };
+	inline osg::ref_ptr<osg::Camera> getLeftEyeinHMD() { return _leftEye; };
+	inline osg::ref_ptr<osg::Camera> getRightEyeinHMD() { return _rightEye; };
 
 	inline osgViewer::View * getHuDView() const { return _HUDView; };
 	enum HUDPOS
@@ -96,6 +98,9 @@ private:
 	ovrSizei _eyeTextureSize[2];
 	osg::ref_ptr<osg::Texture2D> _masterTex;
 	osg::ref_ptr<osgViewer::View> _hmdView;
+
+	osg::ref_ptr<osg::Camera> _leftEye;
+	osg::ref_ptr<osg::Camera> _rightEye;
 
 	osg::ref_ptr<Screens> _screens;
 	osg::ref_ptr<osgViewer::View> _normalView;

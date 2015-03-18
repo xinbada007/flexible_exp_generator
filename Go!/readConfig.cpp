@@ -345,6 +345,12 @@ void ReadConfig::initializeAfterReadTrial()
  		}
 
 		_vehicle->_carNode = carNode.release();
+		if (_vehicle->_carNode)
+		{
+			LightVisitor lv;
+			_vehicle->_carNode->accept(lv);
+			_vehicle->_carInsideLight = lv.getLightNode();
+		}
 	}
 	else
 	{
@@ -1422,6 +1428,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string TIMERTRIGGER("TIMER-TRIGGER");
 		static const string ENDOFROADEXIT("ENDOFROAD-EXIT");
 		static const string SPEEDCOLOR("SPEED-COLOR-NOTICE");
+		static const string CARCOLORCHANGE("CAR-BG-SPEED-COLOR");
 
 		static const string TIMEFROMSTART("TIME-START");
 		static const string DISTANCEFROMSTART("DISTANCE-START");
@@ -1505,7 +1512,16 @@ void ReadConfig::readTrial(ifstream &in)
 					ss << config;
 					double x, y, z;
 					ss >> x >> y >> z;
-					_experiment->_clearColor.set(x, y, z, 1.0f);
+					_experiment->_otherClearColor.set(x, y, z, 1.0f);
+				}
+				continue;
+			}
+			else if (title == CARCOLORCHANGE)
+			{
+				config.erase(config.begin(), config.begin() + CARCOLORCHANGE.size());
+				if (!config.empty())
+				{
+					_experiment->_carColorChange = (stoi(config) > 0) ? true : false;
 				}
 				continue;
 			}
@@ -2577,9 +2593,35 @@ BoundingboxVisitor::~BoundingboxVisitor()
 void BoundingboxVisitor::apply(osg::Geode &gdNode)
 {
 	bb.expandBy(gdNode.getBoundingBox());
+
+	//continuing traversing sub-scene
+	traverse(gdNode);
 }
 
 void BoundingboxVisitor::reset()
 {
 	bb.init();
+}
+
+void LightVisitor::apply(osg::LightSource &lsNode)
+{
+	_lsNode = &lsNode;
+
+	//continuing traversing sub-scene
+	traverse(lsNode);
+}
+
+void LightVisitor::reset()
+{
+	_lsNode = NULL;
+}
+
+LightVisitor::LightVisitor():
+_lsNode(NULL), osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+{
+}
+
+LightVisitor::~LightVisitor()
+{
+	_lsNode = NULL;
 }

@@ -16,7 +16,9 @@
 #include <assert.h>
 
 MulitViewer::MulitViewer(osg::ref_ptr<ReadConfig> refRC):
-_screens(refRC->getScreens()), _normalView(NULL), _HUDView(NULL), _HUDText(NULL), _BGView(NULL), _hmdView(NULL), _masterTex(NULL), _hFOV(0.0f)
+_screens(refRC->getScreens()), _normalView(NULL), _HUDView(NULL), 
+_HUDText(NULL), _BGView(NULL), _hmdView(NULL), _masterTex(NULL), _hFOV(0.0f),
+_leftEye(NULL), _rightEye(NULL)
 {
 }
 
@@ -40,6 +42,9 @@ MulitViewer::~MulitViewer()
 	_HUDView = NULL;
 	_HUDText = NULL;
 	_BGView = NULL;
+
+	_leftEye = NULL;
+	_rightEye = NULL;
 }
 
 void MulitViewer::genMainView()
@@ -680,6 +685,9 @@ void MulitViewer::runHMD()
 	leftcam->setProjectionMatrix(l_proj_M);
 	rightcam->setProjectionMatrix(r_proj_M);
 
+	_leftEye = leftcam;
+	_rightEye = rightcam;
+
 // 	//Test
 // 	osg::Camera *backCam = _hmdView->getSlave(ovrEye_Count)._camera;
 // 	backCam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.x,
@@ -778,7 +786,7 @@ void MulitViewer::shutdownHMD()
 osg::Camera * MulitViewer::createRTTCamera(osg::Camera::BufferComponent buffer, osg::Texture *tex)
 {
 	osg::ref_ptr<osg::Camera> camera = new osg::Camera;
-	camera->setClearColor(osg::Vec4(135.f / 255.f, 206.f / 255.f, 250.f / 255.f, 1.0f));
+	camera->setClearColor(_screens->_bgColor);
 	camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
 	camera->setRenderOrder(osg::Camera::PRE_RENDER);

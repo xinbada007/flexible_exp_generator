@@ -20,7 +20,7 @@
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
-_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false)
+_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false), _otherClearColor(_expSetting->_otherClearColor)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -727,19 +727,35 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*carState->_startTime), 0.0f);
 			_frameNumber = carState->_frameStamp;
 
-			if (_speedColor)
+			if (_speedColor && carState)
 			{
-				if (carState && carState->_speed < 0.0f)
+				osg::LightSource *ls = _car->getVehicle()->_carInsideLight;
+				if (carState->_speed < 0.0f)
 				{
-					if (_mv->getMainView()->getCamera()->getClearColor() != _otherColor)
+					if (_expSetting->_carColorChange && ls)
 					{
-						_mv->getMainView()->getCamera()->setClearColor(_otherColor);
+						ls->getLight()->setAmbient(_otherClearColor);
+						ls->getLight()->setDiffuse(_otherClearColor);
+					}
+					else if (_mv)
+					{
+						if (_mv->getLeftEyeinHMD()) _mv->getLeftEyeinHMD()->setClearColor(_otherClearColor);
+						if (_mv->getRightEyeinHMD()) _mv->getRightEyeinHMD()->setClearColor(_otherClearColor);
+						_mv->getMainView()->getCamera()->setClearColor(_otherClearColor);
+
 					}
 				}
 				else
 				{
-					if (_mv->getMainView()->getCamera()->getClearColor() != _clearColor)
+					if (_expSetting->_carColorChange && ls)
 					{
+						ls->getLight()->setAmbient(_carLightColorAmbient);
+						ls->getLight()->setDiffuse(_carLightColorDiffuse);
+					}
+					else if (_mv)
+					{
+						if (_mv->getLeftEyeinHMD()) _mv->getLeftEyeinHMD()->setClearColor(_clearColor);
+						if (_mv->getRightEyeinHMD()) _mv->getRightEyeinHMD()->setClearColor(_clearColor);
 						_mv->getMainView()->getCamera()->setClearColor(_clearColor);
 					}
 				}

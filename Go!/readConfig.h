@@ -6,6 +6,7 @@
 #include <osg/Array>
 #include <osg/Geode>
 #include <osg/Image>
+#include <osg/LightSource>
 
 #include "Nurbs.h"
 #include "math.h"
@@ -22,6 +23,8 @@ typedef struct Experiment :public osg::Referenced
 	{
 		_timer = 0;
 		_endofRoadExit = false;
+		_otherClearColor.set(0.0f, 0.0f, 0.0f, 1.0f);
+		_carColorChange = true;
 
 		_carTimefromStart = new osg::DoubleArray;
 		_carDistancefromStart = new osg::DoubleArray;
@@ -71,11 +74,11 @@ typedef struct Experiment :public osg::Referenced
 
 		_deviation = 0.0f;
 		_deviationBaseline = 0.0f;
-
-		_clearColor.set(0.0f, 0.0f, 0.0f, 1.0f);
 	};
 	unsigned _timer;
 	bool _endofRoadExit;
+	osg::Vec4d _otherClearColor;
+	bool _carColorChange;
 
 	osg::ref_ptr<osg::DoubleArray> _carTimefromStart;
 	osg::ref_ptr<osg::DoubleArray> _carDistancefromStart;
@@ -122,7 +125,6 @@ typedef struct Experiment :public osg::Referenced
 		LOOP,
 		NO_LOOPING
 	};
-	osg::Vec4d _clearColor;
 	bool _GLPOINTSMODE;
 	double _obsArrayLength;
 	double _speed;
@@ -392,6 +394,7 @@ typedef struct Vehicle:public osg::Referenced
 		_disabledButton = new osg::UIntArray;
 		_disabledButton->resize(20, 0);
 		_carNode = NULL;
+		_carInsideLight = NULL;
 
 		_speed = frameRate::instance()->getDesignfRate() / 3.6f;
 		_speedincr = 1.0;
@@ -435,6 +438,7 @@ typedef struct Vehicle:public osg::Referenced
 	double _dynamicSensitive;
 	std::string _carModel;
 	osg::ref_ptr<osg::Node> _carNode;
+	osg::ref_ptr<osg::LightSource> _carInsideLight;
 
 	double _startDelay;
 
@@ -656,4 +660,19 @@ public:
 	inline double getDimention_Y() { return bb.yMax() - bb.yMin(); };
 private:
 	osg::BoundingBoxd bb;
+};
+
+class LightVisitor	:
+	public osg::NodeVisitor
+{
+public:
+	LightVisitor();
+	~LightVisitor();
+
+	virtual void reset();
+	virtual void apply(osg::LightSource &lsNode);
+	inline osg::ref_ptr<osg::LightSource> getLightNode() const { return _lsNode; };
+
+private:
+	osg::ref_ptr<osg::LightSource> _lsNode;
 };

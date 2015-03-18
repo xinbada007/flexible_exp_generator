@@ -27,7 +27,15 @@ public:
 		_fovX = (_mv) ? _mv->getHorizontalFov() : 0.0f;
 		_clearColor = (_mv) ? _mv->getMainView()->getCamera()->getClearColor() : _clearColor;
 	};
-	inline void setCar(Car *car) { _car = car;};
+	inline void setCar(Car *car) 
+	{
+		_car = car; 
+		if (car->getVehicle()->_carInsideLight)
+		{
+			_carLightColorAmbient = car->getVehicle()->_carInsideLight->getLight()->getAmbient();
+			_carLightColorDiffuse = car->getVehicle()->_carInsideLight->getLight()->getDiffuse();
+		}
+	};
 private:
 	Experiment *_expSetting;
 	Car *_car;
@@ -60,8 +68,12 @@ private:
 	osg::ref_ptr<osg::Switch> _road;
 	osg::ref_ptr<MulitViewer> _mv;
 	osg::Vec4d _clearColor;
-	osg::Vec4d _otherColor;
+	osg::Vec4d _otherClearColor;
+
+	osg::Vec4d _carLightColorAmbient;
+	osg::Vec4d _carLightColorDiffuse;
 	bool _speedColor;
+
 	const double _roadLength;
 
 	osg::ref_ptr<osg::AnimationPathCallback> _anmCallback;
