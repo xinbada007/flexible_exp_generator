@@ -418,31 +418,23 @@ bool CarEvent::Joystick()
 		_buttons->at(b) = 1;
 
 		//Record User Hit
-		if (b == 0)
-		{
-			_carState->_userHit = 0;
-		}
+		_carState->_userHit = b;
 	}
 	else if (b == -1)
 	{
-		if (_buttons->at(0) == 1)
+		//Reset User Hit
+		_carState->_userHit = -1;
+
+		if (_buttons->at(1) == 1 && !_vehicle->_disabledButton->at(1))
 		{
-			//Reset UserHit
-			_carState->_userHit = -1;
-		}
-		else if (_buttons->at(1) == 1)
-		{
-			if (_carState->_O == _vehicle->_O)
+			if (_carState->_startTime == INT_MAX)
 			{
-				if (_carState->_startTime == INT_MAX)
-				{
-					_carState->_startTime = _carState->_timeReference;
-				}
-				_carState->_speed = _vehicle->_speed;
-				_speedLock = !_speedLock;
+				_carState->_startTime = _carState->_timeReference;
 			}
+			_carState->_speed = _vehicle->_speed;
+			_speedLock = !_speedLock;
 		}
-		else if (_buttons->at(6) == 1)
+		else if (_buttons->at(6) == 1 && !_vehicle->_disabledButton->at(6))
 		{
 			if (_carState->_O != _vehicle->_O && _vehicle->_carReset == Vehicle::VEHICLE_RESET_TYPE::MANUAL)
 			{

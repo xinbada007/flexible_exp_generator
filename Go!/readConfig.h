@@ -385,6 +385,8 @@ typedef struct Vehicle:public osg::Referenced
 		_length = 4.520;
 		_wheelBase = 2.615;
 		_height = 0.0f;
+		_disabledButton = new osg::UIntArray;
+		_disabledButton->resize(20, 0);
 		_carNode = NULL;
 
 		_speed = frameRate::instance()->getDesignfRate() / 3.6f;
@@ -417,6 +419,7 @@ typedef struct Vehicle:public osg::Referenced
 	double _height;
 	double _length;
 	double _wheelBase;
+	osg::ref_ptr<osg::UIntArray> _disabledButton;
 	
 	double _speed;
 	double _speedincr;

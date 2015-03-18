@@ -969,6 +969,7 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//Set Vehicle
 		static const string ACCEL = "ACCELERATION";
+		static const string DISABLEBUTTON = "DISABLEDBUTTON";
 		static const string DEADBAND = "STEERINGDEADBAND";
 		static const string CARSPEED = "CARSPEED";
 		static const string CARWHEEL = "CARWHEEL";
@@ -994,7 +995,18 @@ void ReadConfig::readTrial(ifstream &in)
 				_vehicle->_acceleration = (stoi(config) == 1) ? true : false;
 				continue;
 			}
-			if (title == DEADBAND)
+			else if (title == DISABLEBUTTON)
+			{
+				config.erase(config.begin(), config.begin() + DISABLEBUTTON.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_vehicle->_disabledButton->at(stoul(config, &sz)) = 1;
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == DEADBAND)
 			{
 				config.erase(config.begin(), config.begin() + DEADBAND.size());
 				if (!config.empty())
@@ -1003,7 +1015,7 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
-			if (title == DYNAMICSENSITIVE)
+			else if (title == DYNAMICSENSITIVE)
 			{
 				config.erase(config.begin(), config.begin() + DYNAMICSENSITIVE.size());
 				if (!config.empty())
