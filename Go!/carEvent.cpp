@@ -400,9 +400,10 @@ bool CarEvent::Joystick()
 			{
 				_carState->_speed = _vehicle->_speed * _speedSign;
 			}
-			if (_carState->_startTime == INT_MAX)
+			if (_carState->_insertTrigger)
 			{
 				_carState->_startTime = _carState->_timeReference;
+				_carState->_insertTrigger = false;
 			}
 		}
 		else if (abs(y) <= DeadZone)
@@ -427,9 +428,10 @@ bool CarEvent::Joystick()
 
 		if (_buttons->at(1) == 1 && !_vehicle->_disabledButton->at(1))
 		{
-			if (_carState->_startTime == INT_MAX)
+			if (_carState->_insertTrigger)
 			{
 				_carState->_startTime = _carState->_timeReference;
+				_carState->_insertTrigger = false;
 			}
 			_carState->_speed = _vehicle->_speed;
 			_speedLock = !_speedLock;

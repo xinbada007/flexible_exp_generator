@@ -29,11 +29,16 @@ public:
 	};
 	inline void setCar(Car *car) 
 	{
-		_car = car; 
-		if (car->getVehicle()->_carInsideLight)
+		_car = NULL;
+		if (car)
 		{
-			_carLightColorAmbient = car->getVehicle()->_carInsideLight->getLight()->getAmbient();
-			_carLightColorDiffuse = car->getVehicle()->_carInsideLight->getLight()->getDiffuse();
+			_car = car;
+			if (car->getVehicle()->_carInsideLight)
+			{
+				_carLightColorAmbient = car->getVehicle()->_carInsideLight->getLight()->getAmbient();
+				_carLightColorDiffuse = car->getVehicle()->_carInsideLight->getLight()->getDiffuse();
+			}
+			_memorisedCarTime = _car->getCarState()->_startTime;
 		}
 	};
 private:
@@ -42,6 +47,9 @@ private:
 	CollVisitor *_cVisitor;
 
 	double _expTime;
+	double _memorisedExpTime;
+	double _memorisedCarTime;
+	bool _insertTrigger;
 	osg::ref_ptr<osg::UIntArray> _dynamic;
 	bool _dynamicUpdated;
 	bool _deviationWarn;

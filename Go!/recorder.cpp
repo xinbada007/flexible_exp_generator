@@ -23,6 +23,7 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_rc = rc;
 
 	_outMoment.push_back(&_recS._time);
+	_outMoment.push_back(&_recS._expDuration);
 	_outMoment.push_back(&_recS._fps);
 	_outMoment.push_back(&_recS._frame);
 	_outMoment.push_back(&_recS._crash);
@@ -338,6 +339,10 @@ void Recorder::rectoTxt(const CarState *carState)
 	const double &timeReference = carState->_timeReference;
 	_gcvt_s(tempd, size_tempd, timeReference, nDigit);
 	_recS._time = tempd + _recS._TAB;
+
+	const double &expDuration = carState->_expDuration;
+	_gcvt_s(tempd, size_tempd, expDuration, nDigit);
+	_recS._expDuration = tempd + _recS._TAB;
 
 	const double fps = (frameStamp - _lastFrameStamp) / (timeReference - _lastTimeReference);
 	frameRate::instance()->setRealfRate(fps);

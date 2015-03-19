@@ -20,7 +20,8 @@
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
-_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false), _otherClearColor(_expSetting->_otherClearColor)
+_opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false),
+_otherClearColor(_expSetting->_otherClearColor), _insertTrigger(false), _memorisedCarTime(INT_MAX), _memorisedExpTime(_expTime)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -724,7 +725,18 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			}
 			break;
 		case::osgGA::GUIEventAdapter::FRAME:
-			_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*carState->_startTime), 0.0f);
+			if (!_insertTrigger)
+			{
+				_expTime = std::fmax(carState->_timeReference - (_expSetting->_timer*_memorisedCarTime), 0.0f) + _memorisedExpTime;
+			}
+			else if (!_car->getCarState()->_insertTrigger)
+			{
+				_memorisedCarTime = carState->_startTime;
+				_memorisedExpTime = _expTime;
+				_insertTrigger = false;
+			}
+			carState->_expDuration = _expTime;
+
 			_frameNumber = carState->_frameStamp;
 
 			if (_speedColor && carState)
@@ -875,6 +887,13 @@ void ExperimentCallback::trigger()
 					break;
 				case::Experiment::TRIGGER_COM::SPEEDCOLOR:
 					_speedColor = !_speedColor;
+					break;
+				case::Experiment::TRIGGER_COM::TRIGGER:
+					if (_car)
+					{
+						this->_insertTrigger = true;
+						_car->getCarState()->_insertTrigger = true;
+					}
 					break;
 				case::Experiment::TRIGGER_COM::QUIT:
 					if (_mv)

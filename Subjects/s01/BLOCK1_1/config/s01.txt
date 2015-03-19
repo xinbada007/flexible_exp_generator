@@ -4,7 +4,7 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	1	#enable this disbles all other screen settings
+Use_HMD:	0	#enable this disbles all other screen settings
 HMD_Screen:	1
 HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
@@ -56,7 +56,7 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	0	#0 = use default	1 = use trigger
+Timer-Trigger:	1	#0 = use default	1 = use trigger
 Speed-Color-Notice:	1.0,0.808,0.980
 Car-BG-Speed-Color:	0
 
@@ -70,9 +70,9 @@ Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 Lane-Offset:	-1.875	#Negative = L	Positive = R
 
 ##==Trigger Setting======================
-Trigger-Enable:	1	0	1	0	0	0	0	1	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#Background Color	#quit
-Trigger-Time:	16	-1	0	4	4	-1	1	0	30
-Trigger-Time:	-1	-1	-1	18	8	-1	-1	-1	-1
+Trigger-Enable:	0	0	1	1	0	0	0	0	1	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#Background Color	#quit
+Trigger-Time:	16	-1	0	4	4	-1	1	0	0	30
+Trigger-Time:	18	-1	-1	18	8	-1	-1	-1	16	-1
 
 [CAMERASETTINGS]
 offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700
