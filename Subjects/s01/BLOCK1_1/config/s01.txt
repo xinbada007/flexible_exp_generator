@@ -64,7 +64,7 @@ Car-BG-Speed-Color:	0
 Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Car Position=========================
-Time-Start:	-1
+Time-Start:	0
 Distance-Start:	1000
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 Lane-Offset:	-1.875	#Negative = L	Positive = R

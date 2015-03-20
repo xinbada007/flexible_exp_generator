@@ -1186,7 +1186,7 @@ void ExperimentCallback::showObstacle()
 	bool hit(false);
 	while (obsTi != _expSetting->_obstaclesTime->end())
 	{
-		if (_expTime > *obsTi)
+		if (_expTime >= *obsTi)
 		{
 			CarState *carState = _car->getCarState();
 			Plane::reverse_across_iterator curO = *carState->_OQuad;
@@ -1305,7 +1305,7 @@ void ExperimentCallback::positionCar()
 	osg::DoubleArray::iterator carTi = _expSetting->_carTimefromStart->begin();
 	while (carTi != _expSetting->_carTimefromStart->end())
 	{
-		if (_expTime > *carTi)
+		if (_expTime >= *carTi)
 		{
 			CarState *carState = _car->getCarState();
 			Plane::reverse_across_iterator curO = *carState->_OQuad;
