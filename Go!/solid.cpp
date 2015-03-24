@@ -12,8 +12,7 @@
 Solid::Solid():
 _next(NULL), _prev(NULL), _updated(false), _numPoints(0), _numPlanes(0),
 _startPlane(NULL), _startE(NULL), _startP(NULL), _texCoord(NULL), _imgTexture(NULL),
-_lastPlane(NULL), _index(0), _texMode(false), _ccw(true), _ccwupdated(false), _maxAnisotropy(1.0f), _solidType(Solid::solidType::SD_UNDEFINED),
-_pointsColorArray(NULL)
+_lastPlane(NULL), _index(0), _texMode(false), _ccw(true), _ccwupdated(false), _maxAnisotropy(1.0f), _solidType(Solid::solidType::SD_UNDEFINED)
 {
 	_solidchildGeode = NULL;
 }
@@ -23,7 +22,7 @@ osg::Switch(copy,copyop),
 _next(copy._next), _prev(copy._prev), _updated(copy._updated), _numPoints(copy._numPoints), _numPlanes(copy._numPlanes),
 _startPlane(copy._startPlane), _startE(copy._startE), _startP(copy._startP), _texCoord(copy._texCoord), _imgTexture(copy._imgTexture),
 _lastPlane(copy._lastPlane), _index(copy._index), _texMode(copy._texMode), _ccw(copy._ccw), _ccwupdated(copy._ccwupdated),
-_maxAnisotropy(copy._maxAnisotropy), _solidType(copy._solidType), _pointsColorArray(copy._pointsColorArray), _solidchildGeode(copy._solidchildGeode)
+_maxAnisotropy(copy._maxAnisotropy), _solidType(copy._solidType), _solidchildGeode(copy._solidchildGeode)
 {
 }
 
@@ -350,54 +349,4 @@ void Solid::caclCCW() const
 
 	_ccw = outside;
 	_ccwupdated = true;
-}
-
-void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3Array> p)
-{
-	osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array(p->begin(), p->end());
-
-	this->solidType = GL_POINTS_BODY;
-
-	osg::ref_ptr<osg::Geode> GLP = new osg::Geode;
-
-	osg::ref_ptr<osg::Geometry> GLgeomtry = new osg::Geometry;
-	GLgeomtry->setVertexArray(vertex);
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
-	color->push_back(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	if (_pointsColorArray)
-	{
-		color = _pointsColorArray;
-	}
-	GLgeomtry->setColorArray(color.release());
-	GLgeomtry->setColorBinding(osg::Geometry::BIND_OVERALL);
-	
-	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, vertex->getNumElements()));
-
-	GLP->addDrawable(GLgeomtry.release());
-	this->addChild(GLP.release());
-}
-
-void Solid::createGLPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
-{
-	osg::ref_ptr<osg::Vec3dArray> vertex = new osg::Vec3dArray(p->begin(), p->end());
-
-	this->solidType = GL_POINTS_BODY;
-
-	osg::ref_ptr<osg::Geode> GLP = new osg::Geode;
-
-	osg::ref_ptr<osg::Geometry> GLgeomtry = new osg::Geometry;
-	GLgeomtry->setVertexArray(vertex);
-	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
-	color->push_back(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	if (_pointsColorArray)
-	{
-		color = _pointsColorArray;
-	}
-	GLgeomtry->setColorArray(color.release());
-	GLgeomtry->setColorBinding(osg::Geometry::BIND_OVERALL);
-
-	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, vertex->getNumElements()));
-
-	GLP->addDrawable(GLgeomtry.release());
-	this->addChild(GLP.release());
 }

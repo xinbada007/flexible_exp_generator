@@ -267,6 +267,7 @@
     <ClInclude Include="Nurbs.h" />
     <ClInclude Include="logicRoad.h" />
     <ClInclude Include="obstacle.h" />
+    <ClInclude Include="opticFlow.h" />
     <ClInclude Include="pickHandler.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="points.h" />
@@ -303,6 +304,7 @@
     <ClCompile Include="NurbsCurve.cpp" />
     <ClCompile Include="logicRoad.cpp" />
     <ClCompile Include="obstacle.cpp" />
+    <ClCompile Include="opticFlow.cpp" />
     <ClCompile Include="pickHandler.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="points.cpp" />

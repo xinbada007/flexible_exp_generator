@@ -2,12 +2,12 @@
 #include "experimentCallback.h"
 #include "collVisitor.h"
 #include "debugNode.h"
-#include "obstacle.h"
 
 #include <osg/Switch>
 #include <osg/MatrixTransform>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
+#include <osgUtil/Optimizer>
 
 #include <osgAudio/SoundManager.h>
 
@@ -253,7 +253,7 @@ void ExperimentCallback::createObstacles()
 
 			if (_expSetting->_GLPOINTSMODE)
 			{
-				osg::ref_ptr<Obstacle> obs = new Obstacle;
+				osg::ref_ptr<OpticFlow> obs = new OpticFlow;
 				osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
 				osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
 				ss->setAttribute(psize);
@@ -264,10 +264,8 @@ void ExperimentCallback::createObstacles()
 				color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
 				obs->setPointsColorArray(color);
 
-				obs->createPOINTS(_centerList);
+				obs->createOpticFlow(_centerList);
 				obs->setStateSet(ss);
-				obs->setSolidType(Solid::solidType::GL_POINTS_BODY);
-				obs->setTag(ROADTAG::RT_UNSPECIFIED);
 				obs->setDataVariance(osg::Object::STATIC);
 
 				_obstacleList.push_back(obs);
@@ -393,10 +391,12 @@ void ExperimentCallback::createOpticFlow()
 			{
 				if (!versions)
 				{
-					osg::ref_ptr<Obstacle> temp = new Obstacle;
-					temp->createPOINTS(points);
-					temp->setSolidType(Solid::solidType::GL_POINTS_BODY);
-					temp->setTag(ROADTAG::RT_UNSPECIFIED);
+					osg::ref_ptr<OpticFlow> temp = new OpticFlow;
+					temp->createOpticFlow(points, 
+						_expSetting->_opticFlowMode, 
+						_expSetting->_opticFlowModeSize, 
+						_expSetting->_opticFlowModeSegments);
+
 					if (_expSetting->_opticFlowVersions)
 					{
 						temp->setDataVariance(osg::Object::DYNAMIC);
@@ -419,12 +419,21 @@ void ExperimentCallback::createOpticFlow()
 	}
 
 	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-	osg::ref_ptr<osg::Point> psize = new osg::Point(3.0f);
-	ss->setAttribute(psize);
-	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-
+	if (!_expSetting->_opticFlowMode)
+	{
+		osg::ref_ptr<osg::Point> psize = new osg::Point(_expSetting->_opticFlowModeSize);
+		ss->setAttribute(psize);
+	}
+	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 	_opticFlowPoints->setStateSet(ss);
+
+	if (!_expSetting->_opticFlowVersions)
+	{
+		_opticFlowPoints->setDataVariance(osg::Object::STATIC);
+	}
+	osgUtil::Optimizer op;
+	op.optimize(_opticFlowPoints, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
 }
 
 void ExperimentCallback::showOpticFlow()
@@ -565,7 +574,7 @@ void ExperimentCallback::showOpticFlow()
 		const int startCur = (y < 0.0f) ? curY : TOTL / 2;
 		for (int opticStart = 0; opticStart<TOTL; opticStart++)
 		{
-			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(opticStart));
+			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(opticStart));
 			if (obs)
 			{
 				if (opticStart >= startFor && opticStart < curFor)
@@ -601,7 +610,7 @@ void ExperimentCallback::showOpticFlow()
 	{
 		for (unsigned i = 0; i != _opticFlowPoints->getNumChildren(); i++)
 		{
-			Obstacle *obs = static_cast<Obstacle*>(_opticFlowPoints->getChild(i));
+			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(i));
 			if (obs)
 			{
 				obs->setFrameCounts(obs->getFrameCounts() + 1);
@@ -611,7 +620,7 @@ void ExperimentCallback::showOpticFlow()
 	}
 }
 
-void ExperimentCallback::dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned depth)
+void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned depth)
 {
 	if (!_expSetting->_opticFlowFrameCounts)
 	{

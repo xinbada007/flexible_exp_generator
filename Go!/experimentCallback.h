@@ -10,6 +10,7 @@
 #include "readConfig.h"
 #include "mulitViewer.h"
 #include "obstacle.h"
+#include "opticFlow.h"
 
 class CollVisitor;
 
@@ -99,7 +100,7 @@ private:
 	void positionCar();
 	void showObstacle();
 	void showOpticFlow();
-	void dynamicFlow(osg::ref_ptr<Obstacle> obs, const unsigned depth);
+	void dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned depth);
 	void deviationCheck();
 
 	void createObstacles();

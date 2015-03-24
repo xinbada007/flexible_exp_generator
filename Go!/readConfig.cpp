@@ -1473,6 +1473,9 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OPTICFLOWDENSITY("OPTICFLOW-DENSITY");
 		static const string OPTICFLOWFRAMECOUNTS("OPTICFLOW-FRAMECOUNTS");
 		static const string OPTICFLOWVERSIONS("OPTICFLOW-VERSIONS");
+		static const string OPTICFLOWMODE("OPTICFLOW-MODE");
+		static const string OPTICFLOWMODESIZE("OPTICFLOW-MODE-SIZE");
+		static const string OPTICFLOWMODESEGMENTS("OPTICFLOW-MODE-SEGMENTS");
 
 		static const string	TRIGGER_ENABLE("TRIGGER-ENABLE");
 		static const string TRIGGER_TIME("TRIGGER-TIME");
@@ -1950,6 +1953,33 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_opticFlowVersions = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OPTICFLOWMODE)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWMODE.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowMode = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OPTICFLOWMODESIZE)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWMODESIZE.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowModeSize = stod(config);
+				}
+				continue;
+			}
+			else if (title == OPTICFLOWMODESEGMENTS)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWMODESEGMENTS.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowModeSegments = stod(config);
 				}
 				continue;
 			}

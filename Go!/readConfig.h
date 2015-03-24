@@ -67,6 +67,9 @@ typedef struct Experiment :public osg::Referenced
 		_opticFlowDensity = 100;
 		_opticFlowFrameCounts = 0;
 		_opticFlowVersions = 0;
+		_opticFlowMode = 0;
+		_opticFlowModeSize = 1.0f;
+		_opticFlowModeSegments = 64;
 
 		_triggerTimer = new osg::DoubleArray;
 
@@ -137,6 +140,9 @@ typedef struct Experiment :public osg::Referenced
 	int _opticFlowDensity;
 	unsigned int _opticFlowFrameCounts;
 	unsigned int _opticFlowVersions;
+	unsigned int _opticFlowMode;
+	double _opticFlowModeSize;
+	double _opticFlowModeSegments;
 
 	std::vector<triggerEnablePair> _triggerEnable;
 	osg::ref_ptr<osg::DoubleArray> _triggerTimer;

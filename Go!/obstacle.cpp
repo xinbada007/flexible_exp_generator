@@ -13,13 +13,13 @@
 #include <algorithm>
 
 Obstacle::Obstacle():
-_frameCounts(0), _objNode(NULL)
+_objNode(NULL)
 {
 	_tag = ROADTAG::OBS;
 }
 
 Obstacle::Obstacle(const Obstacle &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */):
-LogicRoad(copy, copyop), _frameCounts(copy._frameCounts), _objNode(copy._objNode)
+LogicRoad(copy, copyop), _objNode(copy._objNode)
 {
 
 }
@@ -320,16 +320,6 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 
 	TextureVisitor tv;
 	this->accept(tv);
-}
-
-void Obstacle::createPOINTS(osg::ref_ptr<osg::Vec3Array> p)
-{
-	this->createGLPOINTS(p);
-}
-
-void Obstacle::createPOINTS(osg::ref_ptr<osg::Vec3dArray> p)
-{
-	this->createGLPOINTS(p);
 }
 
 void Obstacle::sweep(osg::ref_ptr<osg::Vec3dArray> swArray)
