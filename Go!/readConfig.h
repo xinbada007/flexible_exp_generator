@@ -142,7 +142,7 @@ typedef struct Experiment :public osg::Referenced
 	unsigned int _opticFlowVersions;
 	unsigned int _opticFlowMode;
 	double _opticFlowModeSize;
-	double _opticFlowModeSegments;
+	unsigned _opticFlowModeSegments;
 
 	std::vector<triggerEnablePair> _triggerEnable;
 	osg::ref_ptr<osg::DoubleArray> _triggerTimer;

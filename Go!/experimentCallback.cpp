@@ -428,7 +428,7 @@ void ExperimentCallback::createOpticFlow()
 	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 	_opticFlowPoints->setStateSet(ss);
 
-	if (!_expSetting->_opticFlowVersions)
+	if (!_expSetting->_opticFlowVersions || _expSetting->_opticFlowMode)
 	{
 		_opticFlowPoints->setDataVariance(osg::Object::STATIC);
 	}
@@ -622,7 +622,7 @@ void ExperimentCallback::showOpticFlow()
 
 void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned depth)
 {
-	if (!_expSetting->_opticFlowFrameCounts)
+	if (!_expSetting->_opticFlowFrameCounts || _expSetting->_opticFlowMode)
 	{
 		return;
 	}

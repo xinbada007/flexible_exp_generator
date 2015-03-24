@@ -1979,7 +1979,7 @@ void ReadConfig::readTrial(ifstream &in)
 				config.erase(config.begin(), config.begin() + OPTICFLOWMODESEGMENTS.size());
 				if (!config.empty())
 				{
-					_experiment->_opticFlowModeSegments = stod(config);
+					_experiment->_opticFlowModeSegments = stoi(config);
 				}
 				continue;
 			}
