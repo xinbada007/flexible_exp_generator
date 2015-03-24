@@ -307,14 +307,13 @@ void ExperimentCallback::createOpticFlow()
 	{
 		yv.push_back(i*_expSetting->_depthDensity);
 		++i;
-	} while (yv.back() < _roadLength && _expSetting->_depthDensity);
+	} while ((i * _expSetting->_depthDensity) < _roadLength && _expSetting->_depthDensity);
 	i = 1;
 	do
 	{
 		yv.push_back(-i*_expSetting->_depthDensity);
 		++i;
 	} while (abs(yv.back()) < _roadLength && _expSetting->_depthDensity);
-	yv.push_back(-i*_expSetting->_depthDensity);
 
 	const double tanhalfH = _expSetting->_opticFlowWidth < 0 ? abs(_expSetting->_opticFlowWidth) : 0;
 	const double tanhalfV = _expSetting->_opticFlowHeight < 0 ? abs(_expSetting->_opticFlowHeight) : 0;
