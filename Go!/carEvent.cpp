@@ -12,7 +12,7 @@
 
 CarEvent::CarEvent() :
 _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
-, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _limitCheck(true), _speedSign(1)
+, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _speedSign(1)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
@@ -143,16 +143,9 @@ void CarEvent::calculateCarMovement()
 	//Limit the speed under MAX
 	const double dr_rate = frameRate::instance()->getDesignfRate() / frameRate::instance()->getRealfRate();
 
-	if (_limitCheck)
 	{
-		_carState->_speed = abs(_carState->_speed) > abs(_vehicle->_speed) ?
-			(_vehicle->_speed*(_carState >= 0 ? 1 : -1)) : _carState->_speed;
-
-		_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
-
 		//set rotation direction and limit
 		_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
-		_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
 	}
 
 	//set the acceleration of rotation
@@ -277,7 +270,7 @@ void CarEvent::autoNavigation()
 	const bool RotationTurn = (ANGLE > headingError) ? turnF : TURN;
 
 	_leftTurn = RotationTurn;
-	_carState->_angle = RotationAngle;
+	_carState->_angle = RotationAngle > eps_1000 ? RotationAngle : 0.0f;
 	_autoNavi = true;
 
 	return;
@@ -340,7 +333,7 @@ void CarEvent::shiftVehicle()
 	_carState->_shiftD.z() = _carState->_heading.z();
 	_carState->_shiftD.normalize();
 
-	double R = _carState->_turningRadius;
+	double R = abs(_vehicle->_wheelBase / sin(_vehicle->_rotate));
 	R *= sin(abs(_carState->_angle) * 1.0f / frameRate::instance()->getRealfRate());
 	R *= _vehicle->_dynamicSensitive;
 
@@ -554,8 +547,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				_carState->_speed = 0.0f;
 			}
 
-			//initial calculate turning radius and turning center
-			getTurningFactor();
+			//initial check if over speed
+			_carState->_speed = abs(_carState->_speed) > abs(_vehicle->_speed) ?
+				(_vehicle->_speed*(_carState >= 0 ? 1 : -1)) : _carState->_speed;
 
 			//1st
 			shiftVehicle();
@@ -563,7 +557,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			autoNavigation();
 			//3rd
 			dealCollision();
-			//4th
+			//4th calculate turning radius and turning center
+			getTurningFactor();
+			//5th
 			calculateCarMovement();
 
 			//always final
@@ -582,6 +578,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 void CarEvent::getTurningFactor()
 {
+	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
+	_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
+
 	const double sinTheta = sin(_carState->_angle);
 	if (!sinTheta)
 	{

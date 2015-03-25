@@ -106,8 +106,16 @@ void MulitViewer::genMainView()
 		_normalView = createPowerWall();
 		this->addView(_normalView);
 		this->setThreadingModel(osgViewer::ViewerBase::ThreadPerCamera);
-		frameRate::instance()->setDesignedfRate(refreshRate);
-		this->setRunMaxFrameRate(refreshRate);
+		if (_screens->_refreshRate)
+		{
+			frameRate::instance()->setDesignedfRate(_screens->_refreshRate);
+		}
+		else
+		{
+			frameRate::instance()->setDesignedfRate(refreshRate);
+		}
+		
+		this->setRunMaxFrameRate(frameRate::instance()->getDesignfRate());
 		_hFOV = _screens->_hFov;
 	}
 

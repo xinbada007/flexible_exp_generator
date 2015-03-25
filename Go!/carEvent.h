@@ -39,7 +39,6 @@ private:
 	int _speedSign;
 
 	bool _updated;
-	bool _limitCheck;
 
 	osg::ref_ptr<osg::UIntArray> _buttons;
 protected:

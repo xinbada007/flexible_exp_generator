@@ -813,6 +813,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string FXAA = "MULTISAMPLES";
 		static const string ZNEAR = "ZNEAR";
 		static const string ZFAR = "ZFAR";
+		static const string REFRESHRATE = "REFRESHRATE";
 		while (flag == SCREEN && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -876,6 +877,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_screens->_zFar = stod(config);
+				}
+				continue;
+			}
+			else if (title == REFRESHRATE)
+			{
+				config.erase(config.begin(), config.begin() + REFRESHRATE.size());
+				if (!config.empty())
+				{
+					_screens->_refreshRate = stod(config);
 				}
 				continue;
 			}

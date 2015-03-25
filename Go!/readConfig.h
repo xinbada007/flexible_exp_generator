@@ -490,6 +490,7 @@ typedef struct Screens:public osg::Referenced
 		_distortion = 1.0f;
 		_fxaa = 4;
 		_hFov = 2.0f*atan(_aspect*tan(_fovy*0.5f));	//default unit is degree
+		_refreshRate = 0.0f;
 
 		_scrs = new osg::UIntArray;
 		_realworld = new osg::DoubleArray;
@@ -511,6 +512,7 @@ typedef struct Screens:public osg::Referenced
 	double _distortion;
 	unsigned _fxaa;
 	double _hFov;
+	double _refreshRate;
 
 	osg::ref_ptr<osg::UIntArray> _scrs;
 	osg::ref_ptr<osg::DoubleArray> _realworld;
