@@ -37,7 +37,6 @@ private:
 	bool _shifted;
 	bool _speedLock;
 	int _speedSign;
-	bool _buttonBrake;
 
 	bool _updated;
 	bool _limitCheck;

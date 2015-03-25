@@ -12,8 +12,7 @@
 
 CarEvent::CarEvent() :
 _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
-, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _limitCheck(true), _speedSign(1),
-_buttonBrake(false)
+, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _limitCheck(true), _speedSign(1)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(10, 0);
@@ -326,8 +325,6 @@ void CarEvent::makeResetMatrix()
 	_reset *= osg::Matrix::translate(MO);
 
 	_carState->_forceReset = _reset;
-	_buttonBrake = false;
-	_speedSign = 1;
 }
 
 void CarEvent::shiftVehicle()
@@ -394,22 +391,23 @@ bool CarEvent::Joystick()
 	{
 		if (abs(y) > DeadZone)
 		{
-			_buttonBrake = (y > 0) ? true : false;
 //			_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
 			if (y < 0)
 			{
 				_carState->_speed = _vehicle->_speed * _speedSign;
+				if (_carState->_insertTrigger)
+				{
+					_carState->_startTime = _carState->_timeReference;
+					_carState->_insertTrigger = false;
+				}
 			}
-			if (_carState->_insertTrigger)
+			else
 			{
-				_carState->_startTime = _carState->_timeReference;
-				_carState->_insertTrigger = false;
+				_carState->_speed = 0.0f;
 			}
 		}
-		else if (abs(y) <= DeadZone)
+		else
 		{
-			_speedSign = (_buttonBrake) ? -_speedSign : _speedSign;
-			_buttonBrake = false;
 			_carState->_speed = 0.0f;
 		}
 	}
@@ -441,6 +439,20 @@ bool CarEvent::Joystick()
 			if (_carState->_O != _vehicle->_O && _vehicle->_carReset == Vehicle::VEHICLE_RESET_TYPE::MANUAL)
 			{
 				_carState->_reset = true;
+			}
+		}
+		else if (_buttons->at(8) == 1 && !_vehicle->_disabledButton->at(8))
+		{
+			if (!_carState->_speed)
+			{
+				_speedSign = -1;
+			}
+		}
+		else if (_buttons->at(9) == 1 && !_vehicle->_disabledButton->at(9))
+		{
+			if (!_carState->_speed)
+			{
+				_speedSign = 1;
 			}
 		}
 		_buttons->assign(_buttons->size(), 0);
