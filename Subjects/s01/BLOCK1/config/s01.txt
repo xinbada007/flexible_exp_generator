@@ -18,13 +18,13 @@ zNear:	0.1
 zFar:	1000
 
 MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
-Background:	0.529,0.808,0.980
+Background:	0,0,0
 
 [CarSettings]
 SteeringDeadBand:	0.05	#deadband
-CarSpeed:	-20
+CarSpeed:	20
 CarWheel:	35
-CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive	#Width = 1.886	Length = 4.260
+#CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive	#Width = 1.886	Length = 4.260
 WheelBase:	2.615
 CarReset:	0	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = starting position
@@ -63,32 +63,34 @@ Timer-Trigger:	1	#0 = use default	1 = use trigger
 ##==Deviation Warn Setting===============
 Deviation-Siren:	../Resources/sound/alert.wav
 
-##==Obstacle Setting=====================
-Obstacle:	-1 -1 -1 -1;	-1 -1 -1 -1 -1;
-Obstacle-Range:	1 6 16 21;	1 6 11 16 21; 
-Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-6.575 -6.575 -6.575 -6.575;	6.575 6.575 6.575 6.575 6.575;
-OBS-Collision:	1
-OBS-Shape:	4	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
-OBS-Pic:	../Resources/models/Beetle.ive;
-OBS-Orientation:	0,0,1,0;	0,0,1,0;	0,0,1,0;	0,0,1,0;
-OBS-Orientation:	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;
+##==Optic Flow Setting===========================================
+OpticFlow:		1	#1 = Enable	0= Disable
+OpticFlow-Visible:	0	#only visible within 100 meters
+OpticFlow-FrameCounts:	0	
+OpticFlow-Versions:	0
+DepthDensity:		1005	#every x meters
+OpticFlow-Width:	1000
+OpticFlow-Height:	100
+OpticFlow-Density:	500
+OPTICFLOW-MODE:		2
+OPTICFLOW-MODE-SIZE:	1
+OPTICFLOW-MODE-SEGMENTS:	12
 
 ##==Car Position=========================
 Time-Start:	0
-Distance-Start:	800
+Distance-Start:	0
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
-Lane-Offset:	-1.875	#Negative = L	Positive = R
+Lane-Offset:	0	#Negative = L	Positive = R
 
 ##==Trigger Setting======================
 #road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
-Trigger-Enable:	0	0	1	1	0	0	0	0	1	0
+Trigger-Enable:	1	0	1	1	0	0	0	0	1	0
 
-Trigger-Time:	16	-1	0	-1	-1	10	-1	-1	0	-1
+Trigger-Time:	0	0	0	-1	-1	10	-1	-1	0	-1
 Trigger-Time:	-1	-1	-1	18	-1	-1	-1	-1	-1	-1
 
 [CAMERASETTINGS]
-offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700
+#offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700
 
 #Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;

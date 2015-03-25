@@ -27,11 +27,11 @@ void OpticFlow::createOpticFlow(osg::Array *points, const int mode /* = 0 */, co
 		}
 		else if (mode == 1)
 		{
-			createPolygon(p, size, segments);
+			createSpherePoly(p, size, segments);
 		}
 		else if (mode == 2)
 		{
-			createBalls(p, size);
+			createCubePoly(p, size);
 		}
 	}
 }
@@ -62,7 +62,7 @@ void OpticFlow::createGLPOINTS(osg::Vec3Array *p)
 	this->addChild(GLP.release());
 }
 
-void OpticFlow::createPolygon(osg::Vec3Array *p, const double radius, const int segments)
+void OpticFlow::createSpherePoly(osg::Vec3Array *p, const double radius, const int segments)
 {
 	const double R(radius);
 	osg::ref_ptr<osg::Vec3Array> temp = new osg::Vec3Array;
@@ -70,39 +70,39 @@ void OpticFlow::createPolygon(osg::Vec3Array *p, const double radius, const int 
 	{
 		const double theta = (double(i) / double(segments)) * 2 * PI;
 		const double x = R * cos(theta);
-		const double z = 0.0f;
-		const double y = R * sin(theta);
+		const double y = 0.0f;
+		const double z = R * sin(theta);
 		temp->push_back(osg::Vec3(x, y, z));
 	}
 
  	osg::ref_ptr<osg::Vec3Array> solid = new osg::Vec3Array;
 
-// 	for (int i = 0; i < segments; i++)
-// 	{
-// 		const double theta = (double(i) / double(segments)) * 2 * PI;
-// 		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
-// 		arrayByMatrix(t, osg::Matrix::rotate(theta, osg::Vec3d(0.0f, 0.0f, 1.0f)));
-// 		copy(t->begin(), t->end(), std::back_inserter(*solid));
-// 	}
-
-	const int SEG(segments / 2);
-	for (int i = 1; i <= SEG; i++)
+	for (int i = 0; i < segments; i++)
 	{
-		const double H = (double(i) / double(SEG)) * R;
-		const double r = sqrt(R*R - H*H);
-		const double ratio = r / R;
-
+		const double theta = (double(i) / double(segments)) * 2 * PI;
 		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
-		osg::Matrix m;
-		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, H)) * osg::Matrix::scale(osg::Vec3(ratio, ratio, 1.0f));
-		arrayByMatrix(t, m);
-		copy(t->begin(), t->end(), std::back_inserter(*solid));
-
-		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, -2*H));
-		arrayByMatrix(t, m);
+		arrayByMatrix(t, osg::Matrix::rotate(theta, osg::Vec3d(0.0f, 0.0f, 1.0f)));
 		copy(t->begin(), t->end(), std::back_inserter(*solid));
 	}
-	copy(temp->begin(), temp->end(), std::back_inserter(*solid));
+
+// 	const int SEG(segments / 2);
+// 	for (int i = 1; i <= SEG; i++)
+// 	{
+// 		const double H = (double(i) / double(SEG)) * R;
+// 		const double r = sqrt(R*R - H*H);
+// 		const double ratio = r / R;
+// 
+// 		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
+// 		osg::Matrix m;
+// 		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, H)) * osg::Matrix::scale(osg::Vec3(ratio, ratio, 1.0f));
+// 		arrayByMatrix(t, m);
+// 		copy(t->begin(), t->end(), std::back_inserter(*solid));
+// 
+// 		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, -2*H));
+// 		arrayByMatrix(t, m);
+// 		copy(t->begin(), t->end(), std::back_inserter(*solid));
+// 	}
+// 	copy(temp->begin(), temp->end(), std::back_inserter(*solid));
 
 	osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array;
 	osg::Vec3Array::const_iterator i = p->begin();
@@ -125,6 +125,7 @@ void OpticFlow::createPolygon(osg::Vec3Array *p, const double radius, const int 
 	}
 	gmtry->setColorArray(color.release());
 	gmtry->setColorBinding(osg::Geometry::BIND_OVERALL);
+	gmtry->setDataVariance(osg::Object::STATIC);
 
 	i = p->begin();
 	while (i != p->end())
@@ -136,7 +137,7 @@ void OpticFlow::createPolygon(osg::Vec3Array *p, const double radius, const int 
 			const int index = j;
 			const int FIRST = index * segments + START;
 			const int COUNT = segments;
-			gmtry->addPrimitiveSet(new osg::DrawArrays(GL_LINE_LOOP, FIRST, COUNT));
+			gmtry->addPrimitiveSet(new osg::DrawArrays(GL_POLYGON, FIRST, COUNT));
 
 			++j;
 		}
@@ -145,15 +146,16 @@ void OpticFlow::createPolygon(osg::Vec3Array *p, const double radius, const int 
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 	geode->addDrawable(gmtry.release());
+	geode->setDataVariance(osg::Object::STATIC);
 
 	this->addChild(geode.release());
 	this->setDataVariance(osg::Object::STATIC);
 
 	osgUtil::Optimizer op;
-	op.optimize(this, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
+	op.optimize(this, osgUtil::Optimizer::ALL_OPTIMIZATIONS ^ osgUtil::Optimizer::TRISTRIP_GEOMETRY);
 }
 
-void OpticFlow::createBalls(osg::Vec3Array *p, const double radius)
+void OpticFlow::createSPhereSolid(osg::Vec3Array *p, const double radius)
 {
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
@@ -169,4 +171,72 @@ void OpticFlow::createBalls(osg::Vec3Array *p, const double radius)
 	}
 
 	this->addChild(geode.release());
+}
+
+void OpticFlow::createCubePoly(osg::Vec3Array *p, const double radius)
+{
+	const osg::Vec3 X(radius, 0.0f, 0.0f);
+	const osg::Vec3 Y(0.0f, radius, 0.0f);
+	const osg::Vec3 Z(0.0f, 0.0f, radius);
+
+	const osg::Vec3 Origin(0.0f, 0.0f, 0.0f);
+	const osg::Vec3 RB = Origin + (X*0.5f - Y*0.5f);
+	const osg::Vec3 RT = Origin + (X*0.5f + Y*0.5f);
+	const osg::Vec3 LB(RB - X);
+	const osg::Vec3 LT(RT - X);
+
+	osg::ref_ptr<osg::Vec3Array> temp = new osg::Vec3Array;
+	temp->push_back(RB); temp->push_back(LB); temp->push_back(LT); temp->push_back(RT);
+	temp->push_back(RT + Z); temp->push_back(LT + Z);
+	temp->push_back(LT + Z - Y); temp->push_back(RT + Z - Y);
+
+	osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array;
+	osg::Vec3Array::const_iterator i = p->begin();
+	while (i != p->end())
+	{
+		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
+		arrayByMatrix(t, osg::Matrix::translate(*i));
+		
+		copy(t->begin(), t->end(), std::back_inserter(*vertex));
+
+		++i;
+	}
+
+	osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+	geom->setVertexArray(vertex);
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+	color->push_back(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	if (_pointsColorArray)
+	{
+		color = _pointsColorArray;
+	}
+	geom->setColorArray(color.release());
+	geom->setColorBinding(osg::Geometry::BIND_OVERALL);
+	geom->setDataVariance(osg::Object::STATIC);
+
+	i = p->begin();
+	while (i != p->end())
+	{
+		const int START = (i - p->begin()) * temp->getNumElements();
+
+		osg::ref_ptr<osg::DrawElementsUInt> de = new osg::DrawElementsUInt(GL_QUAD_STRIP);
+		de->push_back(0 + START); de->push_back(1 + START); 
+		de->push_back(3 + START); de->push_back(2 + START);
+		de->push_back(4 + START); de->push_back(5 + START);
+		de->push_back(7 + START); de->push_back(6 + START);
+		de->push_back(0 + START); de->push_back(1 + START);
+		geom->addPrimitiveSet(de);
+
+		++i;
+	}
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(geom.release());
+	geode->setDataVariance(osg::Object::STATIC);
+
+	this->addChild(geode.release());
+	this->setDataVariance(osg::Object::STATIC);
+
+	osgUtil::Optimizer op;
+	op.optimize(this, osgUtil::Optimizer::ALL_OPTIMIZATIONS ^ osgUtil::Optimizer::TRISTRIP_GEOMETRY);
 }

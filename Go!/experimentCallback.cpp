@@ -8,6 +8,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Point>
 #include <osgUtil/Optimizer>
+#include <osg/PolygonMode>
 
 #include <osgAudio/SoundManager.h>
 
@@ -430,9 +431,12 @@ void ExperimentCallback::createOpticFlow()
 	if (!_expSetting->_opticFlowVersions || _expSetting->_opticFlowMode)
 	{
 		_opticFlowPoints->setDataVariance(osg::Object::STATIC);
+		osg::ref_ptr<osg::PolygonMode> pm = new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+		ss->setAttribute(pm, osg::StateAttribute::OVERRIDE);
 	}
+
 	osgUtil::Optimizer op;
-	op.optimize(_opticFlowPoints, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
+	op.optimize(_opticFlowPoints, osgUtil::Optimizer::ALL_OPTIMIZATIONS ^ osgUtil::Optimizer::TRISTRIP_GEOMETRY);
 }
 
 void ExperimentCallback::showOpticFlow()

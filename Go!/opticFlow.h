@@ -14,8 +14,9 @@ public:
 
 private:
 	void createGLPOINTS(osg::Vec3Array *p);
-	void createPolygon(osg::Vec3Array *p, const double radius, const int segments);
-	void createBalls(osg::Vec3Array *p, const double radius);
+	void createSpherePoly(osg::Vec3Array *p, const double radius, const int segments);
+	void createCubePoly(osg::Vec3Array *p, const double radius);
+	void createSPhereSolid(osg::Vec3Array *p, const double radius);
 	osg::ref_ptr<osg::Vec4Array> _pointsColorArray;
 	unsigned _frameCounts;
 };
