@@ -632,44 +632,51 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned
 
 	if (_expSetting->_opticFlowMode == 2 && obs->getPolyNumber())
 	{
-		const double degree = (2 * PI) / _expSetting->_opticFlowFrameCounts;
-		assert(_expSetting->_opticFlowFrameCounts);
-		obs->setDataVariance(osg::Object::DYNAMIC);
-		osg::Vec3Array *vertex = NULL;
-		osg::Geometry *gmtry = NULL;
-		osg::Geode *geode = obs->getChild(0)->asGeode();
-		if (geode)
+		if (obs->getFrameCounts() > _expSetting->_opticFlowFrameCounts)
 		{
-			gmtry = geode->getDrawable(0)->asGeometry();
-			if (gmtry)
-			{
-				vertex = dynamic_cast<osg::Vec3Array*>(gmtry->getVertexArray());
-			}
-		}
-		if (vertex)
-		{
-			osg::Vec3Array * v = obs->getPointsArray();
-			osg::Vec3Array::const_iterator i = v->begin();
-			while (i != v->end())
-			{
-				osg::Matrix m;
-				m = osg::Matrix::translate(-(*i)) * osg::Matrix::rotate(degree, Z_AXIS)
-					* osg::Matrix::translate(*i);
+			obs->setFrameCounts(0);
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_int_distribution<> dis(-45, 45);
+			const double degree = dis(gen) * TO_RADDIAN;
 
-				const unsigned START = (i - v->begin()) * obs->getPolyNumber();
-				const unsigned END = START + 8;
-				osg::Vec3Array::iterator j = vertex->begin() + START;
-				while (j != vertex->begin() + END)
+			obs->setDataVariance(osg::Object::DYNAMIC);
+			osg::Vec3Array *vertex = NULL;
+			osg::Geometry *gmtry = NULL;
+			osg::Geode *geode = obs->getChild(0)->asGeode();
+			if (geode)
+			{
+				gmtry = geode->getDrawable(0)->asGeometry();
+				if (gmtry)
 				{
-					(*j) = (*j) * m;
-					++j;
+					vertex = dynamic_cast<osg::Vec3Array*>(gmtry->getVertexArray());
 				}
-
-				++i;
 			}
+			if (vertex)
+			{
+				osg::Vec3Array * v = obs->getPointsArray();
+				osg::Vec3Array::const_iterator i = v->begin();
+				while (i != v->end())
+				{
+					osg::Matrix m;
+					m = osg::Matrix::translate(-(*i)) * osg::Matrix::rotate(degree, Z_AXIS)
+						* osg::Matrix::translate(*i);
+
+					const unsigned START = (i - v->begin()) * obs->getPolyNumber();
+					const unsigned END = START + 8;
+					osg::Vec3Array::iterator j = vertex->begin() + START;
+					while (j != vertex->begin() + END)
+					{
+						(*j) = (*j) * m;
+						++j;
+					}
+
+					++i;
+				}
+			}
+			gmtry->dirtyBound();
+			gmtry->dirtyDisplayList();
 		}
-		gmtry->dirtyBound();
-		gmtry->dirtyDisplayList();
 	}
 
 	if (!_expSetting->_opticFlowMode)
