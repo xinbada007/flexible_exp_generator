@@ -1478,6 +1478,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OPTICFLOW("OPTICFLOW");
 		static const string OPTICFLOWRANGE("OPTICFLOW-VISIBLE");
 		static const string DEPTHDENSITY("DEPTHDENSITY");
+		static const string OPTICFLOWOFFSET("OPTICFLOWOFFSET");
 		static const string OPTICFLOWWIDTH("OPTICFLOW-WIDTH");
 		static const string OPTICFLOWHEIGHT("OPTICFLOW-HEIGHT");
 		static const string OPTICFLOWDENSITY("OPTICFLOW-DENSITY");
@@ -1999,6 +2000,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_depthDensity = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OPTICFLOWOFFSET)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWOFFSET.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowStartOffset = stoi(config);
 				}
 				continue;
 			}

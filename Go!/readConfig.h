@@ -70,6 +70,7 @@ typedef struct Experiment :public osg::Referenced
 		_opticFlowMode = 0;
 		_opticFlowModeSize = 1.0f;
 		_opticFlowModeSegments = 64;
+		_opticFlowStartOffset = 0;
 
 		_triggerTimer = new osg::DoubleArray;
 
@@ -135,6 +136,7 @@ typedef struct Experiment :public osg::Referenced
 	bool _opticFlow;
 	int _opticFlowRange;
 	int _depthDensity;
+	int _opticFlowStartOffset;
 	double _opticFlowWidth;
 	double _opticFlowHeight;
 	int _opticFlowDensity;

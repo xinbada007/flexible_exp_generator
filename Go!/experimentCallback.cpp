@@ -304,17 +304,18 @@ void ExperimentCallback::createOpticFlow()
 
 	std::vector<float> ya, yv, zv;
 	int i(0);
-	do 
+	do
 	{
-		yv.push_back(i*_expSetting->_depthDensity);
+		yv.push_back(i*_expSetting->_depthDensity + _expSetting->_opticFlowStartOffset);
 		++i;
-	} while ((i * _expSetting->_depthDensity) < _roadLength && _expSetting->_depthDensity);
+	} while ((i * _expSetting->_depthDensity + _expSetting->_opticFlowStartOffset) < _roadLength && _expSetting->_depthDensity);
+	const int I = i;
 	i = 1;
 	do
 	{
-		yv.push_back(-i*_expSetting->_depthDensity);
+		yv.push_back(-i*_expSetting->_depthDensity + _expSetting->_opticFlowStartOffset);
 		++i;
-	} while (abs(yv.back()) < _roadLength && _expSetting->_depthDensity);
+	} while (i <= I && _expSetting->_depthDensity);
 
 	const double tanhalfH = _expSetting->_opticFlowWidth < 0 ? abs(_expSetting->_opticFlowWidth) : 0;
 	const double tanhalfV = _expSetting->_opticFlowHeight < 0 ? abs(_expSetting->_opticFlowHeight) : 0;
@@ -511,64 +512,64 @@ void ExperimentCallback::showOpticFlow()
 		//FOV dectection
 
 		const int &TOTL = _opticFlowPoints->getNumChildren();
-		const double &y = _car->getCarState()->_O.y();
+		const double &y = _car->getCarState()->_O.y() - _expSetting->_opticFlowStartOffset;
 		const double forwardY = y + min(forwL,L);
 		const double backwardY = y - min(backL,L);
 
-		int curY(0.0f);
+		int curY(0);
 		if (y >= 0.0f)
 		{
-			curY = y / _expSetting->_depthDensity + 0.5f;
-			if (curY > TOTL / 2)
+			curY = y / _expSetting->_depthDensity/* + 0.5f*/;
+			if (curY > TOTL / 2 - 1)
 			{
-				curY = TOTL / 2;
+				curY = TOTL / 2 - 1;
 			}
 		}
 		else
 		{
-			curY = (abs(y) / _expSetting->_depthDensity) + 0.5f;
+			curY = (abs(y) / _expSetting->_depthDensity)/* + 0.5f*/;
 			curY += TOTL / 2;
-			if (curY > TOTL)
+			if (curY > TOTL - 1)
 			{
-				curY = TOTL;
+				curY = TOTL - 1;
 			}
 		}
 
-		int curFor(0.0f);
+		int curFor(0);
 		if (forwardY >= 0.0f)
 		{
-			curFor = forwardY / _expSetting->_depthDensity + 0.5f;
-			if (curFor > TOTL / 2)
+			curFor = forwardY / _expSetting->_depthDensity/* + 0.5f*/;
+			if (curFor > TOTL / 2 - 1)
 			{
-				curFor = TOTL / 2;
+				curFor = TOTL / 2 - 1;
 			}
 		}
 		else
 		{
-			curFor = abs(forwardY) / _expSetting->_depthDensity + 0.5f;
+			curFor = abs(forwardY) / _expSetting->_depthDensity/* + 0.5f*/;
 			curFor += TOTL / 2;
-			if (curFor > TOTL)
+			if (curFor > TOTL - 1)
 			{
-				curFor = TOTL;
+				curFor = TOTL - 1;
 			}
 		}
 
-		int curBac(0.0f);
+		int curBac(0);
 		if (backwardY >= 0.0f)
 		{
-			curBac = backwardY / _expSetting->_depthDensity + 0.5f;
-			if (curBac > TOTL / 2)
+			curBac = backwardY / _expSetting->_depthDensity/* + 0.5f*/;
+			if (curBac > TOTL / 2 - 1)
 			{
-				curBac = TOTL / 2;
+				curBac = TOTL / 2 - 1;
 			}
 		}
 		else
 		{
-			curBac = abs(backwardY) / _expSetting->_depthDensity + 0.5f;
+			curBac = abs(backwardY) / _expSetting->_depthDensity/* + 0.5f*/;
 			curBac += TOTL / 2;
-			if (curBac > TOTL)
+			if (curBac > TOTL - 1)
 			{
-				curBac = TOTL;
+				curBac = TOTL - 1;
 			}
 		}
 
@@ -580,21 +581,21 @@ void ExperimentCallback::showOpticFlow()
 			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(opticStart));
 			if (obs)
 			{
-				if (opticStart >= startFor && opticStart < curFor)
+				if (opticStart >= startFor && opticStart <= curFor)
 				{
 //					obs->setAllChildrenOn();
 					obs->setFrameCounts(obs->getFrameCounts() + 1);
 					dynamicFlow(obs, opticStart);
 				}
 
-				else if (opticStart >= startBac && opticStart < curY)
+				else if (opticStart >= startBac && opticStart <= curY)
 				{
 //					obs->setAllChildrenOn();
 					obs->setFrameCounts(obs->getFrameCounts() + 1);
 					dynamicFlow(obs, opticStart);
 				}
 
-				else if (opticStart >= startCur && opticStart < curBac)
+				else if (opticStart >= startCur && opticStart <= curBac)
 				{
 //					obs->setAllChildrenOn();
 					obs->setFrameCounts(obs->getFrameCounts() + 1);
