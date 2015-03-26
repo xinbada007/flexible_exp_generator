@@ -64,6 +64,7 @@ private:
 	osg::ref_ptr<osg::Switch> _opticFlowPoints;
 	std::vector<std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>,unsigned>> _opticFlowVersions;
 	bool _opticFlowDrawn;
+	std::vector<int> _opticFlowDynamicIndex;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
 	osg::ref_ptr<osgAudio::Sample> _sirenSample;

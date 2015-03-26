@@ -28,8 +28,8 @@ CarReset:	0	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = according to start point
 
 [RoadSettings]
-RoadLanes:	100.368
-RoadLength:	1335	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+RoadLanes:	1000.368
+RoadLength:	1300	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
 TextureWidth:	9.18
 RoadPic:	../Resources/texture/road4096-0.png 16
 
@@ -80,7 +80,7 @@ OPTICFLOW-MODE-SIZE:	1
 
 ##==Trigger Setting======================
 #road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
-Trigger-Enable:	1	0	1	1	0	0	0	0	1	0
+Trigger-Enable:	0	0	1	1	0	0	0	0	1	0
 Trigger-Time:	0	0	-1	4	0	-1	0	-1	0	30
 Trigger-Time:	-1	16	16	18	16	-1	-1	-1	-1	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1

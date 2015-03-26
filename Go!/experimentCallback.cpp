@@ -317,6 +317,8 @@ void ExperimentCallback::createOpticFlow()
 		++i;
 	} while (i <= I && _expSetting->_depthDensity);
 
+	_opticFlowDynamicIndex.resize(yv.size(), 0);
+
 	const double tanhalfH = _expSetting->_opticFlowWidth < 0 ? abs(_expSetting->_opticFlowWidth) : 0;
 	const double tanhalfV = _expSetting->_opticFlowHeight < 0 ? abs(_expSetting->_opticFlowHeight) : 0;
 
@@ -576,6 +578,7 @@ void ExperimentCallback::showOpticFlow()
 		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : min(curFor,curBac));
 		const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
 		const int startCur = (y < 0.0f) ? curY : TOTL / 2;
+		
 		for (int opticStart = 0; opticStart<TOTL; opticStart++)
 		{
 			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(opticStart));
