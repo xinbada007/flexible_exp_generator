@@ -636,7 +636,7 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned
 		{
 			obs->setFrameCounts(0);
 			std::random_device rd;
-			std::mt19937 gen(rd());
+			std::ranlux24_base gen(rd());
 			std::uniform_int_distribution<> dis(-45, 45);
 			const double degree = dis(gen) * TO_RADDIAN;
 
