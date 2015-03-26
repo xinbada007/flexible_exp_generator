@@ -7,13 +7,14 @@
 #include <osgUtil/Optimizer>
 
 OpticFlow::OpticFlow() :
-_frameCounts(0), _pointsColorArray(NULL)
+_frameCounts(0), _pointsColorArray(NULL), _points(NULL), _polyNumbers(0)
 {
 }
 
 OpticFlow::~OpticFlow()
 {
 	_pointsColorArray = NULL;
+	_points = NULL;
 }
 
 void OpticFlow::createOpticFlow(osg::Array *points, const int mode /* = 0 */, const double size /* = 0 */, const int segments /* = 0 */)
@@ -60,6 +61,9 @@ void OpticFlow::createGLPOINTS(osg::Vec3Array *p)
 
 	GLP->addDrawable(GLgeomtry.release());
 	this->addChild(GLP.release());
+
+	_points = vertex;
+	p = NULL;
 }
 
 void OpticFlow::createSpherePoly(osg::Vec3Array *p, const double radius, const int segments)
@@ -153,6 +157,10 @@ void OpticFlow::createSpherePoly(osg::Vec3Array *p, const double radius, const i
 
 	osgUtil::Optimizer op;
 	op.optimize(this, osgUtil::Optimizer::ALL_OPTIMIZATIONS ^ osgUtil::Optimizer::TRISTRIP_GEOMETRY);
+
+	_polyNumbers = solid->getNumElements();
+	_points = new osg::Vec3Array(p->begin(), p->end());
+	p = NULL;
 }
 
 void OpticFlow::createSPhereSolid(osg::Vec3Array *p, const double radius)
@@ -171,6 +179,9 @@ void OpticFlow::createSPhereSolid(osg::Vec3Array *p, const double radius)
 	}
 
 	this->addChild(geode.release());
+
+	_points = new osg::Vec3Array(p->begin(), p->end());
+	p = NULL;
 }
 
 void OpticFlow::createCubePoly(osg::Vec3Array *p, const double radius)
@@ -245,4 +256,8 @@ void OpticFlow::createCubePoly(osg::Vec3Array *p, const double radius)
 
 	osgUtil::Optimizer op;
 	op.optimize(this, osgUtil::Optimizer::ALL_OPTIMIZATIONS ^ osgUtil::Optimizer::TRISTRIP_GEOMETRY);
+
+	_polyNumbers = temp->getNumElements();
+	_points = new osg::Vec3Array(p->begin(), p->end());
+	p = NULL;
 }

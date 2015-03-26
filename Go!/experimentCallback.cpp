@@ -625,32 +625,77 @@ void ExperimentCallback::showOpticFlow()
 
 void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned depth)
 {
-	if (!_expSetting->_opticFlowFrameCounts || _expSetting->_opticFlowMode)
+	if (!_expSetting->_opticFlowFrameCounts)
 	{
 		return;
 	}
 
-	if (obs->getFrameCounts() > _expSetting->_opticFlowFrameCounts)
+	if (_expSetting->_opticFlowMode == 2 && obs->getPolyNumber())
 	{
-		obs->setFrameCounts(0);
+		const double degree = (2 * PI) / _expSetting->_opticFlowFrameCounts;
+		assert(_expSetting->_opticFlowFrameCounts);
+		obs->setDataVariance(osg::Object::DYNAMIC);
+		osg::Vec3Array *vertex = NULL;
+		osg::Geometry *gmtry = NULL;
 		osg::Geode *geode = obs->getChild(0)->asGeode();
 		if (geode)
 		{
-			osg::Geometry *gmtry = geode->getDrawable(0)->asGeometry();
+			gmtry = geode->getDrawable(0)->asGeometry();
 			if (gmtry)
 			{
-				if (gmtry->getPrimitiveSet(0))
+				vertex = dynamic_cast<osg::Vec3Array*>(gmtry->getVertexArray());
+			}
+		}
+		if (vertex)
+		{
+			osg::Vec3Array * v = obs->getPointsArray();
+			osg::Vec3Array::const_iterator i = v->begin();
+			while (i != v->end())
+			{
+				osg::Matrix m;
+				m = osg::Matrix::translate(-(*i)) * osg::Matrix::rotate(degree, Z_AXIS)
+					* osg::Matrix::translate(*i);
+
+				const unsigned START = (i - v->begin()) * obs->getPolyNumber();
+				const unsigned END = START + 8;
+				osg::Vec3Array::iterator j = vertex->begin() + START;
+				while (j != vertex->begin() + END)
 				{
-					unsigned &order = _opticFlowVersions.at(depth).second;
-					osg::ref_ptr<osg::Vec3Array> points = _opticFlowVersions.at(depth).first.at(order);
+					(*j) = (*j) * m;
+					++j;
+				}
 
-					++order;
-					order %= _opticFlowVersions.at(depth).first.size();
+				++i;
+			}
+		}
+		gmtry->dirtyBound();
+		gmtry->dirtyDisplayList();
+	}
 
-					gmtry->setVertexArray(points);
-					gmtry->setPrimitiveSet(0, new osg::DrawArrays(GL_POINTS, 0, points->getNumElements()));
-					gmtry->dirtyBound();
-					gmtry->dirtyDisplayList();
+	if (!_expSetting->_opticFlowMode)
+	{
+		if (obs->getFrameCounts() > _expSetting->_opticFlowFrameCounts)
+		{
+			obs->setFrameCounts(0);
+			osg::Geode *geode = obs->getChild(0)->asGeode();
+			if (geode)
+			{
+				osg::Geometry *gmtry = geode->getDrawable(0)->asGeometry();
+				if (gmtry)
+				{
+					if (gmtry->getPrimitiveSet(0))
+					{
+						unsigned &order = _opticFlowVersions.at(depth).second;
+						osg::ref_ptr<osg::Vec3Array> points = _opticFlowVersions.at(depth).first.at(order);
+
+						++order;
+						order %= _opticFlowVersions.at(depth).first.size();
+
+						gmtry->setVertexArray(points);
+						gmtry->setPrimitiveSet(0, new osg::DrawArrays(GL_POINTS, 0, points->getNumElements()));
+						gmtry->dirtyBound();
+						gmtry->dirtyDisplayList();
+					}
 				}
 			}
 		}
