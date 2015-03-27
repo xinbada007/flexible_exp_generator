@@ -547,7 +547,7 @@ void Recorder::rectoTxt(const CarState *carState)
 	_gcvt_s(tempd, size_tempd, carState->_pointsEarned, nDigit);
 	_recS._pointsEarned = tempd + _recS._TAB;
 
-	_recS._steering = carState->_steer ? "1" : "-1" + _recS._TAB;
+	_recS._steering = (carState->_steer ? "1" : "-1") + _recS._TAB;
 
 	_gcvt_s(tempd, size_tempd, carState->_turningRadius, nDigit);
 	_recS._turningRadius = tempd + _recS._TAB;

@@ -68,7 +68,7 @@ Deviation-Siren:	../Resources/sound/alert.wav
 ##==Optic Flow Setting===========================================
 OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	300	#only visible within 100 meters
-OpticFlow-FrameCounts:	6	
+OpticFlow-FrameCounts:	0	
 OpticFlow-Versions:	0
 DepthDensity:		100	#every x meters
 OpticFlow-Width:	1000

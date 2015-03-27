@@ -456,6 +456,11 @@ void ExperimentCallback::showOpticFlow()
 		_root->addChild(_opticFlowPoints);
 	}
 
+	if (!_expSetting->_opticFlowFrameCounts)
+	{
+		return;
+	}
+
 	if (_opticFlowDrawn && _expSetting->_opticFlowRange)
 	{
 		//FOV dectection
@@ -578,7 +583,7 @@ void ExperimentCallback::showOpticFlow()
 		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : min(curFor,curBac));
 		const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
 		const int startCur = (y < 0.0f) ? curY : TOTL / 2;
-		
+		fill(_opticFlowDynamicIndex.begin(), _opticFlowDynamicIndex.end(), 0);
 		for (int opticStart = 0; opticStart<TOTL; opticStart++)
 		{
 			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(opticStart));
@@ -586,6 +591,7 @@ void ExperimentCallback::showOpticFlow()
 			{
 				if (opticStart >= startFor && opticStart <= curFor)
 				{
+					_opticFlowDynamicIndex.at(opticStart) = 1;
 //					obs->setAllChildrenOn();
 					obs->setFrameCounts(obs->getFrameCounts() + 1);
 					dynamicFlow(obs, opticStart);
@@ -593,16 +599,24 @@ void ExperimentCallback::showOpticFlow()
 
 				else if (opticStart >= startBac && opticStart <= curY)
 				{
-//					obs->setAllChildrenOn();
-					obs->setFrameCounts(obs->getFrameCounts() + 1);
-					dynamicFlow(obs, opticStart);
+					if (!_opticFlowDynamicIndex.at(opticStart))
+					{
+						_opticFlowDynamicIndex.at(opticStart) = 1;
+//						obs->setAllChildrenOn();
+						obs->setFrameCounts(obs->getFrameCounts() + 1);
+						dynamicFlow(obs, opticStart);
+					}					
 				}
 
 				else if (opticStart >= startCur && opticStart <= curBac)
 				{
-//					obs->setAllChildrenOn();
-					obs->setFrameCounts(obs->getFrameCounts() + 1);
-					dynamicFlow(obs, opticStart);
+					if (!_opticFlowDynamicIndex.at(opticStart))
+					{
+						_opticFlowDynamicIndex.at(opticStart) = 1;
+//						obs->setAllChildrenOn();
+						obs->setFrameCounts(obs->getFrameCounts() + 1);
+						dynamicFlow(obs, opticStart);
+					}
 				}
 
 				else
@@ -613,6 +627,7 @@ void ExperimentCallback::showOpticFlow()
 			}
 		}
 	}
+
 	if (!_expSetting->_opticFlowRange)
 	{
 		for (unsigned i = 0; i != _opticFlowPoints->getNumChildren(); i++)

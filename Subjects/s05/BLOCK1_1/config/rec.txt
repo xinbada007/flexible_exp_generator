@@ -1,2 +1,0 @@
-Time	FPS	Frame	Crash	RB	RU	LU	LB	OC	Dither	CustomDither	DAngle	swAngle	swNoDead	OX	OY	OZ	HX	HY	HZ	DX	DY	DZ	HA	RHA	AccumulativeHeading(Y)	Speed	RSpeed	radius	radiusR	radiusL	Dynamic	USRHIT	SCORE	toOBS	
-
