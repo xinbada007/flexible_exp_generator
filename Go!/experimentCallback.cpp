@@ -591,10 +591,13 @@ void ExperimentCallback::showOpticFlow()
 			{
 				if (opticStart >= startFor && opticStart <= curFor)
 				{
-					_opticFlowDynamicIndex.at(opticStart) = 1;
-//					obs->setAllChildrenOn();
-					obs->setFrameCounts(obs->getFrameCounts() + 1);
-					dynamicFlow(obs, opticStart);
+					if (!_opticFlowDynamicIndex.at(opticStart))
+					{
+						_opticFlowDynamicIndex.at(opticStart) = 1;
+//						obs->setAllChildrenOn();
+						obs->setFrameCounts(obs->getFrameCounts() + 1);
+						dynamicFlow(obs, opticStart);
+					}
 				}
 
 				else if (opticStart >= startBac && opticStart <= curY)
