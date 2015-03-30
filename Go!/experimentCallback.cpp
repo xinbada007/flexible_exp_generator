@@ -463,171 +463,17 @@ void ExperimentCallback::showOpticFlow()
 
 	if (_opticFlowDrawn && _expSetting->_opticFlowRange)
 	{
-		//FOV dectection
-		const double MAX_SUPPORTED_FOV(178.0f);
-		assert(_fovX < MAX_SUPPORTED_FOV);
-		const double theta = 0.5f * (min(_fovX*1.05f, MAX_SUPPORTED_FOV)) * TO_RADDIAN;	//slightly increase the fov by 10%
-		CarState const *cs = _car->getCarState();
-
-		const osg::Vec3d &direction = cs->_direction;
-		const double curtheta = acos((direction*X_AXIS) / (direction.length()*X_AXIS.length()));
-		const double &L = _expSetting->_opticFlowRange;
-
-		assert(cos(theta));
-		const double L1 = abs(L*sin(curtheta - theta) / cos(theta)) + 0.5f;
-		const double L2 = abs(L*sin(PI - theta - curtheta) / cos(theta)) + 0.5f;
-
-		const int sign = direction*UP_DIR >= 0 ? 1 : -1;
-		
-		double forwL(L), backL(L);
-		if (sign == 1)
+		opticFlowRange();
+		std::vector<int>::const_iterator i = _opticFlowDynamicIndex.cbegin();
+		while (i != _opticFlowDynamicIndex.cend())
 		{
-			if (curtheta >= theta && curtheta <= PI - theta)
-			{
-				forwL = max(L1, L2);
-				backL = 0.0f;
-			}
-			else if (curtheta < theta)
-			{
-				forwL = max(L1, L2);
-				backL = min(L1, L2);
-			}
-			else if (curtheta > PI - theta)
-			{
-				forwL = max(L1, L2);
-				backL = min(L1, L2);
-			}
-		}
-		else
-		{
-			if (curtheta >= theta && curtheta <= PI - theta)
-			{
-				backL = max(L1, L2);
-				forwL = 0.0f;
-			}
-			else if (curtheta < theta)
-			{
-				backL = max(L1, L2);
-				forwL = min(L1, L2);
-			}
-			else if (curtheta > PI - theta)
-			{
-				backL = max(L1, L2);
-				forwL = min(L1, L2);
-			}
-		}
-		//FOV dectection
-
-		const int &TOTL = _opticFlowPoints->getNumChildren();
-		const double &y = _car->getCarState()->_O.y() - _expSetting->_opticFlowStartOffset;
-		const double forwardY = y + min(forwL,L);
-		const double backwardY = y - min(backL,L);
-
-		int curY(0);
-		if (y >= 0.0f)
-		{
-			curY = y / _expSetting->_depthDensity/* + 0.5f*/;
-			if (curY > TOTL / 2 - 1)
-			{
-				curY = TOTL / 2 - 1;
-			}
-		}
-		else
-		{
-			curY = (abs(y) / _expSetting->_depthDensity)/* + 0.5f*/;
-			curY += TOTL / 2;
-			if (curY > TOTL - 1)
-			{
-				curY = TOTL - 1;
-			}
-		}
-
-		int curFor(0);
-		if (forwardY >= 0.0f)
-		{
-			curFor = forwardY / _expSetting->_depthDensity/* + 0.5f*/;
-			if (curFor > TOTL / 2 - 1)
-			{
-				curFor = TOTL / 2 - 1;
-			}
-		}
-		else
-		{
-			curFor = abs(forwardY) / _expSetting->_depthDensity/* + 0.5f*/;
-			curFor += TOTL / 2;
-			if (curFor > TOTL - 1)
-			{
-				curFor = TOTL - 1;
-			}
-		}
-
-		int curBac(0);
-		if (backwardY >= 0.0f)
-		{
-			curBac = backwardY / _expSetting->_depthDensity/* + 0.5f*/;
-			if (curBac > TOTL / 2 - 1)
-			{
-				curBac = TOTL / 2 - 1;
-			}
-		}
-		else
-		{
-			curBac = abs(backwardY) / _expSetting->_depthDensity/* + 0.5f*/;
-			curBac += TOTL / 2;
-			if (curBac > TOTL - 1)
-			{
-				curBac = TOTL - 1;
-			}
-		}
-
-		const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY<0.0f) ? 0 : min(curFor,curBac));
-		const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
-		const int startCur = (y < 0.0f) ? curY : TOTL / 2;
-		fill(_opticFlowDynamicIndex.begin(), _opticFlowDynamicIndex.end(), 0);
-		for (int opticStart = 0; opticStart<TOTL; opticStart++)
-		{
-			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(opticStart));
+			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(*i));
 			if (obs)
 			{
-				if (opticStart >= startFor && opticStart <= curFor)
-				{
-					if (!_opticFlowDynamicIndex.at(opticStart))
-					{
-						_opticFlowDynamicIndex.at(opticStart) = 1;
-//						obs->setAllChildrenOn();
-						obs->setFrameCounts(obs->getFrameCounts() + 1);
-						dynamicFlow(obs, opticStart);
-					}
-				}
-
-				else if (opticStart >= startBac && opticStart <= curY)
-				{
-					if (!_opticFlowDynamicIndex.at(opticStart))
-					{
-						_opticFlowDynamicIndex.at(opticStart) = 1;
-//						obs->setAllChildrenOn();
-						obs->setFrameCounts(obs->getFrameCounts() + 1);
-						dynamicFlow(obs, opticStart);
-					}					
-				}
-
-				else if (opticStart >= startCur && opticStart <= curBac)
-				{
-					if (!_opticFlowDynamicIndex.at(opticStart))
-					{
-						_opticFlowDynamicIndex.at(opticStart) = 1;
-//						obs->setAllChildrenOn();
-						obs->setFrameCounts(obs->getFrameCounts() + 1);
-						dynamicFlow(obs, opticStart);
-					}
-				}
-
-				else
-				{
-//					obs->setAllChildrenOff();
-					obs->setFrameCounts(0);
-				}
+				obs->setFrameCounts(obs->getFrameCounts() + 1);
+				dynamicFlow(obs, *i);
 			}
+			++i;
 		}
 	}
 
@@ -641,6 +487,148 @@ void ExperimentCallback::showOpticFlow()
 				obs->setFrameCounts(obs->getFrameCounts() + 1);
 				dynamicFlow(obs, i);
 			}
+		}
+	}
+}
+
+void ExperimentCallback::opticFlowRange()
+{
+	//FOV dectection
+	const double MAX_SUPPORTED_FOV(178.0f);
+	assert(_fovX < MAX_SUPPORTED_FOV);
+	const double theta = 0.5f * (min(_fovX*1.05f, MAX_SUPPORTED_FOV)) * TO_RADDIAN;	//slightly increase the fov by 10%
+	CarState const *cs = _car->getCarState();
+
+	const osg::Vec3d &direction = cs->_direction;
+	const double curtheta = acos((direction*X_AXIS) / (direction.length()*X_AXIS.length()));
+	const double &L = _expSetting->_opticFlowRange;
+
+	assert(cos(theta));
+	const double L1 = abs(L*sin(curtheta - theta) / cos(theta)) + 0.5f;
+	const double L2 = abs(L*sin(PI - theta - curtheta) / cos(theta)) + 0.5f;
+
+	const int sign = direction*UP_DIR >= 0 ? 1 : -1;
+
+	double forwL(L), backL(L);
+	if (sign == 1)
+	{
+		if (curtheta >= theta && curtheta <= PI - theta)
+		{
+			forwL = max(L1, L2);
+			backL = 0.0f;
+		}
+		else if (curtheta < theta)
+		{
+			forwL = max(L1, L2);
+			backL = min(L1, L2);
+		}
+		else if (curtheta > PI - theta)
+		{
+			forwL = max(L1, L2);
+			backL = min(L1, L2);
+		}
+	}
+	else
+	{
+		if (curtheta >= theta && curtheta <= PI - theta)
+		{
+			backL = max(L1, L2);
+			forwL = 0.0f;
+		}
+		else if (curtheta < theta)
+		{
+			backL = max(L1, L2);
+			forwL = min(L1, L2);
+		}
+		else if (curtheta > PI - theta)
+		{
+			backL = max(L1, L2);
+			forwL = min(L1, L2);
+		}
+	}
+	//FOV dectection
+
+	const int &TOTL = _opticFlowPoints->getNumChildren();
+	const double &y = _car->getCarState()->_O.y() - _expSetting->_opticFlowStartOffset;
+	const double forwardY = y + min(forwL, L);
+	const double backwardY = y - min(backL, L);
+
+	int curY(0);
+	if (y >= 0.0f)
+	{
+		curY = y / _expSetting->_depthDensity/* + 0.5f*/;
+		if (curY > TOTL / 2 - 1)
+		{
+			curY = TOTL / 2 - 1;
+		}
+	}
+	else
+	{
+		curY = (abs(y) / _expSetting->_depthDensity)/* + 0.5f*/;
+		curY += TOTL / 2;
+		if (curY > TOTL - 1)
+		{
+			curY = TOTL - 1;
+		}
+	}
+
+	int curFor(0);
+	if (forwardY >= 0.0f)
+	{
+		curFor = forwardY / _expSetting->_depthDensity/* + 0.5f*/;
+		if (curFor > TOTL / 2 - 1)
+		{
+			curFor = TOTL / 2 - 1;
+		}
+	}
+	else
+	{
+		curFor = abs(forwardY) / _expSetting->_depthDensity/* + 0.5f*/;
+		curFor += TOTL / 2;
+		if (curFor > TOTL - 1)
+		{
+			curFor = TOTL - 1;
+		}
+	}
+
+	int curBac(0);
+	if (backwardY >= 0.0f)
+	{
+		curBac = backwardY / _expSetting->_depthDensity/* + 0.5f*/;
+		if (curBac > TOTL / 2 - 1)
+		{
+			curBac = TOTL / 2 - 1;
+		}
+	}
+	else
+	{
+		curBac = abs(backwardY) / _expSetting->_depthDensity/* + 0.5f*/;
+		curBac += TOTL / 2;
+		if (curBac > TOTL - 1)
+		{
+			curBac = TOTL - 1;
+		}
+	}
+
+	const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY < 0.0f) ? 0 : min(curFor, curBac));
+	const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
+	const int startCur = (y < 0.0f) ? curY : TOTL / 2;
+	_opticFlowDynamicIndex.clear();
+	for (int opticStart = 0; opticStart < TOTL; opticStart++)
+	{
+		if (opticStart >= startFor && opticStart <= curFor)
+		{
+			_opticFlowDynamicIndex.push_back(opticStart);
+		}
+
+		else if (opticStart >= startBac && opticStart <= curY)
+		{
+			_opticFlowDynamicIndex.push_back(opticStart);
+		}
+
+		else if (opticStart >= startCur && opticStart <= curBac)
+		{
+			_opticFlowDynamicIndex.push_back(opticStart);
 		}
 	}
 }
@@ -685,7 +673,7 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned
 						* osg::Matrix::translate(*i);
 
 					const unsigned START = (i - v->begin()) * obs->getPolyNumber();
-					const unsigned END = START + 8;
+					const unsigned END = START + obs->getPolyNumber();
 					osg::Vec3Array::iterator j = vertex->begin() + START;
 					while (j != vertex->begin() + END)
 					{

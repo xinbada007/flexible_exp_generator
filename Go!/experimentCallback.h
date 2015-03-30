@@ -101,6 +101,7 @@ private:
 	void positionCar();
 	void showObstacle();
 	void showOpticFlow();
+	void opticFlowRange();
 	void dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned depth);
 	void deviationCheck();
 

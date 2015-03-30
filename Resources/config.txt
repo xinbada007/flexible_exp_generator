@@ -28,7 +28,7 @@ CarReset:	0	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = according to start point
 
 [RoadSettings]
-RoadLanes:	1000.368
+RoadLanes:	100.368
 RoadLength:	1300	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
 TextureWidth:	9.18
 RoadPic:	../Resources/texture/road4096-0.png 16
@@ -67,12 +67,12 @@ Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Optic Flow Setting===========================================
 OpticFlow:		1	#1 = Enable	0= Disable
-OpticFlow-Visible:	300	#only visible within 100 meters
-OpticFlow-FrameCounts:	0	
+OpticFlow-Visible:	1000	#only visible within 100 meters
+OpticFlow-FrameCounts:	6
 OpticFlow-Versions:	0
 DepthDensity:		100	#every x meters
-OpticFlow-Width:	1000
-OpticFlow-Height:	420
+OpticFlow-Width:	637
+OpticFlow-Height:	414
 OpticFlow-Density:	300
 OPTICFLOW-MODE:		2
 OPTICFLOW-MODE-SIZE:	1
@@ -80,9 +80,9 @@ OPTICFLOW-MODE-SIZE:	1
 
 ##==Trigger Setting======================
 #road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
-Trigger-Enable:	0	0	1	1	0	0	0	0	1	0
+Trigger-Enable:	1	0	1	1	0	0	0	0	1	0
 Trigger-Time:	0	0	-1	4	0	-1	0	-1	0	30
-Trigger-Time:	-1	16	16	18	16	-1	-1	-1	-1	-1
+Trigger-Time:	-1	16	16	18	-1	-1	-1	-1	-1	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
 
 ##==Text Setting=========================
