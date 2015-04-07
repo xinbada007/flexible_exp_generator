@@ -222,7 +222,7 @@ void ExperimentCallback::createObstacles()
 					const osg::Vec3d &dir = *(cB + 1) - *cB;
 					const double costheta = (dir * UP_DIR) / (dir.length()*UP_DIR.length());
 					const int sign = ((UP_DIR^dir).z() > 0) ? 1 : -1;
-					theta = acos(costheta) * sign;
+					theta = acosR(costheta) * sign;
 				}
 				osg::Quat rotationQ;
 				rotationQ.makeRotate(theta, Z_AXIS);
@@ -499,8 +499,9 @@ void ExperimentCallback::opticFlowRange()
 	const double theta = 0.5f * (min(_fovX*1.05f, MAX_SUPPORTED_FOV)) * TO_RADDIAN;	//slightly increase the fov by 10%
 	CarState const *cs = _car->getCarState();
 
-	const osg::Vec3d &direction = cs->_direction;
-	const double curtheta = acos((direction*X_AXIS) / (direction.length()*X_AXIS.length()));
+	osg::Vec3d direction = cs->_direction;
+	direction.normalize();
+	const double curtheta = acosR(direction*X_AXIS);
 	const double &L = _expSetting->_opticFlowRange;
 
 	assert(cos(theta));

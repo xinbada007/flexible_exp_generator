@@ -653,7 +653,7 @@ void CarEvent::getTurningFactor()
 // 	osg::notify(osg::NOTICE) << "VEC\t" << realVec.x() << "\t" << realVec.y() << std::endl;
 // 	osg::notify(osg::NOTICE) << "CENTER\t" << _carState->_turningCenter.x() << "\t" << _carState->_turningCenter.y() << std::endl;
 
-	double theta = acos((realVec*WHEELBASE) / (realVec.length()*WHEELBASE.length()));
+	double theta = acosR((realVec*WHEELBASE) / (realVec.length()*WHEELBASE.length()));
 	theta -= PI*0.5f;
 	theta -= abs(_carState->_angle);
 	if (!isEqual(theta,0.0f,eps_100))
