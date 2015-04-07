@@ -5,11 +5,11 @@ TrialConfig
 
 [ScreenSettings]
 #Num of Screent starts from 0
-Hdistance:	2.72	#5.44	#0.6
+Hdistance:	0.6	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
-aspect:	 	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		42.175	#Disable when RealWorld is enabled
+aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		50	#Disable when RealWorld is enabled
 zNear:		0.1
 zFar:		1000
 RealWorld:	0:	45.533, 69.565, 45.217
@@ -69,19 +69,19 @@ Deviation-Siren:	../Resources/sound/alert.wav
 OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
 OpticFlow-FrameCounts:	6
-OpticFlow-Versions:	0
+OpticFlow-Versions:	50
 DepthDensity:		100	#every x meters
-OpticFlow-Width:	637
+OpticFlow-Width:	2000
 OpticFlow-Height:	414
-OpticFlow-Density:	300
-OPTICFLOW-MODE:		2
-OPTICFLOW-MODE-SIZE:	1
+OpticFlow-Density:	1000
+OPTICFLOW-MODE:		0
+OPTICFLOW-MODE-SIZE:	3
 
 
 ##==Trigger Setting======================
 #road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
-Trigger-Enable:	1	0	1	1	0	0	0	0	1	0
-Trigger-Time:	0	0	-1	4	0	-1	0	-1	0	30
+Trigger-Enable:	1	1	1	1	0	0	0	0	1	1
+Trigger-Time:	16	0	-1	4	0	-1	0	-1	0	30
 Trigger-Time:	-1	16	16	18	-1	-1	-1	-1	-1	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
 

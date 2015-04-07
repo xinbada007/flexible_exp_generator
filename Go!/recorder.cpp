@@ -483,8 +483,8 @@ void Recorder::rectoTxt(const CarState *carState)
 		osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
 		naviEdge.normalize();
 		const osg::Vec3d cross = naviEdge^carD;
-		double dA = (asinR(cross.z()) / TO_RADDIAN);
-		_gcvt_s(tempd, size_tempd, dA, nDigit);
+		const double theta = (acos(naviEdge*carD) / TO_RADDIAN) * ((cross.z() >= 0) ? 1.0f : -1.0f);
+		_gcvt_s(tempd, size_tempd, theta, nDigit);
 		_recS._dAngle = tempd + _recS._TAB;
 	}
 
