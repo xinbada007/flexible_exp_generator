@@ -795,6 +795,20 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 					_anmCallback->setPause(!_anmCallback->getPause());
 				}
 				break;
+			case::osgGA::GUIEventAdapter::KEY_Home:
+				if (_mv)
+				{
+					ovrHmd *hmd = _mv->getHMDDevice();
+					if (hmd)
+					{
+						ovrHmd_RecenterPose(*hmd);
+					}
+				}
+				break;
+// 			case::osgGA::GUIEventAdapter::KEY_Delete:
+// 				_opticFlowPoints = NULL;
+// 				_opticFlowPoints->addChild(NULL);
+// 				break;
 			default:
 				break;
 			}
@@ -964,7 +978,7 @@ void ExperimentCallback::trigger()
 					_speedColor = !_speedColor;
 					break;
 				case::Experiment::TRIGGER_COM::TRIGGER:
-					if (_car)
+					if (_expSetting->_timer && _car)
 					{
 						this->_insertTrigger = true;
 						_car->getCarState()->_insertTrigger = true;

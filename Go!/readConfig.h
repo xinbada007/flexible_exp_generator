@@ -401,7 +401,7 @@ typedef struct Vehicle:public osg::Referenced
 		_wheelBase = 2.615;
 		_height = 0.0f;
 		_disabledButton = new osg::UIntArray;
-		_disabledButton->resize(20, 0);
+		_disabledButton->assign(20, 0);
 		_carNode = NULL;
 		_carInsideLight = NULL;
 

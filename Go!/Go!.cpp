@@ -3,12 +3,6 @@
 #include "stdafx.h"
 #include "headers.h"
 
-#include <osgViewer/api/Win32/GraphicsHandleWin32>
-
-#include <OVR.h>
-#include <OVR_CAPI.h>
-#include <OVR_CAPI_GL.h>
-
 Road * obtainRoad(ReadConfig *rc)
 {
 	osg::ref_ptr<Road> road = new Road;

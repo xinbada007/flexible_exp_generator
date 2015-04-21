@@ -9,10 +9,6 @@
 #include <osg/Multisample>
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
 
-#include <OVR.h>
-#include <OVR_CAPI.h>
-#include <OVR_CAPI_GL.h>
-
 #include <assert.h>
 
 MulitViewer::MulitViewer(osg::ref_ptr<ReadConfig> refRC):
@@ -577,7 +573,6 @@ bool MulitViewer::setHMDSceneData(osg::Node *node)
 
 	int g_DistortionCaps = 0
 		| ovrDistortionCap_Vignette
-		| ovrDistortionCap_Chromatic
 		| ovrDistortionCap_Overdrive
 		| ovrDistortionCap_TimeWarp // Turning this on gives ghosting???
 		;
@@ -607,8 +602,6 @@ bool MulitViewer::setHMDSceneData(osg::Node *node)
 	this->frame();
 
 	_hmdView->getCamera()->getGraphicsContext()->makeCurrent();
-
-	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	_glCfg.OGL.Header.API = ovrRenderAPI_OpenGL;
 	_glCfg.OGL.Header.BackBufferSize = _windowsR;
@@ -696,7 +689,7 @@ void MulitViewer::runHMD()
 	_leftEye = leftcam;
 	_rightEye = rightcam;
 
-// 	//Test
+ 	//Test
 // 	osg::Camera *backCam = _hmdView->getSlave(ovrEye_Count)._camera;
 // 	backCam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.x,
 // 		_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.y,
@@ -715,23 +708,23 @@ void MulitViewer::runHMD()
 	//Test
 
 	osg::Matrixd L, R ,HM;
+	osg::Matrixd leftRotation, rightRotation;
 	CameraEvent *camEvent = dynamic_cast<CameraEvent*>(_hmdView->getCameraManipulator());
 	if (camEvent)
 	{
-		camEvent->addOffsetMatrixtoList(&L);
-		camEvent->addCameratoList(leftcam);
-		camEvent->addOffsetMatrixtoList(&R);
-		camEvent->addCameratoList(rightcam);
+		camEvent->setOffsetMatrixtoList(&L, &R);
+		camEvent->setCameratoList(leftcam,rightcam);
+		camEvent->setRotationMatrix(&leftRotation, &rightRotation);
 
 		camEvent->setEyePointOffset(&HM);
 	}
 
-	typedef BOOL(GL_APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
-	PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
-	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
-	assert(wglSwapIntervalEXT);
+// 	typedef BOOL(GL_APIENTRY *PFNWGLSWAPINTERVALFARPROC)(int);
+// 	PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
+// 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
+// 	assert(wglSwapIntervalEXT);
 
-	ovrTrackingState hmdState;
+//	ovrTrackingState hmdState;
 
 	ovrHmd_RecenterPose(_hmd);
 	ovrHmd_DismissHSWDisplay(_hmd);
@@ -741,28 +734,28 @@ void MulitViewer::runHMD()
 	{
 		const unsigned &frameIndex = _hmdView->getFrameStamp()->getFrameNumber();
  		l_HmdFrameTiming = ovrHmd_BeginFrame(_hmd, frameIndex);
-		ovrHmd_GetEyePoses(_hmd, frameIndex, _eyeOffsets, _eyePoses, &hmdState);
+		ovrHmd_GetEyePoses(_hmd, frameIndex, _eyeOffsets, _eyePoses, NULL);
 
 		const OVR::Quatd &leftOrientation = OVR::Quatd(_eyePoses[ovrEye_Left].Orientation);
 		const OVR::Matrix4d &leftMVMatrix = OVR::Matrix4d(leftOrientation.Inverted());
 		const OVR::Quatd &rightOrientation = OVR::Quatd(_eyePoses[ovrEye_Right].Orientation);
 		const OVR::Matrix4d &rightMVMatrix = OVR::Matrix4d(rightOrientation.Inverted());
-		osg::Matrixd leftMatrix, rightMatrix;
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < 4; j++)
 			{
-				leftMatrix(i, j) = leftMVMatrix.Transposed().M[i][j];
-				rightMatrix(i, j) = rightMVMatrix.Transposed().M[i][j];
+				leftRotation(i, j) = leftMVMatrix.Transposed().M[i][j];
+				rightRotation(i, j) = rightMVMatrix.Transposed().M[i][j];
 			}
 		}
-		const double &headX = hmdState.HeadPose.ThePose.Position.x;
-		const double &headY = 0.0f;
-		const double &headZ = 0.0f;
-		osg::Vec3d headVector(headX, headY, headZ);
-		HM = osg::Matrix::translate(headVector);
-		L = leftMatrix * l_view_M;
-		R = rightMatrix* r_view_M;
+
+// 		const double &headX = hmdState.HeadPose.ThePose.Position.x;
+// 		const double &headY = hmdState.HeadPose.ThePose.Position.y;
+// 		const double &headZ = hmdState.HeadPose.ThePose.Position.z;
+// 		osg::Vec3d headVector(headX, headY, headZ);
+// 		HM = osg::Matrix::translate(headVector);
+		L = leftRotation * l_view_M;
+		R = rightRotation * r_view_M;
 
 // 		//Test
 //		backCam->setViewMatrix(_hmdView->getCamera()->getViewMatrix());
@@ -848,11 +841,6 @@ int MulitViewer::go()
 	{
 		assert(!_hmdView);
 		return run();
-// 		while (!this->done())
-// 		{
-// 			this->frame();
-// 		}
-// 		return 0;
 	}
 	else if (_hmdView)
 	{

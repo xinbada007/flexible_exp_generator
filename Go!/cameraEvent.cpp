@@ -11,6 +11,8 @@ _useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);
+	_initialCamRotation = lMat.getRotate();
+
 	_camRotation = lMat.getRotate();
 	_camRotationOrigin = _camRotation;
 
@@ -25,12 +27,28 @@ _useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL)
 	_eyeRotation = osg::Matrix::identity().getRotate();
 	_eyeOffset.set(0.0f, 0.0f, 0.0f);
 
+	_camList[0] = NULL;
+	_camList[1] = NULL;
+	_matrixList[0] = NULL;
+	_matrixList[1] = NULL;
+	_rotationList[0] = NULL;
+	_rotationList[1] = NULL;
+
 	genCamera(refRC);
 }
 
 
 CameraEvent::~CameraEvent()
 {
+	_eyePointOffset = NULL;
+
+	_camList[0] = NULL;
+	_camList[1] = NULL;
+	_matrixList[0] = NULL;
+	_matrixList[1] = NULL;
+	_rotationList[0] = NULL;
+	_rotationList[1] = NULL;
+
 	std::cout << "Deconstruct CameraEvent" << std::endl;
 }
 
@@ -55,16 +73,10 @@ osg::Matrixd CameraEvent::getInverseMatrix() const
 							osg::Matrix::rotate(_camRotation.inverse()) *
 								_matrixLookAt;
 
-	if ((!_camList.empty() && !_matrixList.empty()) && (_camList.size() == _matrixList.size()))
+	if (_camList[0] && _camList[1] && _matrixList[0] && _matrixList[1])
 	{
-		cameraList::const_iterator camIndex = _camList.cbegin();
-		matrixList::const_iterator mIndex = _matrixList.cbegin();
-		while (camIndex != _camList.cend() && mIndex != _matrixList.cend())
-		{
-			(*camIndex)->setViewMatrix(M*(*(*mIndex)));
-			++camIndex;
-			++mIndex;
-		}
+		_camList[0]->setViewMatrix(M * (*_matrixList[0]));
+		_camList[1]->setViewMatrix(M * (*_matrixList[1]));
 	}
 
 	return M;
@@ -198,7 +210,7 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 
 			if (_reset)
 			{
-				_camRotation = _camRotationOrigin * refCS->_state.getRotate();
+				_camRotation = _camRotationOrigin  * refCS->_state.getRotate();
 				_offset = _offsetOrigin * osg::Matrix::rotate(refCS->_state.getRotate());
 				_reset = false;
 			}
@@ -207,6 +219,7 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			{
 				_realOffset = _offset * (*_eyePointOffset);
 			}
+
 			else
 			{
 				_realOffset = _offset;

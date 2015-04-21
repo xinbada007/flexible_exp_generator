@@ -15,7 +15,7 @@ _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false)
 , _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _speedSign(1)
 {
 	_buttons = new osg::UIntArray;
-	_buttons->assign(10, 0);
+	_buttons->assign(20, 0);
 }
 
 CarEvent::~CarEvent()
@@ -157,11 +157,11 @@ void CarEvent::calculateCarMovement()
 	{
 		osg::Vec3d &origin = _carState->_turningCenter;
 		const double &radius = _carState->_turningRadius;
-		const double perimeter = 2 * PI*radius;
+		const double perimeter = 2 * PI * radius;
 		double ratio = 0.0f;
 		if (radius > 0.0f)
 		{
-			ratio = abs((_carState->_speed / perimeter)*(360.0f)*TO_RADDIAN);
+			ratio = abs((_carState->_speed / radius));
 			ratio = (_carState->_speed > 0.0f) ? (_leftTurn) ? ratio : -ratio : (_leftTurn) ? ratio: -ratio;
 		}
 		const osg::Matrix circle = osg::Matrix::rotate(ratio / frameRate::instance()->getRealfRate(), Z_AXIS);
@@ -537,6 +537,11 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				break;
 			}
 		case osgGA::GUIEventAdapter::FRAME:
+			//DEBUG
+// 			_carState->_speed = _vehicle->_speed;
+// 			_carState->_angle = _vehicle->_rotate * 0.2;
+			//DEBUG
+
 			if (_carState->_reset)
 			{
 				makeResetMatrix();

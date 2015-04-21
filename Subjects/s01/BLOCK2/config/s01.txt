@@ -4,6 +4,8 @@
 TrialConfig
 
 [ScreenSettings]
+USE_HMD:	1
+HMD_RefreshRate:	60;
 #Num of Screent starts from 0
 Hdistance:	0.6	#5.44	#0.6
 Vdistance:	1.5	#1.25
@@ -66,7 +68,7 @@ Lane-Offset:	-1.875	#Negative = L	Positive = R
 Deviation-Siren:	../Resources/sound/alert.wav
 
 ##==Optic Flow Setting===========================================
-OpticFlow:		1	#1 = Enable	0= Disable
+OpticFlow:		0	#1 = Enable	0= Disable
 OpticFlow-Visible:	1000	#only visible within 100 meters
 OpticFlow-FrameCounts:	6
 OpticFlow-Versions:	50
@@ -82,7 +84,7 @@ OPTICFLOW-MODE-SIZE:	3
 #road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
 Trigger-Enable:	1	1	1	1	0	0	0	0	1	1
 Trigger-Time:	16	0	-1	4	0	-1	0	-1	0	30
-Trigger-Time:	-1	16	16	18	-1	-1	-1	-1	-1	-1
+Trigger-Time:	-1	16	0	18	-1	-1	-1	-1	-1	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
 
 ##==Text Setting=========================

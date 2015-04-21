@@ -4,8 +4,10 @@
 #include <osgText/Text>
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
 
+#define __STDC_LIMIT_MACROS 1
+#define __STDC_CONSTANT_MACROS 1
 #include <OVR.h>
-#include <OVR_CAPI.h>
+#include <OVR_CAPI_0_5_0.h>
 #include <OVR_CAPI_GL.h>
 
 #include <vector>
@@ -32,6 +34,8 @@ public:
 	inline std::vector<osg::Camera*> getSlaveCamerasinMainView() const { return _slaveCamerasinNormalView; };
 	inline osg::ref_ptr<osg::Camera> getLeftEyeinHMD() { return _leftEye; };
 	inline osg::ref_ptr<osg::Camera> getRightEyeinHMD() { return _rightEye; };
+
+	inline ovrHmd * getHMDDevice() { if (_hmdView) return &_hmd; return NULL; };
 
 	inline osgViewer::View * getHuDView() const { return _HUDView; };
 	enum HUDPOS

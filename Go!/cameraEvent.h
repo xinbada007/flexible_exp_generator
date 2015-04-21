@@ -4,17 +4,15 @@
 #include <osgGA/CameraManipulator>
 #include <osg/Quat>
 
-typedef std::vector<osg::Camera*> cameraList;
-typedef std::vector<osg::Matrixd*> matrixList;
-
 class CameraEvent :
 	public osgGA::CameraManipulator
 {
 public:
 	CameraEvent(osg::ref_ptr<ReadConfig> refRC);
-	inline void addOffsetMatrixtoList(osg::Matrixd *offset){ _matrixList.push_back(offset); };
-	inline void addCameratoList(osg::Camera *cam){ _camList.push_back(cam); };
+	inline void setOffsetMatrixtoList(osg::Matrixd *LEFT, osg::Matrixd *RIGHT){ _matrixList[0] = LEFT; _matrixList[1] = RIGHT; };
+	inline void setCameratoList(osg::Camera *LEFT, osg::Camera *RIGHT){ _camList[0] = LEFT; _camList[1] = RIGHT; };
 	inline void setEyePointOffset(osg::Matrixd *eyeOffset) { _eyePointOffset = eyeOffset; };
+	inline void setRotationMatrix(osg::Matrixd *LEFT, osg::Matrixd *RIGHT){ _rotationList[0] = LEFT; _rotationList[1] = RIGHT; }
 
 protected:
 	virtual ~CameraEvent();
@@ -29,6 +27,7 @@ private:
 	void updateLookAt(osg::View *viewer);
 	osg::Quat _camRotationOrigin;
 	osg::Quat _camRotation;
+	osg::Quat _initialCamRotation;
 	osg::Vec3d _offsetOrigin;
 	osg::Vec3d _offset;
 	osg::Vec3d _realOffset;
@@ -54,8 +53,9 @@ private:
 
 	osg::Matrix _stateLast;
 
-	cameraList _camList;
-	matrixList _matrixList;
+	osg::Camera *_camList[2];
+	osg::Matrixd *_matrixList[2];
+	osg::Matrixd *_rotationList[2];
 
 	osg::Matrix *_eyePointOffset;
 };
