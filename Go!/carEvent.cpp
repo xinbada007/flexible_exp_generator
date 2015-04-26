@@ -488,9 +488,9 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			if ((key == osgGA::GUIEventAdapter::KEY_A || key == osgGA::GUIEventAdapter::KEY_D))
 			{
 				int sign = (key == osgGA::GUIEventAdapter::KEY_A) ? 1 : -1;
-				_leftTurn = (_carState->_speed >= 0) ? (sign == 1) : (sign == -1);
-				sign = (_leftTurn) ? 1 : -1;
 				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
+				_carState->_angle = abs(_carState->_angle);
+				_leftTurn = (_carState->_speed >= 0) ? (sign == 1) : (sign == -1);
 				_shifted = true;
 				break;
 			}
