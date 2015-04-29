@@ -9,6 +9,8 @@
 #include <osg/Multisample>
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
 
+#include <Kernel/OVR_Threads.h>
+
 #include <assert.h>
 
 MulitViewer::MulitViewer(osg::ref_ptr<ReadConfig> refRC):
@@ -63,7 +65,7 @@ void MulitViewer::genMainView()
 		this->addView(_hmdView);
 		this->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 		frameRate::instance()->setDesignedfRate(_screens->_HMD_RefreshRate);
-		this->setRunMaxFrameRate(_screens->_HMD_RefreshRate);
+//		this->setRunMaxFrameRate(_screens->_HMD_RefreshRate);
 		assert(_hmd);
 		_hFOV = max(_hmd->MaxEyeFov->LeftTan, _hmd->MaxEyeFov->RightTan);
 		_hFOV *= 2.0f;
@@ -455,6 +457,16 @@ bool MulitViewer::hmd_Initialise()
 		return true;
 	}
 
+	SetThreadPriority(GetCurrentThread(), OVR::Thread::HighestPriority);
+
+	SYSTEM_INFO sysInfo;
+	GetNativeSystemInfo(&sysInfo);
+	int cpuCount = (int) sysInfo.dwNumberOfProcessors;
+	if (cpuCount >= 4) // Don't do this unless there are at least 4 processors, otherwise the process could hog the machine.
+	{
+		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	}
+
 	if (!ovr_Initialize())
 	{
 		osg::notify(osg::FATAL) << "Cannot Initialize Oculus Rift" << std::endl;
@@ -468,11 +480,9 @@ bool MulitViewer::hmd_Initialise()
 		_hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
 	}
 
-	//Test
-	unsigned hmdCaps = /*ovrHmdCap_NoMirrorToWindow |*/ ovrHmdCap_NoVSync;
+	unsigned hmdCaps = ovrHmdCap_LowPersistence | ovrHmdCap_DynamicPrediction;
 	ovrHmd_SetEnabledCaps(_hmd, hmdCaps);
-	//Test
-
+	
 	uint32_t l_SupportedSensorCaps = ovrTrackingCap_Orientation | ovrTrackingCap_Position | ovrTrackingCap_MagYawCorrection;
 	uint32_t l_RequiredTrackingCaps = 0;
 	ovrBool l_TrackingResult = ovrHmd_ConfigureTracking(_hmd, l_SupportedSensorCaps, l_RequiredTrackingCaps);
@@ -484,8 +494,8 @@ bool MulitViewer::hmd_Initialise()
 
 	_windowsR = _hmd->Resolution;
 	bool directMode = !(_hmd->HmdCaps & ovrHmdCap_ExtendDesktop);
-	_windowsR.w /= (directMode) ? 2 : 1;
-	_windowsR.h /= (directMode) ? 2 : 1;
+	_windowsR.w = (directMode) ? 1100 : _windowsR.w;
+	_windowsR.h = (directMode) ? 618 : _windowsR.h;
 
 	_hmdView = new osgViewer::View;
 	if (directMode)
@@ -754,6 +764,7 @@ void MulitViewer::runHMD()
 // 		const double &headZ = hmdState.HeadPose.ThePose.Position.z;
 // 		osg::Vec3d headVector(headX, headY, headZ);
 // 		HM = osg::Matrix::translate(headVector);
+
 		L = leftRotation * l_view_M;
 		R = rightRotation * r_view_M;
 

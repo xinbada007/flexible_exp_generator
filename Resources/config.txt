@@ -4,7 +4,7 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	0	#enable this disbles all other screen settings
+Use_HMD:	1	#enable this disbles all other screen settings
 HMD_Screen:	1
 HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
@@ -15,7 +15,7 @@ fovy:		60	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391
-MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
+MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 Background:	0.529,0.808,0.980
 
 [CarSettings]
