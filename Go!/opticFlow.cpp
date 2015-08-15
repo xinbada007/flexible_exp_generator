@@ -59,6 +59,16 @@ void OpticFlow::createGLPOINTS(osg::Vec3Array *p)
 
 	GLgeomtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, vertex->getNumElements()));
 
+	//TEST
+	const int Num = (double) 1 / 0.005f + 0.5f;
+	const int STEP = (double) vertex->getNumElements() / Num + 0.5f;
+	_primList.clear();
+	for (int i = 0; i < Num; i++)
+	{
+		_primList.push_back(new osg::DrawArrays(GL_POINTS, i * STEP, STEP));
+	}
+	//TEST
+
 	GLP->addDrawable(GLgeomtry.release());
 	this->addChild(GLP.release());
 

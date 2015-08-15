@@ -400,7 +400,7 @@ void ExperimentCallback::createOpticFlow()
 						_expSetting->_opticFlowModeSize, 
 						_expSetting->_opticFlowModeSegments);
 
-					if (_expSetting->_opticFlowVersions)
+					if (_expSetting->_opticFlowVersions || _expSetting->_opticFlowForeground)
 					{
 						temp->setDataVariance(osg::Object::DYNAMIC);
 					}
@@ -439,7 +439,7 @@ void ExperimentCallback::createOpticFlow()
 	}
 
 	osgUtil::Optimizer op;
-	op.optimize(_opticFlowPoints, osgUtil::Optimizer::ALL_OPTIMIZATIONS ^ osgUtil::Optimizer::TRISTRIP_GEOMETRY);
+	op.optimize(_opticFlowPoints, osgUtil::Optimizer::ALL_OPTIMIZATIONS ^ osgUtil::Optimizer::TRISTRIP_GEOMETRY /*^ osgUtil::Optimizer::MERGE_GEOMETRY*/);
 }
 
 void ExperimentCallback::showOpticFlow()
@@ -454,6 +454,18 @@ void ExperimentCallback::showOpticFlow()
 		_opticFlowDrawn = true;
 
 		_root->addChild(_opticFlowPoints);
+	}
+
+	if (_expSetting->_opticFlowForeground && _expSetting->_opticFlowRange)
+	{
+		if (_expSetting->_opticFlowMode)
+		{
+			return;
+		}
+
+		opticFlowRange();
+		foregroundFlow(_forward_Vec);
+		foregroundFlow(_backward_Vec);
 	}
 
 	if (!_expSetting->_opticFlowFrameCounts)
@@ -477,7 +489,7 @@ void ExperimentCallback::showOpticFlow()
 		}
 	}
 
-	if (!_expSetting->_opticFlowRange)
+	if (_opticFlowDrawn && !_expSetting->_opticFlowRange)
 	{
 		for (unsigned i = 0; i != _opticFlowPoints->getNumChildren(); i++)
 		{
@@ -615,8 +627,13 @@ void ExperimentCallback::opticFlowRange()
 	const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
 	const int startCur = (y < 0.0f) ? curY : TOTL / 2;
 	_opticFlowDynamicIndex.clear();
+	//TEST
+	_forward_Vec.clear();
+	_backward_Vec.clear();
+	//TEST
 	for (int opticStart = 0; opticStart < TOTL; opticStart++)
 	{
+		const unsigned numElements = _opticFlowDynamicIndex.size();
 		if (opticStart >= startFor && opticStart <= curFor)
 		{
 			_opticFlowDynamicIndex.push_back(opticStart);
@@ -631,6 +648,14 @@ void ExperimentCallback::opticFlowRange()
 		{
 			_opticFlowDynamicIndex.push_back(opticStart);
 		}
+
+		//TEST
+		if (_opticFlowDynamicIndex.size() > numElements)
+		{
+			const int &thisNum = _opticFlowDynamicIndex.back();
+			thisNum <= (TOTL / 2 - 1) ? _forward_Vec.push_back(thisNum) : _backward_Vec.push_back(thisNum);
+		}
+		//TEST
 	}
 }
 
@@ -701,7 +726,7 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned
 				osg::Geometry *gmtry = geode->getDrawable(0)->asGeometry();
 				if (gmtry)
 				{
-					if (gmtry->getPrimitiveSet(0))
+					if (gmtry->getNumPrimitiveSets())
 					{
 						unsigned &order = _opticFlowVersions.at(depth).second;
 						osg::ref_ptr<osg::Vec3Array> points = _opticFlowVersions.at(depth).first.at(order);
@@ -710,13 +735,57 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned
 						order %= _opticFlowVersions.at(depth).first.size();
 
 						gmtry->setVertexArray(points);
-						gmtry->setPrimitiveSet(0, new osg::DrawArrays(GL_POINTS, 0, points->getNumElements()));
 						gmtry->dirtyBound();
 						gmtry->dirtyDisplayList();
 					}
 				}
 			}
 		}
+	}
+}
+
+void ExperimentCallback::foregroundFlow(const std::vector<int> &forevec)
+{
+	if (forevec.empty())
+	{
+		return;
+	}
+
+	const int &BASELINE = forevec.front();
+	std::vector<int>::const_iterator i = forevec.cbegin();
+	std::vector<int>::const_iterator END_ITER = forevec.cend();
+
+	while (i != END_ITER)
+	{
+		OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(*i));
+		if (obs)
+		{
+			osg::Geode *geode = obs->getChild(0)->asGeode();
+			if (geode)
+			{
+				osg::Geometry *gmtry = geode->getDrawable(0)->asGeometry();
+				if (gmtry)
+				{
+					const unsigned &numPrims = obs->getPrimSetList().size();
+					const unsigned &numPrimsinGmtry = gmtry->getNumPrimitiveSets();
+
+					const int t = (*i) - BASELINE + 1;
+					assert(t > 0);
+					const int ratio = 3 * t * t - 3 * t + 1;
+					const int thisNum = (double)numPrims / ratio + 0.5f;
+
+					if (thisNum != numPrimsinGmtry)
+					{
+						osg::Geometry::PrimitiveSetList thisList;
+						std::copy(obs->getPrimSetList().cbegin(), obs->getPrimSetList().cbegin() + thisNum, std::back_inserter(thisList));
+						gmtry->setPrimitiveSetList(thisList);
+						gmtry->dirtyBound();
+						gmtry->dirtyDisplayList();
+					}
+				}
+			}
+		}
+		++i;
 	}
 }
 

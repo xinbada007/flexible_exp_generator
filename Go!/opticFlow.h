@@ -15,6 +15,8 @@ public:
 	inline osg::ref_ptr<osg::Vec3Array> getPointsArray() { return _points; };
 	inline const unsigned & getPolyNumber() const { return _polyNumbers; };
 
+	inline const osg::Geometry::PrimitiveSetList & getPrimSetList() const { return _primList; };
+
 private:
 	void createGLPOINTS(osg::Vec3Array *p);
 	void createSpherePoly(osg::Vec3Array *p, const double radius, const int segments);
@@ -24,4 +26,6 @@ private:
 	osg::ref_ptr<osg::Vec3Array> _points;
 	unsigned _frameCounts;
 	unsigned _polyNumbers;
+
+	osg::Geometry::PrimitiveSetList _primList;
 };

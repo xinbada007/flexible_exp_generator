@@ -297,89 +297,6 @@ void MulitViewer::createHUDView()
 			return;
 		}
 
-// 		_HUDView = new osgViewer::View;
-// /*		_HUDView->getCamera()->setGraphicsContext(_hmdView->getCamera()->getGraphicsContext());*/
-// 
-// 		osgViewer::ViewerBase::Windows windows;
-// 		this->getWindows(windows);
-// 		osg::ref_ptr<osg::Camera> camera = createHUDCamerainWindow(windows.front());
-// 		osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-// 		ss->setAttributeAndModes(new osg::Depth(osg::Depth::ALWAYS, 1.0f, 1.0f));
-// 		camera->setStateSet(ss);
-// 		_HUDView->setCamera(camera.release());
-// 
-// 		_HUDView->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-// 		_HUDView->getCamera()->setRenderOrder(osg::Camera::PRE_RENDER);
-// 		_HUDView->getCamera()->attach(osg::Camera::COLOR_BUFFER, _masterTex);
-// 
-// 		osg::Camera *leftCam = new osg::Camera;
-// 		{
-// 			leftCam->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-// 			leftCam->setRenderOrder(osg::Camera::PRE_RENDER, RenderOrder::HUDDISPLAY);
-// 			leftCam->setViewport(0, 0, _masterTex->getTextureWidth(), _masterTex->getTextureHeight());
-// 			leftCam->attach(osg::Camera::COLOR_BUFFER, _masterTex);
-// 			leftCam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-// 			osg::GraphicsContext *context = _HUDView->getCamera()->getGraphicsContext();
-// 			leftCam->setGraphicsContext(context);
-// 			leftCam->setView(_HUDView);
-// 		}
-// 
-// 		osg::Camera *rightCam = new osg::Camera;
-// 		{
-// 			rightCam->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-// 			rightCam->setRenderOrder(osg::Camera::PRE_RENDER, RenderOrder::HUDDISPLAY);
-// 			rightCam->setViewport(0, 0, _masterTex->getTextureWidth(), _masterTex->getTextureHeight());
-// 			rightCam->attach(osg::Camera::COLOR_BUFFER, _masterTex);
-// 			rightCam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-// 			osg::GraphicsContext *context = _HUDView->getCamera()->getGraphicsContext();
-// 			rightCam->setGraphicsContext(context);
-// 			rightCam->setView(_HUDView);
-// 		}
-// 
-//  		_HUDView->addSlave(leftCam, osg::Matrix(), osg::Matrix(), true);
-//  		_HUDView->addSlave(rightCam, osg::Matrix(), osg::Matrix(), true);
-// 
-// 		_HUDView->getCamera()->setDrawBuffer(GL_NONE);
-// 		leftCam->setDrawBuffer(GL_NONE);
-// 		rightCam->setDrawBuffer(GL_NONE);
-// 		_HUDView->getCamera()->setReadBuffer(GL_NONE);
-// 		leftCam->setReadBuffer(GL_NONE);
-// 		rightCam->setReadBuffer(GL_NONE);
-// 		_HUDView->getCamera()->getGraphicsContext()->setSwapCallback(new swapcallback);
-// 
-// 		float    orthoDistance = 0.8f; // 2D is 0.8 meter from camera
-// 		OVR::Vector2f orthoScale0 = OVR::Vector2f(1.0f) / OVR::Vector2f(_eyeRenderDesc[ovrEye_Left].PixelsPerTanAngleAtCenter);
-// 		OVR::Vector2f orthoScale1 = OVR::Vector2f(1.0f) / OVR::Vector2f(_eyeRenderDesc[ovrEye_Right].PixelsPerTanAngleAtCenter);
-// 		OVR::Matrix4f _projection2D[ovrEye_Count];
-// 		_projection2D[ovrEye_Left] = ovrMatrix4f_OrthoSubProjection(_projectionMatrici[ovrEye_Left], orthoScale0, orthoDistance, _eyeRenderDesc[ovrEye_Left].HmdToEyeViewOffset.x);
-// 		_projection2D[ovrEye_Right] = ovrMatrix4f_OrthoSubProjection(_projectionMatrici[ovrEye_Right], orthoScale1, orthoDistance, _eyeRenderDesc[ovrEye_Right].HmdToEyeViewOffset.x);
-// 		osg::Matrix l_proj_M, r_proj_M, l_view_M, r_view_M;
-// 		for (int i = 0; i < 4; i++)
-// 		{
-// 			for (int j = 0; j < 4; j++)
-// 			{
-// 				l_proj_M(i, j) = _projection2D[ovrEye_Left].Transposed().M[i][j];
-// 				r_proj_M(i, j) = _projection2D[ovrEye_Right].Transposed().M[i][j];
-// 			}
-// 		}
-// 
-// 		l_view_M = osg::Matrix::translate(_eyeOffsets[ovrEye_Left].x, _eyeOffsets[ovrEye_Left].y, _eyeOffsets[ovrEye_Left].z);
-// 		r_view_M = osg::Matrix::translate(_eyeOffsets[ovrEye_Right].x, _eyeOffsets[ovrEye_Right].y, _eyeOffsets[ovrEye_Right].z);
-// 
-// 		leftCam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.x,
-// 			_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.y,
-// 			_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.w,
-// 			_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.h);
-// 		rightCam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.w,
-// 			_eyeTextures[ovrEye_Right].Header.RenderViewport.Pos.y,
-// 			_eyeTextures[ovrEye_Right].Header.RenderViewport.Size.w,
-// 			_eyeTextures[ovrEye_Right].Header.RenderViewport.Size.h);
-// 
-// 		leftCam->setProjectionMatrix(l_proj_M);
-// 		rightCam->setProjectionMatrix(r_proj_M);
-// 
-// 		this->addView(_HUDView);
-
 		return;
 	}
 }
@@ -551,24 +468,6 @@ bool MulitViewer::hmd_Initialise()
 	rightCam->setReadBuffer(GL_NONE);
 	_hmdView->getCamera()->getGraphicsContext()->setSwapCallback(new swapcallback);
 
-	//Test
-// 	osg::ref_ptr<osg::Camera> backCam = new osg::Camera;
-// 	{
-// 		backCam->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-// 		backCam->setRenderOrder(osg::Camera::PRE_RENDER);
-// 		backCam->setViewport(0, 0, _masterTex->getTextureWidth(), _masterTex->getTextureHeight());
-// 		backCam->attach(osg::Camera::COLOR_BUFFER, _masterTex);
-// 		backCam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-// 
-// 		backCam->setGraphicsContext(_hmdView->getCamera()->getGraphicsContext());
-// 		backCam->setView(_hmdView);
-// 
-// 		_hmdView->addSlave(backCam, osg::Matrix(), osg::Matrix(), true);
-// 		backCam->setDrawBuffer(GL_NONE);
-// 		backCam->setReadBuffer(GL_NONE);
-// 	}
-	//Test
-
 	return true;
 }
 
@@ -699,24 +598,6 @@ void MulitViewer::runHMD()
 	_leftEye = leftcam;
 	_rightEye = rightcam;
 
- 	//Test
-// 	osg::Camera *backCam = _hmdView->getSlave(ovrEye_Count)._camera;
-// 	backCam->setViewport(_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.x,
-// 		_eyeTextures[ovrEye_Left].Header.RenderViewport.Pos.y,
-// 		_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.w*0.2f,
-// 		_eyeTextures[ovrEye_Left].Header.RenderViewport.Size.h*0.2f);
-// 	OVR::Matrix4f proM = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Left].Fov, -_screens->_zNear, -_screens->_zFar, true);
-// 	osg::Matrix projMosg;
-// 	for (int i = 0; i < 4; i++)
-// 	{
-// 		for (int j = 0; j < 4; j++)
-// 		{
-// 			projMosg(i, j) = proM.Transposed().M[i][j];
-// 		}
-// 	}
-// 	backCam->setProjectionMatrix(projMosg);
-	//Test
-
 	osg::Matrixd L, R ,HM;
 	osg::Matrixd leftRotation, rightRotation;
 	CameraEvent *camEvent = dynamic_cast<CameraEvent*>(_hmdView->getCameraManipulator());
@@ -765,21 +646,8 @@ void MulitViewer::runHMD()
 // 		osg::Vec3d headVector(headX, headY, headZ);
 // 		HM = osg::Matrix::translate(headVector);
 
-		L = leftRotation * l_view_M;
-		R = rightRotation * r_view_M;
-
-// 		//Test
-//		backCam->setViewMatrix(_hmdView->getCamera()->getViewMatrix());
-// 		proM = ovrMatrix4f_Projection(_eyeRenderDesc[ovrEye_Left].Fov, _screens->_zNear, _screens->_zFar, true);
-// 		for (int i = 0; i < 4; i++)
-// 		{
-// 			for (int j = 0; j < 4; j++)
-// 			{
-// 				projMosg(i, j) = proM.Transposed().M[i][j];
-// 			}
-// 		}
-// 		backCam->setProjectionMatrix(projMosg);
-// 		//Test
+		L = leftRotation /** l_view_M*/;
+		R = rightRotation /** r_view_M*/;
 
 //  	wglSwapIntervalEXT(0);
 

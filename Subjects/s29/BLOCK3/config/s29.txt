@@ -74,7 +74,9 @@ OpticFlow-Width:	103	#5670
 OpticFlow-Height:	58	#509
 OpticFlow-Density:	100
 OPTICFLOW-VISIBLE:	100
-OPTICFLOW-FOREGROUND:	0
+OPTICFLOW-FOREGROUND:	1
+OPTICFLOW-MODE:		2
+OPTICFLOW-MODE-SIZE:	1
 
 ##==Trigger Setting======================
 Trigger-Enable:	1	1	1	1	0	0	0	0	1	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
@@ -90,5 +92,6 @@ Text:	Quit in 1s
 Textime:	4	14	18	28	29
 Period:		2	1	2	1	1
 
+#Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;

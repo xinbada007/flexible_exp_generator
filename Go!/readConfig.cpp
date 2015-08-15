@@ -1487,6 +1487,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OPTICFLOWMODE("OPTICFLOW-MODE");
 		static const string OPTICFLOWMODESIZE("OPTICFLOW-MODE-SIZE");
 		static const string OPTICFLOWMODESEGMENTS("OPTICFLOW-MODE-SEGMENTS");
+		static const string OPTICFLOWFOREGROUND("OPTICFLOW-FOREGROUND");
 
 		static const string	TRIGGER_ENABLE("TRIGGER-ENABLE");
 		static const string TRIGGER_TIME("TRIGGER-TIME");
@@ -1991,6 +1992,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_experiment->_opticFlowModeSegments = stoi(config);
+				}
+				continue;
+			}
+			else if (title == OPTICFLOWFOREGROUND)
+			{
+				config.erase(config.begin(), config.begin() + OPTICFLOWFOREGROUND.size());
+				if (!config.empty())
+				{
+					_experiment->_opticFlowForeground = (stod(config) == 1) ? true : false;
 				}
 				continue;
 			}

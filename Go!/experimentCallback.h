@@ -65,6 +65,8 @@ private:
 	std::vector<std::pair<std::vector<osg::ref_ptr<osg::Vec3Array>>,unsigned>> _opticFlowVersions;
 	bool _opticFlowDrawn;
 	std::vector<int> _opticFlowDynamicIndex;
+	std::vector<int> _forward_Vec;
+	std::vector<int> _backward_Vec;
 
 	osg::ref_ptr<osgAudio::SoundState> _siren;
 	osg::ref_ptr<osgAudio::Sample> _sirenSample;
@@ -103,6 +105,7 @@ private:
 	void showOpticFlow();
 	void opticFlowRange();
 	void dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned depth);
+	void foregroundFlow(const std::vector<int> &forevec);
 	void deviationCheck();
 
 	void createObstacles();

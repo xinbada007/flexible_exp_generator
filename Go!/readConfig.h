@@ -71,6 +71,7 @@ typedef struct Experiment :public osg::Referenced
 		_opticFlowModeSize = 1.0f;
 		_opticFlowModeSegments = 64;
 		_opticFlowStartOffset = 0;
+		_opticFlowForeground = false;
 
 		_triggerTimer = new osg::DoubleArray;
 
@@ -145,6 +146,7 @@ typedef struct Experiment :public osg::Referenced
 	unsigned int _opticFlowMode;
 	double _opticFlowModeSize;
 	unsigned _opticFlowModeSegments;
+	bool _opticFlowForeground;
 
 	std::vector<triggerEnablePair> _triggerEnable;
 	osg::ref_ptr<osg::DoubleArray> _triggerTimer;
