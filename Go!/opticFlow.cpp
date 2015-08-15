@@ -28,7 +28,11 @@ void OpticFlow::createOpticFlow(osg::Array *points, const int mode /* = 0 */, co
 		}
 		else if (mode == 1)
 		{
-			createSpherePoly(p, size, segments);
+			osg::ref_ptr<osg::Vec3Array> solid = generateSphereSolidVertex(p, size, segments);
+			osg::ref_ptr<osg::Vec3Array> vertex = generateSphereVertex(p, solid);
+			createSpherePoly(p, vertex, solid, segments);
+
+// 			createSPhereSolid(p, size);
 		}
 		else if (mode == 2)
 		{
@@ -76,59 +80,8 @@ void OpticFlow::createGLPOINTS(osg::Vec3Array *p)
 	p = NULL;
 }
 
-void OpticFlow::createSpherePoly(osg::Vec3Array *p, const double radius, const int segments)
+void OpticFlow::createSpherePoly(osg::Vec3Array *p, osg::Vec3Array *vertex, osg::Vec3Array *solid, const int segments)
 {
-	const double R(radius);
-	osg::ref_ptr<osg::Vec3Array> temp = new osg::Vec3Array;
-	for (int i = 0; i < segments; i++)
-	{
-		const double theta = (double(i) / double(segments)) * 2 * PI;
-		const double x = R * cos(theta);
-		const double y = 0.0f;
-		const double z = R * sin(theta);
-		temp->push_back(osg::Vec3(x, y, z));
-	}
-
- 	osg::ref_ptr<osg::Vec3Array> solid = new osg::Vec3Array;
-
-	for (int i = 0; i < segments; i++)
-	{
-		const double theta = (double(i) / double(segments)) * 2 * PI;
-		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
-		arrayByMatrix(t, osg::Matrix::rotate(theta, osg::Vec3d(0.0f, 0.0f, 1.0f)));
-		copy(t->begin(), t->end(), std::back_inserter(*solid));
-	}
-
-// 	const int SEG(segments / 2);
-// 	for (int i = 1; i <= SEG; i++)
-// 	{
-// 		const double H = (double(i) / double(SEG)) * R;
-// 		const double r = sqrt(R*R - H*H);
-// 		const double ratio = r / R;
-// 
-// 		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
-// 		osg::Matrix m;
-// 		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, H)) * osg::Matrix::scale(osg::Vec3(ratio, ratio, 1.0f));
-// 		arrayByMatrix(t, m);
-// 		copy(t->begin(), t->end(), std::back_inserter(*solid));
-// 
-// 		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, -2*H));
-// 		arrayByMatrix(t, m);
-// 		copy(t->begin(), t->end(), std::back_inserter(*solid));
-// 	}
-// 	copy(temp->begin(), temp->end(), std::back_inserter(*solid));
-
-	osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array;
-	osg::Vec3Array::const_iterator i = p->begin();
-	while (i != p->end())
-	{
-		osg::ref_ptr<osg::Vec3Array> c = new osg::Vec3Array(solid->begin(), solid->end());
-		arrayByMatrix(c, osg::Matrix::translate(*i));
-		
-		copy(c->begin(), c->end(), std::back_inserter(*vertex));
-		++i;
-	}
-
 	osg::ref_ptr<osg::Geometry> gmtry = new osg::Geometry;
 	gmtry->setVertexArray(vertex);
 	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
@@ -141,7 +94,7 @@ void OpticFlow::createSpherePoly(osg::Vec3Array *p, const double radius, const i
 	gmtry->setColorBinding(osg::Geometry::BIND_OVERALL);
 	gmtry->setDataVariance(osg::Object::STATIC);
 
-	i = p->begin();
+	osg::Vec3Array::const_iterator i = p->begin();
 	while (i != p->end())
 	{
 		unsigned j = 0;
@@ -171,6 +124,67 @@ void OpticFlow::createSpherePoly(osg::Vec3Array *p, const double radius, const i
 	_polyNumbers = solid->getNumElements();
 	_points = new osg::Vec3Array(p->begin(), p->end());
 	p = NULL;
+}
+
+osg::ref_ptr<osg::Vec3Array> OpticFlow::generateSphereVertex(osg::Vec3Array *p,  osg::Vec3Array *solid)
+{
+	osg::ref_ptr<osg::Vec3Array> vertex = new osg::Vec3Array;
+	osg::Vec3Array::const_iterator i = p->begin();
+	while (i != p->end())
+	{
+		osg::ref_ptr<osg::Vec3Array> c = new osg::Vec3Array(solid->begin(), solid->end());
+		arrayByMatrix(c, osg::Matrix::translate(*i));
+
+		copy(c->begin(), c->end(), std::back_inserter(*vertex));
+		++i;
+	}
+
+	return vertex.release();
+}
+
+osg::ref_ptr<osg::Vec3Array> OpticFlow::generateSphereSolidVertex(osg::Vec3Array *p, const double radius, const int segments)
+{
+	const double R(radius);
+	osg::ref_ptr<osg::Vec3Array> temp = new osg::Vec3Array;
+	for (int i = 0; i < segments; i++)
+	{
+		const double theta = (double(i) / double(segments)) * 2 * PI;
+		const double x = R * cos(theta);
+		const double y = 0.0f;
+		const double z = R * sin(theta);
+		temp->push_back(osg::Vec3(x, y, z));
+	}
+
+	osg::ref_ptr<osg::Vec3Array> solid = new osg::Vec3Array;
+
+	for (int i = 0; i < segments; i++)
+	{
+		const double theta = (double(i) / double(segments)) * 2 * PI;
+		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
+		arrayByMatrix(t, osg::Matrix::rotate(theta, osg::Vec3d(0.0f, 0.0f, 1.0f)));
+		copy(t->begin(), t->end(), std::back_inserter(*solid));
+	}
+
+//  const int SEG(segments / 2);
+// 	for (int i = 1; i <= SEG; i++)
+// 	{
+// 		const double H = (double(i) / double(SEG)) * R;
+// 		const double r = sqrt(R*R - H*H);
+// 		const double ratio = r / R;
+// 	
+// 		osg::ref_ptr<osg::Vec3Array> t = new osg::Vec3Array(temp->begin(), temp->end());
+// 		osg::Matrix m;
+// 		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, H)) * osg::Matrix::scale(osg::Vec3(ratio, ratio, 1.0f));
+// 		arrayByMatrix(t, m);
+// 		copy(t->begin(), t->end(), std::back_inserter(*solid));
+// 	
+// 		m = osg::Matrix::translate(osg::Vec3(0.0f, 0.0f, -2*H));
+// 		arrayByMatrix(t, m);
+// 		copy(t->begin(), t->end(), std::back_inserter(*solid));
+// 	}
+// 	copy(temp->begin(), temp->end(), std::back_inserter(*solid));
+
+	return solid.release();
 }
 
 void OpticFlow::createSPhereSolid(osg::Vec3Array *p, const double radius)

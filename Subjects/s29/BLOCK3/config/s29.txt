@@ -67,16 +67,17 @@ Deviation-Siren:	../Resources/sound/alert.wav
 ##==Optic Flow Setting===========================================
 OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	0	#only visible within 100 meters
-OpticFlow-FrameCounts:	0	
+OpticFlow-FrameCounts:	0
 OpticFlow-Versions:	0
-DepthDensity:		10	#every x meters
+DepthDensity:		5	#every x meters
 OpticFlow-Width:	103	#5670
 OpticFlow-Height:	58	#509
 OpticFlow-Density:	100
-OPTICFLOW-VISIBLE:	100
-OPTICFLOW-FOREGROUND:	1
-OPTICFLOW-MODE:		2
+OPTICFLOW-VISIBLE:	0
+OPTICFLOW-FOREGROUND:	0
+OPTICFLOW-MODE:		1
 OPTICFLOW-MODE-SIZE:	1
+OPTICFLOW-MODE-SEGMENTS:	16
 
 ##==Trigger Setting======================
 Trigger-Enable:	1	1	1	1	0	0	0	0	1	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit

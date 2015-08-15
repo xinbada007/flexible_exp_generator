@@ -17,9 +17,19 @@ public:
 
 	inline const osg::Geometry::PrimitiveSetList & getPrimSetList() const { return _primList; };
 
+	static inline osg::ref_ptr<osg::Vec3Array> getSpherePointsArray(osg::Vec3Array *p, const double radius, const int segments)
+	{
+		osg::ref_ptr<osg::Vec3Array> solid = generateSphereSolidVertex(p, radius, segments);
+		osg::ref_ptr<osg::Vec3Array> points = generateSphereVertex(p, solid);
+
+		return points.release();
+	}
+
 private:
 	void createGLPOINTS(osg::Vec3Array *p);
-	void createSpherePoly(osg::Vec3Array *p, const double radius, const int segments);
+	void createSpherePoly(osg::Vec3Array *p, osg::Vec3Array *vertex, osg::Vec3Array *solid, const int segments);
+	static osg::ref_ptr<osg::Vec3Array> generateSphereSolidVertex(osg::Vec3Array *p, const double radius, const int segments);
+	static osg::ref_ptr<osg::Vec3Array> generateSphereVertex(osg::Vec3Array *p, osg::Vec3Array *solid);
 	void createCubePoly(osg::Vec3Array *p, const double radius);
 	void createSPhereSolid(osg::Vec3Array *p, const double radius);
 	osg::ref_ptr<osg::Vec4Array> _pointsColorArray;

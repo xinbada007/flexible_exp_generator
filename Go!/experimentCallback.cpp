@@ -412,6 +412,10 @@ void ExperimentCallback::createOpticFlow()
 					_opticFlowPoints->addChild(temp);
 				}
 				
+				if (_expSetting->_opticFlowMode == 1) // Create Dynamic Sphere 
+				{
+					points = OpticFlow::getSpherePointsArray(points, _expSetting->_opticFlowModeSize, _expSetting->_opticFlowModeSegments);
+				}
 				verOrder.push_back(new osg::Vec3Array(points->begin(), points->end()));
 				points->clear();
 			}
@@ -715,11 +719,13 @@ void ExperimentCallback::dynamicFlow(osg::ref_ptr<OpticFlow> obs, const unsigned
 		}
 	}
 
-	if (!_expSetting->_opticFlowMode)
+	else
 	{
 		if (obs->getFrameCounts() > _expSetting->_opticFlowFrameCounts)
 		{
 			obs->setFrameCounts(0);
+			obs->setDataVariance(osg::Object::DYNAMIC);
+
 			osg::Geode *geode = obs->getChild(0)->asGeode();
 			if (geode)
 			{
