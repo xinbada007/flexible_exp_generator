@@ -6,6 +6,15 @@
 #include <osg/BoundingBox>
 #include <vector>
 
+#ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#endif
+#include <boost/asio/serial_port.hpp> 
+#include <boost/asio.hpp> 
+#include <boost/bind.hpp>
+
+#include <windows.h>
+
 typedef std::vector<Plane*> quadList;
 typedef std::vector<Solid*> solidList;
 typedef std::vector<Obstacle*> obstacleList;
@@ -205,9 +214,18 @@ public:
 	void genCar(osg::ref_ptr<ReadConfig> refRC);
 	Vehicle * getVehicle() const { return _vehicle.get(); };
 	CarState * getCarState() const { return _carState.get(); };
+ 	static DWORD WINAPI callCommunication(LPVOID lpParam);
+	DWORD WINAPI networkINFunc();
+	void connectionTimeOut(boost::asio::ip::tcp::socket *socket, const boost::system::error_code &ec);
+	void receiveMsg(boost::asio::ip::tcp::socket *socket, boost::asio::deadline_timer *timer, const boost::system::error_code &ec);
+	void receiveMsgHandler(bool *isread, char temp[4096], boost::asio::deadline_timer *timer, const unsigned &bytestransferred, const boost::system::error_code &ec);
+	void receiveTimeOut(boost::asio::ip::tcp::socket *socket, const boost::system::error_code &ec);
+
 private:
 	osg::ref_ptr<Vehicle> _vehicle;
 	osg::ref_ptr<CarState> _carState;
+	HANDLE _carThread;
+	bool _carTerminated;
 protected:
 	virtual ~Car();
 };

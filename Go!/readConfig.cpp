@@ -1001,6 +1001,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string CARVISIBLE = "CARVISIBLE";
 		static const string CARRESET = "CARRESET";
 		static const string RESETMODE = "RESETMODE";
+		static const string IP_ADDRESS = "CAR-IP-ADDRESS";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1149,6 +1150,31 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_vehicle->_resetMode = stoi(config);
+				}
+				continue;
+			}
+			else if (title == IP_ADDRESS)
+			{
+				config.erase(config.begin(), config.begin() + IP_ADDRESS.size());
+				std::size_t found = config.find_first_not_of(SPACE);
+				if (found != config.npos) config.erase(config.begin(), config.begin() + found);
+				if (!config.empty())
+				{
+					std::size_t found_to = config.find_first_of(" ");
+					if (found_to != config.npos)
+					{
+						std::copy(config.begin(), config.begin() + found_to, std::back_inserter(_vehicle->_ipAddress));
+						config.erase(config.begin(), config.begin() + found_to);
+					}
+					else
+					{
+						_vehicle->_ipAddress = config;
+						config.clear();
+					}
+				}
+				if (!config.empty())
+				{
+					_vehicle->_ipPort = stoi(config);
 				}
 				continue;
 			}

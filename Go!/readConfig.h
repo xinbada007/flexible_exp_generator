@@ -424,6 +424,9 @@ typedef struct Vehicle:public osg::Referenced
 		_carReset = DISABLE;
 		_resetMode = 0;
 
+		_ipAddress = "";
+		_ipPort = 55555;
+
 		_V = new osg::Vec3dArray;
 		this->_O.set(O_POINT);
 	}
@@ -460,6 +463,9 @@ typedef struct Vehicle:public osg::Referenced
 	int _carReset;
 	int _resetMode;
 	osg::Matrixd _initialState;
+
+	std::string _ipAddress;
+	unsigned _ipPort;
 
 	enum VEHICLE_RESET_TYPE
 	{

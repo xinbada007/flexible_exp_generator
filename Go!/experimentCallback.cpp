@@ -512,7 +512,7 @@ void ExperimentCallback::opticFlowRange()
 	//FOV dectection
 	const double MAX_SUPPORTED_FOV(178.0f);
 	assert(_fovX < MAX_SUPPORTED_FOV);
-	const double theta = 0.5f * (min(_fovX*1.05f, MAX_SUPPORTED_FOV)) * TO_RADDIAN;	//slightly increase the fov by 10%
+	const double theta = 0.5f * (std::min(_fovX*1.05f, MAX_SUPPORTED_FOV)) * TO_RADDIAN;	//slightly increase the fov by 10%
 	CarState const *cs = _car->getCarState();
 
 	osg::Vec3d direction = cs->_direction;
@@ -531,44 +531,44 @@ void ExperimentCallback::opticFlowRange()
 	{
 		if (curtheta >= theta && curtheta <= PI - theta)
 		{
-			forwL = max(L1, L2);
+			forwL = std::max(L1, L2);
 			backL = 0.0f;
 		}
 		else if (curtheta < theta)
 		{
-			forwL = max(L1, L2);
-			backL = min(L1, L2);
+			forwL = std::max(L1, L2);
+			backL = std::min(L1, L2);
 		}
 		else if (curtheta > PI - theta)
 		{
-			forwL = max(L1, L2);
-			backL = min(L1, L2);
+			forwL = std::max(L1, L2);
+			backL = std::min(L1, L2);
 		}
 	}
 	else
 	{
 		if (curtheta >= theta && curtheta <= PI - theta)
 		{
-			backL = max(L1, L2);
+			backL = std::max(L1, L2);
 			forwL = 0.0f;
 		}
 		else if (curtheta < theta)
 		{
-			backL = max(L1, L2);
-			forwL = min(L1, L2);
+			backL = std::max(L1, L2);
+			forwL = std::min(L1, L2);
 		}
 		else if (curtheta > PI - theta)
 		{
-			backL = max(L1, L2);
-			forwL = min(L1, L2);
+			backL = std::max(L1, L2);
+			forwL = std::min(L1, L2);
 		}
 	}
 	//FOV dectection
 
 	const int &TOTL = _opticFlowPoints->getNumChildren();
 	const double &y = _car->getCarState()->_O.y() - _expSetting->_opticFlowStartOffset;
-	const double forwardY = y + min(forwL, L);
-	const double backwardY = y - min(backL, L);
+	const double forwardY = y + std::min(forwL, L);
+	const double backwardY = y - std::min(backL, L);
 
 	int curY(0);
 	if (y >= 0.0f)
@@ -627,7 +627,7 @@ void ExperimentCallback::opticFlowRange()
 		}
 	}
 
-	const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY < 0.0f) ? 0 : min(curFor, curBac));
+	const int startFor = (forwardY < 0.0f) ? curFor : ((backwardY < 0.0f) ? 0 : std::min(curFor, curBac));
 	const int startBac = (forwardY < 0.0f) ? curFor : TOTL / 2;
 	const int startCur = (y < 0.0f) ? curY : TOTL / 2;
 	_opticFlowDynamicIndex.clear();

@@ -4,8 +4,13 @@
 #include <osgText/Text>
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
 
-#define __STDC_LIMIT_MACROS 1
-#define __STDC_CONSTANT_MACROS 1
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
+
 #include <OVR.h>
 #include <OVR_CAPI_0_5_0.h>
 #include <OVR_CAPI_GL.h>
