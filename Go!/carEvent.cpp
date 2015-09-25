@@ -334,8 +334,9 @@ void CarEvent::shiftVehicle()
 	_carState->_shiftD.normalize();
 
 	double R = abs(_vehicle->_wheelBase / sin(_vehicle->_rotate));
-	R *= sin(abs(_carState->_angle) * 1.0f / frameRate::instance()->getRealfRate());
+	R *= sin(abs(_carState->_angle) / frameRate::instance()->getRealfRate());
 	R *= _vehicle->_dynamicSensitive;
+	std::cout << "Shift Speed:\t" << R << std::endl;
 
 	_carState->_shiftD *= R;
 	_carState->_shiftD = (_leftTurn) ? -_carState->_shiftD : _carState->_shiftD;
@@ -552,9 +553,11 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				_carState->_speed = 0.0f;
 			}
 
+			carController();
+
 			//initial check if over speed
 			_carState->_speed = abs(_carState->_speed) > abs(_vehicle->_speed) ?
-				(_vehicle->_speed*(_carState >= 0 ? 1 : -1)) : _carState->_speed;
+				(_vehicle->_speed*(_carState->_speed >= 0 ? 1 : -1)) : _carState->_speed;
 
 			//1st
 			shiftVehicle();
@@ -581,10 +584,34 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 //	osg::notify(osg::NOTICE) << "CarEvent..END..." << std::endl;
 }
 
+void CarEvent::carController()
+{
+	if (!_carState || !_vehicle)
+	{
+		return;
+	}
+
+	_shifted = false;
+
+	if (abs(_carState->_locked_angle) <= _vehicle->_rotate)
+	{
+		_carState->_angle = _carState->_locked_angle;
+		if (_carState->_angle)
+		{
+			_shifted = true;
+		}
+	}
+	if (abs(_carState->_locked_speed) <= _vehicle->_speed)
+	{
+		_carState->_speed = _carState->_locked_speed;
+	}
+}
+
 void CarEvent::getTurningFactor()
 {
-	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
-	_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
+	_carState->_angle = abs(_carState->_angle);
+	_carState->_angle = _carState->_angle > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
+	_carState->_angle = _carState->_speed == 0 ? 0.0f : _carState->_angle;
 
 	const double sinTheta = sin(_carState->_angle);
 	if (!sinTheta)
@@ -595,6 +622,10 @@ void CarEvent::getTurningFactor()
 	}
 
 	_carState->_turningRadius = _vehicle->_wheelBase / sinTheta;
+	if (_carState->_turningRadius < 0 && _carState->_turningRadius != -2.0f)
+	{
+		sinTheta;
+	}
 
 	const osg::Vec3d &RIGHT_TOP = _carState->_frontWheel->front();
 	const osg::Vec3d &LEFT_TOP = _carState->_frontWheel->back();

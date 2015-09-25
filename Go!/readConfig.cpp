@@ -512,6 +512,8 @@ void ReadConfig::initializeAfterReadTrial()
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carDistancefromStart.get(), SIZE);
 		normalizeArrayLength<osg::IntArray>(_experiment->_carStartLane.get(), SIZE);
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carLaneOffset.get(), SIZE);
+		normalizeArrayLength<osg::DoubleArray>(_experiment->_SteeringAngle.get(), SIZE);
+		normalizeArrayLength<osg::DoubleArray>(_experiment->_SpeedValue.get(), SIZE);
 	}
 
 	//Initialize Triggers
@@ -1001,6 +1003,8 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string CARVISIBLE = "CARVISIBLE";
 		static const string CARRESET = "CARRESET";
 		static const string RESETMODE = "RESETMODE";
+		static const string CARSTEERINGTIME = "CARSTEERINGANGLEPOS";
+		static const string CARSTEERINGANGLE = "CARSTEERINGANGLEVALUE";
 		while (flag == CAR && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1444,6 +1448,8 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string DISTANCEFROMSTART("DISTANCE-START");
 		static const string STARTLANE("START-LANE");
 		static const string LANEOFFSET("LANE-OFFSET");
+		static const string STEERINGANGLE("STEERING-ANGLE");
+		static const string SPEEDVALUE("SPEED-VALUE");
 
 		static const string TEXTIME("TEXTIME");
 		static const string PERIOD("PERIOD");
@@ -1580,6 +1586,28 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					std::string::size_type sz;
 					_experiment->_carLaneOffset->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == STEERINGANGLE)
+			{
+				config.erase(config.begin(), config.begin() + STEERINGANGLE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_SteeringAngle->push_back(stod(config, &sz) * TO_RADDIAN);
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == SPEEDVALUE)
+			{
+				config.erase(config.begin(), config.begin() + SPEEDVALUE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_SpeedValue->push_back(stod(config, &sz) / 3.6f);
 					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;

@@ -33,6 +33,8 @@ typedef struct Experiment :public osg::Referenced
 
 		_textTime = new osg::UIntArray;
 		_textPeriod = new osg::DoubleArray;
+		_SteeringAngle = new osg::DoubleArray;
+		_SpeedValue = new osg::DoubleArray;
 		_dynamicChange = new osg::UIntArray;
 		_dynamicChangeCondition = 0;
 		_dynamicChangeLasting = 0;
@@ -93,6 +95,9 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr <osg::UIntArray> _textTime;
 	osg::ref_ptr <osg::DoubleArray> _textPeriod;
 	stringList _textContent;
+
+	osg::ref_ptr<osg::DoubleArray> _SteeringAngle;
+	osg::ref_ptr<osg::DoubleArray> _SpeedValue;
 
 	osg::ref_ptr <osg::UIntArray> _dynamicChange;
 	unsigned _dynamicChangeCondition;
@@ -183,6 +188,8 @@ protected:
 
 		_textTime = NULL;
 		_textPeriod = NULL;
+		_SteeringAngle = NULL;
+		_SpeedValue = NULL;
 		_dynamicChange = NULL;
 		_imgDynamic = NULL;
 		_obstaclesTime = NULL;

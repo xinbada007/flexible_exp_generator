@@ -76,3 +76,4 @@ OpticFlow-Density:	4000
 Trigger-Enable:	1	1	1	0	0	0	0	0	1	0	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
 Trigger-Time:	-1	-1	0	-1	-1	-1	-1	-1	0	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
+#Roads:	../Resources/roads/Line.txt;

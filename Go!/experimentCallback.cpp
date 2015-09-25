@@ -254,22 +254,22 @@ void ExperimentCallback::createObstacles()
 
 			if (_expSetting->_GLPOINTSMODE)
 			{
-				osg::ref_ptr<OpticFlow> obs = new OpticFlow;
-				osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-				osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
-				ss->setAttribute(psize);
-				ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-				ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-
-				osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
-				color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				obs->setPointsColorArray(color);
-
-				obs->createOpticFlow(_centerList);
-				obs->setStateSet(ss);
-				obs->setDataVariance(osg::Object::STATIC);
-
-				_obstacleList.push_back(obs);
+// 				osg::ref_ptr<OpticFlow> obs = new OpticFlow;
+// 				osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+// 				osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
+// 				ss->setAttribute(psize);
+// 				ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+// 				ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+// 
+// 				osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+// 				color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+// 				obs->setPointsColorArray(color);
+// 
+// 				obs->createOpticFlow(_centerList);
+// 				obs->setStateSet(ss);
+// 				obs->setDataVariance(osg::Object::STATIC);
+// 
+// 				_obstacleList.push_back(obs);
 			}
 			else
 			{
@@ -1454,13 +1454,15 @@ void ExperimentCallback::positionCar()
 	const unsigned &distanceSize = _expSetting->_carDistancefromStart->size();
 	const unsigned &offsetSize = _expSetting->_carLaneOffset->size();
 	const unsigned &laneSize = _expSetting->_carStartLane->size();
+	const unsigned &steeringSize = _expSetting->_SteeringAngle->size();
+	const unsigned &speedSize = _expSetting->_SpeedValue->size();
 
-	if (!timeSize || !distanceSize || !offsetSize || !laneSize)
+	if (!timeSize || !distanceSize || !offsetSize || !laneSize || !steeringSize || !speedSize)
 	{
 		return;
 	}
 
-	if (timeSize != distanceSize || timeSize != offsetSize || timeSize != laneSize)
+	if (timeSize != distanceSize || timeSize != offsetSize || timeSize != laneSize || timeSize != steeringSize || timeSize != speedSize)
 	{
 		osg::notify(osg::WARN) << "cannot position Car because size are inconsistent" << std::endl;
 		return;
@@ -1512,18 +1514,30 @@ void ExperimentCallback::positionCar()
 				center = center * osg::Matrix::translate(X_AXIS* *pos * _expSetting->_offset * 0.25f);
 				center = center * osg::Matrix::translate(X_AXIS * *posLaneOffset);
 				const osg::Matrixd M = osg::Matrix::translate(center - carState->_O);
-				carState->_forceReset = M;
-				carState->_lastQuad.back() = *curO;
 
-				_car->getVehicle()->_initialState = M;
-				_car->getVehicle()->_baseline = _expSetting->_offset * _expSetting->_deviationBaseline * 0.25f;
-				arrayByMatrix(_car->getVehicle()->_V, M);
-				_car->getVehicle()->_O = _car->getVehicle()->_O * M;
+				if (*pos != -2)
+				{
+					carState->_forceReset = M;
+					carState->_lastQuad.back() = *curO;
+
+					_car->getVehicle()->_initialState = M;
+					_car->getVehicle()->_baseline = _expSetting->_offset * _expSetting->_deviationBaseline * 0.25f;
+					arrayByMatrix(_car->getVehicle()->_V, M);
+					_car->getVehicle()->_O = _car->getVehicle()->_O * M;
+				}
+
+				osg::DoubleArray::iterator steeringOffset = _expSetting->_SteeringAngle->begin() + offset;
+				carState->_locked_angle = *steeringOffset;
+
+				osg::DoubleArray::iterator speedOffset = _expSetting->_SpeedValue->begin() + offset;
+				carState->_locked_speed = *speedOffset;
 
 				_expSetting->_carTimefromStart->erase(carTi);
 				_expSetting->_carDistancefromStart->erase(requiredDistance);
 				_expSetting->_carStartLane->erase(pos);
 				_expSetting->_carLaneOffset->erase(posLaneOffset);
+				_expSetting->_SteeringAngle->erase(steeringOffset);
+				_expSetting->_SpeedValue->erase(speedOffset);
 
 				if (_expSetting->_carTimefromStart->empty())
 				{

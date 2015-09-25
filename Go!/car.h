@@ -33,6 +33,9 @@ typedef struct CarState:public osg::Referenced
 		_distancefromBase = 0.0f;
 		_dynamic = true; //acceleration mode
 
+		_locked_angle = INT_MAX;
+		_locked_speed = INT_MAX;
+
 		_collide = false;
 		_crashPermit = true;
 		_userHit = -1;
@@ -112,6 +115,9 @@ typedef struct CarState:public osg::Referenced
 	double _dither;
 	double _distancefromBase;
 	bool _dynamic;
+
+	double _locked_angle;
+	double _locked_speed;
 
 	bool _collide;
 	bool _crashPermit;
