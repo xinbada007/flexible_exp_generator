@@ -591,15 +591,10 @@ void CarEvent::carController()
 		return;
 	}
 
-	_shifted = false;
-
 	if (abs(_carState->_locked_angle) <= _vehicle->_rotate)
 	{
 		_carState->_angle = _carState->_locked_angle;
-		if (_carState->_angle)
-		{
-			_shifted = true;
-		}
+		_shifted = _carState->_angle==0 ? true : false;
 	}
 	if (abs(_carState->_locked_speed) <= _vehicle->_speed)
 	{
@@ -622,10 +617,6 @@ void CarEvent::getTurningFactor()
 	}
 
 	_carState->_turningRadius = _vehicle->_wheelBase / sinTheta;
-	if (_carState->_turningRadius < 0 && _carState->_turningRadius != -2.0f)
-	{
-		sinTheta;
-	}
 
 	const osg::Vec3d &RIGHT_TOP = _carState->_frontWheel->front();
 	const osg::Vec3d &LEFT_TOP = _carState->_frontWheel->back();
