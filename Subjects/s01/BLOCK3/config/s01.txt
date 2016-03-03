@@ -82,11 +82,11 @@ OBS-Orientation:	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;
 
 OBS-Array:	../Resources/roads/lc.txt;
 OBS-Array-NurbsMethod:	1;
-OBS-ARRAY-LENGTH:	800;
+OBS-ARRAY-LENGTH:	400;
 OBS-ARRAY-SPEED:	30;
 #OBS-ARRAY-OFFSET:	3.75;
 OBS-Array-Align:	3.75 10 0;
-OBS-Array-Num:	1000;
+OBS-Array-Num:	500;
 OBS-Array-Pic:	../Resources/models/Beetle.ive
 OBS-Array-Shape:	4
 #OBS-Array-OBSSize:	1	4	1.2;
