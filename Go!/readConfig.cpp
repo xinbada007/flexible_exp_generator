@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <io.h>
 #include <direct.h>
+#include<iterator>
 
 #include <osg/Notify>
 #include <osg/Geometry>
@@ -504,7 +505,7 @@ void ReadConfig::initializeAfterReadTrial()
 		_experiment->_obsArrayNurbsMethod == 1 ? updateNurbs(thisNurbs, _experiment->_numObsinArray, 0.0f) : updateNurbs(thisNurbs, new NurbsCurve, _experiment->_numObsinArray, 0.0f);
 		_experiment->_nurbs.push_back(thisNurbs.release());
 	}
-	_experiment->_speed = _vehicle->_speed;
+// 	_experiment->_speed = _vehicle->_speed;
  	_experiment->_offset = _roads->_width;
 
 	{
@@ -512,6 +513,8 @@ void ReadConfig::initializeAfterReadTrial()
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carDistancefromStart.get(), SIZE);
 		normalizeArrayLength<osg::IntArray>(_experiment->_carStartLane.get(), SIZE);
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carLaneOffset.get(), SIZE);
+		normalizeArrayLength<osg::DoubleArray>(_experiment->_SteeringAngle.get(), SIZE);
+		normalizeArrayLength<osg::DoubleArray>(_experiment->_SpeedValue.get(), SIZE);
 	}
 
 	//Initialize Triggers
@@ -1470,6 +1473,8 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string DISTANCEFROMSTART("DISTANCE-START");
 		static const string STARTLANE("START-LANE");
 		static const string LANEOFFSET("LANE-OFFSET");
+		static const string STEERINGANGLE("STEERING-ANGLE");
+		static const string SPEEDVALUE("SPEED-VALUE");
 
 		static const string TEXTIME("TEXTIME");
 		static const string PERIOD("PERIOD");
@@ -1500,6 +1505,8 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSARRAYMODE("OBS-ARRAY-MODE");
 		static const string OBSANIMELOOP("OBS-ANIME-LOOP");
 		static const string OBSNURBSMETHOD("OBS-ARRAY-NURBSMETHOD");
+		static const string OBSARRAYSPEED("OBS-ARRAY-SPEED");
+		static const string OBSARRAYSHAPE("OBS-ARRAY-SHAPE");
 
 		static const string OPTICFLOW("OPTICFLOW");
 		static const string OPTICFLOWRANGE("OPTICFLOW-VISIBLE");
@@ -1606,6 +1613,28 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					std::string::size_type sz;
 					_experiment->_carLaneOffset->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == STEERINGANGLE)
+			{
+				config.erase(config.begin(), config.begin() + STEERINGANGLE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_SteeringAngle->push_back(stod(config, &sz) * TO_RADDIAN);
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == SPEEDVALUE)
+			{
+				config.erase(config.begin(), config.begin() + SPEEDVALUE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_SpeedValue->push_back(stod(config, &sz) / 3.6f);
 					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;
@@ -1903,6 +1932,24 @@ void ReadConfig::readTrial(ifstream &in)
 				}
 				continue;
 			}
+			else if (title == OBSARRAYSPEED)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYSPEED.size());
+				if (!config.empty())
+				{
+					_experiment->_speed = stod(config) / 3.6f;
+				}
+				continue;
+			}
+			else if (title == OBSARRAYSHAPE)
+			{
+				config.erase(config.begin(), config.begin() + OBSARRAYSHAPE.size());
+				if (!config.empty())
+				{
+					_experiment->_obsArrayShape = stoi(config);
+				}
+				continue;
+			}
 			else if (title == OBSNURBSMETHOD)
 			{
 				config.erase(config.begin(), config.begin() + OBSNURBSMETHOD.size());
@@ -2082,8 +2129,8 @@ void ReadConfig::readTrial(ifstream &in)
 				while (!config.empty())
 				{
 					std::string::size_type sz;
-					std::pair<int, enum TRIGGER_COM> temp;
-					temp = std::make_pair(stoi(config, &sz), enum TRIGGER_COM(Experiment::TRIGGER_COM::ROAD + numCom));
+					std::pair<int, Experiment::TRIGGER_COM> temp;
+					temp = std::make_pair(stoi(config, &sz), Experiment::TRIGGER_COM(Experiment::TRIGGER_COM::ROAD + numCom));
 					++numCom;
 					numCom %= _experiment->_NUMTRIGGERCOM;
 					_experiment->_triggerEnable.push_back(temp);

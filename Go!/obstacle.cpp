@@ -412,7 +412,7 @@ void Obstacle::sweep(const double height)
 	link(firstP, lastP);
 }
 
-void Obstacle::createNode(const std::string file)
+void Obstacle::createNode(const std::string file, const osg::Vec3d &CENTER /* = H_POINT */)
 {
 	osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(file);
 	if (!node)
@@ -428,7 +428,7 @@ void Obstacle::createNode(const std::string file)
 	osg::Vec3d maxP(bb.xMax(), bb.yMax(), bb.zMax());
 	osg::Vec3d center = (minP + maxP)*0.5f;
 	osg::Matrix m;
-  	m *= osg::Matrix::translate(H_POINT);
+	m *= osg::Matrix::translate(CENTER);
 
 	_objNode = node.release();
 	osg::ref_ptr<osg::MatrixTransform> mT = new osg::MatrixTransform;

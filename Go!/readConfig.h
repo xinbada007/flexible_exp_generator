@@ -14,7 +14,6 @@
 typedef std::vector<std::string> stringList;
 struct  Nurbs;
 typedef std::vector<osg::ref_ptr<Nurbs>> nurbsList;
-typedef std::pair<int, enum TRIGGER_COM> triggerEnablePair;
 
 typedef struct Experiment :public osg::Referenced
 {
@@ -33,6 +32,8 @@ typedef struct Experiment :public osg::Referenced
 
 		_textTime = new osg::UIntArray;
 		_textPeriod = new osg::DoubleArray;
+		_SteeringAngle = new osg::DoubleArray;
+		_SpeedValue = new osg::DoubleArray;
 		_dynamicChange = new osg::UIntArray;
 		_dynamicChangeCondition = 0;
 		_dynamicChangeLasting = 0;
@@ -49,6 +50,7 @@ typedef struct Experiment :public osg::Referenced
 		_obsVisible = 300.0f;
 		_imgOBS = NULL;
 		_imgObsArray = NULL;
+		_obsArrayShape = 0;
 		_imgAnisotropy = 1.0f;
 		_numObsinArray = 100;
 		_obsArrayOFFSET = 0.0f;
@@ -94,6 +96,9 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr <osg::DoubleArray> _textPeriod;
 	stringList _textContent;
 
+	osg::ref_ptr<osg::DoubleArray> _SteeringAngle;
+	osg::ref_ptr<osg::DoubleArray> _SpeedValue;
+
 	osg::ref_ptr <osg::UIntArray> _dynamicChange;
 	unsigned _dynamicChangeCondition;
 	unsigned _dynamicChangeLasting;
@@ -111,6 +116,7 @@ typedef struct Experiment :public osg::Referenced
 	std::string _obsArrayPic;
 	osg::ref_ptr<osg::Image> _imgObsArray;
 	int _obsShape;
+	int _obsArrayShape;
 	double _obsVisible;
 	std::string _obsPic;
 	osg::ref_ptr<osg::Image> _imgOBS;
@@ -148,7 +154,6 @@ typedef struct Experiment :public osg::Referenced
 	unsigned _opticFlowModeSegments;
 	bool _opticFlowForeground;
 
-	std::vector<triggerEnablePair> _triggerEnable;
 	osg::ref_ptr<osg::DoubleArray> _triggerTimer;
 	enum TRIGGER_COM
 	{
@@ -163,6 +168,7 @@ typedef struct Experiment :public osg::Referenced
 		TRIGGER,
 		QUIT
 	};
+	std::vector<std::pair<int, TRIGGER_COM>> _triggerEnable;
 	const unsigned _NUMTRIGGERCOM;
 
 	double _offset;
@@ -183,6 +189,8 @@ protected:
 
 		_textTime = NULL;
 		_textPeriod = NULL;
+		_SteeringAngle = NULL;
+		_SpeedValue = NULL;
 		_dynamicChange = NULL;
 		_imgDynamic = NULL;
 		_obstaclesTime = NULL;
@@ -195,6 +203,7 @@ protected:
 		_triggerTimer = NULL;
 	};
 }Experiment;
+typedef std::pair<int, Experiment::TRIGGER_COM> triggerEnablePair;
 
 typedef struct Nurbs :public osg::Referenced
 {

@@ -20,7 +20,8 @@ public:
 	};
 
 private:
-	osg::Geode::DrawableList _drawableList;
+	std::vector<osg::Drawable*> _drawableList;
+//	osg::Geode::DrawableList _drawableList;
 	int _beginMode;
 	unsigned _numLim;
 	unsigned _candidate;
@@ -28,5 +29,6 @@ private:
 	void setStateset(osg::ref_ptr<osg::StateSet> stateSet);
 	void draw() const;
 	void render(osg::Drawable *refD) const;
+	void fetchDrawableList(osg::Geode &geode);
 };
 

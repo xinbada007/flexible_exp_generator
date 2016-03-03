@@ -114,7 +114,14 @@ void DebugNode::addCarDebugger()
 		return;
 	}
 
-	osg::Geode::DrawableList drawableList = _carDebugGde->getDrawableList();
+	std::vector<osg::Drawable*> drawableList;
+	const unsigned numofDrawables = _carDebugGde->getNumDrawables();
+	for (unsigned int i = 0; i < numofDrawables; i++)
+	{
+		drawableList.push_back(_carDebugGde->getDrawable(i));
+	}
+
+//	osg::Geode::DrawableList drawableList = _carDebugGde->getDrawableList();
 	while (!drawableList.empty())
 	{
 		drawableList.back()->dirtyBound();
@@ -144,7 +151,7 @@ void DebugNode::operator()(osg::Node *node, osg::NodeVisitor *nv)
 {
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
-	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
+	osgGA::GUIEventAdapter *ea = (!events.empty()) ? dynamic_cast<osgGA::GUIEventAdapter*>(events.front().get()) : NULL;
 	if (!_carState)
 	{
 		osg::notify(osg::WARN) << "Cannot find car failed to debug" << std::endl;

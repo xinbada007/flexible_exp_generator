@@ -172,20 +172,27 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			case osgGA::GUIEventAdapter::KEY_KP_Enter:
 				_reset = true;
 				break;
+			case osgGA::GUIEventAdapter::KEY_Period:
+				_eyeRotation.makeRotate(-_rotationInterval / frameRate::instance()->getRealfRate(), _eye_Z_Axis);
+				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Y_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
+				break;
+
 			default:
 				break;
 			}
 			break;
 		case osgGA::GUIEventAdapter::KEYUP:
 			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up || ea.getKey() == osgGA::GUIEventAdapter::KEY_Down
-				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_Right)
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_Right
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Period)
 			{
 				_eyeRotation = osg::Matrix::identity().getRotate();
 			}
 			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Up || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Down
 				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Right
 				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Add || ea.getKey() == osgGA::GUIEventAdapter::KEY_KP_Subtract
-				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Page_Down || ea.getKey() == osgGA::GUIEventAdapter::KEY_Page_Up)
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Page_Down || ea.getKey() == osgGA::GUIEventAdapter::KEY_Page_Up
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Period)
 			{
 				_eyeOffset.set(0.0f, 0.0f, 0.0f);
 			}

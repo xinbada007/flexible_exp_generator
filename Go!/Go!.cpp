@@ -3,6 +3,9 @@
 #include "stdafx.h"
 #include "headers.h"
 
+#include <osgDB/ReadFile>
+#include <osgGA/TrackballManipulator>
+
 Road * obtainRoad(ReadConfig *rc)
 {
 	osg::ref_ptr<Road> road = new Road;
@@ -136,9 +139,13 @@ void runScene(ReadConfig *readConfig)
 
 	//Viewer Setup
 	osg::ref_ptr<MulitViewer> mViewer = new MulitViewer(readConfig);
-	mViewer->genMainView();
+	mViewer->genMainView(root);
 	mViewer->getMainView()->setCameraManipulator(camMatrix);
-	mViewer->setMainViewSceneData(root);
+	osg::ref_ptr<osgViewer::ScreenCaptureHandler> scapture = new osgViewer::ScreenCaptureHandler;
+// 	scapture->setKeyEventToggleContinuousCapture('c');
+// 	scapture->setFramesToCapture(60);
+	scapture->setKeyEventTakeScreenShot('c');
+	mViewer->getMainView()->addEventHandler(scapture);
 	mViewer->createHUDView();
 	mViewer->createBackgroundView();
 

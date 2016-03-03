@@ -19,6 +19,27 @@ typedef std::vector<Plane*> quadList;
 typedef std::vector<Solid*> solidList;
 typedef std::vector<Obstacle*> obstacleList;
 
+// Critical Section class for thread-safe menbers access
+//
+#pragma region Critical Section Class
+class clsCritical
+{
+private:
+	CRITICAL_SECTION *m_objpCS;
+	LONG volatile m_dwOwnerThread;
+	LONG volatile m_dwLocked;
+	bool volatile m_bDoRecursive;
+
+public:
+	explicit clsCritical(CRITICAL_SECTION *cs, bool createUnlocked = false, bool lockRecursively = false);
+	~clsCritical();
+	int GetRecursionCount();
+	bool IsLocked();
+	int Enter();
+	int Leave();
+};
+#pragma endregion
+
 typedef struct CarState:public osg::Referenced
 {
 	CarState()
@@ -41,6 +62,9 @@ typedef struct CarState:public osg::Referenced
 		_dither = 0.0f;
 		_distancefromBase = 0.0f;
 		_dynamic = true; //acceleration mode
+
+		_locked_angle = INT_MAX;
+		_locked_speed = INT_MAX;
 
 		_collide = false;
 		_crashPermit = true;
@@ -88,6 +112,8 @@ typedef struct CarState:public osg::Referenced
 		_replay = false;
 
 		_detailedDisplay = false;
+
+		_GPS_Speed = 0.0f;
 	};
 	osg::Vec3d _O;
 	osg::Vec3d _O_Project;
@@ -121,6 +147,9 @@ typedef struct CarState:public osg::Referenced
 	double _dither;
 	double _distancefromBase;
 	bool _dynamic;
+
+	double _locked_angle;
+	double _locked_speed;
 
 	bool _collide;
 	bool _crashPermit;
@@ -189,6 +218,9 @@ private:
 
 	obstacleList _obsList;
 	osg::ref_ptr<osg::DoubleArray> _distancetoObsBody;
+
+	double _GPS_Speed;
+
 protected:
 	~CarState()
 	{ 
@@ -225,8 +257,7 @@ private:
 	osg::ref_ptr<Vehicle> _vehicle;
 	osg::ref_ptr<CarState> _carState;
 	HANDLE _carThread;
-	bool _carTerminated;
+	unsigned _carTerminated;
 protected:
 	virtual ~Car();
 };
-

@@ -117,3 +117,15 @@ private:
 	void removeNodefromRoad(osg::Node *n);
 };
 
+class GeometryVistor :
+	public osg::NodeVisitor
+{
+public:
+	GeometryVistor();
+	void setColor(const double &r, const double &g, const double &b);
+	virtual void apply(osg::Geometry &geom);
+private:
+	double _r;
+	double _g;
+	double _b;
+};

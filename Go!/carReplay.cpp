@@ -22,7 +22,7 @@ void CarReplay::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
-	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
+	osgGA::GUIEventAdapter *ea = (!events.empty()) ? dynamic_cast<osgGA::GUIEventAdapter*>(events.front().get()) : NULL;
 
 	if (refC && refC->getCarState() && refC->getCarState()->_saveState && ea)
 	{

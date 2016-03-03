@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "opticFlow.h"
-#include <math.h>
 
 #include <osg/ShapeDrawable>
 #include <osg/Billboard>
 #include <osgUtil/Optimizer>
+
+#include <math.h>
+#include<iterator>
 
 OpticFlow::OpticFlow() :
 _frameCounts(0), _pointsColorArray(NULL), _points(NULL), _polyNumbers(0)

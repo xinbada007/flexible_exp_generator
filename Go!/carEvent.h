@@ -23,6 +23,7 @@ private:
 	void autoNavigation();
 	void checkRotationLimit();
 	void dealCollision();
+	void carController();
 
 	osg::ref_ptr<Car> _car;
 	osg::ref_ptr<CarState> _carState;

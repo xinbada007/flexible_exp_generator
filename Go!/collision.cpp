@@ -242,7 +242,7 @@ bool Collision::detectObsDistance(const Car *refC, const Obstacle *obs, double *
 	}
 
 	const osg::Vec3d &center = refC->getCarState()->_carArray->back();
-	const double therold = std::max(refC->getVehicle()->_width, refC->getVehicle()->_length) * 2;
+	const double therold = std::max(refC->getVehicle()->_width, refC->getVehicle()->_length)*2;
 	Points *p = obs->getPoint();
 	while (p)
 	{

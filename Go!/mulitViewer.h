@@ -4,16 +4,8 @@
 #include <osgText/Text>
 #include <osgViewer/api/Win32/GraphicsHandleWin32>
 
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-
-#include <OVR.h>
-#include <OVR_CAPI_0_5_0.h>
-#include <OVR_CAPI_GL.h>
+#include <oculusviewer.h>
+#include <oculuseventhandler.h>
 
 #include <vector>
 
@@ -33,14 +25,9 @@ public:
 	MulitViewer(osg::ref_ptr<ReadConfig> refRC);
 
 	inline double getHorizontalFov() const { return _hFOV; };
-	inline osgViewer::View * getHMDView() const { return _hmdView; };
 	inline osgViewer::View * getNormalView() const { return _normalView; };
-	inline osgViewer::View * getMainView() const { return (_normalView) ? _normalView : _hmdView; };
+	inline osgViewer::View * getMainView() const { return (_normalView) ? _normalView : _HMDViewer; };
 	inline std::vector<osg::Camera*> getSlaveCamerasinMainView() const { return _slaveCamerasinNormalView; };
-	inline osg::ref_ptr<osg::Camera> getLeftEyeinHMD() { return _leftEye; };
-	inline osg::ref_ptr<osg::Camera> getRightEyeinHMD() { return _rightEye; };
-
-	inline ovrHmd * getHMDDevice() { if (_hmdView) return &_hmd; return NULL; };
 
 	inline osgViewer::View * getHuDView() const { return _HUDView; };
 	enum HUDPOS
@@ -76,41 +63,19 @@ public:
 
 	inline osgViewer::View * getBGView() const { return _BGView; };
 
-	void genMainView();
+	void genMainView(osg::ref_ptr<osg::Node> node);
 	bool setMainViewSceneData(osg::Node *node);
 	void createHUDView();
 	void createBackgroundView();
 
 	int go();
+
 private:
 	osgViewer::View * createPowerWall();
 	osg::Camera * createSlaveCamerainNormalView(const unsigned screenNum, const osg::GraphicsContext::ScreenSettings &ss, const int startX = 0, const int startY = 0);
 	osg::Camera * createHUDCamerainWindow(osg::GraphicsContext *windows);
+	void createHMD(osg::ref_ptr<osg::Node> node);
 	
-	osg::Camera * createRTTCamera(osg::Camera::BufferComponent buffer,osg::Texture *tex);
-	osg::Camera * createSlaveCamerainHMD(osgViewer::View *view, osg::ref_ptr<osg::Texture2D> tex);
-
-	bool hmd_Initialise();
-	bool setHMDSceneData(osg::Node *node);
-	void runHMD();
-	void shutdownHMD();
-	ovrHmd _hmd;
-	ovrGLConfig _glCfg;
-	ovrEyeRenderDesc _eyeRenderDesc[2];
-	ovrVector3f _eyeOffsets[2];
-	ovrPosef _eyePoses[2];
-	ovrTexture _eyeTextures[2];
-	OVR::Matrix4f _projectionMatrici[2];
-	OVR::Sizei _renderTargetSize;
-	ovrSizei _windowsR;
-	ovrSizei _targetSize;
-	ovrSizei _eyeTextureSize[2];
-	osg::ref_ptr<osg::Texture2D> _masterTex;
-	osg::ref_ptr<osgViewer::View> _hmdView;
-
-	osg::ref_ptr<osg::Camera> _leftEye;
-	osg::ref_ptr<osg::Camera> _rightEye;
-
 	osg::ref_ptr<Screens> _screens;
 	osg::ref_ptr<osgViewer::View> _normalView;
 	std::vector<osg::Camera*> _slaveCamerasinNormalView;
@@ -118,17 +83,11 @@ private:
 	osgText::Text* _HUDText;
 	osg::ref_ptr<osgViewer::View> _BGView;
 
+	osg::ref_ptr<osgViewer::Viewer> _HMDViewer;
+	osg::ref_ptr<OculusViewer> _OculusViewer;
+
 	double _hFOV;
 
 protected:
 	virtual ~MulitViewer();
-};
-
-class swapcallback:
-	public osg::GraphicsContext::SwapCallback
-{
-public:
-	swapcallback(){};
-	~swapcallback(){};
-	virtual void swapBuffersImplementation(osg::GraphicsContext* gc){};
 };

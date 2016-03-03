@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "car.h"
 #include <algorithm>
+#include <assert.h>
 
 Car::Car()
 {
@@ -9,7 +10,7 @@ Car::Car()
 
 Car::Car(const Car &copy, osg::CopyOp copyop /* = osg::CopyOp::SHALLOW_COPY */) :
 EulerPoly(copy, copyop), _vehicle(copy._vehicle), _carState(copy._carState), _carThread(NULL),
-_carTerminated(false)
+_carTerminated(0)
 {
 
 }
@@ -21,7 +22,7 @@ Car::~Car()
 	_vehicle = NULL;
 	_carState = NULL;
 
-	_carTerminated = true;
+	InterlockedExchange(&_carTerminated, 1);
 	if (_carThread)
 	{
 		WaitForSingleObject(_carThread, INFINITE);
@@ -33,7 +34,7 @@ DWORD WINAPI Car::callCommunication(LPVOID lpParam)
 {
 	Car *thisCar = (Car *)lpParam;
 
-	while (!thisCar->_carTerminated)
+	while (thisCar && !thisCar->_carTerminated)
 	{
 		thisCar->networkINFunc();
 	}
@@ -105,6 +106,24 @@ void Car::receiveMsg(boost::asio::ip::tcp::socket *socket, boost::asio::deadline
 		if ((!bytestranferred || ercode))
 		{
 			break;
+		}
+		else
+		{
+			std::string data;
+			for (unsigned i = 0; i < bytestranferred; i++)
+			{
+				data.push_back(input[i]);
+			}
+			std::size_t found_to = data.find_first_of("\n");
+			std::string speed;
+			double speed_gps = 0.0f;
+			if (found_to != data.npos)
+			{
+				std::copy(data.begin(), data.begin() + found_to, std::back_inserter(speed));
+// 				this->_carState->_GPS_Speed
+// 				speed_gps = stod(speed);
+			}
+
 		}
 // 		socket->async_read_some(boost::asio::buffer(temp), boost::bind(&Car::receiveMsgHandler, this, &isread, temp, timer, boost::asio::placeholders::bytes_transferred, boost::asio::placeholders::error));
 // 		timer->expires_from_now(boost::posix_time::millisec(100));
@@ -219,3 +238,81 @@ void Car::genCar(osg::ref_ptr<ReadConfig> refRC)
  		_carThread = CreateThread(NULL, NULL, Car::callCommunication,(LPVOID)this, NULL, NULL);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// CriticalSection class
+//
+#pragma region Critical Section Class
+clsCritical::clsCritical(CRITICAL_SECTION *cs, bool createUnlocked, bool lockRecursively)
+{
+	assert(cs != NULL);
+
+	m_objpCS = cs;
+	m_dwLocked = -1;
+	m_bDoRecursive = lockRecursively;
+	m_dwOwnerThread = GetCurrentThreadId();
+
+	if (!createUnlocked)
+		Enter();
+}
+
+clsCritical::~clsCritical()
+{
+	int iFail = (int)0x80000000;
+
+	while (m_dwLocked >= 0)
+		if (Leave() == iFail)
+			break;
+}
+
+int clsCritical::Enter()
+{
+	if (m_dwOwnerThread != GetCurrentThreadId())
+		throw "class clsCritical: Thread cross-over error. ";
+
+	try
+	{
+		if (m_bDoRecursive || (m_dwLocked == -1))
+		{
+			EnterCriticalSection(m_objpCS);
+			InterlockedIncrement(&m_dwLocked);
+		}
+		return m_dwLocked;
+	}
+	catch (...)
+	{
+		return 0x80000000;
+	}
+}
+
+int clsCritical::Leave()
+{
+	if (m_dwOwnerThread != GetCurrentThreadId())
+		throw "class clsCritical: Thread cross-over error. ";
+
+	try
+	{
+		if (m_dwLocked >= 0)
+		{
+			LeaveCriticalSection(m_objpCS);
+			InterlockedDecrement(&m_dwLocked);
+			return m_dwLocked;
+		}
+		return -1;
+	}
+	catch (...)
+	{
+		return 0x80000000;
+	}
+}
+
+bool clsCritical::IsLocked()
+{
+	return (m_dwLocked > -1);
+}
+
+int clsCritical::GetRecursionCount()
+{
+	return m_dwLocked;
+}
+#pragma endregion

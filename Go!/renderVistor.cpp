@@ -77,10 +77,23 @@ void RenderVistor::apply(osg::Group &refNode)
 // 	traverse(refGeode);
 // }
 
+void RenderVistor::fetchDrawableList(osg::Geode &geode)
+{
+	_drawableList.clear();
+
+	const unsigned &num = geode.getNumDrawables();
+	for (unsigned i = 0; i < num; i++)
+	{
+		_drawableList.push_back(geode.getDrawable(i));
+	}
+}
+
 void RenderVistor::apply(osg::Geode &refGeode)
 {
 	//pre-process before traverse
-	_drawableList = refGeode.getDrawableList();
+// 	_drawableList = refGeode.getDrawableList();
+
+	fetchDrawableList(refGeode);
 	draw();
 
 	traverse(refGeode);
@@ -103,7 +116,8 @@ void RenderVistor::draw() const
 		return;
 	}
 
-	osg::Geode::DrawableList::const_iterator i = _drawableList.begin();
+//	osg::Geode::DrawableList::const_iterator i = _drawableList.begin();
+	std::vector<osg::Drawable*>::const_iterator i = _drawableList.cbegin();
 	
 	do 
 	{

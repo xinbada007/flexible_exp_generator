@@ -8,6 +8,8 @@
 #include <osg/Switch>
 #include <osg/PolygonMode>
 
+#include<iterator>
+
 LogicRoad::LogicRoad():
 _next(NULL), _prev(NULL), _tag(ROAD),
 _roadTxt(""), _width(-1), _density(-1), _eFlag(NULL)

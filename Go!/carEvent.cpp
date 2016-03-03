@@ -146,6 +146,7 @@ void CarEvent::calculateCarMovement()
 	{
 		//set rotation direction and limit
 		_carState->_angle = abs(_carState->_angle) * (_leftTurn ? 1 : -1);
+		if (_carState->_speed < 0) _carState->_angle = -_carState->_angle;
 	}
 
 	//set the acceleration of rotation
@@ -334,8 +335,9 @@ void CarEvent::shiftVehicle()
 	_carState->_shiftD.normalize();
 
 	double R = abs(_vehicle->_wheelBase / sin(_vehicle->_rotate));
-	R *= sin(abs(_carState->_angle) * 1.0f / frameRate::instance()->getRealfRate());
+	R *= sin(abs(_carState->_angle) / frameRate::instance()->getRealfRate());
 	R *= _vehicle->_dynamicSensitive;
+// 	std::cout << "Shift Speed:\t" << R << std::endl;
 
 	_carState->_shiftD *= R;
 	_carState->_shiftD = (_leftTurn) ? -_carState->_shiftD : _carState->_shiftD;
@@ -475,7 +477,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 	
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
-	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
+	osgGA::GUIEventAdapter *ea = (!events.empty()) ? dynamic_cast<osgGA::GUIEventAdapter*>(events.front().get()) : NULL;
 
 	if (_carState && ea)
 	{
@@ -490,6 +492,7 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				int sign = (key == osgGA::GUIEventAdapter::KEY_A) ? 1 : -1;
 				_carState->_angle += _vehicle->_rotate*sign*_carState->_angle_incr;
 				_carState->_angle = abs(_carState->_angle);
+
 				_leftTurn = (_carState->_speed >= 0) ? (sign == 1) : (sign == -1);
 				_shifted = true;
 				break;
@@ -552,9 +555,11 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 				_carState->_speed = 0.0f;
 			}
 
+			carController();
+
 			//initial check if over speed
 			_carState->_speed = abs(_carState->_speed) > abs(_vehicle->_speed) ?
-				(_vehicle->_speed*(_carState >= 0 ? 1 : -1)) : _carState->_speed;
+				(_vehicle->_speed*(_carState->_speed >= 0 ? 1 : -1)) : _carState->_speed;
 
 			//1st
 			shiftVehicle();
@@ -581,10 +586,31 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 //	osg::notify(osg::NOTICE) << "CarEvent..END..." << std::endl;
 }
 
+void CarEvent::carController()
+{
+	if (!_carState || !_vehicle)
+	{
+		return;
+	}
+
+	if (abs(_carState->_locked_angle) <= _vehicle->_rotate)
+	{
+		_carState->_angle = _carState->_locked_angle;
+		_shifted = _carState->_angle==0 ? true : false;
+		_leftTurn = (_carState->_angle > 0) ? true : false;
+		_leftTurn &= (_carState->_speed >= 0) ? true : false;
+	}
+	if (abs(_carState->_locked_speed) <= _vehicle->_speed)
+	{
+		_carState->_speed = _carState->_locked_speed;
+	}
+}
+
 void CarEvent::getTurningFactor()
 {
-	_carState->_angle = abs(_carState->_angle) > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
-	_carState->_angle = (abs(_carState->_speed) == 0) ? 0.0f : _carState->_angle;
+	_carState->_angle = abs(_carState->_angle);
+	_carState->_angle = _carState->_angle > _vehicle->_rotate ? _vehicle->_rotate : _carState->_angle;
+	_carState->_angle = _carState->_speed == 0 ? 0.0f : _carState->_angle;
 
 	const double sinTheta = sin(_carState->_angle);
 	if (!sinTheta)
@@ -799,12 +825,19 @@ void CarEvent::applyCarMovement()
 
 void dirtyVisitor::apply(osg::Geode &geo)
 {
-	const osg::Geode::DrawableList &drawList = geo.getDrawableList();
-	osg::Geode::DrawableList::const_iterator i = drawList.cbegin();
-	while (i != drawList.cend())
+// 	const osg::Geode::DrawableList &drawList = geo.getDrawableList();
+// 	osg::Geode::DrawableList::const_iterator i = drawList.cbegin();
+// 	while (i != drawList.cend())
+// 	{
+// 		(*i)->dirtyBound();
+// 		(*i)->dirtyDisplayList();
+// 		++i;
+// 	}
+
+	const unsigned &num = geo.getNumDrawables();
+	for (unsigned i = 0; i < num; i++)
 	{
-		(*i)->dirtyBound();
-		(*i)->dirtyDisplayList();
-		++i;
+		geo.getDrawable(i)->dirtyBound();
+		geo.getDrawable(i)->dirtyDisplayList();
 	}
 }

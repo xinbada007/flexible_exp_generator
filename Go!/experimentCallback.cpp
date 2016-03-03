@@ -17,6 +17,7 @@
 #include <random>
 #include <assert.h>
 #include <climits>
+#include <algorithm>
 
 ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTime(0), _expSetting(rc->getExpSetting()), _cameraHUD(NULL)
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
@@ -242,8 +243,28 @@ void ExperimentCallback::createObstacles()
 			obs->setSolidType(Solid::solidType::SD_ANIMATION);
 			obs->setTag(ROADTAG::RT_UNSPECIFIED);
 			obs->setImage(_expSetting->_imgObsArray);
-			obs->createBox(_expSetting->_obsArrayAlign, _expSetting->_obsArraySize);
+			const osg::Vec3d &center = _expSetting->_obsArrayAlign;
+			switch (_expSetting->_obsArrayShape)
+			{
+			case 0:
+				obs->createBox(center, _expSetting->_obsSize);
+				break;
+			case 1:
+				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
+				break;
+			case 3:
+				obs->createSphere(center, _expSetting->_obsSize.x());
+				break;
+			case 4:
+				obs->createNode(_expSetting->_obsArrayPic, center);
+				break;
+			default:
+				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
+				break;
+			}
 			obs->setDataVariance(osg::Object::DYNAMIC);
+// 			obs->createBox(_expSetting->_obsArrayAlign, _expSetting->_obsArraySize);
+// 			obs->setDataVariance(osg::Object::DYNAMIC);
 			_obstacleList.push_back(obs);
 		}
 
@@ -254,22 +275,22 @@ void ExperimentCallback::createObstacles()
 
 			if (_expSetting->_GLPOINTSMODE)
 			{
-				osg::ref_ptr<OpticFlow> obs = new OpticFlow;
-				osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
-				osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
-				ss->setAttribute(psize);
-				ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-				ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-
-				osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
-				color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
-				obs->setPointsColorArray(color);
-
-				obs->createOpticFlow(_centerList);
-				obs->setStateSet(ss);
-				obs->setDataVariance(osg::Object::STATIC);
-
-				_obstacleList.push_back(obs);
+// 				osg::ref_ptr<OpticFlow> obs = new OpticFlow;
+// 				osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+// 				osg::ref_ptr<osg::Point> psize = new osg::Point(5.0f);
+// 				ss->setAttribute(psize);
+// 				ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+// 				ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+// 
+// 				osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+// 				color->push_back(osg::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+// 				obs->setPointsColorArray(color);
+// 
+// 				obs->createOpticFlow(_centerList);
+// 				obs->setStateSet(ss);
+// 				obs->setDataVariance(osg::Object::STATIC);
+// 
+// 				_obstacleList.push_back(obs);
 			}
 			else
 			{
@@ -821,7 +842,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 
 	osgGA::EventVisitor *ev = dynamic_cast<osgGA::EventVisitor*>(nv);
 	osgGA::EventQueue::Events events = (ev) ? ev->getEvents() : events;
-	osgGA::GUIEventAdapter *ea = (!events.empty()) ? events.front() : NULL;
+	osgGA::GUIEventAdapter *ea = (!events.empty()) ? dynamic_cast<osgGA::GUIEventAdapter*>(events.front().get()) : NULL;
 	CarState *carState = _car->getCarState();
 	if (carState && ea)
 	{
@@ -870,16 +891,27 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 					_anmCallback->setPause(!_anmCallback->getPause());
 				}
 				break;
-			case::osgGA::GUIEventAdapter::KEY_Home:
-				if (_mv)
+// 			case::osgGA::GUIEventAdapter::KEY_Home:
+// 				if (_mv)
+// 				{
+// 
+// 				}
+// 				break;
+			case::osgGA::GUIEventAdapter::KEY_Rightbracket:
+				if (_root)
 				{
-					ovrHmd *hmd = _mv->getHMDDevice();
-					if (hmd)
-					{
-						ovrHmd_RecenterPose(*hmd);
-					}
+					GeometryVistor gv;
+					gv.setColor(0.7, 1.3, 0.7);
+					_root->accept(gv);
 				}
 				break;
+			case::osgGA::GUIEventAdapter::KEY_Leftbracket:
+				if (_root)
+				{
+					GeometryVistor gv;
+					gv.setColor(1.3, 0.7, 0.7);
+					_root->accept(gv);
+				}
 // 			case::osgGA::GUIEventAdapter::KEY_Delete:
 // 				_opticFlowPoints = NULL;
 // 				_opticFlowPoints->addChild(NULL);
@@ -915,10 +947,10 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 					}
 					else if (_mv)
 					{
-						if (_mv->getLeftEyeinHMD()) _mv->getLeftEyeinHMD()->setClearColor(_otherClearColor);
-						if (_mv->getRightEyeinHMD()) _mv->getRightEyeinHMD()->setClearColor(_otherClearColor);
-						_mv->getMainView()->getCamera()->setClearColor(_otherClearColor);
+						//Left Eye
+						//Right Eye
 
+						_mv->getMainView()->getCamera()->setClearColor(_otherClearColor);
 					}
 				}
 				else
@@ -930,8 +962,9 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 					}
 					else if (_mv)
 					{
-						if (_mv->getLeftEyeinHMD()) _mv->getLeftEyeinHMD()->setClearColor(_clearColor);
-						if (_mv->getRightEyeinHMD()) _mv->getRightEyeinHMD()->setClearColor(_clearColor);
+						//Left Eye
+						//Right Eye
+
 						_mv->getMainView()->getCamera()->setClearColor(_clearColor);
 					}
 				}
@@ -1454,13 +1487,15 @@ void ExperimentCallback::positionCar()
 	const unsigned &distanceSize = _expSetting->_carDistancefromStart->size();
 	const unsigned &offsetSize = _expSetting->_carLaneOffset->size();
 	const unsigned &laneSize = _expSetting->_carStartLane->size();
+	const unsigned &steeringSize = _expSetting->_SteeringAngle->size();
+	const unsigned &speedSize = _expSetting->_SpeedValue->size();
 
-	if (!timeSize || !distanceSize || !offsetSize || !laneSize)
+	if (!timeSize || !distanceSize || !offsetSize || !laneSize || !steeringSize || !speedSize)
 	{
 		return;
 	}
 
-	if (timeSize != distanceSize || timeSize != offsetSize || timeSize != laneSize)
+	if (timeSize != distanceSize || timeSize != offsetSize || timeSize != laneSize || timeSize != steeringSize || timeSize != speedSize)
 	{
 		osg::notify(osg::WARN) << "cannot position Car because size are inconsistent" << std::endl;
 		return;
@@ -1512,18 +1547,30 @@ void ExperimentCallback::positionCar()
 				center = center * osg::Matrix::translate(X_AXIS* *pos * _expSetting->_offset * 0.25f);
 				center = center * osg::Matrix::translate(X_AXIS * *posLaneOffset);
 				const osg::Matrixd M = osg::Matrix::translate(center - carState->_O);
-				carState->_forceReset = M;
-				carState->_lastQuad.back() = *curO;
 
-				_car->getVehicle()->_initialState = M;
-				_car->getVehicle()->_baseline = _expSetting->_offset * _expSetting->_deviationBaseline * 0.25f;
-				arrayByMatrix(_car->getVehicle()->_V, M);
-				_car->getVehicle()->_O = _car->getVehicle()->_O * M;
+				if (*pos != -2)
+				{
+					carState->_forceReset = M;
+					carState->_lastQuad.back() = *curO;
+
+					_car->getVehicle()->_initialState = M;
+					_car->getVehicle()->_baseline = _expSetting->_offset * _expSetting->_deviationBaseline * 0.25f;
+					arrayByMatrix(_car->getVehicle()->_V, M);
+					_car->getVehicle()->_O = _car->getVehicle()->_O * M;
+				}
+
+				osg::DoubleArray::iterator steeringOffset = _expSetting->_SteeringAngle->begin() + offset;
+				carState->_locked_angle = *steeringOffset;
+
+				osg::DoubleArray::iterator speedOffset = _expSetting->_SpeedValue->begin() + offset;
+				carState->_locked_speed = *speedOffset;
 
 				_expSetting->_carTimefromStart->erase(carTi);
 				_expSetting->_carDistancefromStart->erase(requiredDistance);
 				_expSetting->_carStartLane->erase(pos);
 				_expSetting->_carLaneOffset->erase(posLaneOffset);
+				_expSetting->_SteeringAngle->erase(steeringOffset);
+				_expSetting->_SpeedValue->erase(speedOffset);
 
 				if (_expSetting->_carTimefromStart->empty())
 				{
@@ -1562,4 +1609,39 @@ void ExperimentCallback::setHUDCamera(osg::Camera *cam)
 
 	_geodeHUD->addDrawable(_textHUD);
 	_cameraHUD->addChild(_geodeHUD);
+}
+
+GeometryVistor::GeometryVistor():
+osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
+_r(1), _g(1), _b(1)
+{
+
+}
+
+void GeometryVistor::setColor(const double &r, const double &g, const double &b)
+{
+	_r = r;
+	_g = g;
+	_b = b;
+}
+
+void GeometryVistor::apply(osg::Geometry &geom)
+{
+	osg::Vec4Array *color = dynamic_cast<osg::Vec4Array*>(geom.getColorArray());
+
+	if (color)
+	{
+		const unsigned &NumElemetns = color->getNumElements();
+		if (NumElemetns > 1)
+		{
+			std::cout << NumElemetns;
+		}
+
+		color->at(0).r() *= _r;
+		color->at(0).g() *= _g;
+		color->at(0).b() *= _b;
+	}
+	geom.dirtyDisplayList();
+
+	traverse(geom);
 }
