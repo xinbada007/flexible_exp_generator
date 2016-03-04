@@ -38,9 +38,9 @@ GroundPic:	../Resources/texture/grass.jpg 16
 GroundPicRes:	500 1000
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
-RoadTxt:	../Resources/roads/Line.txt;
+RoadTxt:	../Resources/roads/0.txt;
 Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
-Density:	50
+Density:	2500
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
 WallHeight:	0
@@ -103,4 +103,4 @@ Trigger-Time:	-1	-1	-1	-1	12	-1	-1	-1	-1	-1
 offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700
 
 #Roads:	../Resources/roads/Line.txt;
-#Roads:	../Resources/roads/Line.txt;
+#Roads:	../Resources/roads/0.txt;

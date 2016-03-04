@@ -2485,49 +2485,49 @@ void ReadConfig::updateNurbs(Nurbs *thisNurbs, const unsigned &density, const do
 	const unsigned kind = 1;
 	SISLCurve *sc = newCurve(numPoints, order, knots, ctrlpts, kind, dim, 1);
 
+	std::vector<std::pair<int, double>> allKnotsFactors;
+	if (width)
+	{
+		allKnotsFactors.reserve(1000);
+	}
+
 	const int der = 0;
 	double *derive = (double*)calloc((der + 1)*dim, sizeof(double));
 	double *curvature = (double*)calloc(dim, sizeof(double));
 	double radius;
 	int jstat;
-	const double denS = ((double)(density) / (double)(numKnots - order - degree)) + 0.5f;
-	for (unsigned i = degree; i < numKnots - order; i++)
+	const double denS = (double)density / (double)(thisNurbs->_knotVector->back() - thisNurbs->_knotVector->front()) + 0.5f;
+	for (unsigned i = 0; i < numKnots - 1; i++)
 	{
 		int leftknot = i;
 		const double left = knots[i];
 		const double right = knots[i + 1];
 		const double step = (right - left) / denS;
-		for (int j = 0; j < denS; j++)
+		for (double k = left; k <= right; k += step)
 		{
-			double k = left + step*j;
-			if (k > right) k = right;
 			s1225(sc, der, k, &leftknot, derive, curvature, &radius, &jstat);
 			if (!jstat)
 			{
-				thisNurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-				thisNurbs->_radius->push_back(radius);
+				const osg::Vec3d evaluated(derive[0], derive[1], derive[2]);
+				if (thisNurbs->_path->empty() || thisNurbs->_path->back() != evaluated)
+				{
+					thisNurbs->_path->push_back(evaluated);
+					thisNurbs->_radius->push_back(radius);
+					if (width)
+					{
+						std::pair<int, double> temp(leftknot, k);
+						allKnotsFactors.push_back(temp);
+					}
+				}
 			}
 			else
 			{
 				osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
 				return;
 			}
+			if (k == right)	break;
 		}
 	}
-	int leftknot = numKnots - order - 1;
-	int k = knots[leftknot + 1];
-	s1225(sc, der, k, &leftknot, derive, curvature, &radius, &jstat);
-	if (!jstat)
-	{
-		thisNurbs->_path->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-		thisNurbs->_radius->push_back(radius);
-	}
-	else
-	{
-		osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
-		return;
-	}
-
 
 	if (width)
 	{
@@ -2567,54 +2567,28 @@ void ReadConfig::updateNurbs(Nurbs *thisNurbs, const unsigned &density, const do
 		double *curvature = (double*)calloc(dim, sizeof(double));
 		double radius;
 		int jstatR, jstatL;
-		const double denS = ((double)(density) / (double)(numKnots - order - degree)) + 0.5f;
-		for (unsigned int i = degree; i < numKnots - order; i++)
+		
+		std::vector<std::pair<int, double>>::iterator knotsThis = allKnotsFactors.begin();
+		std::vector<std::pair<int, double>>::iterator knotsEnd = allKnotsFactors.end();
+
+		for (knotsThis; knotsThis != knotsEnd; knotsThis++)
 		{
-			int leftknot = i;
-			const double left = knots[i];
-			const double right = knots[i + 1];
-			const double step = (right - left) / denS;
-			for (int j = 0; j < denS; j++)
+			s1225(scL, der, (*knotsThis).second, &((*knotsThis).first), derive, curvature, &radius, &jstatR);
+			const osg::Vec3d evaL(derive[0], derive[1], derive[2]);
+			const double radiusL = radius;
+
+			s1225(scR, der, (*knotsThis).second, &((*knotsThis).first), derive, curvature, &radius, &jstatL);
+			const osg::Vec3d evaR(derive[0], derive[1], derive[2]);
+			const double radiusR = radius;
+
+			if (!jstatR && !jstatL)
 			{
-				double k = left + step*j;
-				if (k > right) k = right;
-				s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
-				if (!jstatR)
-				{
-					thisNurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-					thisNurbs->_radiusL->push_back(radius);
-				}
-				s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
-				if (!jstatL)
-				{
-					thisNurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-					thisNurbs->_radiusR->push_back(radius);
-				}
-				if (jstatR || jstatL)
-				{
-					osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
-					return;
-				}
+				thisNurbs->_path_left->push_back(evaL);
+				thisNurbs->_radiusL->push_back(radiusL);
+
+				thisNurbs->_path_right->push_back(evaR);
+				thisNurbs->_radiusR->push_back(radiusR);
 			}
-		}
-		int leftknot = numKnots - order - 1;
-		int k = knots[leftknot + 1];
-		s1225(scL, der, k, &leftknot, derive, curvature, &radius, &jstatR);
-		if (!jstatR)
-		{
-			thisNurbs->_path_left->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-			thisNurbs->_radiusL->push_back(radius);
-		}
-		s1225(scR, der, k, &leftknot, derive, curvature, &radius, &jstatL);
-		if (!jstatL)
-		{
-			thisNurbs->_path_right->push_back(osg::Vec3d(derive[0], derive[1], derive[2]));
-			thisNurbs->_radiusR->push_back(radius);
-		}
-		if (jstatR || jstatL)
-		{
-			osg::notify(osg::FATAL) << "Cannot Evaluate Nurbs based on Given Condition" << std::endl;
-			return;
 		}
 
 		freeCurve(scL);
