@@ -7,7 +7,7 @@
 
 CameraEvent::CameraEvent(osg::ref_ptr<ReadConfig> refRC):
 _reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(1.0f),
-_useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL)
+_useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL), _camRotationMode(true)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);
@@ -33,6 +33,8 @@ _useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL)
 	_matrixList[1] = NULL;
 	_rotationList[0] = NULL;
 	_rotationList[1] = NULL;
+
+	memset(_fnKeys, 0, sizeof(_fnKeys));
 
 	genCamera(refRC);
 }
@@ -176,6 +178,12 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				_eyeRotation.makeRotate(-_rotationInterval / frameRate::instance()->getRealfRate(), _eye_Z_Axis);
 				_eyeOffset = _eyeOffset * osg::Matrix::translate(_eye_Y_Axis * (_offsetInterval / frameRate::instance()->getRealfRate()));
 				break;
+			case osgGA::GUIEventAdapter::KEY_F1:
+				_eyeRotation.makeRotate(-0.5*PI, _eye_X_Axis);
+				break;
+			case osgGA::GUIEventAdapter::KEY_Insert:
+				_camRotationMode = !_camRotationMode;
+				break;
 
 			default:
 				break;
@@ -184,7 +192,7 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 		case osgGA::GUIEventAdapter::KEYUP:
 			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_Up || ea.getKey() == osgGA::GUIEventAdapter::KEY_Down
 				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Left || ea.getKey() == osgGA::GUIEventAdapter::KEY_Right
-				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Period)
+				|| ea.getKey() == osgGA::GUIEventAdapter::KEY_Period || ea.getKey() == osgGA::GUIEventAdapter::KEY_F1)
 			{
 				_eyeRotation = osg::Matrix::identity().getRotate();
 			}
@@ -208,7 +216,11 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			_offset = _offset * osg::Matrix::rotate(moment.getRotate());
 			_offset = _offset * osg::Matrix::translate(_eyeOffset);
 
-			_camRotation *= moment.getRotate();
+			//check Insert Mode (Rotation)
+			if (_camRotationMode)
+			{
+				_camRotation *= moment.getRotate();
+			}
 			_camRotation *= _eyeRotation;
 
 			_eye_X_Axis = X_AXIS * osg::Matrix::rotate(refCS->_state.getRotate());
@@ -226,11 +238,11 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			{
 				_realOffset = _offset * (*_eyePointOffset);
 			}
-
 			else
 			{
 				_realOffset = _offset;
 			}
+
 			_eyePoint.set(refCS->_O + _realOffset);
 			_stateLast = refCS->_state;
 			if (viewer)

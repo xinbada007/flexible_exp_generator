@@ -511,6 +511,8 @@ typedef struct Screens:public osg::Referenced
 		_hFov = 2.0f*atan(_aspect*tan(_fovy*0.5f));	//default unit is degree
 		_refreshRate = 0.0f;
 
+		_resWidth = 0;
+		_resHeight = 0;
 		_scrs = new osg::UIntArray;
 		_realworld = new osg::DoubleArray;
 		_bgColor.set(0.0f, 0.0f, 0.0f, 1.0f);
@@ -533,6 +535,8 @@ typedef struct Screens:public osg::Referenced
 	double _hFov;
 	double _refreshRate;
 
+	unsigned _resWidth;
+	unsigned _resHeight;
 	osg::ref_ptr<osg::UIntArray> _scrs;
 	osg::ref_ptr<osg::DoubleArray> _realworld;
 	std::string _background;

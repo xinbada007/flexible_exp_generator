@@ -4,14 +4,12 @@
 TrialConfig
 
 [ScreenSettings]
-Use_HMD:	0	#enable this disbles all other screen settings
-HMD_Screen:	1
-HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
-aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		60	#Disable when RealWorld is enabled
+Resolution:	1280,720
+aspect:	 	1.777	#0	#1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		30	#Disable when RealWorld is enabled
 zNear:	0.1
 zFar:	1000
 RealWorld:	0:	42.268, 65.217, 42.391

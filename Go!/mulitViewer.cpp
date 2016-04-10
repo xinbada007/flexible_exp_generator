@@ -137,6 +137,11 @@ osgViewer::View * MulitViewer::createPowerWall()
 			if (ffo != screenNumber->end())	screenNumber->erase(ffo);
 			unsigned sn_count = std::count(screenNumber->begin(), screenNumber->end(), si);
 			wsi->getScreenSettings(si, ss);
+			if (_screens->_resWidth != 0 && _screens->_resHeight != 0)
+			{
+				ss.height = _screens->_resHeight;
+				ss.width = _screens->_resWidth;
+			}
 			ss.height = ss.height / numRows;
 			ss.width = ss.width / si_count;
 

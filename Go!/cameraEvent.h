@@ -58,5 +58,8 @@ private:
 	osg::Matrixd *_rotationList[2];
 
 	osg::Matrix *_eyePointOffset;
+
+	bool _camRotationMode;
+	unsigned _fnKeys[12];
 };
 

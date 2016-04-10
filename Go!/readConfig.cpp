@@ -802,6 +802,7 @@ void ReadConfig::readTrial(ifstream &in)
 
 		//Set Screen
 		static const string SCR = "SCREEN";
+		static const string RESO = "RESOLUTION";
 		static const string USEHMD = "USE_HMD";
 		static const string HMDSCREEN = "HMD_SCREEN";
 		static const string HMDREFRESHRATE = "HMD_REFRESHRATE";
@@ -829,6 +830,19 @@ void ReadConfig::readTrial(ifstream &in)
 					std::string::size_type sz;
 					_screens->_scrs->push_back(stoi(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == RESO)
+			{
+				config.erase(config.begin(), config.begin() + RESO.size());
+				if (!config.empty())
+				{
+					std::string::size_type sz;
+					_screens->_resWidth = stoi(config, &sz);
+
+					config.erase(config.begin(), config.begin() + sz);
+					_screens->_resHeight = stoi(config);
 				}
 				continue;
 			}
