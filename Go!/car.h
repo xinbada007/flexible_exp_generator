@@ -111,7 +111,7 @@ typedef struct CarState:public osg::Referenced
 		_dynamicState = NULL;
 		_replay = false;
 
-		_detailedDisplay = false;
+		_detailedDisplay = 0;
 
 		_GPS_Speed = 0.0f;
 	};
@@ -171,7 +171,7 @@ typedef struct CarState:public osg::Referenced
 	osg::ref_ptr<osg::IntArray> _dynamicState;
 	bool _replay;
 
-	bool _detailedDisplay;
+	unsigned _detailedDisplay;
 
 	inline void cacluateSpeedandAngle() const
 	{ 

@@ -112,7 +112,7 @@ private:
 	osg::Camera *_cameraHUD;
 	osg::ref_ptr<osg::Geode> _geodeHUD;
 
-	bool _detailed;
+	unsigned _detailed;
 	bool _reced;
 
 	enum TypeofText

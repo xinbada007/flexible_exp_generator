@@ -18,7 +18,7 @@ using namespace std;
 
 Recorder::Recorder(ReadConfig *rc) : _rc(NULL), _statusText(new osgText::Text),
 _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _cameraHUD(NULL)
-, _geodeHUD(new osg::Geode), _detailed(false), _reced(false)
+, _geodeHUD(new osg::Geode), _detailed(0), _reced(false)
 {
 	_rc = rc;
 
@@ -643,13 +643,17 @@ void Recorder::copyandSetHUDText()
 		i++;
 	}
 
-	if (_detailed)
+	if (_detailed == 1)
 	{
 		setStatus(content);
 	}
-	else
+	else if (_detailed == 0)
 	{
 		setStatusLess(lesscontent);
+	}
+	else
+	{
+		_statusText->setText("");
 	}
 }
 

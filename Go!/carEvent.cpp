@@ -529,7 +529,8 @@ void CarEvent::operator()(osg::Node *node, osg::NodeVisitor *nv)
 			}
 			else if (key == osgGA::GUIEventAdapter::KEY_H)
 			{
-				_carState->_detailedDisplay = !_carState->_detailedDisplay;
+				++_carState->_detailedDisplay;
+				_carState->_detailedDisplay %= 3;
 				break;
 			}
 		case osgGA::GUIEventAdapter::KEYUP:

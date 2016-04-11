@@ -7,7 +7,7 @@
 
 CameraEvent::CameraEvent(osg::ref_ptr<ReadConfig> refRC):
 _reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(1.0f),
-_useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL), _camRotationMode(true)
+_useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL), _camRotationMode(0)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);
@@ -182,7 +182,8 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				_eyeRotation.makeRotate(-0.5*PI, _eye_X_Axis);
 				break;
 			case osgGA::GUIEventAdapter::KEY_Insert:
-				_camRotationMode = !_camRotationMode;
+				++_camRotationMode;
+				_camRotationMode %= 3;
 				break;
 
 			default:
@@ -217,7 +218,7 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 			_offset = _offset * osg::Matrix::translate(_eyeOffset);
 
 			//check Insert Mode (Rotation)
-			if (_camRotationMode)
+			if (!_camRotationMode)
 			{
 				_camRotation *= moment.getRotate();
 			}
@@ -243,7 +244,12 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				_realOffset = _offset;
 			}
 
-			_eyePoint.set(refCS->_O + _realOffset);
+			//check Inser Mode (Eye Point)
+			if (_camRotationMode != 2)
+			{
+				_eyePoint.set(refCS->_O + _realOffset);
+			}
+			
 			_stateLast = refCS->_state;
 			if (viewer)
 			{
@@ -251,24 +257,6 @@ bool CameraEvent::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapt
 				refCS->_timeReference = viewer->getFrameStamp()->getReferenceTime();
 			}
 // 			osg::notify(osg::NOTICE) << "EyeOFFSET:\t" << _offset.x() <<"\t"<< _offset.y() <<"\t"<< _offset.z() << std::endl;
-
-// 			//Test
-// 			if (_useHMD)
-// 			{
-// 				if (viewer->getNumSlaves() >= 3)
-// 				{
-// 					osg::Camera *backCam = viewer->getSlave(2)._camera;
-// 					osg::Quat rotation = _camRotation;
-// 					osg::Quat temp;
-// 					temp.makeRotate(PI, _eye_Z_Axis);
-// 					rotation *= temp;
-// 					osg::Matrix viewM = osg::Matrix::translate(-_eyePoint) *
-// 						osg::Matrix::rotate(rotation.inverse()) *
-// 						_matrixLookAt;
-// 					backCam->setViewMatrix(viewM);
-// 				}
-// 			}
-// 			//Test
 
 			break;
 		default:

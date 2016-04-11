@@ -10,6 +10,7 @@
 #include <osg/PolygonMode>
 #include <osg/linewidth>
 #include <osg/Point>
+#include <osg/LineStipple>
 
 RenderVistor::RenderVistor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)

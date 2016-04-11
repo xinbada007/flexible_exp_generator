@@ -59,7 +59,7 @@ private:
 
 	osg::Matrix *_eyePointOffset;
 
-	bool _camRotationMode;
+	unsigned _camRotationMode;
 	unsigned _fnKeys[12];
 };
 
