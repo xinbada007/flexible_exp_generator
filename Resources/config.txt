@@ -22,7 +22,9 @@ CarSpeed:	5
 CarWheel:	35
 #CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive
 CarVisible:	1
-CARHEIGHT:	0.1
+CarWidth:	1.7
+CarHeight:	0.15
+CarLength:	4.7
 CarReset:	2	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = starting position
 #DisabledButton:	0,1,2,3,4,5,6,7

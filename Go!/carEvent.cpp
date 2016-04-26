@@ -334,6 +334,10 @@ void CarEvent::shiftVehicle()
 	_carState->_shiftD.z() = _carState->_heading.z();
 	_carState->_shiftD.normalize();
 
+// 	osg::Vec3d origin = (_leftTurn) ? _carState->_backWheel->front() : _carState->_backWheel->back();
+// 	osg::Vec3d r = origin - _carState->_O;
+// 	double test = r.length();
+
 	double R = abs(_vehicle->_wheelBase / sin(_vehicle->_rotate));
 	R *= sin(abs(_carState->_angle) / frameRate::instance()->getRealfRate());
 	R *= _vehicle->_dynamicSensitive;
