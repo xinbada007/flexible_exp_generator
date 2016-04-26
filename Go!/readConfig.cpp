@@ -513,8 +513,10 @@ void ReadConfig::initializeAfterReadTrial()
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carDistancefromStart.get(), SIZE);
 		normalizeArrayLength<osg::IntArray>(_experiment->_carStartLane.get(), SIZE);
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carLaneOffset.get(), SIZE);
-		normalizeArrayLength<osg::DoubleArray>(_experiment->_SteeringAngle.get(), SIZE);
-		normalizeArrayLength<osg::DoubleArray>(_experiment->_SpeedValue.get(), SIZE);
+		unsigned numPos = normalizeArrayLength<osg::DoubleArray>(_experiment->_SteeringAngle.get(), SIZE);
+		std::fill(_experiment->_SteeringAngle->begin() + numPos, _experiment->_SteeringAngle->end(), 65535);
+		numPos = normalizeArrayLength<osg::DoubleArray>(_experiment->_SpeedValue.get(), SIZE);
+		std::fill(_experiment->_SpeedValue->begin() + numPos, _experiment->_SpeedValue->end(), 65535);
 	}
 
 	//Initialize Triggers

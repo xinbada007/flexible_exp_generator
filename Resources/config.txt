@@ -68,8 +68,8 @@ Time-Start:	-1
 Distance-Start:	20
 Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
 Lane-Offset:	-3.75	#Negative = L	Positive = R
-STEERING-ANGLE:	65535
-SPEED-VALUE:	65535
+#STEERING-ANGLE:	65535
+SPEED-VALUE:	-4
 
 ##==Obstacle Setting=====================
 Obstacle:	-1 -1 -1 -1;	-1 -1 -1 -1 -1;
