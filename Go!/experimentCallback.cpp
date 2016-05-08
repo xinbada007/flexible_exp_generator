@@ -891,17 +891,11 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 					_anmCallback->setPause(!_anmCallback->getPause());
 				}
 				break;
-// 			case::osgGA::GUIEventAdapter::KEY_Home:
-// 				if (_mv)
-// 				{
-// 
-// 				}
-// 				break;
 			case::osgGA::GUIEventAdapter::KEY_Rightbracket:
 				if (_root)
 				{
 					GeometryVistor gv;
-					gv.setColor(0.7, 1.3, 0.7);
+					gv.setColor(1.0, 0, 0);
 					_root->accept(gv);
 				}
 				break;
@@ -909,7 +903,7 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 				if (_root)
 				{
 					GeometryVistor gv;
-					gv.setColor(1.3, 0.7, 0.7);
+					gv.setColor(0, 0, 1.0);
 					_root->accept(gv);
 				}
 // 			case::osgGA::GUIEventAdapter::KEY_Delete:

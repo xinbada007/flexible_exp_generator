@@ -356,7 +356,7 @@ int MulitViewer::go()
 
 void MulitViewer::createHMD(osg::ref_ptr<osg::Node> node)
 {
-	float nearClip = (_screens->_zNear) ? _screens->_zNear : 0.1;
+	float nearClip = (_screens->_zNear) ? _screens->_zNear : 0.01;
 	float farClip = (_screens->_zFar) ? _screens->_zFar : 10000.0f;
 	float pixelsPerDisplayPixel = 1.0;
 	float worldUnitsPerMetre = 1.0f;
@@ -372,7 +372,7 @@ void MulitViewer::createHMD(osg::ref_ptr<osg::Node> node)
 
 	// Get the suggested context traits
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = oculusDevice->graphicsContextTraits();
-	traits->windowName = "OsgOculusViewerExample";
+	traits->windowName = "GO_HMD";
 
 	// Create a graphic context based on our desired traits
 	osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits);

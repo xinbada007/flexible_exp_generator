@@ -4,104 +4,89 @@
 TrialConfig
 
 [ScreenSettings]
-Hdistance:	0.6	#2.72	#5.44	#0.6
+#Num of Screent starts from 0
+Hdistance:	2.55	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
-Resolution:	1280,720
-aspect:	 	1.777	#0	#1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		30	#Disable when RealWorld is enabled
-zNear:	0.1
-zFar:	1000
-RealWorld:	0:	42.268, 65.217, 42.391
-MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
-Background:	0.529,0.808,0.980
+aspect:	 	0	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		42.175	#Disable when RealWorld is enabled
+RealWorld:	0:	42.175 , 65.217 , 42.391
+background:	../Resources/texture/A0005332_LARGE.jpg
+MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
 
 [CarSettings]
-SteeringDeadBand:	0.05	#deadband
-CarSpeed:	5
-CarWheel:	35
-#CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive
-CarVisible:	1
+Acceleration:	1
+DynamicSensitiveLevel:	20	#could be float number like 1.2532564766578
+CarSpeed:	50
+SpeedIncr:	1
+CarWheel:	42.5
+WheelAccl:	0	#720	#180	#0	#normally do not apply this
 CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
-CarReset:	2	#0 = disable	1 = auto	2 = manual
-ResetMode:	2	#0 = center	1 = nearest	2 = starting position
-#DisabledButton:	0,1,2,3,4,5,6,7
+#CarPic:		../Resources/texture/car.png
+CarVisible:	0	#1=Visible	0=Invisible
+CarReset:	1	#0 = disable	1 = auto	2 = manual
+ResetMode:	1	#0 = center	1 = nearest
 
 [RoadSettings]
-RoadLanes:	4.896
-RoadLength:	1005	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-TextureWidth:	18.36
-RoadPic:	../Resources/texture/road4096-0.png 16
-
-GroundPlane:	500 1000
-GroundPic:	../Resources/texture/grass.jpg 16
-GroundPicRes:	500 1000
+RoadLanes:	100
+RoadLength:	1666 #1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+TextureWidth:	2
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/roads/Line.txt;
-Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
-Density:	50
-RoadVisible:	1	#1 = Visible	0 = Invisible
+Method:	1	# 0 = OSGNurbs Lib 1 = SISL Lib
+Density:	5000
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
-WallHeight:	0
+WallHeight:	0.001
 
 [Subjects]
-Name:		s01
-Age:		
-Gender:		
-Driving:		#how many years since driving
+Name:	s01
+Age:	24
+Gender:	M
+Driving:	5	#how many years since driving
 
-DirectoryName:	BLOCK3
-TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
+RandomRoads:	0
+TrialName:	1	#0 = System Time	1 = Same as Name of this config File	2 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	1	#0 = use default	1 = use trigger
+Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
+Lane-Offset:	0	#Negtive = L	Positive = R
 
 ##==Deviation Warn Setting===============
-Deviation-Siren:	../Resources/sound/alert.wav
-
-##==Car Position=========================
-Time-Start:	-1
-Distance-Start:	20
-Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
-Lane-Offset:	-3.75	#Negative = L	Positive = R
-#STEERING-ANGLE:	65535
-SPEED-VALUE:	-4
+Deviation:	0	#Units:	Metres
+Deviation-Warn: DEVIATION TOO HIGH
+Deviation-BaseLine:	0	#1 = R	#-1 = L	#0 = Middle
+Deviation-Siren:	../Resources/sound/Industrial Alarm.wav
 
 ##==Obstacle Setting=====================
-Obstacle:	-1 -1 -1 -1;	-1 -1 -1 -1 -1;
-Obstacle-Range:	1 6 16 21;	1 6 11 16 21; 
+Obstacle:	1 1	1 1	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle-Range:	10 10	140 140	270 270 400 400 530 530	660 660
+Obstacle-Range:	790 790	920 920	1050 1050	1180 1180	1310 1310	1440 1440	1570 1570
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	-6.575 -6.575 -6.575 -6.575;	6.575 6.575 6.575 6.575 6.575;
-OBS-Collision:	1
-OBS-Shape:	4	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
-OBS-Pic:	../Resources/models/Beetle.ive;
-OBS-Orientation:	0,0,1,0;	0,0,1,0;	0,0,1,0;	0,0,1,0;
-OBS-Orientation:	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;
+OBS-Position-Offset:	-2 2	-30 -34	30 34	-2 2	-40 -44	-2 2
+OBS-Position-Offset:	40 44	-2 2	-24 -28	-2 2	24 28	-10 -14	24 28	#Negtive = L	Positive = R
+OBS-Size:	0.5	2.0	1.0	#Length X Width X Height
+OBS-Shape:	1	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Pic:	../Resources/texture/red.jpg;
 
-OBS-Array:	../Resources/roads/lc.txt;
-OBS-Array-NurbsMethod:	1;
-OBS-ARRAY-LENGTH:	400;
-OBS-ARRAY-SPEED:	30;
-#OBS-ARRAY-OFFSET:	3.75;
-OBS-Array-Align:	3.75 10 0;
-OBS-Array-Num:	500;
-OBS-Array-Pic:	../Resources/models/Beetle.ive
-OBS-Array-Shape:	4
-#OBS-Array-OBSSize:	1	4	1.2;
-OBS-Array-Mode:	0	# 0 = Animation	1 = Obs	2 = GLPOINTS
-OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
+##==Text Setting=========================
+#Textime:	0
+#Period:	10
+##==must line by line====================
+#Text:	Please Change Lane
 
-##==Trigger Setting======================
-Trigger-Enable:	1	0	1	1	0	1	0	0	1	1	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
-Trigger-Time:	-1	-1	0	0.1	4	-1	1	-1	0	60
-Trigger-Time:	32	-1	-1	30.1	8	30	-1	-1	30	-1
-Trigger-Time:	-1	-1	-1	-1	12	-1	-1	-1	-1	-1
+##==Dynamic Setting======================
+#Dynamic-Change: 1	20	25
+#Dynamic-Change-Condition:	1	0	#black for 10 seconds
 
-[CAMERASETTINGS]
-offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700
+[CameraSettings]
+#this is the camera's position realtively to the original point of vehicle
+#shouldn't mess around with this, set as 0 to let program to define
+Offset:		0	#system decide
+EyeTracker:	0	#normally do not apply
 
 #Roads:	../Resources/roads/Line.txt;
