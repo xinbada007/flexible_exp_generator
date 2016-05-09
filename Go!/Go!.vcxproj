@@ -101,8 +101,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(BOOST_INCLUDE);$(OCULUS_VIEWER_ROOT)\include;$(OCULUS_VIEWER_INCLUDE);$(Oculus_KernelINCLUDE);$(Oculus_SrcINCLUDE);$(Oculus_INCLUDE);$(SISL_INCLUDE);$(FMOD_INCLUDE);$(OSG_AUDIO_INCLUDE);$(OSG_3RDPARTY_INCLUDE);$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(BOOST_LIB);$(OCULUS_VIEWER_ROOT)\lib;$(Oculus_LIB)\Debug\$(VS_VERSION);$(OCULUS_VIEWER_LIB);$(SISL_LIB);$(FMOD_LIB);$(OSG_AUDIO_LIB);$(OSG_LIB_PATH);$(OSG_3RDPARTY_LIB);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(BOOST_INCLUDE);$(OCULUS_VIEWER_ROOT)\$(Oculus_Ver)\include;$(Oculus_KernelINCLUDE);$(Oculus_SrcINCLUDE);$(Oculus_INCLUDE);$(SISL_INCLUDE);$(FMOD_INCLUDE);$(OSG_AUDIO_INCLUDE);$(OSG_3RDPARTY_INCLUDE);$(OSG_ROOT)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(BOOST_LIB);$(Oculus_LIB)\Debug\$(VS_VERSION);$(OCULUS_VIEWER_ROOT)\$(Oculus_Ver)\lib;$(SISL_LIB);$(FMOD_LIB);$(OSG_AUDIO_LIB);$(OSG_LIB_PATH);$(OSG_3RDPARTY_LIB);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -116,8 +116,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(BOOST_INCLUDE);$(OCULUS_VIEWER_ROOT)\include;$(OCULUS_VIEWER_INCLUDE);$(Oculus_KernelINCLUDE);$(Oculus_SrcINCLUDE);$(SISL_INCLUDE);$(FMOD_INCLUDE);$(OSG_AUDIO_INCLUDE);$(OSG_3RDPARTY_INCLUDE);$(OSG_ROOT)\include;$(Oculus_INCLUDE);$(IncludePath)</IncludePath>
-    <LibraryPath>$(BOOST_LIB);$(OCULUS_VIEWER_ROOT)\lib;$(OCULUS_VIEWER_LIB);$(Oculus_LIB)\Release\VS2013\;$(SISL_LIB);$(FMOD_LIB);$(OSG_AUDIO_LIB);$(OSG_LIB_PATH);$(OSG_3RDPARTY_LIB);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(BOOST_INCLUDE);$(OCULUS_VIEWER_ROOT)\$(Oculus_Ver)\include;$(Oculus_KernelINCLUDE);$(Oculus_SrcINCLUDE);$(SISL_INCLUDE);$(FMOD_INCLUDE);$(OSG_AUDIO_INCLUDE);$(OSG_3RDPARTY_INCLUDE);$(OSG_ROOT)\include;$(Oculus_INCLUDE);$(IncludePath)</IncludePath>
+    <LibraryPath>$(BOOST_LIB);$(OCULUS_VIEWER_ROOT)\$(Oculus_Ver)\lib;$(Oculus_LIB)\Release\$(VS_VERSION);$(SISL_LIB);$(FMOD_LIB);$(OSG_AUDIO_LIB);$(OSG_LIB_PATH);$(OSG_3RDPARTY_LIB);$(LibraryPath)</LibraryPath>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'">
