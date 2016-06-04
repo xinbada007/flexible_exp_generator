@@ -16,7 +16,6 @@ public:
 	{
 		return _next;
 	}
-
 	inline Points * getPoint() const { return _startP; };
 	inline void setPoint(Points *ref) { _startP = ref; };
 	inline HalfEdge * getNext() const { return _next; };

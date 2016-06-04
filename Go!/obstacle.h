@@ -13,12 +13,13 @@ public:
 	void createCylinder(const osg::Vec3d &center, const double &radius, const double &height);
 	void createSphere(const osg::Vec3d &centre, const double &radius);
 	void createNode(const std::string file, const osg::Vec3d &CENTER = H_POINT);
+	void createPoint(const osg::Vec3d &center, const double &PS = 10.0f);
 	inline void setImage(osg::ref_ptr<osg::Image> img) { _imgTexture = img; };
 
 	inline osg::Vec3d getDistancetoCar() const { return _distanceVector; };
 	inline void setDistancetoCar(const osg::Vec3d &ref) const { _distanceVector = ref; };
 
-	void multiplyMatrix(const osg::Matrixd &m);
+	void multiplyMatrix(const osg::Matrixd &m, const bool substitute = true);
 protected:
 	virtual ~Obstacle();
 

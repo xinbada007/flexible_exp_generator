@@ -173,6 +173,9 @@ void ExperimentCallback::createObstacles()
 			case 4:
 				obs->createNode(_expSetting->_obsPic);
 				break;
+			case 5:
+				obs->createPoint(center, _expSetting->_obsSize.x());
+				break;
 			default:
 				obs->createCylinder(center, _expSetting->_obsSize.x(), _expSetting->_obsSize.y());
 				break;
@@ -491,6 +494,22 @@ void ExperimentCallback::showOpticFlow()
 		opticFlowRange();
 		foregroundFlow(_forward_Vec);
 		foregroundFlow(_backward_Vec);
+	}
+
+	if (_opticFlowDrawn && _expSetting->_opticFlowRange)
+	{
+		opticFlowRange();
+		_opticFlowPoints->setAllChildrenOff();
+		std::vector<int>::const_iterator i = _opticFlowDynamicIndex.cbegin();
+		while (i != _opticFlowDynamicIndex.cend())
+		{
+			OpticFlow *obs = static_cast<OpticFlow*>(_opticFlowPoints->getChild(*i));
+			if (obs)
+			{
+				_opticFlowPoints->setChildValue(obs, true);
+			}
+			++i;
+		}
 	}
 
 	if (!_expSetting->_opticFlowFrameCounts)
@@ -1357,6 +1376,31 @@ void ExperimentCallback::showObstacle()
 			++obs_begin;
 		}
 	}
+
+	//test
+	if (_expSetting->_obsShape == 5 && _obsListDrawn && !_obstacleList.empty()) //only move if in point mode
+	{
+		CarState *carState = _car->getCarState();
+		Plane::reverse_across_iterator curO = *carState->_OQuad;
+		if (*curO)
+		{
+			double speed = carState->_speed;
+			const osg::Vec3d &direction = carState->_direction;
+			const osg::Vec3d &straight = Y_AXIS;
+			speed = direction*straight*speed / frameRate::instance()->getRealfRate();
+
+			osg::Matrixd m = osg::Matrix::translate(osg::Vec3d(0.0f, speed, 0.0f));
+			std::vector<osg::ref_ptr<Obstacle>>::const_iterator i = _obstacleList.cbegin();
+			while (i != _obstacleList.cend())
+			{
+				osg::ref_ptr<Obstacle> obs = *i;
+				obs->multiplyMatrix(m, false);
+
+				++i;
+			}
+		}
+	}
+	//test
 
 	const int &ob_size = _expSetting->_obstaclesTime->size();
 	const int &range_size = _expSetting->_obstacleRange->size();

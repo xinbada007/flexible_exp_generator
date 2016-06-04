@@ -9,6 +9,7 @@
 #include <osgDB/WriteFile>
 #include <osg/MatrixTransform>
 #include <osgUtil/Optimizer>
+#include <osg/Point>
 
 #include <algorithm>
 
@@ -322,6 +323,46 @@ void Obstacle::createSphere(const osg::Vec3d &centre, const double &radius)
 	this->accept(tv);
 }
 
+void Obstacle::createPoint(const osg::Vec3d &center, const double &PS /* = 10.0f */)
+{
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+
+	osg::ref_ptr<osg::Geometry> gemtry = new osg::Geometry;
+	osg::ref_ptr<osg::Vec3dArray> vertex = new osg::Vec3dArray;
+	vertex->push_back(center);
+	gemtry->setVertexArray(vertex);
+	gemtry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS, 0, vertex->getNumElements()));
+	osg::ref_ptr<osg::Vec4Array> color = new osg::Vec4Array;
+	color->push_back(osg::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	gemtry->setColorArray(color);
+	gemtry->setColorBinding(osg::Geometry::BIND_OVERALL);
+
+	osg::ref_ptr<osg::Point> psize = new osg::Point(PS);
+	osg::ref_ptr<osg::StateSet> ss = new osg::StateSet;
+	ss->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+	ss->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+	ss->setAttribute(psize);
+	gemtry->setStateSet(ss);
+
+	osg::BoundingBoxd bb = gemtry->getBoundingBox();
+	bb.expandBy(center);
+	osg::Vec3d A(center);
+	A.x() += 10.0f;
+	bb.expandBy(A);
+	osg::Vec3d B(center);
+	B.x() -= 10.0f;
+	bb.expandBy(B);
+	gemtry->setInitialBound(bb);
+
+	geode->addDrawable(gemtry);
+
+	this->absoluteTerritory.center = center;
+	this->absoluteTerritory._detectR = 1e-6;
+	this->absoluteTerritory._refuseR = 1e-6;
+
+	this->addChild(geode);
+}
+
 void Obstacle::sweep(osg::ref_ptr<osg::Vec3dArray> swArray)
 {
 	Solid *refS = dynamic_cast<Solid*> (this);
@@ -470,7 +511,7 @@ void Obstacle::createNode(const std::string file, const osg::Vec3d &CENTER /* = 
 // 	this->accept(rv);
 }
 
-void Obstacle::multiplyMatrix(const osg::Matrixd &m)
+void Obstacle::multiplyMatrix(const osg::Matrixd &m, const bool substitute /* = true */)
 {
 	osg::ref_ptr<osg::MatrixTransform> mt = dynamic_cast<osg::MatrixTransform*>(this->getParent(0));
 	if (!mt)
@@ -478,7 +519,10 @@ void Obstacle::multiplyMatrix(const osg::Matrixd &m)
 		mt = new osg::MatrixTransform;
 		this->addParent(mt);
 	}
-	mt->setMatrix(m);
+	else
+	{
+		substitute ? mt->setMatrix(m) : mt->setMatrix(m * mt->getMatrix());
+	}
 
 	Points *p = this->getPoint();
 	while (p)

@@ -649,11 +649,12 @@ void Recorder::copyandSetHUDText()
 	}
 	else if (_detailed == 0)
 	{
-		setStatusLess(lesscontent);
+		_statusText->setText("");
+		
 	}
 	else
 	{
-		_statusText->setText("");
+		setStatusLess(lesscontent);
 	}
 }
 
