@@ -7,7 +7,7 @@
 
 CameraEvent::CameraEvent(osg::ref_ptr<ReadConfig> refRC):
 _reset(false), _eyeTracker(false), _rotationInterval(10.0f * TO_RADDIAN), _offsetInterval(1.0f),
-_useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL), _camRotationMode(0)
+_useHMD(refRC->getScreens()->_HMD == 1), _eyePointOffset(NULL), _camRotationMode(refRC->getCameraSet()->_camFollowMode)
 {
 	osg::Matrix lMat;
 	lMat.makeRotate(PI_2, X_AXIS);

@@ -27,7 +27,7 @@ WheelAccl:	0	#720	#180	#0	#normally do not apply this
 CarWidth:	1.7
 CarHeight:	0.15
 CarLength:	4.7
-CarVisible:	0	#1=Visible	0=Invisible
+CarVisible:	1	#1=Visible	0=Invisible
 CarReset:	0	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = according to start point
 
@@ -81,16 +81,16 @@ OpticFlow-Density:	1000
 OPTICFLOW-MODE-SIZE: 3
 
 ##==Obstacle================================================================================
-Obstacle:	#0 #1	1 1	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
-Obstacle-Range:	100 10	140 140	270 270 400 400 530 530	660 660
+Obstacle:	2.1 #2.1	#1 1	1 1 	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1	1 1
+Obstacle-Range:	100 60	140 140	270 270 400 400 530 530	660 660
 Obstacle-Range:	790 790	920 920	1050 1050	1180 1180	1310 1310	1440 1440	1570 1570
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	0 2	-30 -34	30 34	-2 2	-40 -44	-2 2
 OBS-Position-Offset:	40 44	-2 2	-24 -28	-2 2	24 28	-10 -14	24 28	#Negtive = L	Positive = R
 OBS-Size:	10	0.5	0.5	#Length X Width X Height
-OBS-Shape:	3	# 0 = cube	1 = Cylinder	3 = Sphere
+OBS-Shape:	5	# 0 = cube	1 = Cylinder	3 = Sphere
 OBS-Pic:	../Resources/texture/red.jpg;
-OBS-Visible:	10000
+OBS-Visible:	1000
 OBS-COLLISION:	1
 
 ##==Trigger Setting======================
@@ -105,6 +105,9 @@ Text:	Quit in 2s
 Text:	Quit in 1s
 Textime:	2	12	13
 Period:		2	1	1
+
+[CAMERASETTINGS]
+CAMFOLLOW:	1
 
 #Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;

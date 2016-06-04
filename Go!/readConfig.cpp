@@ -1443,6 +1443,7 @@ void ReadConfig::readTrial(ifstream &in)
 		//Setting Camera
 		static const string CAM_OFFSET("OFFSET");
 		static const string CAM_EYE_TRACKER("EYETRACKER");
+		static const string CAM_FOLLOW("CAMFOLLOW");
 		while (flag == CAMERA && !in.eof())
 		{
 			byPassSpace(in, config);
@@ -1470,6 +1471,15 @@ void ReadConfig::readTrial(ifstream &in)
 				if (!config.empty())
 				{
 					_camset->_eyeTracker = (stoi(config) == 1);
+				}
+				continue;
+			}
+			else if (title == CAM_FOLLOW)
+			{
+				config.erase(config.begin(), config.begin() + CAM_FOLLOW.size());
+				if (!config.empty())
+				{
+					_camset->_camFollowMode = stoi(config);
 				}
 				continue;
 			}
@@ -1752,7 +1762,7 @@ void ReadConfig::readTrial(ifstream &in)
 				while (!config.empty())
 				{
 					std::string::size_type sz;
-					_experiment->_obstaclesTime->push_back(stoi(config, &sz));
+					_experiment->_obstaclesTime->push_back(stod(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;

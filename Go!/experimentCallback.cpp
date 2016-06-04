@@ -1381,8 +1381,7 @@ void ExperimentCallback::showObstacle()
 	if (_expSetting->_obsShape == 5 && _obsListDrawn && !_obstacleList.empty()) //only move if in point mode
 	{
 		CarState *carState = _car->getCarState();
-		Plane::reverse_across_iterator curO = *carState->_OQuad;
-		if (*curO)
+		if (carState)
 		{
 			double speed = carState->_speed;
 			const osg::Vec3d &direction = carState->_direction;
@@ -1390,6 +1389,20 @@ void ExperimentCallback::showObstacle()
 			speed = direction*straight*speed / frameRate::instance()->getRealfRate();
 
 			osg::Matrixd m = osg::Matrix::translate(osg::Vec3d(0.0f, speed, 0.0f));
+			const int dir = (carState->_frameStamp % 2) ? 1 : -1;
+
+			switch (carState->_userHit)
+			{
+			case 1:
+				m *= osg::Matrix::translate(X_AXIS * 0.05f * dir);
+				break;
+			case 2:
+				m *= osg::Matrix::translate(X_AXIS * 0.05f * dir);
+				break;
+			default:
+				break;
+			}
+
 			std::vector<osg::ref_ptr<Obstacle>>::const_iterator i = _obstacleList.cbegin();
 			while (i != _obstacleList.cend())
 			{

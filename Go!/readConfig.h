@@ -560,10 +560,12 @@ typedef struct CameraSet :public osg::Referenced
 	{
 		_offset = new osg::DoubleArray;
 		_eyeTracker = false;
+		_camFollowMode = 0;
 	}
 
 	osg::ref_ptr<osg::DoubleArray> _offset;
 	bool _eyeTracker;
+	unsigned _camFollowMode;
 
 protected:
 	virtual ~CameraSet()
@@ -572,6 +574,7 @@ protected:
 
 		_offset = NULL;
 	};
+
 }CameraSet;
 
 typedef struct Subjects:public osg::Referenced
