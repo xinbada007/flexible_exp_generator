@@ -1380,9 +1380,9 @@ void ExperimentCallback::showObstacle()
 	//test
 	if (_expSetting->_obsShape == 5 && _obsListDrawn && !_obstacleList.empty()) //only move if in point mode
 	{
-		CarState *carState = _car->getCarState();
-		if (carState)
+		if (_car && _car->getCarState())
 		{
+			CarState *carState = _car->getCarState();
 			double speed = carState->_speed;
 			const osg::Vec3d &direction = carState->_direction;
 			const osg::Vec3d &straight = Y_AXIS;
@@ -1394,10 +1394,20 @@ void ExperimentCallback::showObstacle()
 			switch (carState->_userHit)
 			{
 			case 1:
-				m *= osg::Matrix::translate(X_AXIS * 0.05f * dir);
+				if (!_car->getVehicle()->_disabledButton->at(6))
+					m *= osg::Matrix::translate(X_AXIS * 0.2f * dir);
 				break;
 			case 2:
-				m *= osg::Matrix::translate(X_AXIS * 0.05f * dir);
+				if (!_car->getVehicle()->_disabledButton->at(6))
+					m *= osg::Matrix::translate(X_AXIS * 0.2f * -dir);
+				break;
+			case 3:
+				if (!_car->getVehicle()->_disabledButton->at(6))
+					m *= osg::Matrix::translate(X_AXIS * 0.05f * dir);
+				break;
+			case 4:
+				if (!_car->getVehicle()->_disabledButton->at(6))
+					m *= osg::Matrix::translate(X_AXIS * 0.05f * -dir);
 				break;
 			default:
 				break;
