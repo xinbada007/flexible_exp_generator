@@ -44,6 +44,7 @@ typedef struct Experiment :public osg::Referenced
 		_obstaclePos = new osg::IntArray;
 		_obsPosOffset = new osg::DoubleArray;
 		_obsCollision = new osg::UIntArray;
+		_obsControllable = new osg::UIntArray;
 
 		_obsSize.set(1.0f, 1.0f, 1.0f);
 		_obsShape = 1;
@@ -111,6 +112,8 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::DoubleArray> _obsPosOffset;
 	osg::ref_ptr<osg::UIntArray> _obsCollision;
 	std::vector<osg::Quat> _obsOrientation;
+	osg::ref_ptr<osg::UIntArray> _obsControllable;
+
 	osg::Vec3d _obsSize;
 	osg::Vec3d _obsArraySize;
 	std::string _obsArrayPic;
@@ -159,6 +162,7 @@ typedef struct Experiment :public osg::Referenced
 	{
 		ROAD,
 		FLOW,
+		OBSTACLE,
 		CRASHPERMIT,
 		SOUNDALERT,
 		NEAR_FAR_COMPUTE,
@@ -198,6 +202,7 @@ protected:
 		_obstaclePos = NULL;
 		_obsPosOffset = NULL;
 		_obsCollision = NULL;
+		_obsControllable = NULL;
 		_imgObsArray = NULL;
 		_imgOBS = NULL;
 		_triggerTimer = NULL;

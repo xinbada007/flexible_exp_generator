@@ -60,11 +60,11 @@ void RoadSwitchVisitor::apply(osg::Switch &sw)
 			{
 				if (lr->getTag() == ROAD || lr->getTag() == LWALL || lr->getTag() == RWALL)
 				{
-					if (lr->getIndex() == _solidIndexON)
+					if (lr->getIndex() == _solidIndexON || _AllON)
 					{
 						sw.setChildValue(lr, true);
 					}
-					if (lr->getIndex() == _solidIndexOFF)
+					if (lr->getIndex() == _solidIndexOFF || _AllOFF)
 					{
 						sw.setChildValue(lr, false);
 					}
@@ -74,4 +74,31 @@ void RoadSwitchVisitor::apply(osg::Switch &sw)
 	}
 
 	traverse(sw);
+}
+
+void OBSSwitchVisitor::apply(osg::MatrixTransform &mt)
+{
+	int numChildren(mt.getNumChildren());
+	for (int i = 0; i < numChildren; i++)
+	{
+		LogicRoad *lr = dynamic_cast<LogicRoad*> (mt.getChild(i));
+		if (lr)
+		{
+			if (lr->getTag() == OBS)
+			{
+				osg::Switch *sw = dynamic_cast<osg::Switch*>(mt.getParent(0));
+
+				if (sw && _AllON)
+				{
+					sw->setChildValue(&mt, true);
+				}
+				else if (sw && _AllOFF)
+				{
+					sw->setChildValue(&mt, false);
+				}
+			}
+		}
+	}
+
+	traverse(mt);
 }

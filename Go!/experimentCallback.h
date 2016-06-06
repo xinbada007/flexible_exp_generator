@@ -98,6 +98,11 @@ private:
 	double _fovX;
 	unsigned _frameNumber;
 
+	unsigned _rdNumber;
+	osg::ref_ptr<osg::UIntArray> _recorder;
+	bool _switchRoad;
+	bool _switchOBS;
+
 	void dynamicChange();
 	void showText();
 	void positionCar();

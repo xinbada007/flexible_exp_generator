@@ -2,6 +2,7 @@
 #include "experimentCallback.h"
 #include "collVisitor.h"
 #include "debugNode.h"
+#include "roadSwitcher.h"
 
 #include <osg/Switch>
 #include <osg/MatrixTransform>
@@ -23,7 +24,7 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTi
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
 _opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false),
-_otherClearColor(_expSetting->_otherClearColor), _insertTrigger(false), _memorisedCarTime(INT_MAX), _memorisedExpTime(_expTime)
+_otherClearColor(_expSetting->_otherClearColor), _insertTrigger(false), _memorisedCarTime(INT_MAX), _memorisedExpTime(_expTime), _switchRoad(true), _switchOBS(true)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -88,6 +89,12 @@ _otherClearColor(_expSetting->_otherClearColor), _insertTrigger(false), _memoris
 			osgAudio::SoundManager::instance()->addSoundState(_coin);
 		}
 	}
+
+	_recorder = new osg::UIntArray;
+
+	std::random_device rd;
+	std::uniform_int_distribution<int> dist(0, 9);
+	_rdNumber = dist(rd);
 }
 
 ExperimentCallback::~ExperimentCallback()
@@ -472,7 +479,7 @@ void ExperimentCallback::createOpticFlow()
 
 void ExperimentCallback::showOpticFlow()
 {
-	if (!_expSetting->_opticFlow)
+	if (!_expSetting->_opticFlow || !_switchOpticFlow)
 	{
 		return;
 	}
@@ -983,6 +990,22 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 				}
 			}
 
+			if (carState->_userHit == 0)
+			{
+				if (!_recorder->empty() && _recorder->back() - _recorder->front() >= frameRate::instance()->getRealfRate() * 3.0f)
+				{
+					if (_mv)
+					{
+						_mv->setDone(true);
+					}
+				}
+				_recorder->push_back(carState->_frameStamp);
+			}
+			else if (carState->_userHit != 0)
+			{
+				_recorder->clear();
+			}
+
 			deviationCheck();
 			showText();
 			dynamicChange();
@@ -1034,14 +1057,16 @@ void ExperimentCallback::trigger()
 				case::Experiment::TRIGGER_COM::ROAD:
 					if (_road)
 					{
-						if (_road->getNewChildDefaultValue())
+						if (_switchRoad)
 						{
-							_road->setAllChildrenOff();
+							_road->accept(*new RoadSwitchVisitor(-1, -1, false, true));
 						}
 						else
 						{
-							_road->setAllChildrenOn();
+							_road->accept(*new RoadSwitchVisitor(-1, -1, true, false));
 						}
+
+						_switchRoad = !_switchRoad;
 					}
 					break;
 				case::Experiment::TRIGGER_COM::FLOW:
@@ -1056,6 +1081,20 @@ void ExperimentCallback::trigger()
 							_opticFlowPoints->setAllChildrenOff();
 						}
 						_switchOpticFlow = !_switchOpticFlow;
+					}
+					break;
+				case::Experiment::TRIGGER_COM::OBSTACLE:
+					if (_road)
+					{
+						if (_switchOBS)
+						{
+							_road->accept(*new OBSSwitchVisitor(false, true));
+						}
+						else
+						{
+							_road->accept(*new OBSSwitchVisitor(true, false));
+						}
+						_switchOBS = !_switchOBS;
 					}
 					break;
 				case::Experiment::TRIGGER_COM::CRASHPERMIT:
@@ -1378,7 +1417,7 @@ void ExperimentCallback::showObstacle()
 	}
 
 	//test
-	if (_expSetting->_obsShape == 5 && _obsListDrawn && !_obstacleList.empty()) //only move if in point mode
+	if (_expSetting->_obsShape == 5 && _obsListDrawn && !_obstacleList.empty() && _expSetting->_obstaclesTime->empty()) //only move if in point mode
 	{
 		if (_car && _car->getCarState())
 		{
@@ -1389,35 +1428,59 @@ void ExperimentCallback::showObstacle()
 			speed = direction*straight*speed / frameRate::instance()->getRealfRate();
 
 			osg::Matrixd m = osg::Matrix::translate(osg::Vec3d(0.0f, speed, 0.0f));
-			const int dir = (carState->_frameStamp % 2) ? 1 : -1;
-
-			switch (carState->_userHit)
-			{
-			case 1:
-				if (!_car->getVehicle()->_disabledButton->at(6))
-					m *= osg::Matrix::translate(X_AXIS * 0.2f * dir);
-				break;
-			case 2:
-				if (!_car->getVehicle()->_disabledButton->at(6))
-					m *= osg::Matrix::translate(X_AXIS * 0.2f * -dir);
-				break;
-			case 3:
-				if (!_car->getVehicle()->_disabledButton->at(6))
-					m *= osg::Matrix::translate(X_AXIS * 0.05f * dir);
-				break;
-			case 4:
-				if (!_car->getVehicle()->_disabledButton->at(6))
-					m *= osg::Matrix::translate(X_AXIS * 0.05f * -dir);
-				break;
-			default:
-				break;
-			}
-
+			
 			std::vector<osg::ref_ptr<Obstacle>>::const_iterator i = _obstacleList.cbegin();
 			while (i != _obstacleList.cend())
 			{
-				osg::ref_ptr<Obstacle> obs = *i;
-				obs->multiplyMatrix(m, false);
+				if (!_expSetting->_obsControllable->at(i - _obstacleList.cbegin()))
+				{
+					++i;
+					continue;
+				}
+
+				osg::Vec3d origin(carState->_O);
+				origin.x() = 0.0f;
+				osg::Vec3d const p((*i)->absoluteTerritory.center - origin);
+
+				double const &x1 = p.x();
+				double const &y = p.y();
+				double const A = p.length();
+				double const cosalpha = cos(1 * TO_RADDIAN);
+
+				double x2_1 = -2 * y * y * x1;
+				x2_1 += 2 * A * y * cosalpha * sqrt(x1 * x1 + y * y - A * A * cosalpha * cosalpha);
+				x2_1 /= 2 * (x1 * x1 - A * A * cosalpha * cosalpha);
+
+				double x2_2 = -2 * y * y * x1;
+				x2_2 -= 2 * A * y * cosalpha * sqrt(x1 * x1 + y * y - A * A * cosalpha * cosalpha);
+				x2_2 /= 2 * (x1 * x1 - A * A * cosalpha * cosalpha);
+
+				const double &x2pos = (_rdNumber > 5) ? x2_1 : x2_2;
+				const double &x2neg = (_rdNumber > 5) ? x2_2 : x2_1;
+
+				switch (carState->_userHit)
+				{
+				case 2:
+					if (!_car->getVehicle()->_disabledButton->at(2))
+						m *= osg::Matrix::translate(X_AXIS * (x2pos - x1) * 0.5);
+					break;
+				case 3:
+					if (!_car->getVehicle()->_disabledButton->at(3))
+						m *= osg::Matrix::translate(X_AXIS * (x2neg - x1) * 0.5);
+					break;
+				case 4:
+					if (!_car->getVehicle()->_disabledButton->at(4))
+						m *= osg::Matrix::translate(X_AXIS * (x2pos - x1) * 0.1);
+					break;
+				case 5:
+					if (!_car->getVehicle()->_disabledButton->at(5))
+						m *= osg::Matrix::translate(X_AXIS * (x2neg - x1) * 0.1);
+					break;
+				default:
+					break;
+				}
+
+				(*i)->multiplyMatrix(m, false);
 
 				++i;
 			}
@@ -1475,8 +1538,20 @@ void ExperimentCallback::showObstacle()
 				const double distanceRatio = std::fmin((mid.length() + reDistance) / mid.length(), 1.0f);
 				osg::Vec3d center = navi->front()*distanceRatio + navi->back()*(1 - distanceRatio);
 				
-				center = center * osg::Matrix::translate(X_AXIS * *pos * _expSetting->_offset * 0.25);
-				center = center * osg::Matrix::translate(X_AXIS * *posOffset);
+				double putOffset = *posOffset;
+				double put = *pos;
+				if (*pos > 1 || *pos < -1)
+				{
+					std::random_device rd;
+					std::mt19937 gen(rd());
+					std::uniform_real_distribution<double> disY(-abs(*pos), abs(*pos));
+					putOffset = disY(gen);
+
+					put = 0;
+				}
+
+				center = center * osg::Matrix::translate(X_AXIS * put * _expSetting->_offset * 0.25);
+				center = center * osg::Matrix::translate(X_AXIS * putOffset);
 				std::vector<osg::ref_ptr<Obstacle>>::iterator posOBS = _collisionOBSList.begin() + offset;
 				osg::ref_ptr<Obstacle> obs = *posOBS;
 				const osg::Vec3d &OC = H_POINT;
@@ -1609,7 +1684,7 @@ void ExperimentCallback::positionCar()
 				center = center * osg::Matrix::translate(X_AXIS * *posLaneOffset);
 				const osg::Matrixd M = osg::Matrix::translate(center - carState->_O);
 
-				if (*pos != -2)
+				if (*pos == 0 || *pos == 1 || *pos == -1)
 				{
 					carState->_forceReset = M;
 					carState->_lastQuad.back() = *curO;

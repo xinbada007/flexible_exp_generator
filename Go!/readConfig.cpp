@@ -486,6 +486,7 @@ void ReadConfig::initializeAfterReadTrial()
 	normalizeArrayLength<osg::IntArray>(_experiment->_obstaclePos.get(), numObs);
 	normalizeArrayLength<osg::DoubleArray>(_experiment->_obsPosOffset.get(), numObs);
 	normalizeArrayLength<osg::UIntArray>(_experiment->_obsCollision.get(), numObs);
+	normalizeArrayLength<osg::UIntArray>(_experiment->_obsControllable.get(), numObs);
 	normalizeArrayLength<std::vector<osg::Quat>>(&(_experiment->_obsOrientation), numObs);
 
 	_experiment->_imgOBS = osgDB::readImageFile(_experiment->_obsPic);
@@ -1520,6 +1521,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSVISIBLE("OBS-VISIBLE");
 		static const string OBSPIC("OBS-PIC");
 		static const string OBSCOLLISION("OBS-COLLISION");
+		static const string OBSCONTROLLABLE("OBS-CONTROLL");
 
 		static const string OBSARRAY("OBS-ARRAY");
 		static const string OBSARRAYALIGNMENT("OBS-ARRAY-ALIGN");
@@ -1809,6 +1811,18 @@ void ReadConfig::readTrial(ifstream &in)
 					_experiment->_obsCollision->push_back(stoi(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
 				}
+				continue;
+			}
+			else if (title == OBSCONTROLLABLE)
+			{
+				config.erase(config.begin(), config.begin() + OBSCONTROLLABLE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obsControllable->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+
 				continue;
 			}
 			else if (title == OBSSIZE)

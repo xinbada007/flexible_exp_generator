@@ -544,5 +544,4 @@ void Obstacle::multiplyMatrix(const osg::Matrixd &m, const bool substitute /* = 
 	}
 
 	absoluteTerritory.center = absoluteTerritory.center * m;
-	osg::Vec3d test = absoluteTerritory.center;
 }
