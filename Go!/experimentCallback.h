@@ -102,6 +102,7 @@ private:
 	osg::ref_ptr<osg::UIntArray> _recorder;
 	bool _switchRoad;
 	bool _switchOBS;
+	bool _switchDynamicFlow;
 
 	void dynamicChange();
 	void showText();

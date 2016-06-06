@@ -24,7 +24,8 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTi
 , _road(NULL), _root(NULL), _dynamicUpdated(false), _mv(NULL), _roadLength(rc->getRoadSet()->_length),_cVisitor(NULL), _deviationWarn(false), _deviationLeft(false), _siren(NULL),
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
 _opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false),
-_otherClearColor(_expSetting->_otherClearColor), _insertTrigger(false), _memorisedCarTime(INT_MAX), _memorisedExpTime(_expTime), _switchRoad(true), _switchOBS(true)
+_otherClearColor(_expSetting->_otherClearColor), _insertTrigger(false), _memorisedCarTime(INT_MAX), _memorisedExpTime(_expTime), _switchRoad(true), _switchOBS(true),
+_switchDynamicFlow(true)
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -519,7 +520,7 @@ void ExperimentCallback::showOpticFlow()
 		}
 	}
 
-	if (!_expSetting->_opticFlowFrameCounts)
+	if (!_expSetting->_opticFlowFrameCounts || !_switchDynamicFlow)
 	{
 		return;
 	}
@@ -1095,6 +1096,12 @@ void ExperimentCallback::trigger()
 							_road->accept(*new OBSSwitchVisitor(true, false));
 						}
 						_switchOBS = !_switchOBS;
+					}
+					break;
+				case::Experiment::TRIGGER_COM::DYNAMICFLOW:
+					if (_opticFlowPoints)
+					{
+						_switchDynamicFlow = !_switchDynamicFlow;
 					}
 					break;
 				case::Experiment::TRIGGER_COM::CRASHPERMIT:

@@ -163,6 +163,7 @@ typedef struct Experiment :public osg::Referenced
 		ROAD,
 		FLOW,
 		OBSTACLE,
+		DYNAMICFLOW,
 		CRASHPERMIT,
 		SOUNDALERT,
 		NEAR_FAR_COMPUTE,
