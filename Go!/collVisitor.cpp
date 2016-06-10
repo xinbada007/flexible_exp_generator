@@ -8,7 +8,7 @@
 CollVisitor::CollVisitor():
 osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), _mode(ROAD)
 {
-
+	_HUDOBS = NULL;
 }
 
 
@@ -53,6 +53,8 @@ CollVisitor::~CollVisitor()
 	_lwall.clear();
 	_rwall.clear();
 	_wall.clear();
+
+	_HUDOBS = NULL;
 }
 
 void CollVisitor::reset()

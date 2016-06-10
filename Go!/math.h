@@ -87,7 +87,7 @@ template <typename T> unsigned normalizeArrayLength(T *v, const unsigned &S)
 		}
 	}
 
-	return numPos;
+	return numPos < v->size() ? numPos : v->size();
 }
 
 struct searchIndex

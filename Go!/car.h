@@ -65,6 +65,7 @@ typedef struct CarState:public osg::Referenced
 
 		_locked_angle = INT_MAX;
 		_locked_speed = INT_MAX;
+		_anglefromRoad = 0.0f;
 
 		_collide = false;
 		_crashPermit = true;
@@ -72,6 +73,7 @@ typedef struct CarState:public osg::Referenced
 		_pointsEarned = 0;
 
 		_updated = false;
+		_headingDisplayonHUD = -1;	//0 = Need HUD; 1 = HUD NO updates; 2 = HUD updated
 
 		_frameStamp = 0;
 		_timeReference = 0.0f;
@@ -150,6 +152,7 @@ typedef struct CarState:public osg::Referenced
 
 	double _locked_angle;
 	double _locked_speed;
+	double _anglefromRoad;
 
 	bool _collide;
 	bool _crashPermit;
@@ -157,6 +160,8 @@ typedef struct CarState:public osg::Referenced
 	unsigned _pointsEarned;
 
 	bool _updated;
+	int _headingDisplayonHUD;
+	osg::Vec3d _headingHUD;
 
 	unsigned _frameStamp;
 	double _timeReference;

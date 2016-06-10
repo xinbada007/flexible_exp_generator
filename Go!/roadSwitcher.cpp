@@ -92,7 +92,7 @@ void OBSSwitchVisitor::apply(osg::MatrixTransform &mt)
 				{
 					sw->setChildValue(&mt, true);
 				}
-				else if (sw && _AllOFF)
+				else if (sw && (_AllOFF || lr->getSolidType() == Solid::solidType::SWITCH_OFF))
 				{
 					sw->setChildValue(&mt, false);
 				}

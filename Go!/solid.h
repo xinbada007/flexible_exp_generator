@@ -149,7 +149,8 @@ public:
 		WALLBODY,
 		OBSBODY,
 		COINBODY,
-		GL_POINTS_BODY
+		GL_POINTS_BODY,
+		SWITCH_OFF,
 	}solidType;
 
 protected:

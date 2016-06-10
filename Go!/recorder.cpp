@@ -62,6 +62,8 @@ _lastFrameStamp(0), _lastTimeReference(0.0f), _saveState("TrialReplay\n"), _came
 	_outMoment.push_back(&_recS._turningX);
 	_outMoment.push_back(&_recS._turningY);
 	_outMoment.push_back(&_recS._turningZ);
+	_outMoment.push_back(&_recS._headingHUDX);
+	_outMoment.push_back(&_recS._headingHUDY);
 	_outMoment.push_back(&_recS._distanceObsBody);
 	_outMoment.push_back(&_recS._replay);
 
@@ -292,6 +294,7 @@ bool Recorder::output()
 			char temp[10];
 			const unsigned size_temp = sizeof(temp);
 
+			obsBody += "OBSBODY:\n";
 			while (begin_obslist != end_obslist)
 			{
 				if ((*begin_obslist)->getSolidType() == Solid::solidType::OBSBODY)
@@ -316,7 +319,42 @@ bool Recorder::output()
 			}
 
 			wout << obsBody << std::endl;
+
+			obsBody.clear();
+			obsBody += "HUDOBS:\n";
+			osg::ref_ptr<osg::Vec3dArray> HUDOBSList = CollVisitor::instance()->getHudObsList();
+			if (HUDOBSList)
+			{
+				osg::Vec3dArray::const_iterator ibegin = HUDOBSList->begin();
+				osg::Vec3dArray::const_iterator iend = HUDOBSList->end();
+				while (ibegin != iend)
+				{
+					const unsigned index = ibegin - HUDOBSList->begin() + 1;
+					_itoa_s(index, temp, size_temp);
+					obsBody += temp;
+					obsBody += "\t";
+
+					const osg::Vec3d &center = (*ibegin);
+					_itoa_s(center.x(), temp, size_temp);
+					obsBody += temp;
+					obsBody += "\t";
+
+					_itoa_s(center.y(), temp, size_temp);
+					obsBody += temp;
+					obsBody += "\t";
+
+					_itoa_s(center.z(), temp, size_temp);
+					obsBody += temp;
+					obsBody += "\t";
+
+					++ibegin;
+				}
+
+				wout << obsBody << std::endl;
+			}
 		}
+
+		
 	}
 
 	_reced = true;
@@ -477,16 +515,19 @@ void Recorder::rectoTxt(const CarState *carState)
 
 	osg::Vec3d carD = carState->_direction;
 	carD.normalize();
-	if (!carState->_lastQuad.empty())
-	{
-		osg::ref_ptr<osg::Vec3dArray> navigationEdge = carState->_lastQuad.back()->getLoop()->getNavigationEdge();
-		osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
-		naviEdge.normalize();
-		const osg::Vec3d cross = naviEdge^carD;
-		const double theta = (acosR(naviEdge*carD) / TO_RADDIAN) * ((cross.z() >= 0) ? 1.0f : -1.0f);
-		_gcvt_s(tempd, size_tempd, theta, nDigit);
-		_recS._dAngle = tempd + _recS._TAB;
-	}
+// 	if (!carState->_lastQuad.empty())
+// 	{
+// 		osg::ref_ptr<osg::Vec3dArray> navigationEdge = carState->_lastQuad.back()->getLoop()->getNavigationEdge();
+// 		osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
+// 		naviEdge.normalize();
+// 		const osg::Vec3d cross = naviEdge^carD;
+// 		const double theta = (acosR(naviEdge*carD) / TO_RADDIAN) * ((cross.z() >= 0) ? 1.0f : -1.0f);
+// 		_gcvt_s(tempd, size_tempd, theta, nDigit);
+// 		_recS._dAngle = tempd + _recS._TAB;
+// 	}
+
+	_gcvt_s(tempd, size_tempd, carState->_anglefromRoad, nDigit);
+	_recS._dAngle = tempd + _recS._TAB;
 
 	osg::Vec3d carD_LastFrame = carState->_directionLastFrame;
 	carD_LastFrame.normalize();
@@ -581,6 +622,12 @@ void Recorder::rectoTxt(const CarState *carState)
 		_recS._replay = "\n" + carState->getReplayText();
 	}
 
+	const double &hudX = carState->_headingHUD.x();
+	const double &hudY = carState->_headingHUD.y();
+	_itoa_s(hudX, temp, size_temp);
+	_recS._headingHUDX = temp + _recS._TAB;
+	_itoa_s(hudY, temp, size_temp);
+	_recS._headingHUDY = temp + _recS._TAB;
 }
 
 void Recorder::copyandSetHUDText()
@@ -867,6 +914,10 @@ void Recorder::setStatus(const std::string &content)
 				text.push_back(' ');
 				text.push_back(' ');
 				text += "Turning Center: ";
+				break;
+			case Recorder::TypeofText::_HUDX:
+				text.push_back('\n');
+				text += "HUDHeading: ";
 				break;
 			default:
 				text.push_back(' ');

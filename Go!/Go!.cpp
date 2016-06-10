@@ -151,6 +151,9 @@ void runScene(ReadConfig *readConfig)
 
 	recorder->setHUDCamera(mViewer->getHUDCamera(MulitViewer::LEFT));
 	expcontroller->setHUDCamera(mViewer->getHUDCamera(MulitViewer::CENTRE));
+	expcontroller->setHUDCameraLeft(mViewer->getHUDCamera(MulitViewer::LEFT));
+	expcontroller->setHUDCameraRight(mViewer->getHUDCamera(MulitViewer::RIGHT));
+
 	expcontroller->setViewer(mViewer);
 
 	mViewer->go();

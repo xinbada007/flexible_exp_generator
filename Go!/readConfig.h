@@ -18,7 +18,7 @@ typedef std::vector<osg::ref_ptr<Nurbs>> nurbsList;
 typedef struct Experiment :public osg::Referenced
 {
 	Experiment():
-	_NUMTRIGGERCOM(10)
+	_NUMTRIGGERCOM(12)
 	{
 		_timer = 0;
 		_endofRoadExit = false;
@@ -29,6 +29,7 @@ typedef struct Experiment :public osg::Referenced
 		_carDistancefromStart = new osg::DoubleArray;
 		_carStartLane = new osg::IntArray;
 		_carLaneOffset = new osg::DoubleArray;
+		_carRotation = new osg::DoubleArray;
 
 		_textTime = new osg::UIntArray;
 		_textPeriod = new osg::DoubleArray;
@@ -45,6 +46,10 @@ typedef struct Experiment :public osg::Referenced
 		_obsPosOffset = new osg::DoubleArray;
 		_obsCollision = new osg::UIntArray;
 		_obsControllable = new osg::UIntArray;
+		_obsMovewithCar = new osg::UIntArray;
+		_obsZAxis = new osg::DoubleArray;
+		_obsVisualAngle = new osg::DoubleArray;
+		_obsHUD = new osg::UIntArray;
 
 		_obsSize.set(1.0f, 1.0f, 1.0f);
 		_obsShape = 1;
@@ -92,6 +97,7 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::DoubleArray> _carDistancefromStart;
 	osg::ref_ptr<osg::IntArray> _carStartLane;
 	osg::ref_ptr<osg::DoubleArray> _carLaneOffset;
+	osg::ref_ptr<osg::DoubleArray> _carRotation;
 
 	osg::ref_ptr <osg::UIntArray> _textTime;
 	osg::ref_ptr <osg::DoubleArray> _textPeriod;
@@ -113,6 +119,10 @@ typedef struct Experiment :public osg::Referenced
 	osg::ref_ptr<osg::UIntArray> _obsCollision;
 	std::vector<osg::Quat> _obsOrientation;
 	osg::ref_ptr<osg::UIntArray> _obsControllable;
+	osg::ref_ptr<osg::UIntArray> _obsMovewithCar;
+	osg::ref_ptr <osg::DoubleArray> _obsZAxis;
+	osg::ref_ptr<osg::DoubleArray> _obsVisualAngle;
+	osg::ref_ptr<osg::UIntArray> _obsHUD;
 
 	osg::Vec3d _obsSize;
 	osg::Vec3d _obsArraySize;
@@ -191,6 +201,7 @@ protected:
 		_carDistancefromStart = NULL;
 		_carStartLane = NULL;
 		_carLaneOffset = NULL;
+		_carRotation = NULL;
 
 		_textTime = NULL;
 		_textPeriod = NULL;
@@ -204,6 +215,10 @@ protected:
 		_obsPosOffset = NULL;
 		_obsCollision = NULL;
 		_obsControllable = NULL;
+		_obsMovewithCar = NULL;
+		_obsVisualAngle = NULL;
+		_obsHUD = NULL;
+		_obsZAxis = NULL;
 		_imgObsArray = NULL;
 		_imgOBS = NULL;
 		_triggerTimer = NULL;

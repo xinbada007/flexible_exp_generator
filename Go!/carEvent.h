@@ -36,7 +36,7 @@ private:
 	double _lastAngle;
 	bool _autoNavi;
 	bool _shifted;
-	bool _speedLock;
+	int _speedLock;
 	int _speedSign;
 
 	bool _updated;

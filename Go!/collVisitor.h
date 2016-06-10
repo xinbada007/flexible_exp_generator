@@ -21,6 +21,9 @@ public:
 	const solidList getWall() const;
 	static CollVisitor *instance();
 
+	inline void setHudObsList(osg::ref_ptr<osg::Vec3dArray> list) { _HUDOBS = list; };
+	inline osg::ref_ptr<osg::Vec3dArray> getHudObsList(){ return _HUDOBS; };
+
 private:
 	CollVisitor();
 	void pushLR(osg::ref_ptr<LogicRoad> refLR);
@@ -32,5 +35,7 @@ private:
 	mutable solidList _wall;
 
 	ROADTAG _mode;
+
+	osg::ref_ptr<osg::Vec3dArray> _HUDOBS;
 };
 

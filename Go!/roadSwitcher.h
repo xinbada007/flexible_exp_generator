@@ -39,12 +39,14 @@ class OBSSwitchVisitor :
 	public osg::NodeVisitor
 {
 public:
-	OBSSwitchVisitor(bool ONALL = false, bool OFFALL = false) :_AllON(ONALL), _AllOFF(OFFALL), osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN){};
+	OBSSwitchVisitor(int OFF = -1, bool ONALL = false, bool OFFALL = false) :_indexOFF(OFF), _AllON(ONALL), _AllOFF(OFFALL), osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN){};
 	virtual ~OBSSwitchVisitor(){};
 
 	void apply(osg::MatrixTransform &mt);
 
 private:
+	int _indexOFF;
+
 	bool _AllON;
 	bool _AllOFF;
 };

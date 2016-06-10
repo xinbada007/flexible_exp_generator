@@ -22,6 +22,9 @@ public:
 	virtual ~ExperimentCallback();
 	void operator()(osg::Node* node, osg::NodeVisitor* nv);
 	void setHUDCamera(osg::Camera *cam);
+	void setHUDCameraLeft(osg::Camera *camLeft);
+	void setHUDCameraRight(osg::Camera *camRight);
+
 	inline void setViewer(MulitViewer *mv)
 	{ 
 		_mv = (mv) ? mv : NULL;
@@ -74,6 +77,11 @@ private:
 	osg::ref_ptr<osgAudio::Sample> _coinSample;
 
 	osg::Camera *_cameraHUD;
+	osg::Camera *_cameraHUDLeft;
+	osg::Camera *_cameraHUDRight;
+	osg::ref_ptr<osg::Geode> _geodeHUDLeft;
+	osg::ref_ptr<osg::Geode> _geodeHUDRight;
+
 	osg::ref_ptr<osgText::Text> _textHUD;
 	osg::ref_ptr<osg::Geode> _geodeHUD;
 	osg::ref_ptr<osg::Group> _root;
@@ -96,13 +104,16 @@ private:
 	bool _switchOpticFlow;
 
 	double _fovX;
+	const double _zNear;
+	const double _zFar;
 	unsigned _frameNumber;
 
 	unsigned _rdNumber;
-	osg::ref_ptr<osg::UIntArray> _recorder;
+	std::vector<std::vector<unsigned>> _recorder;
 	bool _switchRoad;
 	bool _switchOBS;
 	bool _switchDynamicFlow;
+	osg::ref_ptr<osg::Vec3dArray> _HUDObs;
 
 	void dynamicChange();
 	void showText();
@@ -117,6 +128,11 @@ private:
 	void createObstacles();
 	void createOpticFlow();
 	void dealCollision();
+	void moveObstaclewithCar();
+	void moveObstacleManually();
+	
+	void createHUDObstacles(const osg::Vec3d &center, const osg::Vec4d &color = osg::Vec4d(1.0, 0.0, 0.0, 1.0f));
+	osg::Vec3d converttoHUD(const osg::Vec3d& input, unsigned *CAMERA = NULL);
 
 	void trigger();
 

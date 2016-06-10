@@ -487,7 +487,11 @@ void ReadConfig::initializeAfterReadTrial()
 	normalizeArrayLength<osg::DoubleArray>(_experiment->_obsPosOffset.get(), numObs);
 	normalizeArrayLength<osg::UIntArray>(_experiment->_obsCollision.get(), numObs);
 	normalizeArrayLength<osg::UIntArray>(_experiment->_obsControllable.get(), numObs);
+	normalizeArrayLength<osg::UIntArray>(_experiment->_obsMovewithCar, numObs);
+	normalizeArrayLength<osg::DoubleArray>(_experiment->_obsZAxis.get(), numObs);
 	normalizeArrayLength<std::vector<osg::Quat>>(&(_experiment->_obsOrientation), numObs);
+	normalizeArrayLength<osg::DoubleArray>(_experiment->_obsVisualAngle.get(), numObs);
+	normalizeArrayLength<osg::UIntArray>(_experiment->_obsHUD, numObs);
 
 	_experiment->_imgOBS = osgDB::readImageFile(_experiment->_obsPic);
 	_experiment->_imgObsArray = osgDB::readImageFile(_experiment->_obsArrayPic);
@@ -514,10 +518,17 @@ void ReadConfig::initializeAfterReadTrial()
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carDistancefromStart.get(), SIZE);
 		normalizeArrayLength<osg::IntArray>(_experiment->_carStartLane.get(), SIZE);
 		normalizeArrayLength<osg::DoubleArray>(_experiment->_carLaneOffset.get(), SIZE);
+		normalizeArrayLength<osg::DoubleArray>(_experiment->_carRotation.get(), SIZE);
 		unsigned numPos = normalizeArrayLength<osg::DoubleArray>(_experiment->_SteeringAngle.get(), SIZE);
-		std::fill(_experiment->_SteeringAngle->begin() + numPos, _experiment->_SteeringAngle->end(), 65535);
+		if (numPos < _experiment->_SteeringAngle->getNumElements())
+		{
+			std::fill(_experiment->_SteeringAngle->begin() + numPos, _experiment->_SteeringAngle->end(), 65535);
+		}
 		numPos = normalizeArrayLength<osg::DoubleArray>(_experiment->_SpeedValue.get(), SIZE);
-		std::fill(_experiment->_SpeedValue->begin() + numPos, _experiment->_SpeedValue->end(), 65535);
+		if (numPos < _experiment->_SpeedValue->getNumElements())
+		{
+			std::fill(_experiment->_SpeedValue->begin() + numPos, _experiment->_SpeedValue->end(), 65535);
+		}
 	}
 
 	//Initialize Triggers
@@ -1502,6 +1513,7 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string LANEOFFSET("LANE-OFFSET");
 		static const string STEERINGANGLE("STEERING-ANGLE");
 		static const string SPEEDVALUE("SPEED-VALUE");
+		static const string CARROTATION("CAR-ROTATION");
 
 		static const string TEXTIME("TEXTIME");
 		static const string PERIOD("PERIOD");
@@ -1522,6 +1534,10 @@ void ReadConfig::readTrial(ifstream &in)
 		static const string OBSPIC("OBS-PIC");
 		static const string OBSCOLLISION("OBS-COLLISION");
 		static const string OBSCONTROLLABLE("OBS-CONTROLL");
+		static const string OBSMOVEWITHCAR("OBS-MOVEWITHCAR");
+		static const string OBSZAXIS("OBS-ZAXIS");
+		static const string OBSANGLE("OBSTACLE-ANGLE");
+		static const string OBSHUD("OBS-HUD");
 
 		static const string OBSARRAY("OBS-ARRAY");
 		static const string OBSARRAYALIGNMENT("OBS-ARRAY-ALIGN");
@@ -1630,6 +1646,17 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					std::string::size_type sz;
 					_experiment->_carStartLane->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == CARROTATION)
+			{
+				config.erase(config.begin(), config.begin() + CARROTATION.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_carRotation->push_back(stod(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
 				}
 				continue;
@@ -1820,6 +1847,53 @@ void ReadConfig::readTrial(ifstream &in)
 				{
 					std::string::size_type sz;
 					_experiment->_obsControllable->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+
+				continue;
+			}
+			else if (title == OBSHUD)
+			{
+				config.erase(config.begin(), config.begin() + OBSHUD.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obsHUD->push_back(stoi(config,&sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+				continue;
+			}
+			else if (title == OBSMOVEWITHCAR)
+			{
+				config.erase(config.begin(), config.begin() + OBSMOVEWITHCAR.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obsMovewithCar->push_back(stoi(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+
+				continue;
+			}
+			else if (title == OBSZAXIS)
+			{
+				config.erase(config.begin(), config.begin() + OBSZAXIS.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obsZAxis->push_back(stod(config, &sz));
+					config.erase(config.begin(), config.begin() + sz);
+				}
+
+				continue;
+			}
+			else if (title == OBSANGLE)
+			{
+				config.erase(config.begin(), config.begin() + OBSANGLE.size());
+				while (!config.empty())
+				{
+					std::string::size_type sz;
+					_experiment->_obsVisualAngle->push_back(stod(config, &sz));
 					config.erase(config.begin(), config.begin() + sz);
 				}
 

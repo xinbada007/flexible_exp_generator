@@ -12,7 +12,7 @@
 
 CarEvent::CarEvent() :
 _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
-, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(false), _speedSign(1)
+, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(0), _speedSign(1)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(20, 0);
@@ -70,7 +70,7 @@ void CarEvent::checkRotationLimit()
 
 void CarEvent::dealCollision()
 {
-	if (_carState->_collide && _carState->_crashPermit)
+	if (_carState->_collide && _carState->_crashPermit && !_speedLock)
 	{
 		const obstacleList &obsList = _carState->getObsList();
 		const quadList &wallList = _carState->_collisionQuad;
@@ -127,13 +127,6 @@ void CarEvent::dealCollision()
 				}
 			}
 			++wallIndex;
-		}
-	}
-	else
-	{
-		if (_speedLock)
-		{
-			_carState->_speed = _vehicle->_speed;
 		}
 	}
 }
@@ -351,6 +344,11 @@ void CarEvent::shiftVehicle()
 
 bool CarEvent::Joystick()
 {
+	if (!_carState->_steer)
+	{
+		return true;
+	}
+
 	extern bool poll_joystick(int &x, int &y, int &b);
 	int x(0), y(0), b(-1);
 	if (!poll_joystick(x, y, b))
@@ -368,25 +366,19 @@ bool CarEvent::Joystick()
 	{
 		_carState->_swDeDead = (x / MAX)*MAX_ANGLE;
 
-		if (_carState->_steer)
-		{
-			_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX);
-			_leftTurn = (_carState->_speed >= 0) ? (x < 0) : (x > 0);
-			_shifted = true;
-		}
+		_carState->_angle = _vehicle->_rotate * (double(abs(x)) / MAX);
+		_leftTurn = (_carState->_speed >= 0) ? (x < 0) : (x > 0);
+		_shifted = true;
 	}
 	else if ((abs(x)) <= DeadZone)
 	{
 		_carState->_swDeDead = 0.0f;
 
-		if (_carState->_steer)
-		{
-			_carState->_angle = 0.0f;
-			_shifted = false;
-		}
+		_carState->_angle = 0.0f;
+		_shifted = false;
 	}
 
-	if (!_speedLock)
+	if (_speedLock == 0)
 	{
 		if (abs(y) > DeadZone)
 		{
@@ -425,21 +417,25 @@ bool CarEvent::Joystick()
 
 		if (_buttons->at(1) == 1 && !_vehicle->_disabledButton->at(1))
 		{
-			_carState->_speed = _vehicle->_speed;
-			_speedLock = true;
 			if (_carState->_insertTrigger)
 			{
 				_carState->_startTime = _carState->_timeReference;
 				_carState->_insertTrigger = false;
 			}
-		}
-		else if (_buttons->at(6) == 1 && !_vehicle->_disabledButton->at(6))
-		{
-			if (_carState->_O != _vehicle->_O && _vehicle->_carReset == Vehicle::VEHICLE_RESET_TYPE::MANUAL)
+
+			if (_speedLock != -1)
 			{
-				_carState->_reset = true;
+				_speedLock = 1;
+				_carState->_speed = _vehicle->_speed;
 			}
 		}
+// 		else if (_buttons->at(0) == 1 && !_vehicle->_disabledButton->at(0))
+// 		{
+// 			if (_carState->_O != _vehicle->_O && _vehicle->_carReset == Vehicle::VEHICLE_RESET_TYPE::MANUAL)
+// 			{
+// 				_carState->_reset = true;
+// 			}
+// 		}
 		else if (_buttons->at(8) == 1 && !_vehicle->_disabledButton->at(8))
 		{
 			if (!_carState->_speed)
@@ -454,6 +450,7 @@ bool CarEvent::Joystick()
 				_speedSign = 1;
 			}
 		}
+		
 		_buttons->assign(_buttons->size(), 0);
 	}
 
@@ -601,13 +598,14 @@ void CarEvent::carController()
 	if (abs(_carState->_locked_angle) <= _vehicle->_rotate)
 	{
 		_carState->_angle = _carState->_locked_angle;
-		_shifted = _carState->_angle==0 ? true : false;
+		_shifted = _carState->_angle == 0 ? true : false;
 		_leftTurn = (_carState->_angle > 0) ? true : false;
 		_leftTurn &= (_carState->_speed >= 0) ? true : false;
 	}
 	if (abs(_carState->_locked_speed) <= _vehicle->_speed)
 	{
 		_carState->_speed = _carState->_locked_speed;
+		_speedLock = -1;
 	}
 }
 
@@ -777,6 +775,18 @@ void CarEvent::applyCarMovement()
 	if (!notFound)
 	{
 		copy(_carState->_carArray->begin(),_carState->_carArray->end(),_carState->_lastCarArray->begin());
+	}
+
+	osg::Vec3d carD = _carState->_direction;
+	carD.normalize();
+	if (!_carState->_lastQuad.empty())
+	{
+		osg::ref_ptr<osg::Vec3dArray> navigationEdge = _carState->_lastQuad.back()->getLoop()->getNavigationEdge();
+		osg::Vec3d naviEdge = navigationEdge->front() - navigationEdge->back();
+		naviEdge.normalize();
+		const osg::Vec3d cross = naviEdge^carD;
+		const double theta = (acosR(naviEdge*carD) / TO_RADDIAN) * ((cross.z() >= 0) ? 1.0f : -1.0f);
+		_carState->_anglefromRoad = theta;
 	}
 
 	//isNAN Test

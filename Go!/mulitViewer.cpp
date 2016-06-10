@@ -152,6 +152,7 @@ osgViewer::View * MulitViewer::createPowerWall()
 			osg::Matrix proOffset = osg::Matrix::scale(numColumns, numRows, 1.0f)
 				* osg::Matrix::translate(int(numColumns - 2 * i - 1), 0.0f, 0.0f);
 			
+			_slaveCamerasinNormalView.push_back(camera.get());
 			view->addSlave(camera, proOffset, osg::Matrix(), true);
 		}
 	}
@@ -229,7 +230,7 @@ osg::Camera * MulitViewer::createHUDCamerainWindow(osg::GraphicsContext *windows
 	camera->setViewport(0, 0, windows->getTraits()->width, windows->getTraits()->height);
 
 	//have to be set like this
-	camera->setClearMask(0);
+	camera->setClearMask(GL_DEPTH_BUFFER_BIT);
 
 	// draw subgraph after main camera view.
 	camera->setRenderOrder(osg::Camera::POST_RENDER);

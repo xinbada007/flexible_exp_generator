@@ -6,10 +6,10 @@ TrialConfig
 [ScreenSettings]
 #Num of Screent starts from 0
 Hdistance:	0.6	#2.72	#5.44	#0.6
-Vdistance:	1.5	#1.25
+Vdistance:	1.25	#1.5	#1.25
 screen:		3
-aspect:	 	0	#1.655	#1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		42.175	#Disable when RealWorld is enabled
+aspect:	 	0	1.655	#1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		35	#Disable when RealWorld is enabled
 zNear:		0.1
 zFar:		1000
 Resolution:	0,0
@@ -24,23 +24,21 @@ CarWheel:	25
 CarVisible:	1	#1=Visible	0=Invisible
 CarReset:	0	#0 = disable	1 = auto	2 = manual
 ResetMode:	2	#0 = center	1 = nearest	2 = according to start point
-#DisabledButton:	1
+#DisabledButton:	
 
 [RoadSettings]
 RoadLanes:	100.368
 RoadLength:	1050	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
 TextureWidth:	9.18
-RoadPic:	../Resources/texture/road4096-0.png 16
+#RoadPic:	../Resources/texture/road4096-0.png 16
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/roads/Line.txt;
 Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
-Density:	2000
-RoadVisible:	1	#1 = Visible	0 = Invisible
+Density:	200
+RoadVisible:	0	#1 = Visible	0 = Invisible
 
-WallHeight:	1
-WallRoadWidth:	9.18
-WallPic:	../Resources/texture/wall1024-2.jpg 16
+WallHeight:	0
 
 
 [Subjects]
@@ -54,16 +52,16 @@ TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	1	#0 = use default	1 = use trigger
+Timer-Trigger:	0	#0 = use default	1 = use trigger
 
 ##==Car Position=========================
-Time-Start:	0	#1.0	3.0
+Time-Start:	0	1.0	3.0
 Distance-Start:	0
 Start-Lane:	0	-2	-2	#1 = R	#-1 = L	#0 = Middle
 Lane-Offset:	0	#Negative = L	Positive = R
-STEERING-ANGLE:	65535
-SPEED-VALUE:	65535	75	0
-CAR-ROTATION:	1.8	0	0
+STEERING-ANGLE:	0	0	65535
+SPEED-VALUE:	0	75	65535
+CAR-ROTATION:	0	0	0
 
 ##==Deviation Warn Setting===============
 Deviation-Siren:	../Resources/sound/alert.wav
@@ -71,33 +69,34 @@ Deviation-Siren:	../Resources/sound/alert.wav
 ##==Optic Flow Setting===========================================
 OpticFlow:		1	#1 = Enable	0= Disable
 OpticFlow-Visible:	0	#only visible within 100 meters
-OpticFlow-FrameCounts:	0	
+OpticFlow-FrameCounts:	0
 OpticFlow-Versions:	0
 DepthDensity:		50	#every x meters
 OpticFlow-Width:	5670
-OpticFlow-Height:	419
+OpticFlow-Height:	509
 OpticFlow-Density:	2000
 OPTICFLOW-MODE-SIZE: 3
 
 ##==Obstacle================================================================================
 Obstacle:	0.02
-Obstacle-Range:	1000
+Obstacle-Range:	1000000
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
 OBS-Position-Offset:	0	#Negtive = L	Positive = R
-Obstacle-Angle:	0
+Obstacle-Angle:	2
 #OBS-ZAXIS: 1.25
 
 OBS-Size:	5	0.5	0.5	#Length X Width X Height
 OBS-Shape:	5	# 0 = cube	1 = Cylinder	3 = Sphere	4 = Node	5 = Point
 OBS-Visible:	0
 OBS-COLLISION:	1
-OBS-CONTROLL:	0
+OBS-CONTROLL:	1
+OBS-MOVEWITHCAR:	0
 OBS-HUD:	1
 
 ##==Trigger Setting======================
-Trigger-Enable:	0	1	0	0	0	0	0	0	0	0	0	0	#road	#optic flow	#obstacle	#dynamicflow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
-Trigger-Time:	-1	0.0	-1	-1	-1	-1	-1	-1	-1	-1	1	-1
-Trigger-Time:	-1	1.0	-1	-1	-1	-1	-1	-1	-1	-1	0	-1
+Trigger-Enable:	0	1	1	0	0	0	0	0	0	0	0	1	#road	#optic flow	#obstacle	#dynamicflow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
+Trigger-Time:	-1	0.0	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
+Trigger-Time:	-1	1.0	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
 Trigger-Time:	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
 
 
