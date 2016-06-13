@@ -4,105 +4,105 @@
 TrialConfig
 
 [ScreenSettings]
-#Num of Screent starts from 0
+Use_HMD:	0	#enable this disbles all other screen settings
+#HMD_Screen:	1
+HMD_RefreshRate:	60
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		3
-aspect:	 	0	#1.655	#1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
-fovy:		42.175	#Disable when RealWorld is enabled
-zNear:		0.1
-zFar:		1000
-Resolution:	0,0
-RealWorld:	0:	45.533, 69.565, 45.217
-MultiSamples:	4	#on-board, old ,rubbish cards use 4	#nice cards use 16
+aspect:	 	0#	1.655	#1.659	#4.0651851851851851851851851851851	#1.6614745586708203530633437175493
+fovy:		60	#Disable when RealWorld is enabled
+zNear:	0.1
+zFar:	1000
+RealWorld:	0:	42.268, 65.217, 42.391
+MultiSamples:	0	#on-board, old ,rubbish cards use 4	#nice cards use 16
+Background:	0.529,0.808,0.980
 
 [CarSettings]
-Acceleration:	1
 SteeringDeadBand:	0.05	#deadband
-CarSpeed:	75
-CarWheel:	25
-CarVisible:	1	#1=Visible	0=Invisible
-CarReset:	0	#0 = disable	1 = auto	2 = manual
-ResetMode:	2	#0 = center	1 = nearest	2 = according to start point
-#DisabledButton:	1
+CarSpeed:	5
+CarWheel:	35
+CarModel:	../Resources/models/pontiacG3_lightON_exsimplified1.ive
+CarReset:	2	#0 = disable	1 = auto	2 = manual
+ResetMode:	2	#0 = center	1 = nearest	2 = starting position
+DisabledButton:	0,1,2,3,4,5,6,7
 
 [RoadSettings]
-RoadLanes:	100.368
-RoadLength:	1050	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
-TextureWidth:	9.18
+RoadLanes:	4.896
+RoadLength:	1005	#1.per segment(will strech and 0 = use Roadtxt file defined value); 2.guaranteed in SISL Lib but should work for OSGNurbs Lib
+TextureWidth:	18.36
 RoadPic:	../Resources/texture/road4096-0.png 16
+
+GroundPlane:	500 1000
+GroundPic:	../Resources/texture/grass.jpg 16
+GroundPicRes:	500 1000
 
 #RoadTxt is disabled when Roads in Subjects Section is enabled
 RoadTxt:	../Resources/roads/Line.txt;
 Method:		1	# 0 = OSGNurbs Lib 1 = SISL Lib
-Density:	2000
+Density:	50
 RoadVisible:	1	#1 = Visible	0 = Invisible
 
-WallHeight:	1
-WallRoadWidth:	9.18
-WallPic:	../Resources/texture/wall1024-2.jpg 16
-
+WallHeight:	0
 
 [Subjects]
-Name:		Demo
+Name:		s01
 Age:		
 Gender:		
 Driving:		#how many years since driving
 
-DirectoryName:	Results
+DirectoryName:	BLOCK3
 TrialName:	0	#0 = Same as Name of this config File	1 = Custom Name
 
 [Experiment]
 ##==Starting Condition===================
-Timer-Trigger:	1	#0 = use default	1 = use trigger
-
-##==Car Position=========================
-Time-Start:	0	#1.0	3.0
-Distance-Start:	0
-Start-Lane:	0	-2	-2	#1 = R	#-1 = L	#0 = Middle
-Lane-Offset:	0	#Negative = L	Positive = R
-STEERING-ANGLE:	65535
-SPEED-VALUE:	65535	75	0
-CAR-ROTATION:	1.8	0	0
+Timer-Trigger:	0	#0 = use default	1 = use trigger
 
 ##==Deviation Warn Setting===============
 Deviation-Siren:	../Resources/sound/alert.wav
 
-##==Optic Flow Setting===========================================
-OpticFlow:		1	#1 = Enable	0= Disable
-OpticFlow-Visible:	0	#only visible within 100 meters
-OpticFlow-FrameCounts:	0	
-OpticFlow-Versions:	0
-DepthDensity:		50	#every x meters
-OpticFlow-Width:	5670
-OpticFlow-Height:	419
-OpticFlow-Density:	2000
-OPTICFLOW-MODE-SIZE: 3
+##==Car Position=========================
+Time-Start:	-1
+Distance-Start:	20
+Start-Lane:	0	#1 = R	#-1 = L	#0 = Middle
+Lane-Offset:	-3.75	#Negative = L	Positive = R
+STEERING-ANGLE:	65535
+SPEED-VALUE:	65535
 
-##==Obstacle================================================================================
-Obstacle:	0.02
-Obstacle-Range:	1000
+##==Obstacle Setting=====================
+Obstacle:	-1 #-1 -1 -1;	-1 -1 -1 -1 -1;
+Obstacle-Range:	1000 6 16 21;	1 6 11 16 21; 
 Obstacle-Position:	0	#1 = R	#-1 = L	#0 = Center
-OBS-Position-Offset:	0	#Negtive = L	Positive = R
-Obstacle-Angle:	0
-#OBS-ZAXIS: 1.25
-
-OBS-Size:	5	0.5	0.5	#Length X Width X Height
-OBS-Shape:	5	# 0 = cube	1 = Cylinder	3 = Sphere	4 = Node	5 = Point
-OBS-Visible:	0
-OBS-COLLISION:	1
-OBS-CONTROLL:	0
+OBS-Position-Offset:	-6.575 -6.575 -6.575 -6.575;	6.575 6.575 6.575 6.575 6.575;
+OBS-Collision:	1
+OBS-Shape:	5	# 0 = cube	1 = Cylinder	3 = Sphere	4 = load from file
+OBS-Size:	10,1,1
+OBS-Pic:	../Resources/models/Beetle.ive;
+OBS-Orientation:	0,0,1,0;	0,0,1,0;	0,0,1,0;	0,0,1,0;
+OBS-Orientation:	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;	0,0,1,180;
+OBS-VISIBLE:	0
 OBS-HUD:	1
 
-##==Trigger Setting======================
-Trigger-Enable:	0	1	0	0	0	0	0	0	0	0	0	0	#road	#optic flow	#obstacle	#dynamicflow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
-Trigger-Time:	-1	0.0	-1	-1	-1	-1	-1	-1	-1	-1	1	-1
-Trigger-Time:	-1	1.0	-1	-1	-1	-1	-1	-1	-1	-1	0	-1
-Trigger-Time:	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1	-1
+OBS-Array:	../Resources/roads/lc.txt;
+OBS-Array-NurbsMethod:	1;
+OBS-ARRAY-LENGTH:	400;
+OBS-ARRAY-SPEED:	30;
+#OBS-ARRAY-OFFSET:	3.75;
+OBS-Array-Align:	3.75 10 0;
+OBS-Array-Num:	500;
+OBS-Array-Pic:	../Resources/models/Beetle.ive
+OBS-Array-Shape:	4
+OBS-Array-OBSSize:	1	4	1.2;
+OBS-Array-Mode:	0	# 0 = Animation	1 = Obs	2 = GLPOINTS
+OBS-Anime-LOOP:	1	# 0 = SWing	1 = LOOP	2 = NO_LOOP
 
+##==Trigger Setting======================
+Trigger-Enable:	1	0	1	1	0	1	0	0	1	1	#road	#optic flow	#crash permits	#alert	#near_far	#reset	#steering	#color	#trigger	#quit
+Trigger-Time:	-1	-1	0	0.1	4	-1	1	-1	0	60
+Trigger-Time:	32	-1	-1	30.1	8	30	-1	-1	30	-1
+Trigger-Time:	-1	-1	-1	-1	12	-1	-1	-1	-1	-1
 
 [CAMERASETTINGS]
-CAMFOLLOW:	0
+offset:	0.41508434456460819,0.2012868258516682829,1.0558066537516700
 
-#Roads:	../Resources/roads/Line.txt;
 #Roads:	../Resources/roads/Line.txt;

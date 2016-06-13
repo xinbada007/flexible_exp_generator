@@ -53,7 +53,7 @@ typedef struct Experiment :public osg::Referenced
 
 		_obsSize.set(1.0f, 1.0f, 1.0f);
 		_obsShape = 1;
-		_obsVisible = 300.0f;
+		_obsVisible = 0.0f;
 		_imgOBS = NULL;
 		_imgObsArray = NULL;
 		_obsArrayShape = 0;

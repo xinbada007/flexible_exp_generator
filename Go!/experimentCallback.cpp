@@ -1531,10 +1531,12 @@ void ExperimentCallback::moveObstaclewithCar()
 		speed = direction*straight*speed / frameRate::instance()->getRealfRate();
 		osg::Matrixd m = osg::Matrix::translate(osg::Vec3d(0.0f, speed, 0.0f));
 
-		std::vector<osg::ref_ptr<Obstacle>>::const_iterator i = _obstacleList.cbegin();
-		while (i != _obstacleList.cend())
+//		std::vector<osg::ref_ptr<Obstacle>>::const_iterator i = _obstacleList.cbegin();
+		const obstacleList &obsList = _cVisitor->getObstacle();
+		obstacleList::const_iterator i = obsList.cbegin();
+		while (i != obsList.cend())
 		{
-			if (!_expSetting->_obsMovewithCar->at(i - _obstacleList.cbegin()))
+			if (!_expSetting->_obsMovewithCar->at(i - obsList.cbegin()))
 			{
 				++i;
 				continue;
@@ -1553,10 +1555,11 @@ void ExperimentCallback::moveObstacleManually()
 	{
 		CarState *carState = _car->getCarState();
 
-		std::vector<osg::ref_ptr<Obstacle>>::const_iterator i = _obstacleList.cbegin();
-		while (i != _obstacleList.cend())
+		const obstacleList &obsList = _cVisitor->getObstacle();
+		obstacleList::const_iterator i = obsList.cbegin();
+		while (i != obsList.cend())
 		{
-			if (!_expSetting->_obsControllable->at(i - _obstacleList.cbegin()))
+			if (!_expSetting->_obsControllable->at(i - obsList.cbegin()))
 			{
 				++i;
 				continue;
@@ -1784,11 +1787,12 @@ void ExperimentCallback::showObstacle()
 				osg::UIntArray::iterator posHUDOBS = _expSetting->_obsHUD->begin() + offset;
 				if (*posHUDOBS == 1)
 				{
-					unsigned st = obs->getSolidType();
-					obs->setSolidType(Solid::solidType::SWITCH_OFF);
-					_road->accept(*new OBSSwitchVisitor);
-					createHUDObstacles(obs->absoluteTerritory.center);
-					obs->setSolidType(st);
+					obs->setAllChildrenOff();
+// 					unsigned st = obs->getSolidType();
+// 					obs->setSolidType(Solid::solidType::SWITCH_OFF);
+// 					_road->accept(*new OBSSwitchVisitor);
+// 					createHUDObstacles(obs->absoluteTerritory.center);
+// 					obs->setSolidType(st);
 				}
 
 				_expSetting->_obstaclesTime->erase(obsTi);
