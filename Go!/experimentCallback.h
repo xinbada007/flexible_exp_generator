@@ -114,6 +114,7 @@ private:
 	bool _switchOBS;
 	bool _switchDynamicFlow;
 	osg::ref_ptr<osg::Vec3dArray> _HUDObs;
+	const osg::ref_ptr<const osg::UIntArray> _disabledButtons;
 
 	void dynamicChange();
 	void showText();

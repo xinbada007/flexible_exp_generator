@@ -36,8 +36,10 @@ private:
 	double _lastAngle;
 	bool _autoNavi;
 	bool _shifted;
-	int _speedLock;
 	int _speedSign;
+
+	bool _lockedSpeed;
+	bool _lockedSW;
 
 	bool _updated;
 

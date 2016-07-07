@@ -82,6 +82,7 @@ typedef struct Experiment :public osg::Referenced
 		_opticFlowForeground = false;
 
 		_triggerTimer = new osg::DoubleArray;
+		_timeAllowtoQuit = 0;
 
 		_offset = 0.0f;
 
@@ -185,6 +186,7 @@ typedef struct Experiment :public osg::Referenced
 	};
 	std::vector<std::pair<int, TRIGGER_COM>> _triggerEnable;
 	const unsigned _NUMTRIGGERCOM;
+	unsigned _timeAllowtoQuit;
 
 	double _offset;
 

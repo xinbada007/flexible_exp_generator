@@ -12,7 +12,7 @@
 
 CarEvent::CarEvent() :
 _car(NULL), _carState(NULL), _vehicle(NULL), _mTransform(NULL), _leftTurn(false), _updated(false)
-, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _speedLock(0), _speedSign(1)
+, _lastAngle(0.0f), _autoNavi(false), _shifted(false), _lockedSpeed(false),_lockedSW(false), _speedSign(1)
 {
 	_buttons = new osg::UIntArray;
 	_buttons->assign(20, 0);
@@ -70,7 +70,7 @@ void CarEvent::checkRotationLimit()
 
 void CarEvent::dealCollision()
 {
-	if (_carState->_collide && _carState->_crashPermit && !_speedLock)
+	if (_carState->_collide && _carState->_crashPermit)
 	{
 		const obstacleList &obsList = _carState->getObsList();
 		const quadList &wallList = _carState->_collisionQuad;
@@ -344,10 +344,7 @@ void CarEvent::shiftVehicle()
 
 bool CarEvent::Joystick()
 {
-	if (!_carState->_steer)
-	{
-		return true;
-	}
+	static const bool &steering = _carState->_steer;
 
 	extern bool poll_joystick(int &x, int &y, int &b);
 	int x(0), y(0), b(-1);
@@ -362,7 +359,7 @@ bool CarEvent::Joystick()
 	const double &DEAD = _vehicle->_deadband;
 	const int DeadZone(MAX*DEAD);
 
-	if ((abs(x)) > DeadZone)
+	if ((abs(x)) > DeadZone && !_lockedSW)
 	{
 		_carState->_swDeDead = (x / MAX)*MAX_ANGLE;
 
@@ -370,7 +367,7 @@ bool CarEvent::Joystick()
 		_leftTurn = (_carState->_speed >= 0) ? (x < 0) : (x > 0);
 		_shifted = true;
 	}
-	else if ((abs(x)) <= DeadZone)
+	else if ((abs(x)) <= DeadZone && !_lockedSW)
 	{
 		_carState->_swDeDead = 0.0f;
 
@@ -378,11 +375,10 @@ bool CarEvent::Joystick()
 		_shifted = false;
 	}
 
-	if (_speedLock == 0)
+	if (!_lockedSpeed)
 	{
 		if (abs(y) > DeadZone)
 		{
-//			_carState->_speed = _vehicle->_speed * (double(abs(y)) / MAX) * (y > 0 ? -1 : 1);
 			if (y < 0)
 			{
 				_carState->_speed = _vehicle->_speed * _speedSign;
@@ -423,9 +419,7 @@ bool CarEvent::Joystick()
 				_carState->_insertTrigger = false;
 			}
 
-			if (_speedLock != -1)
 			{
-				_speedLock = 1;
 				_carState->_speed = _vehicle->_speed;
 			}
 		}
@@ -601,11 +595,14 @@ void CarEvent::carController()
 		_shifted = _carState->_angle == 0 ? true : false;
 		_leftTurn = (_carState->_angle > 0) ? true : false;
 		_leftTurn &= (_carState->_speed >= 0) ? true : false;
+
+		_lockedSW = 1;
 	}
 	if (abs(_carState->_locked_speed) <= _vehicle->_speed)
 	{
 		_carState->_speed = _carState->_locked_speed;
-		_speedLock = -1;
+
+		_lockedSpeed = 1;
 	}
 }
 

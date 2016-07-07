@@ -2246,6 +2246,10 @@ void ReadConfig::readTrial(ifstream &in)
 					std::pair<int, Experiment::TRIGGER_COM> temp;
 					temp = std::make_pair(stoi(config, &sz), Experiment::TRIGGER_COM(Experiment::TRIGGER_COM::ROAD + numCom));
 					++numCom;
+					if (temp.second == Experiment::TRIGGER_COM::QUIT && temp.first < 0)
+					{
+						_experiment->_timeAllowtoQuit = abs(temp.first);
+					}
 					numCom %= _experiment->_NUMTRIGGERCOM;
 					_experiment->_triggerEnable.push_back(temp);
 					config.erase(config.begin(), config.begin() + sz);

@@ -26,7 +26,7 @@ ExperimentCallback::ExperimentCallback(const ReadConfig *rc) :_car(NULL), _expTi
 _coin(NULL), _obsListDrawn(false), _opticFlowDrawn(false), _anmCallback(NULL), _centerList(NULL), _timeBuffer(0.020f), _timeLastRecored(0.0f),
 _opticFlowPoints(NULL), _switchOpticFlow(true), _fovX(0.0f), _frameNumber(0), _clearColor(rc->getScreens()->_bgColor), _speedColor(false),
 _otherClearColor(_expSetting->_otherClearColor), _insertTrigger(false), _memorisedCarTime(INT_MAX), _memorisedExpTime(_expTime), _switchRoad(true), _switchOBS(true),
-_switchDynamicFlow(true), _zNear(rc->getScreens()->_zNear), _zFar(rc->getScreens()->_zFar)
+_switchDynamicFlow(true), _zNear(rc->getScreens()->_zNear), _zFar(rc->getScreens()->_zFar), _disabledButtons(new osg::UIntArray(rc->getVehicle()->_disabledButton->begin(),rc->getVehicle()->_disabledButton->end()))
 {
 	_dynamic = new osg::UIntArray(_expSetting->_dynamicChange->rbegin(),_expSetting->_dynamicChange->rend());
 	_textHUD = new osgText::Text;
@@ -165,6 +165,12 @@ ExperimentCallback::~ExperimentCallback()
 
 	_HUDObs->clear();
 	_HUDObs = NULL;
+
+	for (int i = 0; i < _recorder.size(); i++)
+	{
+		_recorder.at(i).clear();
+	}
+	_recorder.clear();
 }
 
 osg::Vec3d ExperimentCallback::converttoHUD(const osg::Vec3d &input, unsigned *CAMERA /*= NULL */)
@@ -1116,22 +1122,30 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 				static const int &hit = carState->_userHit;
 				static const unsigned &frameNo = carState->_frameStamp;
 				static const Vehicle *vehicle = _car->getVehicle();
-				if (hit >= 0 && hit < _recorder.size() && !vehicle->_disabledButton->at(hit))
+				static const unsigned &timetoQuit = _expSetting->_timeAllowtoQuit;
+
+				if (hit >= 0 && hit < _recorder.size())
 				{
-					if (!_recorder.at(hit).empty())
+					if (!vehicle->_disabledButton->at(hit))
 					{
-						if (_recorder.at(hit).back() + 1 == frameNo)
-							_recorder.at(hit).push_back(frameNo);
+						if (!_recorder.at(hit).empty())
+						{
+							if (_recorder.at(hit).back() + 1 == frameNo)
+								_recorder.at(hit).push_back(frameNo);
+							else
+								_recorder.at(hit).clear();
+						}
 						else
-							_recorder.at(hit).clear();
+						{
+							_recorder.at(hit).push_back(frameNo);
+						}
 					}
 					else
 					{
-						_recorder.at(hit).push_back(frameNo);
+						_recorder.at(hit).clear();
 					}
 				}
-					
-
+				
 				if (!_recorder.at(0).empty() && _recorder.at(0).back() - _recorder.at(0).front() >= frameRate::instance()->getRealfRate() * .5f)
 				{
 					carState->_headingDisplayonHUD = 0;
@@ -1139,18 +1153,26 @@ void ExperimentCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 				}
 				else if (!_recorder.at(6).empty() && _recorder.at(6).back() - _recorder.at(6).front() >= frameRate::instance()->getRealfRate() * .5f)
 				{
-					if (_mv)
+					if (_expTime >= timetoQuit && _recorder.at(6).back() >= frameNo - 10 && _mv )
 					{
 						_recorder.at(6).clear();
 						_mv->setDone(true);
 					}
+					else
+					{
+						_recorder.at(6).clear();
+					}
 				}
 				else if (!_recorder.at(7).empty() && _recorder.at(7).back() - _recorder.at(7).front() >= frameRate::instance()->getRealfRate() * .5f)
 				{
-					if (_mv)
+					if (_expTime >= timetoQuit && _recorder.at(7).back() >= frameNo - 10 && _mv)
 					{
 						_recorder.at(7).clear();
 						_mv->setDone(true);
+					}
+					else
+					{
+						_recorder.at(7).clear();
 					}
 				}
 			}
@@ -1291,7 +1313,18 @@ void ExperimentCallback::trigger()
 				case::Experiment::TRIGGER_COM::JOYSTICK:
 					if (_car)
 					{
-						_car->getCarState()->_steer = !(_car->getCarState()->_steer);
+						static bool &steering(_car->getCarState()->_steer);
+						steering = !steering;
+						static Vehicle *vehicle(_car->getVehicle());
+
+						if (!steering)
+						{
+							std::fill(vehicle->_disabledButton->begin(), vehicle->_disabledButton->end(), 1);
+						}
+						else
+						{
+							std::copy(_disabledButtons->begin(), _disabledButtons->end(), vehicle->_disabledButton->begin());
+						}
 					}
 					break;
 				case::Experiment::TRIGGER_COM::SPEEDCOLOR:
@@ -1791,7 +1824,7 @@ void ExperimentCallback::showObstacle()
 // 					unsigned st = obs->getSolidType();
 // 					obs->setSolidType(Solid::solidType::SWITCH_OFF);
 // 					_road->accept(*new OBSSwitchVisitor);
-// 					createHUDObstacles(obs->absoluteTerritory.center);
+ 					createHUDObstacles(obs->absoluteTerritory.center);
 // 					obs->setSolidType(st);
 				}
 
