@@ -614,7 +614,8 @@ bool ReadConfig::byPassSpace(ifstream &in, std::string &content)
 
 	while (!in.eof())
 	{
-		getline(in, content);
+		getline(in, content, '\n');
+
 		std::size_t found = content.find_first_not_of(*SPACE.c_str());
 		if (found != std::string::npos) content.erase(content.begin(), content.begin() + found);
 		found = content.find_first_not_of(*TAB.c_str());

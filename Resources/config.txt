@@ -1,10 +1,12 @@
 #only comma, colon, space, and semicolon are allowed to use
+
 #folder path MUST NOT contain SPACE
+
 
 TrialConfig
 
 [ScreenSettings]
-USE_HMD:	1
+USE_HMD:	0
 Hdistance:	0.6	#2.72	#5.44	#0.6
 Vdistance:	1.5	#1.25
 screen:		0
