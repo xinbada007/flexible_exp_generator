@@ -6,9 +6,9 @@
 #include <osg/BoundingBox>
 #include <vector>
 
-#ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#endif
+// #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
+// #define _WINSOCK_DEPRECATED_NO_WARNINGS
+// #endif
 #include <boost/asio/serial_port.hpp> 
 #include <boost/asio.hpp> 
 #include <boost/bind.hpp>
