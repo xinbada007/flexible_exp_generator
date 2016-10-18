@@ -7,4 +7,4 @@ This is a personal program for academic purpose. This program generates various 
 
 License:
 
-I have not read a bit about GPLv3, but all the third libraries this program incoportes in comply with GPLv3. As a consequence, this program comply with GPLv3.
+I have not read a bit about GPLv3, but all the third libraries this program incoportes in comply with GPLv3. As a consequence, this program complies with GPLv3.
